@@ -18,9 +18,9 @@ export default function Error({
       <p className="text-4xl">⚠️</p>
       <h1 className="mt-4 text-xl font-bold text-stone-900">Something went wrong</h1>
       <p className="mt-2 max-w-md text-sm text-stone-500">
-        The dev server cache may be corrupted. Stop the server, run{" "}
+        If the page stays blank, stop every dev server (Ctrl+C), then run{" "}
         <code className="rounded bg-orange-100 px-1.5 py-0.5 text-orange-800">npm run dev</code>
-        , then refresh.
+        {" "}and hard-refresh (Ctrl+Shift+R).
       </p>
       <button
         type="button"

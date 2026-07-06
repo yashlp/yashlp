@@ -1,4 +1,9 @@
-import type { ReportProductId } from "./report-demo-data";
+export type ReportProductId =
+  | "area-insight"
+  | "property-due-diligence"
+  | "business-location"
+  | "area-comparison"
+  | "advanced-report";
 
 export type RichReportContent = {
   sectionCount: number;

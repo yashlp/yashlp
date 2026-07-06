@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "rm -rf .next && next dev",
-    "dev:clean": "rm -rf .next node_modules/.cache && next dev",
+    "dev": "rm -rf .next && (fuser -k 3000/tcp 2>/dev/null || true) && next dev",
+    "dev:clean": "rm -rf .next node_modules/.cache && (fuser -k 3000/tcp 2>/dev/null || true) && next dev",
     "dev:turbo": "rm -rf .next && next dev --turbopack",
     "dev:fast": "next dev",
     "build": "prisma generate && next build",
