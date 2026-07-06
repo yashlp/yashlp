@@ -5,6 +5,11 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const isProd = process.env.NODE_ENV === "production";
 
+  // In development, skip strict CSP so Turbopack/HMR and dev tooling work reliably.
+  if (!isProd) {
+    return response;
+  }
+
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -24,9 +29,7 @@ export function middleware(request: NextRequest) {
     ].join("; ")
   );
 
-  if (isProd) {
-    response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-  }
+  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
 
   if (request.nextUrl.pathname.startsWith("/api/")) {
     response.headers.set("Cache-Control", "no-store");
