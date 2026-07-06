@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  name             String
+  passwordHash     String
+  reputation       Int      @default(0)
+  reliabilityScore Float    @default(0.5)
+  role             String   @default("user")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  incidents        Incident[]         @relation("Reporter")
+  confirmations    Confirmation[]
+  comments         Comment[]
+  resolutionUpdates ResolutionUpdate[]
+  timelineEvents   TimelineEvent[]
+  savedPlaces      SavedPlace[]
+  notifications    Notification[]
+}
+
+model Category {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  emoji         String
+  type          String
+  photoRequired Boolean  @default(false)
+  description   String
+  sortOrder     Int      @default(0)
+
+  incidents Incident[]
+}
+
+model Incident {
+  id                 String    @id @default(cuid())
+  categoryId         String
+  reporterId         String
+  title              String
+  description        String?
+  latitude           Float
+  longitude          Float
+  address            String?
+  status             String    @default("pending")
+  visibility         String    @default("hidden")
+  confidenceScore    Float     @default(0.1)
+  confirmationCount  Int       @default(0)
+  isPositive         Boolean   @default(false)
+  aiCategoryMatch    Float?
+  aiImageVerified    Boolean?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  resolvedAt         DateTime?
+
+  category           Category           @relation(fields: [categoryId], references: [id])
+  reporter           User               @relation("Reporter", fields: [reporterId], references: [id])
+  confirmations      Confirmation[]
+  comments           Comment[]
+  timelineEvents     TimelineEvent[]
+  resolutionUpdates  ResolutionUpdate[]
+  photos             IncidentPhoto[]
+}
+
+model IncidentPhoto {
+  id         String   @id @default(cuid())
+  incidentId String
+  url        String
+  caption    String?
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+}
+
+model Confirmation {
+  id         String   @id @default(cuid())
+  incidentId String
+  userId     String
+  comment    String?
+  photoUrl   String?
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([incidentId, userId])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  incidentId String
+  userId     String
+  body       String
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model ResolutionUpdate {
+  id                String   @id @default(cuid())
+  incidentId        String
+  userId            String
+  description       String?
+  photoUrl          String?
+  status            String   @default("pending")
+  confirmationCount Int      @default(0)
+  disputeCount      Int      @default(0)
+  createdAt         DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model TimelineEvent {
+  id         String   @id @default(cuid())
+  incidentId String
+  userId     String?
+  action     String
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id])
+}
+
+model SavedPlace {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  latitude  Float
+  longitude Float
+  radiusM   Int      @default(500)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  type      String
+  read      Boolean  @default(false)
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model HealthScoreSnapshot {
+  id             String   @id @default(cuid())
+  placeKey       String
+  placeName      String
+  placeType      String
+  latitude       Float
+  longitude      Float
+  radiusM        Int
+  overallScore   Float
+  confidence     Float
+  categoryScores String
+  incidentCount  Int
+  computedAt     DateTime @default(now())
+
+  @@index([placeKey])
+  @@index([latitude, longitude])
+}
