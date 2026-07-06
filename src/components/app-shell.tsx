@@ -136,6 +136,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           Content Guidelines
         </Link>
         {" · "}
+        <Link href="/try" className="hover:text-orange-600">
+          Try demo hub
+        </Link>
+        {" · "}
         CivicLens — Community intelligence worldwide
       </footer>
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, Camera, CheckCircle, X, Zap } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
 import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT, POPULAR_CATEGORY_SLUGS, POPULAR_POSITIVE_CATEGORY_SLUGS } from "@/lib/constants";
@@ -29,6 +29,7 @@ type Category = {
 
 export default function ReportPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [signalType, setSignalType] = useState<"issue" | "positive">("issue");
@@ -51,9 +52,27 @@ export default function ReportPage() {
     fetch(`/api/categories?type=${signalType}`)
       .then((r) => r.json())
       .then((d) => setCategories(d.categories));
-    setSelected(null);
-    setSearch("");
-  }, [signalType]);
+    if (!searchParams.get("category")) {
+      setSelected(null);
+      setSearch("");
+    }
+  }, [signalType, searchParams]);
+
+  useEffect(() => {
+    const type = searchParams.get("type");
+    const categorySlug = searchParams.get("category");
+    if (type === "positive" || type === "issue") {
+      setSignalType(type);
+    }
+    if (!categorySlug) return;
+
+    fetch(`/api/categories?type=${type === "issue" ? "issue" : "positive"}`)
+      .then((r) => r.json())
+      .then((d: { categories: Category[] }) => {
+        const match = d.categories.find((c) => c.slug === categorySlug);
+        if (match) setSelected(match);
+      });
+  }, [searchParams]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
