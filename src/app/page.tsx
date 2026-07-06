@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Activity, Crosshair, Shield, TrendingUp } from "lucide-react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
+import { useDebouncedValue } from "@/lib/use-debounce";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
-import { IncidentPanel } from "@/components/incident-panel";
 import { SearchBar } from "@/components/search-bar";
 
 const MapView = dynamic(() => import("@/components/map-view").then((m) => m.MapView), {
@@ -17,6 +17,11 @@ const MapView = dynamic(() => import("@/components/map-view").then((m) => m.MapV
     </div>
   ),
 });
+
+const IncidentPanel = dynamic(
+  () => import("@/components/incident-panel").then((m) => m.IncidentPanel),
+  { ssr: false }
+);
 
 type Incident = {
   id: string;
@@ -48,20 +53,28 @@ export default function HomePage() {
   const [zoom, setZoom] = useState(DEFAULT_MAP_ZOOM);
   const [filter, setFilter] = useState<"all" | "issues" | "positive" | "resolved">("all");
 
-  const loadData = async (lat: number, lng: number) => {
-    const [incRes, healthRes] = await Promise.all([
-      fetch("/api/incidents"),
-      fetch(`/api/health?lat=${lat}&lng=${lng}`),
-    ]);
-    const incData = await incRes.json();
-    const healthData = await healthRes.json();
-    setIncidents(incData.incidents ?? []);
-    setHealth(healthData);
-  };
+  const debouncedCenter = useDebouncedValue(center, 500);
+
+  const loadIncidents = useCallback(async () => {
+    const res = await fetch("/api/incidents");
+    const data = await res.json();
+    setIncidents(data.incidents ?? []);
+  }, []);
+
+  const loadHealth = useCallback(async (lat: number, lng: number) => {
+    const res = await fetch(`/api/health?lat=${lat}&lng=${lng}`);
+    const data = await res.json();
+    setHealth(data);
+  }, []);
 
   useEffect(() => {
-    loadData(center.lat, center.lng);
-  }, [center.lat, center.lng]);
+    loadIncidents();
+    loadHealth(DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng);
+  }, [loadIncidents, loadHealth]);
+
+  useEffect(() => {
+    loadHealth(debouncedCenter.lat, debouncedCenter.lng);
+  }, [debouncedCenter.lat, debouncedCenter.lng, loadHealth]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -98,8 +111,8 @@ export default function HomePage() {
   const selected = incidents.find((i) => i.id === selectedId) ?? null;
 
   return (
-    <div className="relative h-[calc(100vh-3.5rem)]">
-      <div className="absolute inset-0 pb-16 md:pb-0">
+    <div className="relative h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-3.5rem)]">
+      <div className="absolute inset-0 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         <MapView
           incidents={filtered}
           center={center}
@@ -112,7 +125,7 @@ export default function HomePage() {
         />
       </div>
 
-      <div className="pointer-events-none absolute left-0 right-0 top-0 z-[1000] flex flex-col gap-3 p-4">
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-[1000] flex flex-col gap-2 p-3 sm:gap-3 sm:p-4">
         <div className="pointer-events-auto mx-auto w-full max-w-xl">
           <SearchBar
             onSelect={(lat, lng) => {
@@ -123,13 +136,13 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="pointer-events-auto flex flex-wrap items-center gap-2">
+        <div className="pointer-events-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
           {(["all", "issues", "positive", "resolved"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs font-semibold capitalize shadow-sm transition",
+                "min-h-9 rounded-full px-3 py-2 text-xs font-semibold capitalize shadow-sm transition sm:px-3.5",
                 filter === f
                   ? "bg-orange-600 text-white shadow-orange-200"
                   : "glass-card text-stone-700 hover:bg-white"
@@ -142,14 +155,14 @@ export default function HomePage() {
       </div>
 
       {health && (
-        <div className="pointer-events-auto absolute bottom-20 left-4 z-[1000] md:bottom-4">
-          <div className="glass-card w-64 rounded-2xl p-4">
+        <div className="pointer-events-auto absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] left-3 z-[1000] md:bottom-4 md:left-4">
+          <div className="glass-card w-[min(100vw-1.5rem,16rem)] rounded-2xl p-3 sm:w-64 sm:p-4">
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-400">
               <Activity className="h-3.5 w-3.5 text-orange-500" />
               Community Health Score
             </div>
             <div className="flex items-end gap-2">
-              <span className={cn("text-4xl font-bold", scoreColor(health.overallScore))}>
+              <span className={cn("text-3xl font-bold sm:text-4xl", scoreColor(health.overallScore))}>
                 {health.overallScore}
               </span>
               <span className="mb-1 text-sm text-stone-400">/ 100</span>
@@ -174,14 +187,14 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="pointer-events-auto absolute bottom-20 right-4 z-[1000] flex flex-col gap-2 md:bottom-4">
+      <div className="pointer-events-auto absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-3 z-[1000] flex flex-col gap-2 md:bottom-4 md:right-4">
         <button
           onClick={goToMyLocation}
-          className="glass-card flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-stone-600 shadow hover:bg-orange-50"
+          className="glass-card flex min-h-11 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium text-stone-600 shadow hover:bg-orange-50"
           title="Go to my location"
         >
           <Crosshair className="h-4 w-4 text-blue-600" />
-          My location
+          <span className="hidden sm:inline">My location</span>
         </button>
         <div className="glass-card hidden items-center gap-2 rounded-xl px-3 py-2 text-xs text-stone-400 md:flex">
           <Shield className="h-3.5 w-3.5 text-orange-500" />
@@ -193,7 +206,7 @@ export default function HomePage() {
         <IncidentPanel
           incidentId={selected.id}
           onClose={() => setSelectedId(null)}
-          onUpdate={() => loadData(center.lat, center.lng)}
+          onUpdate={loadIncidents}
         />
       )}
     </div>

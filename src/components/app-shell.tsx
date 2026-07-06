@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   FileText,
@@ -20,28 +20,44 @@ import { TermsGate } from "@/components/terms-gate";
 type UserInfo = { id: string; name: string; phone: string; reputation: number } | null;
 
 const navItems = [
-  { href: "/", label: "Map", icon: Home },
-  { href: "/insights", label: "Insights", icon: BarChart3 },
-  { href: "/reports", label: "Reports", icon: FileText },
-  { href: "/compare", label: "Compare", icon: GitCompare },
-  { href: "/ask", label: "Ask AI", icon: MessageCircle },
+  { href: "/", label: "Map", shortLabel: "Map", icon: Home },
+  { href: "/insights", label: "Insights", shortLabel: "Stats", icon: BarChart3 },
+  { href: "/reports", label: "Reports", shortLabel: "Reports", icon: FileText },
+  { href: "/compare", label: "Compare", shortLabel: "Compare", icon: GitCompare },
+  { href: "/ask", label: "Ask AI", shortLabel: "Ask", icon: MessageCircle },
 ];
+
+const MOBILE_NAV = navItems.slice(0, 4);
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<UserInfo>(null);
+  const prevPath = useRef(pathname);
   const isLegalPage =
     pathname === "/terms" || pathname === "/privacy" || pathname === "/content-policy";
+  const isMapPage = pathname === "/";
 
-  useEffect(() => {
+  const refreshUser = () => {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => setUser(d.user))
       .catch(() => setUser(null));
+  };
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
+  useEffect(() => {
+    const cameFromLogin = prevPath.current === "/login" && pathname !== "/login";
+    prevPath.current = pathname;
+    if (cameFromLogin || pathname === "/profile") {
+      refreshUser();
+    }
   }, [pathname]);
 
   const shell = (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-50 border-b border-orange-100 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
@@ -75,7 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {user ? (
               <Link
                 href="/profile"
-                className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-orange-50"
+                className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-orange-50"
               >
                 <User className="h-4 w-4 text-orange-600" />
                 <span className="hidden sm:inline text-stone-800">{user.name}</span>
@@ -86,24 +102,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-orange-700 hover:bg-orange-50"
+                className="flex min-h-11 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-orange-700 hover:bg-orange-50"
               >
                 <LogIn className="h-4 w-4" />
-                Sign in
+                <span className="hidden xs:inline">Sign in</span>
               </Link>
             )}
             <Link
               href="/report"
-              className="flex items-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-2 text-sm font-semibold text-white shadow-md shadow-orange-200 hover:bg-orange-700"
+              className="hidden min-h-11 items-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-2 text-sm font-semibold text-white shadow-md shadow-orange-200 hover:bg-orange-700 md:flex"
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Report</span>
+              Report
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className={cn("flex-1", !isMapPage && "pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0")}>
+        {children}
+      </main>
 
       <footer className="hidden border-t border-orange-100 bg-white py-3 text-center text-xs text-stone-400 md:block">
         <Link href="/terms" className="hover:text-orange-600">
@@ -121,26 +139,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         CivicLens — Community intelligence worldwide
       </footer>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-orange-100 bg-white/98 backdrop-blur-md md:hidden">
-        <div className="flex items-center justify-around py-2">
-          {navItems.map(({ href, label, icon: Icon }) => (
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-orange-100 bg-white/98 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)] md:hidden">
+        <div className="flex items-stretch justify-around">
+          {MOBILE_NAV.map(({ href, shortLabel, icon: Icon }) => (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1 text-xs font-medium",
+                "flex min-h-14 min-w-14 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] font-medium sm:text-xs",
                 pathname === href ? "text-orange-600" : "text-stone-400"
               )}
             >
               <Icon className="h-5 w-5" />
-              {label}
+              {shortLabel}
             </Link>
           ))}
           <Link
             href="/report"
-            className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs font-semibold text-orange-600"
+            className="flex min-h-14 min-w-14 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] font-semibold text-orange-600 sm:text-xs"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-white shadow-md">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-white shadow-md">
               <Plus className="h-4 w-4" />
             </div>
             Report

@@ -72,7 +72,7 @@ export default function ProfilePage() {
     user.reputation >= 200 ? "Community Leader" : user.reputation >= 100 ? "Trusted Contributor" : "New Member";
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8 pb-24">
+    <div className="mx-auto max-w-lg px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-cyan-600 text-2xl font-bold text-white">

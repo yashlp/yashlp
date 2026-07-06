@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { CACHE_PUBLIC_SHORT, jsonWithCache } from "@/lib/api-cache";
 import { getSessionUser } from "@/lib/auth";
 import { rateLimitResponse } from "@/lib/api-security";
 import { mockAIVerify } from "@/lib/ai";
@@ -44,10 +45,23 @@ export async function GET(req: Request) {
             underLegalReview: false,
           }),
     },
-    include: { category: true },
+    select: {
+      id: true,
+      title: true,
+      latitude: true,
+      longitude: true,
+      status: true,
+      visibilityStage: true,
+      displayLabel: true,
+      underLegalReview: true,
+      confidenceScore: true,
+      confirmationCount: true,
+      isPositive: true,
+      category: { select: { emoji: true, name: true, slug: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
-  return NextResponse.json({ incidents });
+  return jsonWithCache({ incidents }, CACHE_PUBLIC_SHORT);
 }
 
 const createSchema = z.object({

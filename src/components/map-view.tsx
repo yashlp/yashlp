@@ -264,7 +264,7 @@ export function LocationPicker({
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={USER_LOCATION_ZOOM}
-        className="h-48 w-full"
+        className="h-56 w-full sm:h-64"
         zoomControl={true}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

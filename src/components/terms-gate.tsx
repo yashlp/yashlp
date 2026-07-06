@@ -84,7 +84,7 @@ export function TermsGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-orange-50 p-4">
-      <div className="animate-fade-up w-full max-w-lg rounded-3xl border border-orange-200 bg-white p-8 shadow-2xl shadow-orange-100">
+      <div className="animate-fade-up w-full max-w-lg rounded-3xl border border-orange-200 bg-white p-4 shadow-2xl shadow-orange-100 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200">
             <Globe className="h-7 w-7" />

@@ -31,7 +31,11 @@ export function middleware(request: NextRequest) {
 
   response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
 
-  if (request.nextUrl.pathname.startsWith("/api/")) {
+  const path = request.nextUrl.pathname;
+  const isAuth = path.startsWith("/api/auth/");
+  const isMutation = request.method !== "GET";
+
+  if (path.startsWith("/api/") && (isAuth || isMutation)) {
     response.headers.set("Cache-Control", "no-store");
   }
 

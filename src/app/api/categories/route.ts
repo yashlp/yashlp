@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { CACHE_PUBLIC_LONG, jsonWithCache } from "@/lib/api-cache";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -22,5 +22,5 @@ export async function GET(req: Request) {
     },
   });
 
-  return NextResponse.json({ categories });
+  return jsonWithCache({ categories }, CACHE_PUBLIC_LONG);
 }

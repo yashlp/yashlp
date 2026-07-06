@@ -37,7 +37,7 @@ export default function AskAIPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 pb-24">
+    <div className="mx-auto max-w-2xl px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-indigo-600 text-white">
           <Bot className="h-6 w-6" />

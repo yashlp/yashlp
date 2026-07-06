@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { CACHE_PUBLIC_SHORT, jsonWithCache } from "@/lib/api-cache";
 import { getRankings, getTrends } from "@/lib/health-score";
 
 export async function GET(req: Request) {
@@ -7,9 +7,9 @@ export async function GET(req: Request) {
 
   if (type === "rankings") {
     const rankings = await getRankings(10);
-    return NextResponse.json({ rankings });
+    return jsonWithCache({ rankings }, CACHE_PUBLIC_SHORT);
   }
 
   const trends = await getTrends(30);
-  return NextResponse.json({ trends });
+  return jsonWithCache({ trends }, CACHE_PUBLIC_SHORT);
 }

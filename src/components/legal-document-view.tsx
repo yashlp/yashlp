@@ -10,7 +10,7 @@ export function LegalDocumentView({
   backHref?: string;
 }) {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 pb-24">
+    <div className="mx-auto max-w-3xl px-4 py-10 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-10">
       <Link
         href={backHref}
         className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700"

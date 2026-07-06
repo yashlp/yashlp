@@ -101,6 +101,10 @@ model Incident {
   resolutionUpdates  ResolutionUpdate[]
   photos             IncidentPhoto[]
   contentDisputes    ContentDispute[]
+
+  @@index([visibilityStage])
+  @@index([latitude, longitude])
+  @@index([createdAt])
 }
 
 model IncidentPhoto {

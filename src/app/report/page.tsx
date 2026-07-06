@@ -9,10 +9,11 @@ import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT, POPULAR_CATEGORY_SLUGS } fro
 import { photoRuleLabel } from "@/lib/categories";
 import { INSTITUTION_LABELS } from "@/lib/compliance";
 import { CORRUPTION_DISCLAIMER } from "@/lib/compliance/types";
+import { compressImageFile } from "@/lib/image-compress";
 
 const LocationPicker = dynamic(
   () => import("@/components/map-view").then((m) => m.LocationPicker),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-2xl bg-orange-50" /> }
+  { ssr: false, loading: () => <div className="h-56 animate-pulse rounded-2xl bg-orange-50 sm:h-64" /> }
 );
 
 type Category = {
@@ -93,20 +94,21 @@ export default function ReportPage() {
     return map;
   }, [filtered]);
 
-  const handlePhotos = (files: FileList | null) => {
+  const handlePhotos = async (files: FileList | null) => {
     if (!files) return;
     const remaining = MAX_PHOTOS_PER_REPORT - photos.length;
-    Array.from(files)
-      .slice(0, remaining)
-      .forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          setPhotos((prev) =>
-            prev.length < MAX_PHOTOS_PER_REPORT ? [...prev, reader.result as string] : prev
-          );
-        };
-        reader.readAsDataURL(file);
-      });
+    const selected = Array.from(files).slice(0, remaining);
+
+    for (const file of selected) {
+      try {
+        const compressed = await compressImageFile(file);
+        setPhotos((prev) =>
+          prev.length < MAX_PHOTOS_PER_REPORT ? [...prev, compressed] : prev
+        );
+      } catch {
+        setError("Could not process one of the images. Try a different file.");
+      }
+    }
   };
 
   const useMyLocation = () => {
@@ -177,7 +179,7 @@ export default function ReportPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 pb-28">
+    <div className="mx-auto max-w-2xl px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <h1 className="text-2xl font-bold text-stone-900">Quick Report</h1>
       <p className="mt-1 text-sm text-stone-500">Search, snap a photo, pin location — done in seconds.</p>
 
@@ -290,9 +292,9 @@ export default function ReportPage() {
                   <img src={p} alt="" className="h-full w-full object-cover" />
                   <button
                     onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))}
-                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
+                    className="absolute right-1 top-1 flex min-h-10 min-w-10 items-center justify-center rounded-full bg-black/60 text-white"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               ))}

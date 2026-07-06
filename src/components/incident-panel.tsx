@@ -85,7 +85,7 @@ export function IncidentPanel({
 
   if (!incident) {
     return (
-      <div className="absolute bottom-0 left-0 right-0 z-[1001] p-4 md:left-auto md:right-4 md:bottom-4 md:w-96">
+      <div className="absolute inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-[1001] p-3 md:bottom-4 md:left-auto md:right-4 md:w-96 md:p-4">
         <div className="glass-card rounded-2xl p-6 shadow-xl">Loading...</div>
       </div>
     );
@@ -96,8 +96,9 @@ export function IncidentPanel({
   const stageLabel = visibilityStageLabel(incident.visibilityStage);
 
   return (
-    <div className="absolute bottom-14 left-0 right-0 z-[1001] max-h-[70vh] overflow-y-auto p-4 md:bottom-4 md:left-auto md:right-4 md:w-[420px] md:max-h-[calc(100vh-6rem)]">
-      <div className="glass-card rounded-2xl shadow-xl">
+    <div className="absolute inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-[1001] max-h-[min(70dvh,calc(100dvh-8rem))] overflow-y-auto p-3 md:bottom-4 md:left-auto md:right-4 md:w-[420px] md:max-h-[calc(100vh-6rem)] md:p-4">
+      <div className="glass-card rounded-t-3xl rounded-b-2xl shadow-xl md:rounded-2xl">
+        <div className="mx-auto mb-1 mt-2 h-1 w-10 rounded-full bg-stone-200 md:hidden" />
         <div className="flex items-start justify-between border-b border-border p-4">
           <div>
             <div className="flex items-center gap-2">
@@ -114,7 +115,11 @@ export function IncidentPanel({
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-slate-100">
+          <button
+            onClick={onClose}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-slate-100"
+            aria-label="Close"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>

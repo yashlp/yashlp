@@ -82,7 +82,7 @@ export default function ComparePage() {
   );
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 pb-24">
+    <div className="mx-auto max-w-4xl px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <h1 className="flex items-center gap-2 text-2xl font-bold text-stone-900">
         <GitCompare className="h-6 w-6 text-orange-600" />
         Compare Places

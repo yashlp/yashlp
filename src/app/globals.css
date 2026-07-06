@@ -11,6 +11,7 @@
   --muted: #78716c;
   --border: #fed7aa;
   --brand-gradient: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @theme inline {
@@ -30,10 +31,15 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
 }
 
 .leaflet-container {
@@ -41,6 +47,20 @@ body {
   height: 100%;
   z-index: 0;
   font-family: inherit;
+  touch-action: pan-x pan-y;
+}
+
+@media (max-width: 767px) {
+  .leaflet-bottom.leaflet-right {
+    bottom: calc(5rem + var(--safe-bottom));
+    right: 0.5rem;
+  }
+
+  .leaflet-control-zoom a {
+    min-width: 44px;
+    min-height: 44px;
+    line-height: 44px;
+  }
 }
 
 .brand-gradient-text {
@@ -73,9 +93,15 @@ body {
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   outline: none;
   background: white;
+}
+
+@media (min-width: 768px) {
+  .input-field {
+    font-size: 0.875rem;
+  }
 }
 
 .input-field:focus {

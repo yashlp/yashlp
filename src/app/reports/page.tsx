@@ -6,7 +6,7 @@ import { FREE_FEATURES, PAID_REPORTS } from "@/lib/categories";
 
 export default function ReportsPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 pb-28">
+    <div className="mx-auto max-w-5xl px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <div className="rounded-3xl border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-white p-8">
         <h1 className="text-3xl font-bold text-stone-900">
           CivicLens <span className="text-orange-600">Intelligence Reports</span>

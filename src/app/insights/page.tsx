@@ -29,7 +29,7 @@ export default function InsightsPage() {
   const maxReported = Math.max(...trends.map((t) => t.reported), 1);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 pb-24">
+    <div className="mx-auto max-w-4xl px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <h1 className="text-2xl font-bold">Community Insights</h1>
         <p className="mt-1 text-muted">
           Best and worst areas by Community Health Score — grouped by city or neighborhood.
@@ -44,7 +44,8 @@ export default function InsightsPage() {
           {trends.length === 0 ? (
             <p className="text-sm text-muted">No trend data yet.</p>
           ) : (
-            <div className="flex items-end gap-1" style={{ height: 160 }}>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex min-w-[480px] items-end gap-1" style={{ height: 160 }}>
               {trends.map((t) => (
                 <div key={t.date} className="flex flex-1 flex-col items-center gap-1">
                   <div className="flex w-full items-end justify-center gap-0.5" style={{ height: 120 }}>
@@ -64,9 +65,10 @@ export default function InsightsPage() {
                       title={`${t.positive} positive`}
                     />
                   </div>
-                  <span className="text-[9px] text-muted">{t.date.slice(5)}</span>
+                  <span className="text-[10px] text-muted sm:text-xs">{t.date.slice(5)}</span>
                 </div>
               ))}
+            </div>
             </div>
           )}
           <div className="mt-4 flex gap-4 text-xs text-muted">
