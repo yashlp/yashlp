@@ -30,6 +30,7 @@ model User {
   timelineEvents   TimelineEvent[]
   savedPlaces      SavedPlace[]
   notifications    Notification[]
+  contentDisputes  ContentDispute[]
 }
 
 model OtpCode {
@@ -98,6 +99,7 @@ model Incident {
   timelineEvents     TimelineEvent[]
   resolutionUpdates  ResolutionUpdate[]
   photos             IncidentPhoto[]
+  contentDisputes    ContentDispute[]
 }
 
 model IncidentPhoto {
@@ -134,6 +136,22 @@ model Comment {
 
   incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id])
+}
+
+model ContentDispute {
+  id          String   @id @default(cuid())
+  incidentId  String
+  userId      String
+  reason      String?
+  counterEvidence String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([incidentId, userId])
 }
 
 model ResolutionUpdate {

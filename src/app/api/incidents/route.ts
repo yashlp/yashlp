@@ -9,6 +9,8 @@ import {
   resolveProfileForCountry,
 } from "@/lib/legal-engine";
 import { processCompliance } from "@/lib/compliance";
+import { assessEvidence } from "@/lib/compliance/evidenceEngine";
+import { penalizeBlockedReport } from "@/lib/compliance/trustService";
 import {
   addTimelineEvent,
   findNearbyDuplicate,
@@ -129,6 +131,16 @@ export async function POST(req: Request) {
       : resolveProfileForCountry(user.countryCode ?? "INT");
     const legalProfile = getLegalProfile(profileId);
 
+    const evidence = assessEvidence({
+      hasPhoto: photoUrls.length > 0,
+      photoCount: photoUrls.length,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      pinLatitude: data.latitude,
+      pinLongitude: data.longitude,
+      categorySlug: category.slug,
+    });
+
     const compliance = processCompliance({
       categorySlug: category.slug,
       title: data.title,
@@ -137,12 +149,16 @@ export async function POST(req: Request) {
       servicePoint: data.servicePoint,
       corruptionIssueType: data.corruptionIssueType,
       hasPhoto: photoUrls.length > 0,
+      photoCount: photoUrls.length,
       userTrustScore: user.reliabilityScore,
       legalProfileId: legalProfile.id,
       countryCode: user.countryCode ?? undefined,
+      evidenceScore: evidence.evidenceScore,
+      evidenceFlags: evidence.flags,
     });
 
     if (compliance.action === "block" || compliance.originalBlocked) {
+      await penalizeBlockedReport(user.id);
       return NextResponse.json(
         {
           error:
@@ -207,7 +223,7 @@ export async function POST(req: Request) {
       include: incidentInclude,
     });
 
-    return NextResponse.json({ incident: full, ai, compliance });
+    return NextResponse.json({ incident: full, ai, compliance, evidence });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: e.errors[0].message }, { status: 400 });

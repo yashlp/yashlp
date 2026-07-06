@@ -67,6 +67,7 @@ async function main() {
     { phone: "+919988776655", name: "Demo User", reputation: 50, reliabilityScore: 0.7 },
   ];
 
+  await prisma.contentDispute.deleteMany();
   await prisma.incident.deleteMany();
   await prisma.user.deleteMany();
 
@@ -94,6 +95,23 @@ async function main() {
     { city: GLOBAL_SAMPLE_PLACES[2], cat: "no-shade-heat-hazard", status: INCIDENT_STATUSES.ACTIVE, confirmations: 5, isPositive: false },
     { city: GLOBAL_SAMPLE_PLACES[2], cat: "trusted-street-food-spot", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 12, isPositive: true },
     { city: GLOBAL_SAMPLE_PLACES[2], cat: "clean-public-toilet", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 7, isPositive: true },
+    {
+      city: GLOBAL_SAMPLE_PLACES[2],
+      cat: "corruption-bribery",
+      status: INCIDENT_STATUSES.ACTIVE,
+      confirmations: 5,
+      isPositive: false,
+      compliance: {
+        displayLabel: "RTO Office – Service Integrity Reports",
+        institutionType: "rto_office",
+        servicePoint: "Licensing counter",
+        corruptionIssueType: "irregular_practices",
+        description:
+          "Community members have submitted allegations of irregular service practices at Licensing counter, RTO Office.",
+        aggregationText:
+          "Multiple users reported irregular practice reports related to Licensing counter at RTO Office.",
+      },
+    },
   ];
 
   for (const [i, sample] of citySamples.entries()) {
@@ -106,12 +124,14 @@ async function main() {
     const visibility = visibilityForStage(visibilityStage);
     const expiresAt = cat.ttlDays ? addDays(new Date(), cat.ttlDays) : null;
 
+    const compliance = (sample as { compliance?: Record<string, string> }).compliance;
+
     const incident = await prisma.incident.create({
       data: {
         categoryId: cat.id,
         reporterId: reporter.id,
-        title: `${cat.emoji} ${cat.name}`,
-        description: `Community-reported in ${sample.city.name}.`,
+        title: compliance?.displayLabel ?? `${cat.emoji} ${cat.name}`,
+        description: compliance?.description ?? `Community-reported in ${sample.city.name}.`,
         latitude: sample.city.lat + offset.lat,
         longitude: sample.city.lng + offset.lng,
         address: sample.city.name,
@@ -130,6 +150,13 @@ async function main() {
         aiImageVerified: true,
         resolvedAt: sample.status === INCIDENT_STATUSES.RESOLVED ? new Date() : null,
         expiresAt,
+        displayLabel: compliance?.displayLabel ?? null,
+        institutionType: compliance?.institutionType ?? null,
+        servicePoint: compliance?.servicePoint ?? null,
+        corruptionIssueType: compliance?.corruptionIssueType ?? null,
+        aggregationText: compliance?.aggregationText ?? null,
+        contentRiskScore: compliance ? 25 : null,
+        complianceAction: compliance ? "publish" : null,
       },
     });
 

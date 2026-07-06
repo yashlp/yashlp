@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { addTimelineEvent, recalculateIncident } from "@/lib/incident-service";
+import { rewardConfirmation } from "@/lib/compliance/trustService";
 
 export async function POST(
   _req: Request,
@@ -23,10 +24,7 @@ export async function POST(
     data: { incidentId: id, userId: user.id, comment: "Confirmed by community member." },
   });
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { reputation: { increment: 5 } },
-  });
+  await rewardConfirmation(user.id);
 
   await addTimelineEvent(id, "confirmed", user.id);
   const incident = await recalculateIncident(id);

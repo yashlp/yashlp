@@ -10,6 +10,7 @@ import {
   VISIBILITY_STAGE,
 } from "./constants";
 import { haversineDistance } from "./utils";
+import { buildAggregationSummary } from "./compliance";
 
 function addDays(date: Date, days: number): Date {
   const d = new Date(date);
@@ -43,21 +44,26 @@ export function calculateConfidence(
 function deriveVisibilityStage(
   confirmationCount: number,
   status: string,
-  disputeCount: number
+  disputeCount: number,
+  underLegalReview: boolean,
+  complianceAction: string | null
 ): string {
   if (status === INCIDENT_STATUSES.RESOLVED) {
     return VISIBILITY_STAGE.VERIFIED;
   }
+  let stage: string = VISIBILITY_STAGE.PRIVATE;
   if (
     confirmationCount >= VERIFIED_CONFIRMATION_THRESHOLD &&
-    disputeCount < DISPUTE_REOPEN_THRESHOLD
+    disputeCount < DISPUTE_REOPEN_THRESHOLD &&
+    !underLegalReview &&
+    complianceAction !== "limit_visibility" &&
+    complianceAction !== "under_review"
   ) {
-    return VISIBILITY_STAGE.VERIFIED;
+    stage = VISIBILITY_STAGE.VERIFIED;
+  } else if (confirmationCount >= SEED_CONFIRMATION_THRESHOLD) {
+    stage = VISIBILITY_STAGE.SEED;
   }
-  if (confirmationCount >= SEED_CONFIRMATION_THRESHOLD) {
-    return VISIBILITY_STAGE.SEED;
-  }
-  return VISIBILITY_STAGE.PRIVATE;
+  return stage;
 }
 
 function mapVisibilityFromStage(stage: string): string {
@@ -84,6 +90,7 @@ export async function findNearbyDuplicate(
           INCIDENT_STATUSES.POSITIVE_ACTIVE,
           INCIDENT_STATUSES.RESOLUTION_PENDING,
           INCIDENT_STATUSES.DISPUTED,
+          INCIDENT_STATUSES.UNDER_REVIEW,
         ],
       },
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
@@ -105,19 +112,38 @@ export async function recalculateIncident(incidentId: string) {
       category: true,
       reporter: true,
       confirmations: true,
+      contentDisputes: true,
       resolutionUpdates: { orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
   if (!incident) return null;
 
   const confirmationCount = incident.confirmations.length;
+  const contentDisputeCount = incident.contentDisputes.length;
   const latestResolution = incident.resolutionUpdates[0];
   const resolutionDisputes = latestResolution?.disputeCount ?? 0;
+  const totalDisputes = resolutionDisputes + contentDisputeCount;
+
+  let underLegalReview = incident.underLegalReview;
+  let complianceAction = incident.complianceAction;
+
+  if (
+    underLegalReview &&
+    confirmationCount >= VERIFIED_CONFIRMATION_THRESHOLD &&
+    (incident.contentRiskScore ?? 100) < 40 &&
+    contentDisputeCount === 0
+  ) {
+    underLegalReview = false;
+    complianceAction = "publish";
+  }
 
   let status = incident.status;
   let resolvedAt = incident.resolvedAt;
 
-  if (latestResolution?.status === "pending") {
+  if (contentDisputeCount > 0 && status !== INCIDENT_STATUSES.RESOLVED) {
+    status = INCIDENT_STATUSES.DISPUTED;
+    underLegalReview = true;
+  } else if (latestResolution?.status === "pending") {
     status = INCIDENT_STATUSES.RESOLUTION_PENDING;
     if (latestResolution.confirmationCount >= RESOLUTION_CONFIRM_THRESHOLD) {
       status = INCIDENT_STATUSES.RESOLVED;
@@ -135,14 +161,25 @@ export async function recalculateIncident(incidentId: string) {
     status = INCIDENT_STATUSES.ACTIVE;
     resolvedAt = null;
   } else if (confirmationCount >= SEED_CONFIRMATION_THRESHOLD) {
-    status = incident.isPositive ? INCIDENT_STATUSES.POSITIVE_ACTIVE : INCIDENT_STATUSES.ACTIVE;
+    status =
+      underLegalReview
+        ? INCIDENT_STATUSES.UNDER_REVIEW
+        : incident.isPositive
+          ? INCIDENT_STATUSES.POSITIVE_ACTIVE
+          : INCIDENT_STATUSES.ACTIVE;
   } else if (confirmationCount > 0) {
-    status = INCIDENT_STATUSES.PENDING;
+    status = underLegalReview ? INCIDENT_STATUSES.UNDER_REVIEW : INCIDENT_STATUSES.PENDING;
   } else {
-    status = INCIDENT_STATUSES.PENDING;
+    status = underLegalReview ? INCIDENT_STATUSES.UNDER_REVIEW : INCIDENT_STATUSES.PENDING;
   }
 
-  const visibilityStage = deriveVisibilityStage(confirmationCount, status, resolutionDisputes);
+  const visibilityStage = deriveVisibilityStage(
+    confirmationCount,
+    status,
+    totalDisputes,
+    underLegalReview,
+    complianceAction
+  );
   const visibility = mapVisibilityFromStage(visibilityStage);
   const confidenceScore = calculateConfidence(
     confirmationCount,
@@ -151,6 +188,14 @@ export async function recalculateIncident(incidentId: string) {
     incident.aiImageVerified,
     incident.aiCategoryMatch,
     incident.isPositive
+  );
+
+  const displayLabel =
+    incident.displayLabel ?? `${incident.category.emoji} ${incident.category.name}`;
+  const aggregationText = buildAggregationSummary(
+    displayLabel,
+    confirmationCount,
+    incident.category.slug
   );
 
   return prisma.incident.update({
@@ -162,6 +207,9 @@ export async function recalculateIncident(incidentId: string) {
       visibility,
       visibilityStage,
       resolvedAt,
+      underLegalReview,
+      complianceAction,
+      aggregationText,
     },
     include: {
       category: true,
@@ -283,6 +331,10 @@ export const incidentInclude = {
   timelineEvents: { orderBy: { createdAt: "desc" as const }, take: 30 },
   photos: true,
   resolutionUpdates: {
+    include: { user: { select: { name: true } } },
+    orderBy: { createdAt: "desc" as const },
+  },
+  contentDisputes: {
     include: { user: { select: { name: true } } },
     orderBy: { createdAt: "desc" as const },
   },

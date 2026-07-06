@@ -29,9 +29,12 @@ export type ComplianceInput = {
   servicePoint?: string;
   corruptionIssueType?: CorruptionIssueType | string;
   hasPhoto?: boolean;
+  photoCount?: number;
   userTrustScore?: number;
   legalProfileId?: string;
   countryCode?: string;
+  evidenceScore?: number;
+  evidenceFlags?: string[];
 };
 
 export type ComplianceResult = {

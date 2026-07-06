@@ -4,6 +4,8 @@ export * from "./corruptionHandler";
 export * from "./defamationSafeWording";
 export * from "./sanitizationEngine";
 export * from "./contentRiskEngine";
+export * from "./evidenceEngine";
+export * from "./trustService";
 export { processCompliance } from "./compliancePipeline";
 
 export function buildAggregationSummary(

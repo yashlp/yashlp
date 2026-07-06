@@ -50,6 +50,8 @@ export function IncidentPanel({
 }) {
   const [incident, setIncident] = useState<IncidentDetail | null>(null);
   const [comment, setComment] = useState("");
+  const [disputeReason, setDisputeReason] = useState("");
+  const [showDispute, setShowDispute] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -194,11 +196,48 @@ export function IncidentPanel({
                   className="flex items-center gap-1.5 rounded-lg bg-rose-100 px-3 py-2 text-sm text-rose-700"
                 >
                   <XCircle className="h-4 w-4" />
-                  Dispute
+                  Still Broken
                 </button>
               </>
             )}
+            {incident.status !== "resolved" && (
+              <button
+                disabled={loading}
+                onClick={() => setShowDispute((v) => !v)}
+                className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+              >
+                <XCircle className="h-4 w-4" />
+                Dispute Report
+              </button>
+            )}
           </div>
+
+          {showDispute && (
+            <div className="space-y-2 rounded-lg border border-rose-100 bg-rose-50/50 p-3">
+              <p className="text-xs text-rose-800">
+                Businesses and institutions may challenge reports. Provide your reason — no automatic
+                assumption of guilt applies to either side.
+              </p>
+              <textarea
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
+                rows={2}
+                placeholder="Why is this report inaccurate or unfair?"
+                className="w-full rounded-lg border border-rose-200 px-3 py-2 text-sm"
+              />
+              <button
+                disabled={loading || disputeReason.trim().length < 10}
+                onClick={() => {
+                  action(`/api/incidents/${incidentId}/dispute`, { reason: disputeReason });
+                  setShowDispute(false);
+                  setDisputeReason("");
+                }}
+                className="rounded-lg bg-rose-600 px-3 py-2 text-sm text-white disabled:opacity-50"
+              >
+                Submit Dispute
+              </button>
+            </div>
+          )}
 
           <div>
             <label className="mb-1 flex items-center gap-1 text-xs font-medium text-muted">

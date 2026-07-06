@@ -106,6 +106,20 @@ export function assessContentRisk(
     flags.push("low_trust_user");
   }
 
+  if ((input.evidenceScore ?? 1) < 0.4) {
+    factors.weak_evidence = 15;
+    score += 15;
+    flags.push("weak_evidence");
+  }
+
+  for (const flag of input.evidenceFlags ?? []) {
+    if (flag === "gps_far" && !flags.includes("weak_evidence")) {
+      factors.gps_mismatch = 10;
+      score += 10;
+      flags.push("gps_mismatch");
+    }
+  }
+
   if (!input.hasPhoto && ["unhygienic-restaurant", "potholes-bad-roads"].includes(input.categorySlug)) {
     factors.no_photo_evidence = 5;
     score += 5;
