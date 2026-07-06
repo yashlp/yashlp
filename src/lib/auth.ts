@@ -11,6 +11,10 @@ export type SessionUser = {
   reputation: number;
   reliabilityScore: number;
   role: string;
+  countryCode: string | null;
+  legalProfile: string | null;
+  termsAcceptedAt: Date | null;
+  termsVersion: string | null;
 };
 
 export function normalizePhone(raw: string): string {
@@ -49,6 +53,10 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       reputation: true,
       reliabilityScore: true,
       role: true,
+      countryCode: true,
+      legalProfile: true,
+      termsAcceptedAt: true,
+      termsVersion: true,
     },
   });
 

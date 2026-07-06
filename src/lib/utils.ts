@@ -42,6 +42,7 @@ export function scoreBg(score: number): string {
 
 export function statusLabel(status: string, isPositive?: boolean): string {
   if (status === "resolution_pending") return "🟡 Resolution Pending";
+  if (status === "under_review") return "🟡 Under Legal Review";
   if (status === "positive_active" || (isPositive && status === "active"))
     return "🔵 Community Improvement";
   if (status === "resolved") return "🟢 Resolved";

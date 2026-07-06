@@ -5,6 +5,11 @@ import { getSessionUser } from "@/lib/auth";
 import { mockAIVerify } from "@/lib/ai";
 import { isPhotoRequired } from "@/lib/categories";
 import {
+  assessLegalRisk,
+  getLegalProfile,
+  resolveProfileForCountry,
+} from "@/lib/legal-engine";
+import {
   addTimelineEvent,
   findNearbyDuplicate,
   getExpiresAtForCategory,
@@ -32,6 +37,7 @@ export async function GET(req: Request) {
             visibilityStage: {
               in: [VISIBILITY_STAGE.SEED, VISIBILITY_STAGE.VERIFIED],
             },
+            underLegalReview: false,
           }),
     },
     include: { category: true },
@@ -115,6 +121,29 @@ export async function POST(req: Request) {
 
     const ai = mockAIVerify(category.slug, photoUrls.length > 0);
 
+    const profileId = user.legalProfile
+      ? (user.legalProfile as Parameters<typeof getLegalProfile>[0])
+      : resolveProfileForCountry(user.countryCode ?? "INT");
+    const legalProfile = getLegalProfile(profileId);
+
+    const legalCheck = assessLegalRisk({
+      categorySlug: category.slug,
+      title: data.title,
+      description: data.description,
+      legalProfile,
+    });
+
+    if (legalCheck.recommendation === "block") {
+      return NextResponse.json(
+        {
+          error:
+            "This report was blocked by our legal safety filter. Avoid naming individuals or making unverified accusations. Rephrase as a general community observation.",
+          legal: legalCheck,
+        },
+        { status: 422 }
+      );
+    }
+
     const expiresAt = getExpiresAtForCategory(category);
 
     const incident = await prisma.incident.create({
@@ -135,8 +164,18 @@ export async function POST(req: Request) {
         confirmationCount: 0,
         confidenceScore: 0.1,
         expiresAt,
+        legalRiskScore: legalCheck.legalRiskScore,
+        underLegalReview: legalCheck.underReview,
+        legalFlags: legalCheck.flags.length ? JSON.stringify(legalCheck.flags) : null,
       },
     });
+
+    if (legalCheck.underReview) {
+      await addTimelineEvent(incident.id, "legal_review", user.id, {
+        flags: legalCheck.flags,
+        score: legalCheck.legalRiskScore,
+      });
+    }
 
     if (photoUrls.length > 0) await savePhotos(incident.id, user.id, photoUrls);
 
@@ -147,7 +186,7 @@ export async function POST(req: Request) {
       include: incidentInclude,
     });
 
-    return NextResponse.json({ incident: full, ai });
+    return NextResponse.json({ incident: full, ai, legal: legalCheck });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: e.errors[0].message }, { status: 400 });

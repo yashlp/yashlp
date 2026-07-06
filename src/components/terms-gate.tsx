@@ -2,19 +2,68 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FileText, Globe, Shield, CheckCircle2 } from "lucide-react";
-import { TERMS_STORAGE_KEY } from "@/lib/constants";
+import { FileText, Globe, Shield, CheckCircle2, Scale } from "lucide-react";
+import {
+  TERMS_STORAGE_KEY,
+  TERMS_VERSION_KEY,
+  LEGAL_PROFILE_KEY,
+  LEGAL_COUNTRY_KEY,
+  LEGAL_DOCUMENT_VERSION,
+} from "@/lib/constants";
+import type { CountryDetectionResult } from "@/lib/legal-engine";
 
 export function TermsGate({ children }: { children: React.ReactNode }) {
   const [accepted, setAccepted] = useState<boolean | null>(null);
   const [checked, setChecked] = useState(false);
+  const [detection, setDetection] = useState<CountryDetectionResult | null>(null);
 
   useEffect(() => {
-    setAccepted(localStorage.getItem(TERMS_STORAGE_KEY) === "true");
+    const storedVersion = localStorage.getItem(TERMS_VERSION_KEY);
+    const isAccepted =
+      localStorage.getItem(TERMS_STORAGE_KEY) === "true" &&
+      storedVersion === LEGAL_DOCUMENT_VERSION;
+    setAccepted(isAccepted);
+
+    const deviceCountry = navigator.language?.includes("-")
+      ? navigator.language.split("-")[1]?.toUpperCase()
+      : undefined;
+
+    fetch(`/api/legal/detect${deviceCountry ? `?country=${deviceCountry}` : ""}`)
+      .then((r) => r.json())
+      .then((d) => setDetection(d))
+      .catch(() =>
+        setDetection({
+          country: "International",
+          countryCode: "INT",
+          region: "International",
+          legalProfile: "GLOBAL_DEFAULT",
+          detectionSource: "fallback",
+        })
+      );
   }, []);
 
-  const accept = () => {
+  const accept = async () => {
     localStorage.setItem(TERMS_STORAGE_KEY, "true");
+    localStorage.setItem(TERMS_VERSION_KEY, LEGAL_DOCUMENT_VERSION);
+    if (detection) {
+      localStorage.setItem(LEGAL_PROFILE_KEY, detection.legalProfile);
+      localStorage.setItem(LEGAL_COUNTRY_KEY, detection.countryCode);
+    }
+
+    try {
+      await fetch("/api/legal/accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          countryCode: detection?.countryCode,
+          legalProfile: detection?.legalProfile,
+          termsVersion: LEGAL_DOCUMENT_VERSION,
+        }),
+      });
+    } catch {
+      // local acceptance still valid for anonymous users
+    }
+
     setAccepted(true);
   };
 
@@ -43,38 +92,67 @@ export function TermsGate({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
+        {detection && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50/80 px-3 py-2 text-xs text-stone-600">
+            <Scale className="h-4 w-4 shrink-0 text-orange-500" />
+            <span>
+              Legal documents adapted for <strong>{detection.country}</strong> (
+              {detection.legalProfile.replace(/_/g, " ")})
+            </span>
+          </div>
+        )}
+
         <div className="mb-6 max-h-48 overflow-y-auto rounded-2xl border border-orange-100 bg-orange-50/50 p-4 text-sm leading-relaxed text-stone-600">
-          <p className="mb-3 font-medium text-stone-800">Before you continue, please review our Terms & Conditions:</p>
+          <p className="mb-3 font-medium text-stone-800">
+            CivicLens is a community intelligence platform — not a legal authority. By continuing
+            you agree that:
+          </p>
           <ul className="space-y-2 text-xs">
             <li className="flex gap-2">
               <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
-              You agree to submit accurate, good-faith community reports only.
+              Reports are user-generated and NOT legally verified as absolute truth.
             </li>
             <li className="flex gap-2">
               <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
-              Location data is used to place incidents on the map and calculate area health scores.
+              You submit accurate, good-faith community reports only — no false accusations.
             </li>
             <li className="flex gap-2">
               <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
-              Do not upload offensive, false, or copyrighted content.
+              Location data is used to place incidents and calculate area health scores.
             </li>
             <li className="flex gap-2">
               <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
-              CivicLens is a community platform — not an official government channel.
+              Businesses may dispute reports; no automatic assumption of guilt.
             </li>
             <li className="flex gap-2">
               <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
-              You must be 13+ to use this service. See full terms for privacy and data use.
+              High-risk content is AI-reviewed and may be held under review before public visibility.
             </li>
           </ul>
-          <Link
-            href="/terms"
-            target="_blank"
-            className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Read full Terms & Conditions
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href="/terms"
+              target="_blank"
+              className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              target="_blank"
+              className="text-xs font-medium text-orange-600 hover:text-orange-700"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/content-policy"
+              target="_blank"
+              className="text-xs font-medium text-orange-600 hover:text-orange-700"
+            >
+              Content Guidelines
+            </Link>
+          </div>
         </div>
 
         <label className="mb-6 flex cursor-pointer items-start gap-3 rounded-xl border border-orange-100 bg-white p-4 transition hover:border-orange-300">
@@ -85,11 +163,23 @@ export function TermsGate({ children }: { children: React.ReactNode }) {
             className="mt-0.5 h-4 w-4 rounded border-orange-300 text-orange-600 focus:ring-orange-500"
           />
           <span className="text-sm text-stone-700">
-            I have read and agree to the{" "}
+            I have read and agree to the region-adapted{" "}
             <Link href="/terms" target="_blank" className="font-medium text-orange-600 hover:underline">
               Terms & Conditions
-            </Link>{" "}
-            and Privacy Policy.
+            </Link>
+            ,{" "}
+            <Link href="/privacy" target="_blank" className="font-medium text-orange-600 hover:underline">
+              Privacy Policy
+            </Link>
+            , and{" "}
+            <Link
+              href="/content-policy"
+              target="_blank"
+              className="font-medium text-orange-600 hover:underline"
+            >
+              Content Guidelines
+            </Link>
+            .
           </span>
         </label>
 

@@ -7,10 +7,10 @@ import {
 import { LegalDocumentView } from "@/components/legal-document-view";
 
 export const metadata = {
-  title: "Terms & Conditions — CivicLens",
+  title: "Content Guidelines — CivicLens",
 };
 
-export default async function TermsPage({
+export default async function ContentPolicyPage({
   searchParams,
 }: {
   searchParams: Promise<{ country?: string }>;
@@ -28,5 +28,5 @@ export default async function TermsPage({
     detection.countryCode === "INT" ? "US" : detection.countryCode
   );
 
-  return <LegalDocumentView document={docs.terms} />;
+  return <LegalDocumentView document={docs.content} />;
 }

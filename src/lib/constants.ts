@@ -14,6 +14,11 @@ export const USER_LOCATION_ZOOM = 14;
 export const STREET_LEVEL_ZOOM = 12;
 
 export const TERMS_STORAGE_KEY = "civiclens_terms_accepted";
+export const TERMS_VERSION_KEY = "civiclens_terms_version";
+export const LEGAL_PROFILE_KEY = "civiclens_legal_profile";
+export const LEGAL_COUNTRY_KEY = "civiclens_legal_country";
+
+export { LEGAL_DOCUMENT_VERSION } from "@/lib/legal-engine";
 
 export const INCIDENT_STATUSES = {
   PENDING: "pending",

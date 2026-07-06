@@ -30,7 +30,8 @@ const navItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<UserInfo>(null);
-  const isTermsPage = pathname === "/terms";
+  const isLegalPage =
+    pathname === "/terms" || pathname === "/privacy" || pathname === "/content-policy";
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -106,7 +107,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <footer className="hidden border-t border-orange-100 bg-white py-3 text-center text-xs text-stone-400 md:block">
         <Link href="/terms" className="hover:text-orange-600">
-          Terms & Conditions
+          Terms
+        </Link>
+        {" · "}
+        <Link href="/privacy" className="hover:text-orange-600">
+          Privacy
+        </Link>
+        {" · "}
+        <Link href="/content-policy" className="hover:text-orange-600">
+          Content Guidelines
         </Link>
         {" · "}
         CivicLens — Community intelligence worldwide
@@ -141,6 +150,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 
-  if (isTermsPage) return shell;
+  if (isLegalPage) return shell;
   return <TermsGate>{shell}</TermsGate>;
 }
