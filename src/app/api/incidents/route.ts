@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
+import { rateLimitResponse } from "@/lib/api-security";
 import { mockAIVerify } from "@/lib/ai";
 import { isPhotoRequired } from "@/lib/categories";
 import {
@@ -18,6 +19,7 @@ import {
   incidentInclude,
   recalculateIncident,
 } from "@/lib/incident-service";
+import { validatePhotoDataUrls } from "@/lib/photo-validation";
 import {
   INCIDENT_STATUSES,
   MAX_PHOTOS_PER_REPORT,
@@ -71,6 +73,9 @@ async function savePhotos(incidentId: string, userId: string, urls: string[]) {
 }
 
 export async function POST(req: Request) {
+  const limited = rateLimitResponse(req, "incidents-create", 15, 60 * 60 * 1000);
+  if (limited) return limited;
+
   try {
     const user = await getSessionUser();
     if (!user) {
@@ -80,6 +85,13 @@ export async function POST(req: Request) {
     const body = await req.json();
     const data = createSchema.parse(body);
     const photoUrls = data.photoUrls ?? [];
+
+    if (photoUrls.length > 0) {
+      const photoCheck = validatePhotoDataUrls(photoUrls);
+      if (!photoCheck.ok) {
+        return NextResponse.json({ error: photoCheck.error }, { status: 400 });
+      }
+    }
 
     const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
     if (!category) {

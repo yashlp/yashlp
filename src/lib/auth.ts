@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { prisma } from "./db";
+import { createSessionToken, SESSION_MAX_AGE_SEC, verifySessionToken } from "./session-token";
 
 const SESSION_COOKIE = "civiclens_session";
-const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 export type SessionUser = {
   id: string;
@@ -25,12 +25,13 @@ export function normalizePhone(raw: string): string {
 }
 
 export async function createSession(userId: string) {
+  const token = createSessionToken(userId);
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, userId, {
+  cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: SESSION_MAX_AGE,
+    maxAge: SESSION_MAX_AGE_SEC,
     path: "/",
   });
 }
@@ -42,7 +43,10 @@ export async function destroySession() {
 
 export async function getSessionUser(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
-  const userId = cookieStore.get(SESSION_COOKIE)?.value;
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+
+  const userId = verifySessionToken(token);
   if (!userId) return null;
 
   const user = await prisma.user.findUnique({

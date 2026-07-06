@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createSession, normalizePhone } from "@/lib/auth";
+import { rateLimitKey, rateLimitResponse } from "@/lib/api-security";
 import { verifyOtp } from "@/lib/otp";
 import { generateRandomDisplayName } from "@/lib/random-name";
 
@@ -13,10 +14,16 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const limited = rateLimitResponse(req, "verify-otp", 20, 15 * 60 * 1000);
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const data = schema.parse(body);
     const phone = normalizePhone(data.phone);
+
+    const phoneLimited = rateLimitKey("verify-otp-phone", phone, 10, 15 * 60 * 1000);
+    if (phoneLimited) return phoneLimited;
 
     const valid = await verifyOtp(phone, data.otp);
     if (!valid) {

@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { rateLimitResponse } from "@/lib/api-security";
+
 /** Free worldwide geocoding via OpenStreetMap Nominatim (no API key required) */
 export async function GET(req: Request) {
+  const limited = rateLimitResponse(req, "geocode", 60, 60 * 1000);
+  if (limited) return limited;
+
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q")?.trim();
 

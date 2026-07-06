@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimitResponse } from "@/lib/api-security";
 import { processCompliance } from "@/lib/compliance";
 
 const schema = z.object({
@@ -13,6 +14,9 @@ const schema = z.object({
 
 /** Preview compliance processing before submit */
 export async function POST(req: Request) {
+  const limited = rateLimitResponse(req, "compliance-preview", 30, 60 * 1000);
+  if (limited) return limited;
+
   const data = schema.parse(await req.json());
   const result = processCompliance({
     categorySlug: data.categorySlug,

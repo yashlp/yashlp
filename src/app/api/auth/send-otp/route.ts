@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { normalizePhone } from "@/lib/auth";
+import { rateLimitKey, rateLimitResponse } from "@/lib/api-security";
 import { sendOtp } from "@/lib/otp";
 
 const schema = z.object({
@@ -8,10 +9,16 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const limited = rateLimitResponse(req, "send-otp", 10, 15 * 60 * 1000);
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const { phone: raw } = schema.parse(body);
     const phone = normalizePhone(raw);
+
+    const phoneLimited = rateLimitKey("send-otp-phone", phone, 3, 15 * 60 * 1000);
+    if (phoneLimited) return phoneLimited;
 
     await sendOtp(phone);
 
