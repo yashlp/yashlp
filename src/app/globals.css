@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #fffaf7;
+  --foreground: #1c1917;
   --card: #ffffff;
-  --primary: #0d9488;
-  --primary-dark: #0f766e;
-  --accent: #f59e0b;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --pulse-gradient: linear-gradient(135deg, #0d9488 0%, #0891b2 50%, #6366f1 100%);
+  --primary: #ea580c;
+  --primary-dark: #c2410c;
+  --primary-light: #fff7ed;
+  --accent: #fb923c;
+  --muted: #78716c;
+  --border: #fed7aa;
+  --brand-gradient: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
 }
 
 @theme inline {
@@ -18,6 +19,7 @@
   --color-card: var(--card);
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
@@ -41,25 +43,51 @@ body {
   font-family: inherit;
 }
 
-.pulse-gradient-text {
-  background: var(--pulse-gradient);
+.brand-gradient-text {
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(234, 88, 12, 0.08);
 }
 
-@keyframes pulse-ring {
-  0% { transform: scale(0.95); opacity: 0.7; }
-  50% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.7; }
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  font-weight: 500;
+  border-radius: 0.75rem;
+  transition: background 0.2s;
 }
 
-.animate-pulse-ring {
-  animation: pulse-ring 2s ease-in-out infinite;
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.input-field {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  outline: none;
+  background: white;
+}
+
+.input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.4s ease-out;
 }

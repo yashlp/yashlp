@@ -93,7 +93,7 @@ export async function askAI(
   };
 }
 
-export function mockAIVerify(categorySlug: string) {
+export function mockAIVerify(categorySlug: string, hasPhoto = false) {
   const categoryKeywords: Record<string, string[]> = {
     pothole: ["road", "hole", "asphalt", "pavement"],
     graffiti: ["wall", "paint", "marking"],
@@ -102,13 +102,15 @@ export function mockAIVerify(categorySlug: string) {
 
   const keywords = categoryKeywords[categorySlug] ?? ["street", "public"];
   const match = 0.75 + Math.random() * 0.2;
-  const verified = Math.random() > 0.1;
+  const verified = hasPhoto ? Math.random() > 0.1 : Math.random() > 0.4;
 
   return {
     aiCategoryMatch: match,
     aiImageVerified: verified,
     aiNotes: verified
       ? `Image appears consistent with ${categorySlug} (${keywords.join(", ")})`
-      : "Image could not be fully verified — flagged for community review",
+      : hasPhoto
+        ? "Image could not be fully verified — flagged for community review"
+        : "No photo submitted — awaiting community verification",
   };
 }

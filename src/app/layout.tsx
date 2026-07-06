@@ -6,9 +6,9 @@ import { AppShell } from "@/components/app-shell";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "PlacePulse — Community Intelligence Platform",
+  title: "CivicLens — Community Intelligence Platform",
   description:
-    "Every place has a pulse. PlacePulse helps the community measure it.",
+    "Every place has a story. CivicLens helps communities worldwide understand, monitor, and improve the places around them.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

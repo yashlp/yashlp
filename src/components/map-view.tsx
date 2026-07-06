@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { DEFAULT_MAP_ZOOM } from "@/lib/constants";
 import "leaflet/dist/leaflet.css";
 
 type Incident = {
@@ -16,16 +17,26 @@ type Incident = {
   category: { emoji: string; name: string };
 };
 
-function MapMover({ center }: { center: { lat: number; lng: number } }) {
+function MapMover({
+  center,
+  zoom,
+}: {
+  center: { lat: number; lng: number };
+  zoom: number;
+}) {
   const map = useMap();
-  const prev = useRef(center);
+  const prev = useRef({ ...center, zoom });
 
   useEffect(() => {
-    if (prev.current.lat !== center.lat || prev.current.lng !== center.lng) {
-      map.flyTo([center.lat, center.lng], map.getZoom(), { duration: 0.8 });
-      prev.current = center;
+    if (
+      prev.current.lat !== center.lat ||
+      prev.current.lng !== center.lng ||
+      prev.current.zoom !== zoom
+    ) {
+      map.flyTo([center.lat, center.lng], zoom, { duration: 0.8 });
+      prev.current = { ...center, zoom };
     }
-  }, [center, map]);
+  }, [center, zoom, map]);
 
   return null;
 }
@@ -42,23 +53,27 @@ function MapEvents({ onMove }: { onMove: (lat: number, lng: number) => void }) {
 
 function createIcon(incident: Incident, selected: boolean) {
   const color = incident.isPositive
-    ? "#10b981"
+    ? incident.status === "positive_active" || incident.status === "active"
+      ? "#2563eb"
+      : "#93c5fd"
     : incident.status === "resolved"
-      ? "#6366f1"
-      : incident.status === "pending"
-        ? "#f59e0b"
-        : "#ef4444";
+      ? "#16a34a"
+      : incident.status === "disputed"
+        ? "#eab308"
+        : incident.status === "pending"
+          ? "#f59e0b"
+          : "#dc2626";
 
   const size = selected ? 44 : 36;
   const html = `
     <div style="
       width:${size}px;height:${size}px;
       background:${color};
-      border:3px solid ${selected ? "#0f172a" : "white"};
+      border:3px solid ${selected ? "#ea580c" : "white"};
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
       font-size:${selected ? 20 : 16}px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.25);
+      box-shadow:0 2px 10px rgba(234,88,12,0.35);
       transform:translate(-50%,-50%);
     ">${incident.category.emoji}</div>`;
 
@@ -73,12 +88,14 @@ function createIcon(incident: Incident, selected: boolean) {
 export function MapView({
   incidents,
   center,
+  zoom = DEFAULT_MAP_ZOOM,
   selectedId,
   onSelect,
   onMove,
 }: {
   incidents: Incident[];
   center: { lat: number; lng: number };
+  zoom?: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onMove: (lat: number, lng: number) => void;
@@ -86,15 +103,17 @@ export function MapView({
   return (
     <MapContainer
       center={[center.lat, center.lng]}
-      zoom={14}
+      zoom={zoom}
       className="h-full w-full"
-      zoomControl={false}
+      zoomControl={true}
+      worldCopyJump={true}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maxZoom={19}
       />
-      <MapMover center={center} />
+      <MapMover center={center} zoom={zoom} />
       <MapEvents onMove={onMove} />
 
       {incidents.map((inc) => (
@@ -109,7 +128,7 @@ export function MapView({
               <strong>
                 {inc.category.emoji} {inc.category.name}
               </strong>
-              <p className="mt-1 capitalize text-slate-500">
+              <p className="mt-1 capitalize text-stone-500">
                 {inc.status} · {Math.round(inc.confidenceScore * 100)}% confidence
               </p>
             </div>

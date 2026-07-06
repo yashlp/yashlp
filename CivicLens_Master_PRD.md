@@ -1,6 +1,6 @@
-# PlacePulse — Master Product Requirements Document
+# CivicLens — Master Product Requirements Document
 
-> **Internal product definition:** PlacePulse is a **community intelligence platform**, not a civic reporting app. Every design decision should help people *understand places*—not merely file complaints.
+> **Internal product definition:** CivicLens is a **community intelligence platform**, not a civic reporting app. Every design decision should help people *understand places*—not merely file complaints.
 
 **Document version:** 1.0 (Part 1 of 10)  
 **Last updated:** July 6, 2026  
@@ -43,17 +43,17 @@ Developers should be able to trace any user action from tap → API → database
 
 ## 1.1 Overview
 
-**PlacePulse** is an AI-powered community intelligence platform that transforms how people understand, monitor, and improve the places around them. Rather than functioning as a traditional complaint portal, PlacePulse creates a **living digital profile** for every street, neighborhood, city, state, and country—built from community-verified observations, AI-assisted analysis, historical records, and real-time updates.
+**CivicLens** is an AI-powered community intelligence platform that transforms how people understand, monitor, and improve the places around them. Rather than functioning as a traditional complaint portal, CivicLens creates a **living digital profile** for every street, neighborhood, city, state, and country—built from community-verified observations, AI-assisted analysis, historical records, and real-time updates.
 
 Citizens contribute both **negative civic issues** and **positive community signals**. Information earns trust through independent community verification before it influences public scores, rankings, or high-confidence map displays. Every location becomes a continuously evolving source of intelligence, helping residents, travelers, businesses, researchers, and governments make better decisions.
 
 ### Product tagline
 
-> **Every place has a pulse. PlacePulse helps the community measure it.**
+> **Every place has a story. CivicLens helps the community tell it.**
 
 ### One-sentence pitch
 
-PlacePulse is the world's most trusted community intelligence layer for places—combining verified local knowledge, AI insights, and historical place data so anyone can understand, compare, and improve where they live, work, and travel.
+CivicLens is the world's most trusted community intelligence layer for places—combining verified local knowledge, AI insights, and historical place data so anyone can understand, compare, and improve where they live, work, and travel.
 
 ---
 
@@ -82,9 +82,9 @@ To empower communities by transforming everyday local observations into trusted,
 | **Government blind spots** | Agencies receive duplicate tickets, unverifiable photos, and no community confidence signal |
 | **Positive change is invisible** | Cleanups, repairs, and community wins rarely get recorded alongside problems |
 
-### What PlacePulse solves
+### What CivicLens solves
 
-PlacePulse unifies place intelligence into one verified, historical, AI-enriched layer. One incident = one map pin. Community confirmation replaces noisy duplicate reports. Resolution is a first-class workflow with evidence and dispute handling. The **Community Health Score** turns raw observations into comparable, zoom-aware metrics at street, area, city, state, and country levels.
+CivicLens unifies place intelligence into one verified, historical, AI-enriched layer. One incident = one map pin. Community confirmation replaces noisy duplicate reports. Resolution is a first-class workflow with evidence and dispute handling. The **Community Health Score** turns raw observations into comparable, zoom-aware metrics at street, area, city, state, and country levels.
 
 ---
 
@@ -137,9 +137,9 @@ PlacePulse unifies place intelligence into one verified, historical, AI-enriched
 
 ---
 
-## 1.7 Why PlacePulse Is Different
+## 1.7 Why CivicLens Is Different
 
-| Dimension | Traditional civic apps | PlacePulse |
+| Dimension | Traditional civic apps | CivicLens |
 |-----------|------------------------|------------|
 | **Mental model** | Complaint inbox | Community intelligence platform |
 | **Map representation** | Many pins per same issue | **One pin per incident** with unlimited confirmations |
@@ -163,7 +163,7 @@ PlacePulse unifies place intelligence into one verified, historical, AI-enriched
 
 ## 1.8 Product Philosophy
 
-PlacePulse is built on five principles that govern every feature decision:
+CivicLens is built on five principles that govern every feature decision:
 
 ### 1. Communities know their neighborhoods best
 
@@ -215,8 +215,8 @@ Use these names consistently in code, APIs, and documentation:
 
 | Concept | Canonical name | Notes |
 |---------|----------------|-------|
-| Product | **PlacePulse** | User-facing brand |
-| Master spec | `PlacePulse_Master_PRD.md` | This document |
+| Product | **CivicLens** | User-facing brand |
+| Master spec | `CivicLens_Master_PRD.md` | This document |
 | Primary map object | **Incident** | One pin per real-world issue or positive signal cluster |
 | Verification unit | **Confirmation** | Independent user attestation with optional photo/comment |
 | Place metric | **Community Health Score** | Abbreviated **CHS** in internal docs |
@@ -227,7 +227,7 @@ Use these names consistently in code, APIs, and documentation:
 
 ### Former working name
 
-This product was previously conceptualized as **CivicLens**. All references in legacy notes should be migrated to **PlacePulse**. The repositioning from "civic reporting app" to "community intelligence platform" is intentional and should not be reversed in copy or architecture naming (e.g., prefer `incident` and `place_intelligence` over `complaint` in schema design).
+CivicLens is the canonical product name for this community intelligence platform. The repositioning from "civic reporting app" to "community intelligence platform" is intentional and should not be reversed in copy or architecture naming (e.g., prefer `incident` and `place_intelligence` over `complaint` in schema design).
 
 ---
 

@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 
-const SESSION_COOKIE = "placepulse_session";
+const SESSION_COOKIE = "civiclens_session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 export type SessionUser = {

@@ -8,6 +8,18 @@ export async function GET(req: Request) {
   const categories = await prisma.category.findMany({
     where: type ? { type } : undefined,
     orderBy: { sortOrder: "asc" },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      emoji: true,
+      type: true,
+      group: true,
+      photoRequired: true,
+      photoRule: true,
+      description: true,
+      sortOrder: true,
+    },
   });
 
   return NextResponse.json({ categories });

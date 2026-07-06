@@ -39,7 +39,7 @@ export default function AskAIPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 pb-24">
       <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-indigo-600 text-white">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-indigo-600 text-white">
           <Bot className="h-6 w-6" />
         </div>
         <div>
@@ -55,7 +55,7 @@ export default function AskAIPage() {
           <button
             key={s}
             onClick={() => ask(s)}
-            className="rounded-full border border-border bg-white px-3 py-1.5 text-xs hover:border-teal-300 hover:bg-teal-50"
+            className="rounded-full border border-border bg-white px-3 py-1.5 text-xs hover:border-orange-300 hover:bg-orange-50"
           >
             {s}
           </button>
@@ -68,12 +68,12 @@ export default function AskAIPage() {
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && question && ask(question)}
           placeholder="Ask anything about this area..."
-          className="flex-1 rounded-xl border border-border px-4 py-3 text-sm outline-none focus:border-teal-500"
+          className="flex-1 rounded-xl border border-border px-4 py-3 text-sm outline-none focus:border-orange-500"
         />
         <button
           onClick={() => question && ask(question)}
           disabled={loading || !question}
-          className="flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-3 text-white hover:bg-teal-700 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-white hover:bg-orange-700 disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
         </button>
@@ -81,9 +81,9 @@ export default function AskAIPage() {
 
       {(answer || loading) && (
         <div className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-medium text-teal-600">
+          <div className="flex items-center gap-2 text-sm font-medium text-orange-600">
             <Sparkles className="h-4 w-4" />
-            PlacePulse AI
+            CivicLens AI
           </div>
           {loading ? (
             <p className="mt-3 text-sm text-muted animate-pulse">Analyzing community data...</p>

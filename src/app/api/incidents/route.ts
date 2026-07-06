@@ -3,18 +3,22 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { mockAIVerify } from "@/lib/ai";
+import { isPhotoRequired } from "@/lib/categories";
 import {
   addTimelineEvent,
   findNearbyDuplicate,
   incidentInclude,
   recalculateIncident,
 } from "@/lib/incident-service";
-import { INCIDENT_STATUSES, VISIBILITY } from "@/lib/constants";
+import { INCIDENT_STATUSES, MAX_PHOTOS_PER_REPORT, VISIBILITY } from "@/lib/constants";
 
 export async function GET() {
   const incidents = await prisma.incident.findMany({
     where: {
-      OR: [{ visibility: "public" }, { status: INCIDENT_STATUSES.PENDING }],
+      OR: [
+        { visibility: "public" },
+        { status: INCIDENT_STATUSES.PENDING },
+      ],
     },
     include: { category: true },
     orderBy: { createdAt: "desc" },
@@ -29,9 +33,17 @@ const createSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
   address: z.string().optional(),
-  photoUrl: z.string().optional(),
+  photoUrls: z.array(z.string()).max(MAX_PHOTOS_PER_REPORT).optional(),
   attachToExisting: z.string().optional(),
 });
+
+async function savePhotos(incidentId: string, userId: string, urls: string[]) {
+  for (const url of urls.slice(0, MAX_PHOTOS_PER_REPORT)) {
+    await prisma.incidentPhoto.create({
+      data: { incidentId, url, uploadedBy: userId },
+    });
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -42,20 +54,26 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const data = createSchema.parse(body);
+    const photoUrls = data.photoUrls ?? [];
 
     const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
     if (!category) {
       return NextResponse.json({ error: "Invalid category" }, { status: 400 });
     }
 
+    const photoRule = category.photoRule as "required" | "optional" | "allowed";
+    if (isPhotoRequired(photoRule) && photoUrls.length === 0) {
+      return NextResponse.json(
+        { error: "Photo evidence is required for this category" },
+        { status: 400 }
+      );
+    }
+
+    const isPositive = category.type === "positive";
+
     const duplicate = data.attachToExisting
       ? await prisma.incident.findUnique({ where: { id: data.attachToExisting } })
-      : await findNearbyDuplicate(
-          data.latitude,
-          data.longitude,
-          data.categoryId,
-          category.type === "positive"
-        );
+      : await findNearbyDuplicate(data.latitude, data.longitude, data.categoryId, isPositive);
 
     if (duplicate && !data.attachToExisting) {
       return NextResponse.json({
@@ -75,21 +93,13 @@ export async function POST(req: Request) {
           comment: data.description,
         },
       });
-      if (data.photoUrl) {
-        await prisma.incidentPhoto.create({
-          data: {
-            incidentId: duplicate.id,
-            url: data.photoUrl,
-            uploadedBy: user.id,
-          },
-        });
-      }
+      if (photoUrls.length > 0) await savePhotos(duplicate.id, user.id, photoUrls);
       await addTimelineEvent(duplicate.id, "confirmation_added", user.id);
       const updated = await recalculateIncident(duplicate.id);
       return NextResponse.json({ incident: updated, merged: true });
     }
 
-    const ai = mockAIVerify(category.slug, data.photoUrl);
+    const ai = mockAIVerify(category.slug, photoUrls.length > 0);
 
     const incident = await prisma.incident.create({
       data: {
@@ -100,7 +110,7 @@ export async function POST(req: Request) {
         latitude: data.latitude,
         longitude: data.longitude,
         address: data.address,
-        isPositive: category.type === "positive",
+        isPositive,
         status: INCIDENT_STATUSES.PENDING,
         visibility: VISIBILITY.HIDDEN,
         aiCategoryMatch: ai.aiCategoryMatch,
@@ -110,11 +120,7 @@ export async function POST(req: Request) {
       },
     });
 
-    if (data.photoUrl) {
-      await prisma.incidentPhoto.create({
-        data: { incidentId: incident.id, url: data.photoUrl, uploadedBy: user.id },
-      });
-    }
+    if (photoUrls.length > 0) await savePhotos(incident.id, user.id, photoUrls);
 
     await addTimelineEvent(incident.id, "created", user.id, { category: category.slug });
 

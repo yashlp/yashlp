@@ -40,6 +40,15 @@ export function scoreBg(score: number): string {
   return "bg-rose-500";
 }
 
+export function statusLabel(status: string, isPositive?: boolean): string {
+  if (status === "positive_active" || (isPositive && status === "active"))
+    return "🔵 Positive Active";
+  if (status === "resolved") return "🟢 Resolved";
+  if (status === "disputed") return "🟡 Disputed";
+  if (status === "active") return "🔴 Active";
+  return "⏳ Pending";
+}
+
 export function confidenceLabel(score: number): string {
   if (score >= 0.8) return "High confidence";
   if (score >= 0.5) return "Moderate confidence";

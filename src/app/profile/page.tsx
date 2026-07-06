@@ -39,13 +39,13 @@ export default function ProfilePage() {
     <div className="mx-auto max-w-lg px-4 py-8 pb-24">
       <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 text-2xl font-bold text-white">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-cyan-600 text-2xl font-bold text-white">
             {user.name.charAt(0)}
           </div>
           <div>
             <h1 className="text-xl font-bold">{user.name}</h1>
             <p className="text-sm text-muted">{user.email}</p>
-            <span className="mt-1 inline-block rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-medium text-teal-700">
+            <span className="mt-1 inline-block rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-700">
               {tier}
             </span>
           </div>
@@ -56,7 +56,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-2 text-xs font-medium uppercase text-muted">
               <Award className="h-3.5 w-3.5" /> Reputation
             </div>
-            <p className="mt-1 text-3xl font-bold text-teal-600">{user.reputation}</p>
+            <p className="mt-1 text-3xl font-bold text-orange-600">{user.reputation}</p>
           </div>
           <div className="rounded-xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-xs font-medium uppercase text-muted">

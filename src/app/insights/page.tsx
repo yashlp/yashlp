@@ -35,7 +35,7 @@ export default function InsightsPage() {
 
       <section className="mt-8">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <BarChart3 className="h-5 w-5 text-teal-600" />
+          <BarChart3 className="h-5 w-5 text-orange-600" />
           30-Day Trends
         </h2>
         <div className="mt-4 rounded-2xl border border-border bg-white p-6">

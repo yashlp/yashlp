@@ -1,40 +1,42 @@
-# PlacePulse
+# CivicLens
 
-**PlacePulse** is a community intelligence platform that helps people understand, monitor, and improve the places around them.
+**CivicLens** is a global community intelligence platform that helps people understand, monitor, and improve the places around them.
 
-> Every place has a pulse. PlacePulse helps the community measure it.
+> Every place has a story. CivicLens helps the community tell it.
 
-## Features (MVP)
+## Features
 
-- **Live map** with incident pins (issues, positive signals, resolved)
-- **Report flow** with GPS, 39 issue categories + 39 positive signals, duplicate detection
+- **Worldwide map** — free OpenStreetMap tiles + global place search (Nominatim)
+- **Terms gate** — users must accept Terms & Conditions before using the app
+- **Live incident map** with issues, positive signals, and resolved pins
+- **Report flow** — 39 issue categories + 39 positive signals, duplicate detection
 - **Community verification** — confirmations, comments, confidence scoring
 - **Resolution workflow** — submit, verify, or dispute fixes
-- **Community Health Score** — zoom-aware area scoring
+- **Community Health Score** — area scoring with confidence indicators
 - **Ask AI** — natural-language questions about any place
-- **Insights** — 30-day trends and area rankings
+- **Insights** — trends and area rankings
 - **Compare Places** — side-by-side health score comparison
-- **User auth & reputation** — sign up, profile, reliability scoring
 
 ## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Set up database and seed demo data
 npm run db:setup
-
-# Start development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) — accept Terms & Conditions on first visit.
 
 ### Demo account
 
-- **Email:** demo@placepulse.app
+- **Email:** demo@civiclens.app
 - **Password:** demo1234
+
+## Design
+
+- **Theme:** Orange & white — modern, friendly, accessible
+- **Map:** [OpenStreetMap](https://www.openstreetmap.org/) (free, worldwide, no API key)
+- **Geocoding:** [Nominatim](https://nominatim.org/) (free, worldwide search)
 
 ## Tech Stack
 
@@ -42,31 +44,13 @@ Open [http://localhost:3000](http://localhost:3000)
 |-------|------------|
 | Frontend | Next.js 15, React 19, Tailwind CSS 4 |
 | Map | Leaflet + OpenStreetMap |
+| Geocoding | Nominatim (via `/api/geocode`) |
 | Backend | Next.js API Routes |
 | Database | SQLite + Prisma ORM |
-| Auth | Cookie sessions + bcrypt |
-
-## Project Structure
-
-```
-src/
-├── app/                  # Pages and API routes
-│   ├── api/              # REST endpoints
-│   ├── report/           # Report flow
-│   ├── insights/         # Trends & rankings
-│   ├── compare/          # Place comparison
-│   └── ask/              # Ask AI
-├── components/           # UI components
-└── lib/                  # Business logic
-    ├── incident-service.ts
-    ├── health-score.ts
-    ├── ai.ts
-    └── categories.ts
-```
 
 ## Documentation
 
-The master product specification lives in [`PlacePulse_Master_PRD.md`](./PlacePulse_Master_PRD.md).
+Master product spec: [`CivicLens_Master_PRD.md`](./CivicLens_Master_PRD.md)
 
 ## Scripts
 
@@ -74,5 +58,4 @@ The master product specification lives in [`PlacePulse_Master_PRD.md`](./PlacePu
 |---------|-------------|
 | `npm run dev` | Start dev server |
 | `npm run build` | Production build |
-| `npm run db:setup` | Push schema + seed data |
-| `npm run db:seed` | Re-seed demo data |
+| `npm run db:setup` | Push schema + seed global demo data |

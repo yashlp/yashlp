@@ -33,7 +33,9 @@ model Category {
   name          String
   emoji         String
   type          String
+  group         String   @default("")
   photoRequired Boolean  @default(false)
+  photoRule     String   @default("optional")
   description   String
   sortOrder     Int      @default(0)
 

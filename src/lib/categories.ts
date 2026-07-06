@@ -1,118 +1,264 @@
+export type PhotoRule = "required" | "optional" | "allowed";
+
 export type CategoryDefinition = {
   slug: string;
   name: string;
   emoji: string;
   type: "issue" | "positive";
-  photoRequired: boolean;
+  group: string;
+  photoRule: PhotoRule;
   description: string;
-  pairedSlug?: string;
 };
 
-const ISSUE_CATEGORIES: Omit<CategoryDefinition, "type">[] = [
-  { slug: "pothole", name: "Pothole", emoji: "🕳️", photoRequired: true, description: "Road surface hole or depression", pairedSlug: "pothole-repaired" },
-  { slug: "road-damage", name: "Road Damage", emoji: "🛣️", photoRequired: true, description: "Cracks, uneven pavement, or surface deterioration", pairedSlug: "road-resurfaced" },
-  { slug: "broken-sidewalk", name: "Broken Sidewalk", emoji: "🚶", photoRequired: true, description: "Cracked, lifted, or hazardous walkway", pairedSlug: "sidewalk-repaired" },
-  { slug: "streetlight-out", name: "Streetlight Out", emoji: "💡", photoRequired: false, description: "Non-functioning street lighting", pairedSlug: "streetlight-fixed" },
-  { slug: "traffic-signal", name: "Traffic Signal Issue", emoji: "🚦", photoRequired: true, description: "Broken or malfunctioning traffic signal", pairedSlug: "signal-working" },
-  { slug: "street-flooding", name: "Street Flooding", emoji: "🌊", photoRequired: true, description: "Standing water blocking road or sidewalk", pairedSlug: "drainage-cleared" },
-  { slug: "damaged-signage", name: "Damaged Signage", emoji: "🪧", photoRequired: true, description: "Missing, fallen, or unreadable signs", pairedSlug: "signage-restored" },
-  { slug: "illegal-parking", name: "Illegal Parking", emoji: "🚗", photoRequired: true, description: "Vehicle blocking access or violating rules", pairedSlug: "parking-improved" },
-  { slug: "abandoned-vehicle", name: "Abandoned Vehicle", emoji: "🚙", photoRequired: true, description: "Long-term unattended vehicle", pairedSlug: "vehicle-removed" },
-  { slug: "graffiti", name: "Graffiti", emoji: "🎨", photoRequired: true, description: "Unauthorized markings on public property", pairedSlug: "graffiti-removed" },
-  { slug: "illegal-dumping", name: "Illegal Dumping", emoji: "🗑️", photoRequired: true, description: "Unauthorized waste disposal", pairedSlug: "cleanup-completed" },
-  { slug: "overflowing-trash", name: "Overflowing Trash", emoji: "🗃️", photoRequired: true, description: "Full or overflowing public bins", pairedSlug: "clean-street" },
-  { slug: "missed-pickup", name: "Missed Garbage Pickup", emoji: "♻️", photoRequired: false, description: "Scheduled collection did not occur", pairedSlug: "garbage-collected" },
-  { slug: "pest-infestation", name: "Pest Infestation", emoji: "🐀", photoRequired: true, description: "Rodents or pests in public areas", pairedSlug: "pest-resolved" },
-  { slug: "water-leak", name: "Water Leak", emoji: "💧", photoRequired: true, description: "Leaking pipe, hydrant, or water main", pairedSlug: "water-leak-fixed" },
-  { slug: "sewage-issue", name: "Sewage Issue", emoji: "🚽", photoRequired: true, description: "Sewage overflow or smell", pairedSlug: "sewage-repaired" },
-  { slug: "power-outage", name: "Power Outage", emoji: "⚡", photoRequired: false, description: "Localized electrical outage", pairedSlug: "power-restored" },
-  { slug: "utility-pole", name: "Damaged Utility Pole", emoji: "🏗️", photoRequired: true, description: "Leaning, broken, or hazardous pole", pairedSlug: "pole-repaired" },
-  { slug: "broken-bench", name: "Broken Bench", emoji: "🪑", photoRequired: true, description: "Damaged public seating", pairedSlug: "bench-restored" },
-  { slug: "playground-damage", name: "Damaged Playground", emoji: "🛝", photoRequired: true, description: "Broken or unsafe play equipment", pairedSlug: "playground-upgraded" },
-  { slug: "park-maintenance", name: "Park Maintenance", emoji: "🌳", photoRequired: true, description: "Overgrown or poorly maintained park area", pairedSlug: "park-beautified" },
-  { slug: "tree-hazard", name: "Tree Hazard", emoji: "🌲", photoRequired: true, description: "Fallen branch or dangerous tree", pairedSlug: "tree-maintained" },
-  { slug: "noise-pollution", name: "Noise Pollution", emoji: "🔊", photoRequired: false, description: "Excessive or disruptive noise", pairedSlug: "quiet-neighborhood" },
-  { slug: "air-quality", name: "Air Quality Concern", emoji: "😷", photoRequired: false, description: "Smoke, dust, or pollution affecting air", pairedSlug: "fresh-air-area" },
-  { slug: "unsafe-crosswalk", name: "Unsafe Crosswalk", emoji: "🚸", photoRequired: true, description: "Faded markings or dangerous crossing", pairedSlug: "safe-crosswalk" },
-  { slug: "bike-lane-blocked", name: "Bike Lane Obstruction", emoji: "🚲", photoRequired: true, description: "Blocked or unusable bike lane", pairedSlug: "clear-bike-lane" },
-  { slug: "restroom-issue", name: "Public Restroom Issue", emoji: "🚻", photoRequired: true, description: "Unsanitary or broken public restroom", pairedSlug: "clean-restroom" },
-  { slug: "vandalism", name: "Vandalism", emoji: "🔨", photoRequired: true, description: "Intentional damage to public property", pairedSlug: "vandalism-repaired" },
-  { slug: "community-support", name: "Community Support Need", emoji: "🤝", photoRequired: false, description: "Area needing community assistance", pairedSlug: "community-supported" },
-  { slug: "wildlife-hazard", name: "Wildlife Hazard", emoji: "🦝", photoRequired: true, description: "Dangerous wildlife in public space", pairedSlug: "wildlife-protected" },
-  { slug: "construction-hazard", name: "Construction Hazard", emoji: "🚧", photoRequired: true, description: "Unsafe construction zone", pairedSlug: "safe-construction" },
-  { slug: "snow-ice-hazard", name: "Snow/Ice Hazard", emoji: "❄️", photoRequired: true, description: "Uncleared ice or snow on walkway", pairedSlug: "clear-walkways" },
-  { slug: "fire-hazard", name: "Fire Hazard", emoji: "🔥", photoRequired: true, description: "Condition posing fire risk", pairedSlug: "fire-risk-reduced" },
-  { slug: "accessibility-barrier", name: "Accessibility Barrier", emoji: "♿", photoRequired: true, description: "Barrier for wheelchair or mobility access", pairedSlug: "accessibility-improved" },
-  { slug: "public-safety", name: "Public Safety Concern", emoji: "🛡️", photoRequired: false, description: "General safety issue in public space", pairedSlug: "safer-neighborhood" },
-  { slug: "bus-stop-issue", name: "Bus Stop Issue", emoji: "🚌", photoRequired: true, description: "Damaged or inadequate bus shelter", pairedSlug: "bus-stop-improved" },
-  { slug: "road-debris", name: "Road Debris", emoji: "🪨", photoRequired: true, description: "Debris blocking roadway", pairedSlug: "road-cleared" },
-  { slug: "drainage-blocked", name: "Drainage Blockage", emoji: "🕳️", photoRequired: true, description: "Blocked storm drain or gutter", pairedSlug: "drainage-working" },
-  { slug: "other-infrastructure", name: "Other Infrastructure", emoji: "🏙️", photoRequired: false, description: "Other civic infrastructure issue", pairedSlug: "infrastructure-improved" },
+export const MAX_PHOTOS_PER_REPORT = 2;
+
+/** 39 civic issue categories — exact CivicLens taxonomy */
+export const ISSUE_CATEGORIES: CategoryDefinition[] = [
+  // Roads & Transportation (5)
+  { slug: "potholes-bad-roads", name: "Potholes & Bad Roads", emoji: "🕳️", type: "issue", group: "Roads & Transportation", photoRule: "required", description: "Damaged road surface, potholes, or poor road condition" },
+  { slug: "illegal-parking", name: "Illegal Parking", emoji: "🚗", type: "issue", group: "Roads & Transportation", photoRule: "required", description: "Vehicle parked illegally or blocking access" },
+  { slug: "damaged-traffic-signals", name: "Damaged Traffic Signals", emoji: "🚦", type: "issue", group: "Roads & Transportation", photoRule: "required", description: "Broken or malfunctioning traffic signals" },
+  { slug: "no-street-lights", name: "No Street Lights", emoji: "💡", type: "issue", group: "Roads & Transportation", photoRule: "required", description: "Missing or non-functioning street lighting" },
+  { slug: "missing-speed-breakers", name: "Missing Speed Breakers", emoji: "🚧", type: "issue", group: "Roads & Transportation", photoRule: "optional", description: "Area needs speed breakers or traffic calming" },
+
+  // Water & Sanitation (5)
+  { slug: "water-logging-flooding", name: "Water Logging / Flooding", emoji: "💧", type: "issue", group: "Water & Sanitation", photoRule: "required", description: "Standing water or flooding on roads or public areas" },
+  { slug: "open-sewage", name: "Open Sewage", emoji: "🚫", type: "issue", group: "Water & Sanitation", photoRule: "required", description: "Open sewage or wastewater in public areas" },
+  { slug: "water-scarcity", name: "Water Scarcity", emoji: "🏜️", type: "issue", group: "Water & Sanitation", photoRule: "allowed", description: "Lack of water supply in the area" },
+  { slug: "contaminated-water", name: "Contaminated Water", emoji: "☠️", type: "issue", group: "Water & Sanitation", photoRule: "required", description: "Unsafe or contaminated water supply" },
+  { slug: "broken-drainage", name: "Broken Drainage", emoji: "🌊", type: "issue", group: "Water & Sanitation", photoRule: "required", description: "Blocked or broken drainage system" },
+
+  // Electricity & Power (4)
+  { slug: "power-outages", name: "Power Outages", emoji: "⚡", type: "issue", group: "Electricity & Power", photoRule: "optional", description: "Frequent or prolonged electricity outages" },
+  { slug: "unsafe-wiring", name: "Unsafe Wiring", emoji: "⚠️", type: "issue", group: "Electricity & Power", photoRule: "required", description: "Exposed or dangerous electrical wiring" },
+  { slug: "high-electricity-bills", name: "High Electricity Bills", emoji: "💰", type: "issue", group: "Electricity & Power", photoRule: "allowed", description: "Service complaint about excessive electricity charges" },
+  { slug: "broken-street-lights-power", name: "Broken Street Lights (Power)", emoji: "💡", type: "issue", group: "Electricity & Power", photoRule: "optional", description: "Street lights not working due to power issues" },
+
+  // Garbage & Waste (3)
+  { slug: "garbage-pile-up", name: "Garbage Pile Up", emoji: "🗑️", type: "issue", group: "Garbage & Waste", photoRule: "required", description: "Accumulated garbage not being collected" },
+  { slug: "illegal-dumping", name: "Illegal Dumping", emoji: "☠️", type: "issue", group: "Garbage & Waste", photoRule: "required", description: "Unauthorized waste dumping in public areas" },
+  { slug: "plastic-litter", name: "Plastic Litter", emoji: "🥤", type: "issue", group: "Garbage & Waste", photoRule: "optional", description: "Plastic waste littering streets or public spaces" },
+
+  // Corruption & Governance (3)
+  { slug: "corruption-bribery", name: "Corruption / Bribery", emoji: "🐵", type: "issue", group: "Corruption & Governance", photoRule: "allowed", description: "Report corruption or bribery (text + location, no photo required)" },
+  { slug: "encroachments", name: "Encroachments", emoji: "🚫", type: "issue", group: "Corruption & Governance", photoRule: "allowed", description: "Illegal occupation of public land or sidewalks" },
+  { slug: "non-functional-public-services", name: "Non-Functional Public Services", emoji: "❌", type: "issue", group: "Corruption & Governance", photoRule: "optional", description: "Government or public services not functioning" },
+
+  // Health & Sanitation (4)
+  { slug: "unhygienic-restaurant", name: "Unhygienic Food / Restaurant", emoji: "🍽️", type: "issue", group: "Health & Sanitation", photoRule: "required", description: "Unsanitary conditions at a restaurant or food establishment" },
+  { slug: "unhygienic-street-vendor", name: "Unhygienic Street Vendor", emoji: "🍢", type: "issue", group: "Health & Sanitation", photoRule: "required", description: "Unsanitary street food vendor conditions" },
+  { slug: "hospital-facility-issues", name: "Hospital Facility Issues", emoji: "🏥", type: "issue", group: "Health & Sanitation", photoRule: "required", description: "Poor conditions at hospitals or clinics" },
+  { slug: "pest-infestation", name: "Pest Infestation", emoji: "🐀", type: "issue", group: "Health & Sanitation", photoRule: "required", description: "Rodents, insects, or pest problems in public areas" },
+
+  // Pollution & Environment (3)
+  { slug: "air-pollution-smog", name: "Air Pollution / Smog", emoji: "💨", type: "issue", group: "Pollution & Environment", photoRule: "optional", description: "Poor air quality or visible smog" },
+  { slug: "industrial-pollution", name: "Industrial Pollution", emoji: "🏭", type: "issue", group: "Pollution & Environment", photoRule: "optional", description: "Pollution from industrial sources" },
+  { slug: "environmental-damage", name: "Environmental Damage", emoji: "🌳", type: "issue", group: "Pollution & Environment", photoRule: "optional", description: "Deforestation, land damage, or environmental harm" },
+
+  // Women's Safety (2)
+  { slug: "unsafe-unlit-areas", name: "Unsafe / Unlit Areas", emoji: "🌙", type: "issue", group: "Women's Safety", photoRule: "optional", description: "Poorly lit or unsafe areas especially at night" },
+  { slug: "harassment-points", name: "Harassment Points", emoji: "⚠️", type: "issue", group: "Women's Safety", photoRule: "optional", description: "Locations known for harassment or safety concerns" },
+
+  // Animal Welfare (2)
+  { slug: "stray-dog-packs", name: "Stray Dog Packs", emoji: "🐕", type: "issue", group: "Animal Welfare", photoRule: "required", description: "Aggressive or dangerous stray dog packs" },
+  { slug: "animal-cruelty", name: "Animal Cruelty", emoji: "🚫", type: "issue", group: "Animal Welfare", photoRule: "required", description: "Animal abuse or cruelty in public" },
+
+  // Building & Infrastructure (2)
+  { slug: "unsafe-buildings", name: "Unsafe Buildings", emoji: "🏢", type: "issue", group: "Building & Infrastructure", photoRule: "required", description: "Structurally unsafe or dilapidated buildings" },
+  { slug: "fire-safety-issues", name: "Fire Safety Issues", emoji: "🔥", type: "issue", group: "Building & Infrastructure", photoRule: "required", description: "Fire hazards or missing safety measures" },
+
+  // Digital Infrastructure (1)
+  { slug: "poor-internet-network", name: "Poor Internet / Network Issues", emoji: "📡", type: "issue", group: "Digital Infrastructure", photoRule: "allowed", description: "Poor mobile or internet connectivity in the area" },
+
+  // Transportation Services (2)
+  { slug: "bad-bus-auto-service", name: "Bad Bus / Auto Service", emoji: "🚌", type: "issue", group: "Transportation Services", photoRule: "optional", description: "Poor public transport or auto-rickshaw service" },
+  { slug: "overcharging-auto-taxi", name: "Overcharging by Auto / Taxi", emoji: "💰", type: "issue", group: "Transportation Services", photoRule: "allowed", description: "Drivers overcharging passengers" },
+
+  // Education (1)
+  { slug: "poor-school-infrastructure", name: "Poor School Infrastructure", emoji: "🏫", type: "issue", group: "Education", photoRule: "optional", description: "Dilapidated or inadequate school facilities" },
+
+  // Social Issues (2)
+  { slug: "child-labor-exploitation", name: "Child Labor / Exploitation", emoji: "🚫", type: "issue", group: "Social Issues", photoRule: "optional", description: "Child labor or exploitation observed in the area" },
+  { slug: "substance-abuse-hotspots", name: "Substance Abuse Hotspots", emoji: "⚠️", type: "issue", group: "Social Issues", photoRule: "optional", description: "Areas with visible substance abuse activity" },
 ];
 
-const POSITIVE_NAMES: Record<string, { name: string; emoji: string; description: string }> = {
-  "pothole-repaired": { name: "Pothole Repaired", emoji: "✅", description: "Road surface hole has been fixed" },
-  "road-resurfaced": { name: "Road Resurfaced", emoji: "🛤️", description: "Road surface recently improved" },
-  "sidewalk-repaired": { name: "Sidewalk Repaired", emoji: "🦶", description: "Walkway restored to safe condition" },
-  "streetlight-fixed": { name: "Streetlight Fixed", emoji: "🌟", description: "Street lighting restored" },
-  "signal-working": { name: "Signal Working", emoji: "✨", description: "Traffic signal functioning properly" },
-  "drainage-cleared": { name: "Drainage Cleared", emoji: "💦", description: "Flooding or standing water resolved" },
-  "signage-restored": { name: "Signage Restored", emoji: "📋", description: "Public signs repaired or replaced" },
-  "parking-improved": { name: "Parking Improved", emoji: "🅿️", description: "Parking situation improved" },
-  "vehicle-removed": { name: "Vehicle Removed", emoji: "✔️", description: "Abandoned vehicle cleared" },
-  "graffiti-removed": { name: "Graffiti Removed", emoji: "🧽", description: "Unauthorized markings cleaned" },
-  "cleanup-completed": { name: "Cleanup Completed", emoji: "🧹", description: "Illegal dumping cleaned up" },
-  "clean-street": { name: "Clean Street", emoji: "✨", description: "Street is clean and well-maintained" },
-  "garbage-collected": { name: "Garbage Collected", emoji: "🗑️", description: "Waste collection completed" },
-  "pest-resolved": { name: "Pest Issue Resolved", emoji: "🐾", description: "Pest problem addressed" },
-  "water-leak-fixed": { name: "Water Leak Fixed", emoji: "🔧", description: "Water leak repaired" },
-  "sewage-repaired": { name: "Sewage Repaired", emoji: "🛠️", description: "Sewage issue resolved" },
-  "power-restored": { name: "Power Restored", emoji: "💡", description: "Electrical service restored" },
-  "pole-repaired": { name: "Pole Repaired", emoji: "🏗️", description: "Utility pole fixed" },
-  "bench-restored": { name: "Bench Restored", emoji: "🪑", description: "Public seating repaired" },
-  "playground-upgraded": { name: "Playground Upgraded", emoji: "🎠", description: "Play area improved or repaired" },
-  "park-beautified": { name: "Park Beautified", emoji: "🌸", description: "Park well maintained or improved" },
-  "tree-maintained": { name: "Tree Maintained", emoji: "🌿", description: "Trees safely trimmed or maintained" },
-  "quiet-neighborhood": { name: "Quiet Neighborhood", emoji: "🤫", description: "Area noted for peaceful conditions" },
-  "fresh-air-area": { name: "Fresh Air Area", emoji: "🌬️", description: "Good air quality reported" },
-  "safe-crosswalk": { name: "Safe Crosswalk", emoji: "🚶", description: "Crosswalk in good condition" },
-  "clear-bike-lane": { name: "Clear Bike Lane", emoji: "🚴", description: "Bike lane open and usable" },
-  "clean-restroom": { name: "Clean Restroom", emoji: "🚻", description: "Public restroom in good condition" },
-  "vandalism-repaired": { name: "Vandalism Repaired", emoji: "🔨", description: "Vandalism damage fixed" },
-  "community-supported": { name: "Community Supported", emoji: "❤️", description: "Community support provided" },
-  "wildlife-protected": { name: "Wildlife Protected", emoji: "🦋", description: "Wildlife safely managed" },
-  "safe-construction": { name: "Safe Construction Zone", emoji: "👷", description: "Construction area properly managed" },
-  "clear-walkways": { name: "Clear Walkways", emoji: "☀️", description: "Walkways cleared of snow/ice" },
-  "fire-risk-reduced": { name: "Fire Risk Reduced", emoji: "🧯", description: "Fire hazard addressed" },
-  "accessibility-improved": { name: "Accessibility Improved", emoji: "♿", description: "Improved mobility access" },
-  "safer-neighborhood": { name: "Safer Neighborhood", emoji: "🏡", description: "Area feels safer to community" },
-  "bus-stop-improved": { name: "Bus Stop Improved", emoji: "🚏", description: "Bus stop upgraded or repaired" },
-  "road-cleared": { name: "Road Cleared", emoji: "🛣️", description: "Road debris removed" },
-  "drainage-working": { name: "Drainage Working", emoji: "🌧️", description: "Storm drainage functioning" },
-  "infrastructure-improved": { name: "Infrastructure Improved", emoji: "🏗️", description: "General infrastructure improvement" },
-};
+/** 17 positive community signals */
+export const POSITIVE_CATEGORIES: CategoryDefinition[] = [
+  // Infrastructure Improvements (7)
+  { slug: "road-repaired", name: "Road Repaired", emoji: "🛣️", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Road has been repaired or resurfaced" },
+  { slug: "street-lights-fixed", name: "Street Lights Fixed", emoji: "💡", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Street lighting restored or installed" },
+  { slug: "clean-water-restored", name: "Clean Water Restored", emoji: "🚰", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Clean water supply restored to the area" },
+  { slug: "drainage-fixed", name: "Drainage Fixed", emoji: "🌊", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Drainage system repaired and working" },
+  { slug: "clean-area-maintained", name: "Clean Area Maintained", emoji: "🗑️", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Area is being kept clean and maintained" },
+  { slug: "building-safety-improved", name: "Building Safety Improved", emoji: "🏢", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Building safety has been improved" },
+  { slug: "traffic-system-improved", name: "Traffic System Improved", emoji: "🚦", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Traffic signals or flow improved" },
+
+  // Community & Social Positives (5)
+  { slug: "local-festival", name: "Local Festival", emoji: "🎉", type: "positive", group: "Community & Social", photoRule: "optional", description: "Community festival or cultural event" },
+  { slug: "blood-donation-camp", name: "Blood Donation Camp", emoji: "🩸", type: "positive", group: "Community & Social", photoRule: "optional", description: "Blood donation drive in the community" },
+  { slug: "volunteer-activity", name: "Volunteer Activity", emoji: "🤝", type: "positive", group: "Community & Social", photoRule: "optional", description: "Community volunteer work or cleanup" },
+  { slug: "community-education-program", name: "Community Education Program", emoji: "📚", type: "positive", group: "Community & Social", photoRule: "optional", description: "Educational program benefiting the community" },
+  { slug: "community-help-hero", name: "Community Help / Hero Action", emoji: "❤️", type: "positive", group: "Community & Social", photoRule: "optional", description: "Notable act of community help or heroism" },
+
+  // Public Good / Clean Environment (5)
+  { slug: "clean-park", name: "Clean Park", emoji: "🌳", type: "positive", group: "Public Good", photoRule: "optional", description: "Well-maintained and clean park area" },
+  { slug: "excellent-public-service", name: "Excellent Public Service", emoji: "⭐", type: "positive", group: "Public Good", photoRule: "optional", description: "Outstanding public service in the area" },
+  { slug: "clean-street-market", name: "Clean Street / Market Area", emoji: "🧹", type: "positive", group: "Public Good", photoRule: "optional", description: "Clean and well-kept street or market" },
+  { slug: "safe-drinking-water-area", name: "Safe Drinking Water Area", emoji: "🚰", type: "positive", group: "Public Good", photoRule: "optional", description: "Area with reliable safe drinking water" },
+  { slug: "safe-walking-zone", name: "Safe Walking Zone", emoji: "🚶", type: "positive", group: "Public Good", photoRule: "optional", description: "Safe and walkable area for pedestrians" },
+];
 
 export const ALL_CATEGORIES: CategoryDefinition[] = [
-  ...ISSUE_CATEGORIES.map((c) => ({ ...c, type: "issue" as const })),
-  ...ISSUE_CATEGORIES.map((c) => {
-    const slug = c.pairedSlug!;
-    const meta = POSITIVE_NAMES[slug];
-    return {
-      slug,
-      name: meta.name,
-      emoji: meta.emoji,
-      type: "positive" as const,
-      photoRequired: false,
-      description: meta.description,
-      pairedSlug: c.slug,
-    };
-  }),
+  ...ISSUE_CATEGORIES,
+  ...POSITIVE_CATEGORIES,
 ];
 
 export function getIssueCategories() {
-  return ALL_CATEGORIES.filter((c) => c.type === "issue");
+  return ISSUE_CATEGORIES;
 }
 
 export function getPositiveCategories() {
-  return ALL_CATEGORIES.filter((c) => c.type === "positive");
+  return POSITIVE_CATEGORIES;
 }
+
+export function getCategoriesByGroup(type: "issue" | "positive") {
+  const cats = type === "issue" ? ISSUE_CATEGORIES : POSITIVE_CATEGORIES;
+  const groups = new Map<string, CategoryDefinition[]>();
+  for (const cat of cats) {
+    const list = groups.get(cat.group) ?? [];
+    list.push(cat);
+    groups.set(cat.group, list);
+  }
+  return groups;
+}
+
+export function isPhotoRequired(rule: PhotoRule): boolean {
+  return rule === "required";
+}
+
+export function photoRuleLabel(rule: PhotoRule): string {
+  if (rule === "required") return "Photo required";
+  if (rule === "optional") return "Photo optional";
+  return "Photo not required";
+}
+
+/** Paid intelligence report products */
+export const PAID_REPORTS = [
+  {
+    id: "real-estate",
+    name: "Real Estate Intelligence Report",
+    emoji: "🏠",
+    audience: "Buyers, renters, investors",
+    features: [
+      "1–5 year area trend",
+      "Safety score history",
+      "Flood / water logging history",
+      "Road condition trend",
+      "Pollution trend",
+      "Infrastructure improvement rate",
+      "Nearby issues heatmap",
+      "Schools + hospitals quality index",
+      "Community sentiment summary",
+      'AI "Should you live here?" verdict',
+    ],
+  },
+  {
+    id: "business-location",
+    name: "Business Location Analysis",
+    emoji: "🏢",
+    audience: "Shops, startups, franchises",
+    features: [
+      "Footfall proxy score",
+      "Cleanliness index",
+      "Safety rating",
+      "Parking issues density",
+      "Competition density",
+      "Customer complaint density",
+      "Best hours/days analysis",
+      "Risk zones nearby",
+      'AI "Good for business or not" recommendation',
+    ],
+  },
+  {
+    id: "area-intelligence",
+    name: "Area Intelligence Report",
+    emoji: "📊",
+    audience: "Researchers, consultants, citizens",
+    features: [
+      "Full Civic Health Score breakdown",
+      "Category-wise performance",
+      "Top 10 issues in area",
+      "Top 10 improvements",
+      "Trend analysis (improving/declining)",
+      "Heatmap snapshot",
+      "Community engagement level",
+      "Confidence score of data",
+    ],
+  },
+  {
+    id: "municipal-dashboard",
+    name: "Municipal / Government Dashboard",
+    emoji: "🏛️",
+    audience: "Official bodies",
+    features: [
+      "Ward-wise issue clustering",
+      "Response time tracking",
+      "Issue resolution rate",
+      "Department-wise breakdown",
+      "Live problem hotspots",
+      "Infrastructure failure tracking",
+    ],
+  },
+  {
+    id: "api-access",
+    name: "API Access",
+    emoji: "🔌",
+    audience: "Developers, AI, research",
+    features: [
+      "Location-based civic dataset API",
+      "Trend API",
+      "Safety score API",
+      "Cleanliness index API",
+      "Real-time incident feed",
+      "Historical dataset export",
+    ],
+  },
+  {
+    id: "enterprise-dashboard",
+    name: "Enterprise Dashboards",
+    emoji: "🏢",
+    audience: "Large orgs, insurers, logistics",
+    features: [
+      "Multi-city comparison",
+      "Risk heatmaps",
+      "Infrastructure reliability index",
+      "Alerts system",
+      "Data export tools",
+      "Custom filters",
+    ],
+  },
+  {
+    id: "insurance-risk",
+    name: "Insurance & Risk Reports",
+    emoji: "📉",
+    audience: "Insurance & risk analysts",
+    features: [
+      "Flood risk probability",
+      "Accident risk zones",
+      "Fire hazard areas",
+      "Crime proxy indicators",
+      "Property risk scoring",
+      "Historical damage trends",
+    ],
+  },
+] as const;
+
+export const FREE_FEATURES = [
+  "Map & worldwide place search",
+  "Reporting & confirming incidents",
+  "Photo upload (max 2 per report)",
+  "Viewing pins & timelines",
+  "Basic Community Health Score",
+  "Comments & disputes",
+  "Ask AI (limited queries)",
+];

@@ -31,7 +31,13 @@ export async function findNearbyDuplicate(
     where: {
       categoryId,
       isPositive,
-      status: { in: [INCIDENT_STATUSES.PENDING, INCIDENT_STATUSES.ACTIVE] },
+      status: {
+        in: [
+          INCIDENT_STATUSES.PENDING,
+          INCIDENT_STATUSES.ACTIVE,
+          INCIDENT_STATUSES.POSITIVE_ACTIVE,
+        ],
+      },
     },
     include: { category: true, reporter: { select: { name: true, reliabilityScore: true } } },
   });
@@ -74,7 +80,9 @@ export async function recalculateIncident(incidentId: string) {
   } else if (latestResolution?.status === "disputed") {
     status = INCIDENT_STATUSES.DISPUTED;
   } else if (confirmationCount >= CONFIRMATION_THRESHOLD) {
-    status = INCIDENT_STATUSES.ACTIVE;
+    status = incident.isPositive
+      ? INCIDENT_STATUSES.POSITIVE_ACTIVE
+      : INCIDENT_STATUSES.ACTIVE;
     visibility = VISIBILITY.PUBLIC;
   } else if (confirmationCount > 0) {
     status = INCIDENT_STATUSES.PENDING;

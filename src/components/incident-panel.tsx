@@ -92,7 +92,7 @@ export function IncidentPanel({
               <div>
                 <h2 className="font-semibold">{incident.category.name}</h2>
                 <p className="text-xs capitalize text-muted">
-                  {incident.status} · {confidenceLabel(incident.confidenceScore)}
+                  {statusLabel(incident.status, incident.isPositive)} · {confidenceLabel(incident.confidenceScore)}
                 </p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export function IncidentPanel({
               <button
                 disabled={loading}
                 onClick={() => action(`/api/incidents/${incidentId}/confirm`)}
-                className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
               >
                 <CheckCircle className="h-4 w-4" />
                 Confirm
@@ -183,7 +183,7 @@ export function IncidentPanel({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Share what you observed..."
-                className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-teal-500"
+                className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-orange-500"
               />
               <button
                 disabled={!comment.trim() || loading}
@@ -215,7 +215,7 @@ export function IncidentPanel({
           {incident.timelineEvents.length > 0 && (
             <div>
               <h3 className="mb-2 text-xs font-semibold uppercase text-muted">Timeline</h3>
-              <div className="space-y-1 border-l-2 border-teal-200 pl-3">
+              <div className="space-y-1 border-l-2 border-orange-200 pl-3">
                 {incident.timelineEvents.map((e) => (
                   <p key={e.id} className="text-xs text-slate-600">
                     <span className="font-medium capitalize">{e.action.replace(/_/g, " ")}</span>
@@ -228,7 +228,7 @@ export function IncidentPanel({
           )}
 
           <p className="text-center text-xs text-muted">
-            <Link href="/login" className="text-teal-600 hover:underline">
+            <Link href="/login" className="text-orange-600 hover:underline">
               Sign in
             </Link>{" "}
             to contribute and build reputation
