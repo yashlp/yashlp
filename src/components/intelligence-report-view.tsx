@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowLeft,
   BarChart3,
+  CheckCircle2,
   Download,
   MapPin,
   Sparkles,
@@ -12,7 +11,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { IntelligenceReportData } from "@/lib/report-demo-data";
-import { REPORT_DEMO_PRICES } from "@/lib/report-demo-data";
+import { REPORT_PRICING } from "@/lib/report-demo-data";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
 
 function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
@@ -28,20 +27,25 @@ function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
   );
 }
 
-export function IntelligenceReportView({
-  report,
-  isDemo = true,
-}: {
-  report: IntelligenceReportData;
-  isDemo?: boolean;
-}) {
-  const price = REPORT_DEMO_PRICES[report.productId];
+function HeatLevel({ level }: { level: "high" | "medium" | "low" }) {
+  const styles = {
+    high: "bg-rose-500",
+    medium: "bg-amber-400",
+    low: "bg-emerald-500",
+  };
+  return <span className={cn("inline-block h-2.5 w-2.5 rounded-full", styles[level])} />;
+}
+
+export function IntelligenceReportView({ report }: { report: IntelligenceReportData }) {
   const maxReported = Math.max(...report.trends.map((t) => t.reported), 1);
   const dateLabel = new Date(report.generatedAt).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
+  const tierLabel = report.tier === "big" ? REPORT_PRICING.big.label : REPORT_PRICING.small.label;
 
   const verdictStyles = {
     positive: "border-emerald-200 bg-emerald-50 text-emerald-900",
@@ -51,16 +55,25 @@ export function IntelligenceReportView({
 
   return (
     <div className="mx-auto max-w-3xl">
-      {/* Document shell */}
       <div className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/40">
+        {/* Paid receipt strip */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 sm:px-6">
+          <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+            <CheckCircle2 className="h-4 w-4" />
+            Payment successful — full report unlocked
+          </div>
+          <div className="text-xs text-emerald-700">
+            ₹{report.priceInr} · ${report.priceUsd} USD · {tierLabel}
+          </div>
+        </div>
+
         {/* Cover header */}
         <div className="relative bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 px-6 py-8 text-white sm:px-10 sm:py-10">
-          {isDemo && (
-            <span className="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wide backdrop-blur">
-              Sample Demo
-            </span>
-          )}
-          <div className="flex items-start gap-4">
+          <div className="absolute right-4 top-4 text-right text-xs text-orange-100">
+            <p>Order {report.orderRef}</p>
+            <p className="mt-0.5 opacity-80">{dateLabel}</p>
+          </div>
+          <div className="flex items-start gap-4 pr-24">
             <span className="text-4xl sm:text-5xl">{report.emoji}</span>
             <div>
               <p className="text-sm font-medium text-orange-100">CivicLens Intelligence</p>
@@ -72,8 +85,6 @@ export function IntelligenceReportView({
                 </span>
                 <span>·</span>
                 <span>{report.radiusM}m radius</span>
-                <span>·</span>
-                <span>{dateLabel}</span>
               </div>
             </div>
           </div>
@@ -94,7 +105,7 @@ export function IntelligenceReportView({
               </div>
               <div className="mt-3 h-3 w-full max-w-xs overflow-hidden rounded-full bg-orange-100">
                 <div
-                  className={cn("h-full rounded-full transition-all", scoreBg(report.overallScore))}
+                  className={cn("h-full rounded-full", scoreBg(report.overallScore))}
                   style={{ width: `${report.overallScore}%` }}
                 />
               </div>
@@ -117,15 +128,27 @@ export function IntelligenceReportView({
                   <BarChart3 className="h-4 w-4 text-stone-400" />
                 )}
                 <span className="capitalize text-stone-600">{report.trendDirection} over 30 days</span>
-                <span className="text-stone-300">·</span>
-                <span className="capitalize text-stone-500">{report.engagementLevel} engagement</span>
               </div>
+            </div>
+          </section>
+
+          {/* Plain language — full, not blurred */}
+          <section>
+            <h2 className="text-lg font-bold text-stone-900">Plain-language answers</h2>
+            <p className="mt-1 text-sm text-stone-500">Written for everyday decisions — no jargon.</p>
+            <div className="mt-4 space-y-3">
+              {report.plainLanguageAnswers.map((item) => (
+                <div key={item.question} className="rounded-2xl border border-orange-100 bg-orange-50/40 p-4">
+                  <p className="text-sm font-semibold text-stone-800">{item.question}</p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-stone-600">{item.answer}</p>
+                </div>
+              ))}
             </div>
           </section>
 
           {/* Category breakdown */}
           <section>
-            <h2 className="text-lg font-bold text-stone-900">Category Performance</h2>
+            <h2 className="text-lg font-bold text-stone-900">Category performance</h2>
             <div className="mt-4 space-y-3">
               {report.categoryScores.map((cat) => (
                 <div key={cat.name} className="flex items-center gap-3">
@@ -149,10 +172,59 @@ export function IntelligenceReportView({
             </div>
           </section>
 
-          {/* Issues & improvements */}
+          {/* Area comparison */}
+          {report.areaComparisons.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold text-stone-900">How this area compares</h2>
+              <div className="mt-3 overflow-hidden rounded-2xl border border-orange-100">
+                {report.areaComparisons.map((row, i) => (
+                  <div
+                    key={row.name}
+                    className={cn(
+                      "flex items-center justify-between gap-4 px-4 py-3",
+                      i > 0 && "border-t border-orange-50",
+                      row.note === "Your selected location" && "bg-orange-50/60"
+                    )}
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-stone-800">{row.name}</p>
+                      <p className="text-xs text-stone-400">{row.note}</p>
+                    </div>
+                    <span className={cn("text-xl font-bold", scoreColor(row.score))}>{row.score}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Heatmap zones */}
+          {report.heatmapZones.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold text-stone-900">Issue heatmap by zone</h2>
+              <div className="mt-3 space-y-2">
+                {report.heatmapZones.map((z) => (
+                  <div
+                    key={z.zone}
+                    className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3"
+                  >
+                    <HeatLevel level={z.level} />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-stone-800">{z.zone}</p>
+                      <p className="text-xs text-stone-500">{z.issue}</p>
+                    </div>
+                    <span className="text-xs capitalize text-stone-400">{z.level} activity</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Issues & improvements — full lists */}
           <div className="grid gap-6 sm:grid-cols-2">
             <section>
-              <h2 className="text-lg font-bold text-stone-900">Top Issues</h2>
+              <h2 className="text-lg font-bold text-stone-900">
+                Top issues ({report.topIssues.length})
+              </h2>
               <ul className="mt-3 space-y-2">
                 {report.topIssues.map((issue) => (
                   <li
@@ -170,7 +242,9 @@ export function IntelligenceReportView({
               </ul>
             </section>
             <section>
-              <h2 className="text-lg font-bold text-stone-900">Top Improvements</h2>
+              <h2 className="text-lg font-bold text-stone-900">
+                Top improvements ({report.topImprovements.length})
+              </h2>
               <ul className="mt-3 space-y-2">
                 {report.topImprovements.map((item) => (
                   <li
@@ -190,7 +264,7 @@ export function IntelligenceReportView({
 
           {/* Trend chart */}
           <section>
-            <h2 className="text-lg font-bold text-stone-900">30-Day Activity</h2>
+            <h2 className="text-lg font-bold text-stone-900">Activity trend</h2>
             <div className="mt-4 rounded-2xl border border-orange-100 bg-orange-50/30 p-4">
               <div className="flex min-h-[120px] items-end gap-2">
                 {report.trends.map((t) => (
@@ -227,7 +301,7 @@ export function IntelligenceReportView({
             </div>
           </section>
 
-          {/* Product-specific extras */}
+          {/* Product-specific sections */}
           {report.extraSections.map((section) => (
             <section key={section.title}>
               <h2 className="text-lg font-bold text-stone-900">{section.title}</h2>
@@ -266,36 +340,28 @@ export function IntelligenceReportView({
             <p className="text-xs leading-relaxed text-stone-500">{report.disclaimer}</p>
           </section>
 
-          {/* CTA footer */}
-          {isDemo && (
-            <div className="flex flex-col items-center gap-3 border-t border-orange-100 pt-6 sm:flex-row sm:justify-between">
-              <div>
-                <p className="text-sm text-stone-500">Full report for any location worldwide</p>
-                <p className="text-lg font-bold text-stone-900">
-                  from ₹{price.inr}{" "}
-                  <span className="text-sm font-normal text-stone-400">(${price.usd} USD)</span>
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled
-                  className="flex items-center gap-2 rounded-xl border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700 opacity-60"
-                >
-                  <Download className="h-4 w-4" />
-                  PDF export soon
-                </button>
-                <Link
-                  href="/login"
-                  className="rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700"
-                >
-                  Get early access
-                </Link>
-              </div>
+          {/* Post-purchase footer */}
+          <div className="flex flex-col items-center gap-3 border-t border-orange-100 pt-6 sm:flex-row sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-stone-700">You paid ₹{report.priceInr} (${report.priceUsd})</p>
+              <p className="text-xs text-stone-400">PDF download & email delivery coming soon</p>
             </div>
-          )}
+            <button
+              type="button"
+              disabled
+              className="flex items-center gap-2 rounded-xl border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700"
+            >
+              <Download className="h-4 w-4" />
+              Download PDF
+            </button>
+          </div>
         </div>
       </div>
+
+      <p className="mt-4 text-center text-xs text-stone-400">
+        Demo uses sample Mumbai data. After purchase, your report uses your chosen location and live verified
+        data.
+      </p>
     </div>
   );
 }
