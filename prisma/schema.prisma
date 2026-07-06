@@ -49,6 +49,7 @@ model Category {
   photoRule     String   @default("optional")
   description   String
   sortOrder     Int      @default(0)
+  ttlDays       Int?
 
   incidents Incident[]
 }
@@ -64,6 +65,7 @@ model Incident {
   address            String?
   status             String    @default("pending")
   visibility         String    @default("hidden")
+  visibilityStage    String    @default("private")
   confidenceScore    Float     @default(0.1)
   confirmationCount  Int       @default(0)
   isPositive         Boolean   @default(false)
@@ -72,6 +74,7 @@ model Incident {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   resolvedAt         DateTime?
+  expiresAt          DateTime?
 
   category           Category           @relation(fields: [categoryId], references: [id])
   reporter           User               @relation("Reporter", fields: [reporterId], references: [id])

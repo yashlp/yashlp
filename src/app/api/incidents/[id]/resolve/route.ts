@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { addTimelineEvent, recalculateIncident } from "@/lib/incident-service";
+import { INCIDENT_STATUSES } from "@/lib/constants";
 
 const schema = z.object({
   description: z.string().optional(),
@@ -27,6 +28,11 @@ export async function POST(
       photoUrl: data.photoUrl,
       status: "pending",
     },
+  });
+
+  await prisma.incident.update({
+    where: { id },
+    data: { status: INCIDENT_STATUSES.RESOLUTION_PENDING },
   });
 
   await addTimelineEvent(id, "resolution_submitted", user.id);

@@ -9,7 +9,8 @@ export async function askAI(
   const health = await getAreaHealthScore(latitude, longitude);
   const incidents = await prisma.incident.findMany({
     where: {
-      visibility: "public",
+      visibilityStage: "verified",
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       latitude: { gte: latitude - 0.015, lte: latitude + 0.015 },
       longitude: { gte: longitude - 0.015, lte: longitude + 0.015 },
     },

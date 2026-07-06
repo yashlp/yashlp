@@ -10,7 +10,7 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import { DEFAULT_MAP_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
+import { DEFAULT_MAP_ZOOM, STREET_LEVEL_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
 import "leaflet/dist/leaflet.css";
 
 type Incident = {
@@ -19,7 +19,9 @@ type Incident = {
   latitude: number;
   longitude: number;
   status: string;
+  visibilityStage?: string;
   confidenceScore: number;
+  confirmationCount?: number;
   isPositive: boolean;
   category: { emoji: string; name: string };
 };
@@ -75,11 +77,20 @@ function MapMover({
   return null;
 }
 
-function MapEvents({ onMove }: { onMove: (lat: number, lng: number) => void }) {
+function MapEvents({
+  onMove,
+  onZoom,
+}: {
+  onMove: (lat: number, lng: number) => void;
+  onZoom?: (zoom: number) => void;
+}) {
   useMapEvents({
     moveend: (e) => {
       const c = e.target.getCenter();
       onMove(c.lat, c.lng);
+    },
+    zoomend: (e) => {
+      onZoom?.(e.target.getZoom());
     },
   });
   return null;
@@ -97,30 +108,51 @@ function PinPickerEvents({
 }
 
 function createIcon(incident: Incident, selected: boolean) {
-  const color = incident.isPositive
-    ? incident.status === "positive_active" || incident.status === "active"
-      ? "#2563eb"
-      : "#93c5fd"
-    : incident.status === "resolved"
-      ? "#16a34a"
-      : incident.status === "disputed"
-        ? "#eab308"
-        : incident.status === "pending"
-          ? "#f59e0b"
-          : "#dc2626";
+  const stage = incident.visibilityStage ?? "verified";
+  const isSeed = stage === "seed";
+  const isPrivate = stage === "private";
 
-  const size = selected ? 44 : 36;
+  let color: string;
+  if (incident.isPositive) {
+    color =
+      incident.status === "positive_active" || incident.status === "active"
+        ? "#2563eb"
+        : "#93c5fd";
+  } else if (incident.status === "resolved") {
+    color = "#16a34a";
+  } else if (incident.status === "resolution_pending") {
+    color = "#eab308";
+  } else if (incident.status === "disputed") {
+    color = "#ca8a04";
+  } else if (isPrivate || incident.status === "pending") {
+    color = "#f59e0b";
+  } else if (isSeed) {
+    color = "#f97316";
+  } else {
+    color = "#dc2626";
+  }
+
+  const baseSize = isSeed ? 28 : isPrivate ? 24 : 36;
+  const size = selected ? baseSize + 8 : baseSize;
+  const opacity = isSeed ? 0.65 : isPrivate ? 0.45 : 1;
+  const borderStyle = isSeed ? "dashed" : "solid";
+
   const html = `
     <div style="
       width:${size}px;height:${size}px;
       background:${color};
-      border:3px solid ${selected ? "#ea580c" : "white"};
+      opacity:${opacity};
+      border:3px ${borderStyle} ${selected ? "#ea580c" : "white"};
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      font-size:${selected ? 20 : 16}px;
+      font-size:${selected ? 18 : isSeed ? 13 : 16}px;
       box-shadow:0 2px 10px rgba(234,88,12,0.35);
       transform:translate(-50%,-50%);
-    ">${incident.category.emoji}</div>`;
+      position:relative;
+    ">
+      ${incident.category.emoji}
+      ${incident.status === "resolved" ? `<span style="position:absolute;bottom:-2px;right:-2px;font-size:10px;background:white;border-radius:50%;padding:1px;">✓</span>` : ""}
+    </div>`;
 
   return L.divIcon({
     html,
@@ -128,6 +160,14 @@ function createIcon(incident: Incident, selected: boolean) {
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
+}
+
+function visibilityLabel(incident: Incident): string {
+  if (incident.status === "resolution_pending") return "Resolution Pending";
+  if (incident.status === "resolved") return "Resolved";
+  if (incident.visibilityStage === "seed") return "Community Report (Unverified)";
+  if (incident.visibilityStage === "verified") return "Verified";
+  return "Pending";
 }
 
 export function MapView({
@@ -138,6 +178,7 @@ export function MapView({
   userLocation,
   onSelect,
   onMove,
+  onZoom,
 }: {
   incidents: Incident[];
   center: { lat: number; lng: number };
@@ -146,7 +187,13 @@ export function MapView({
   userLocation?: { lat: number; lng: number } | null;
   onSelect: (id: string) => void;
   onMove: (lat: number, lng: number) => void;
+  onZoom?: (zoom: number) => void;
 }) {
+  const visibleIncidents =
+    zoom < STREET_LEVEL_ZOOM
+      ? incidents.filter((i) => i.visibilityStage !== "seed")
+      : incidents;
+
   return (
     <MapContainer
       center={[center.lat, center.lng]}
@@ -161,7 +208,7 @@ export function MapView({
         maxZoom={19}
       />
       <MapMover center={center} zoom={zoom} />
-      <MapEvents onMove={onMove} />
+      <MapEvents onMove={onMove} onZoom={onZoom} />
 
       {userLocation && (
         <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
@@ -169,7 +216,7 @@ export function MapView({
         </Marker>
       )}
 
-      {incidents.map((inc) => (
+      {visibleIncidents.map((inc) => (
         <Marker
           key={inc.id}
           position={[inc.latitude, inc.longitude]}
@@ -181,9 +228,12 @@ export function MapView({
               <strong>
                 {inc.category.emoji} {inc.category.name}
               </strong>
-              <p className="mt-1 capitalize text-stone-500">
-                {inc.status} · {Math.round(inc.confidenceScore * 100)}% confidence
+              <p className="mt-1 text-stone-500">
+                {visibilityLabel(inc)} · {Math.round(inc.confidenceScore * 100)}% confidence
               </p>
+              {(inc.confirmationCount ?? 0) > 0 && (
+                <p className="text-xs text-stone-400">{inc.confirmationCount} community reports</p>
+              )}
             </div>
           </Popup>
         </Marker>

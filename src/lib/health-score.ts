@@ -8,12 +8,16 @@ type IncidentForScore = {
   isPositive: boolean;
   confidenceScore: number;
   status: string;
+  visibilityStage?: string;
   category: { slug: string; name: string; type: string };
 };
 
 export function computeHealthScore(incidents: IncidentForScore[]) {
   const verified = incidents.filter(
-    (i) => i.confidenceScore >= 0.5 && i.status !== "disputed"
+    (i) =>
+      i.visibilityStage === "verified" &&
+      i.confidenceScore >= 0.5 &&
+      i.status !== "disputed"
   );
 
   if (verified.length === 0) {
@@ -66,7 +70,8 @@ export async function getAreaHealthScore(
 ) {
   const incidents = await prisma.incident.findMany({
     where: {
-      visibility: "public",
+      visibilityStage: "verified",
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       latitude: { gte: latitude - 0.02, lte: latitude + 0.02 },
       longitude: { gte: longitude - 0.02, lte: longitude + 0.02 },
     },
@@ -82,7 +87,10 @@ export async function getAreaHealthScore(
 
 export async function getRankings(limit = 10) {
   const incidents = await prisma.incident.findMany({
-    where: { visibility: "public" },
+    where: {
+      visibilityStage: "verified",
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
     include: { category: true },
   });
 

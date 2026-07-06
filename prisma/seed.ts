@@ -1,13 +1,37 @@
 import { PrismaClient } from "@prisma/client";
-import { ALL_CATEGORIES, isPhotoRequired } from "../src/lib/categories";
-import { GLOBAL_SAMPLE_PLACES } from "../src/lib/constants";
+import { ALL_CATEGORIES, getCategoryTtlDays, isPhotoRequired } from "../src/lib/categories";
+import {
+  GLOBAL_SAMPLE_PLACES,
+  INCIDENT_STATUSES,
+  VISIBILITY,
+  VISIBILITY_STAGE,
+} from "../src/lib/constants";
 
 const prisma = new PrismaClient();
+
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function stageForConfirmations(count: number): string {
+  if (count >= 10) return VISIBILITY_STAGE.VERIFIED;
+  if (count >= 3) return VISIBILITY_STAGE.SEED;
+  return VISIBILITY_STAGE.PRIVATE;
+}
+
+function visibilityForStage(stage: string): string {
+  if (stage === VISIBILITY_STAGE.VERIFIED) return VISIBILITY.PUBLIC;
+  if (stage === VISIBILITY_STAGE.SEED) return VISIBILITY.SEED;
+  return VISIBILITY.HIDDEN;
+}
 
 async function main() {
   console.log("Seeding CivicLens database...");
 
   for (const [index, cat] of ALL_CATEGORIES.entries()) {
+    const ttlDays = getCategoryTtlDays(cat);
     await prisma.category.upsert({
       where: { slug: cat.slug },
       update: {
@@ -19,6 +43,7 @@ async function main() {
         photoRule: cat.photoRule,
         description: cat.description,
         sortOrder: index,
+        ttlDays,
       },
       create: {
         slug: cat.slug,
@@ -30,6 +55,7 @@ async function main() {
         photoRule: cat.photoRule,
         description: cat.description,
         sortOrder: index,
+        ttlDays,
       },
     });
   }
@@ -54,14 +80,20 @@ async function main() {
   const positiveCats = await prisma.category.findMany({ where: { type: "positive" } });
 
   const citySamples = [
-    { city: GLOBAL_SAMPLE_PLACES[0], cat: "potholes-bad-roads", status: "active", visibility: "public", confirmations: 4, isPositive: false },
-    { city: GLOBAL_SAMPLE_PLACES[1], cat: "no-street-lights", status: "active", visibility: "public", confirmations: 3, isPositive: false },
-    { city: GLOBAL_SAMPLE_PLACES[2], cat: "open-sewage", status: "pending", visibility: "hidden", confirmations: 1, isPositive: false },
-    { city: GLOBAL_SAMPLE_PLACES[3], cat: "clean-street-market", status: "positive_active", visibility: "public", confirmations: 3, isPositive: true },
-    { city: GLOBAL_SAMPLE_PLACES[4], cat: "unsafe-buildings", status: "resolved", visibility: "public", confirmations: 5, isPositive: false },
-    { city: GLOBAL_SAMPLE_PLACES[5], cat: "clean-park", status: "positive_active", visibility: "public", confirmations: 4, isPositive: true },
-    { city: GLOBAL_SAMPLE_PLACES[0], cat: "garbage-pile-up", status: "active", visibility: "public", confirmations: 3, isPositive: false },
-    { city: GLOBAL_SAMPLE_PLACES[2], cat: "road-repaired", status: "positive_active", visibility: "public", confirmations: 3, isPositive: true },
+    { city: GLOBAL_SAMPLE_PLACES[0], cat: "potholes-bad-roads", status: INCIDENT_STATUSES.ACTIVE, confirmations: 12, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[1], cat: "no-street-lights", status: INCIDENT_STATUSES.ACTIVE, confirmations: 5, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "open-sewage", status: INCIDENT_STATUSES.PENDING, confirmations: 1, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[3], cat: "clean-street-market", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 4, isPositive: true },
+    { city: GLOBAL_SAMPLE_PLACES[4], cat: "unsafe-buildings", status: INCIDENT_STATUSES.RESOLVED, confirmations: 11, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[5], cat: "clean-park", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 10, isPositive: true },
+    { city: GLOBAL_SAMPLE_PLACES[0], cat: "garbage-pile-up", status: INCIDENT_STATUSES.ACTIVE, confirmations: 3, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "road-repaired", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 8, isPositive: true },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "broken-footpath-sidewalk", status: INCIDENT_STATUSES.ACTIVE, confirmations: 4, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "broken-public-toilet", status: INCIDENT_STATUSES.ACTIVE, confirmations: 6, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "long-queue-government-office", status: INCIDENT_STATUSES.ACTIVE, confirmations: 3, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "no-shade-heat-hazard", status: INCIDENT_STATUSES.ACTIVE, confirmations: 5, isPositive: false },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "trusted-street-food-spot", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 12, isPositive: true },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "clean-public-toilet", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 7, isPositive: true },
   ];
 
   for (const [i, sample] of citySamples.entries()) {
@@ -70,6 +102,9 @@ async function main() {
       : categories.find((c) => c.slug === sample.cat)!;
     const reporter = users[i % users.length];
     const offset = { lat: (Math.random() - 0.5) * 0.008, lng: (Math.random() - 0.5) * 0.008 };
+    const visibilityStage = stageForConfirmations(sample.confirmations);
+    const visibility = visibilityForStage(visibilityStage);
+    const expiresAt = cat.ttlDays ? addDays(new Date(), cat.ttlDays) : null;
 
     const incident = await prisma.incident.create({
       data: {
@@ -81,13 +116,20 @@ async function main() {
         longitude: sample.city.lng + offset.lng,
         address: sample.city.name,
         status: sample.status,
-        visibility: sample.visibility,
+        visibility,
+        visibilityStage,
         confirmationCount: sample.confirmations,
-        confidenceScore: Math.min(sample.confirmations / 3, 1) * 0.7 + 0.2,
+        confidenceScore:
+          visibilityStage === VISIBILITY_STAGE.VERIFIED
+            ? 0.88
+            : visibilityStage === VISIBILITY_STAGE.SEED
+              ? 0.52
+              : 0.15,
         isPositive: sample.isPositive,
         aiCategoryMatch: 0.85,
         aiImageVerified: true,
-        resolvedAt: sample.status === "resolved" ? new Date() : null,
+        resolvedAt: sample.status === INCIDENT_STATUSES.RESOLVED ? new Date() : null,
+        expiresAt,
       },
     });
 

@@ -41,12 +41,20 @@ export function scoreBg(score: number): string {
 }
 
 export function statusLabel(status: string, isPositive?: boolean): string {
+  if (status === "resolution_pending") return "🟡 Resolution Pending";
   if (status === "positive_active" || (isPositive && status === "active"))
-    return "🔵 Positive Active";
+    return "🔵 Community Improvement";
   if (status === "resolved") return "🟢 Resolved";
   if (status === "disputed") return "🟡 Disputed";
-  if (status === "active") return "🔴 Active";
-  return "⏳ Pending";
+  if (status === "active") return "🔴 Active Issue";
+  return "⏳ Pending Verification";
+}
+
+export function visibilityStageLabel(stage?: string): string {
+  if (stage === "verified") return "Verified";
+  if (stage === "seed") return "Community Report (Unverified)";
+  if (stage === "private") return "Pending Verification";
+  return "Unknown";
 }
 
 export function confidenceLabel(score: number): string {

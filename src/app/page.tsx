@@ -24,7 +24,9 @@ type Incident = {
   latitude: number;
   longitude: number;
   status: string;
+  visibilityStage?: string;
   confidenceScore: number;
+  confirmationCount?: number;
   isPositive: boolean;
   category: { emoji: string; name: string; slug: string };
 };
@@ -104,6 +106,7 @@ export default function HomePage() {
           userLocation={userLocation}
           onSelect={setSelectedId}
           onMove={(lat, lng) => setCenter({ lat, lng })}
+          onZoom={setZoom}
         />
       </div>
 

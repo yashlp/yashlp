@@ -4,14 +4,18 @@ import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCircle, MessageSquare, X, XCircle } from "lucide-react";
 import Link from "next/link";
-import { confidenceLabel, statusLabel } from "@/lib/utils";
-import { CONFIRMATION_THRESHOLD } from "@/lib/constants";
+import { confidenceLabel, statusLabel, visibilityStageLabel } from "@/lib/utils";
+import {
+  SEED_CONFIRMATION_THRESHOLD,
+  VERIFIED_CONFIRMATION_THRESHOLD,
+} from "@/lib/constants";
 
 type IncidentDetail = {
   id: string;
   title: string;
   description: string | null;
   status: string;
+  visibilityStage?: string;
   confidenceScore: number;
   confirmationCount: number;
   isPositive: boolean;
@@ -80,7 +84,9 @@ export function IncidentPanel({
     );
   }
 
-  const needsMore = incident.confirmationCount < CONFIRMATION_THRESHOLD;
+  const needsSeed = incident.confirmationCount < SEED_CONFIRMATION_THRESHOLD;
+  const needsVerified = incident.confirmationCount < VERIFIED_CONFIRMATION_THRESHOLD;
+  const stageLabel = visibilityStageLabel(incident.visibilityStage);
 
   return (
     <div className="absolute bottom-14 left-0 right-0 z-[1001] max-h-[70vh] overflow-y-auto p-4 md:bottom-4 md:left-auto md:right-4 md:w-[420px] md:max-h-[calc(100vh-6rem)]">
@@ -92,7 +98,8 @@ export function IncidentPanel({
               <div>
                 <h2 className="font-semibold">{incident.category.name}</h2>
                 <p className="text-xs capitalize text-muted">
-                  {statusLabel(incident.status, incident.isPositive)} · {confidenceLabel(incident.confidenceScore)}
+                  {statusLabel(incident.status, incident.isPositive)} · {stageLabel} ·{" "}
+                  {confidenceLabel(incident.confidenceScore)}
                 </p>
               </div>
             </div>
@@ -110,7 +117,8 @@ export function IncidentPanel({
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="rounded-full bg-slate-100 px-2.5 py-1">
               {incident.confirmationCount} confirmations
-              {needsMore && ` (${CONFIRMATION_THRESHOLD} needed)`}
+              {needsSeed && ` (${SEED_CONFIRMATION_THRESHOLD} for map visibility)`}
+              {!needsSeed && needsVerified && ` (${VERIFIED_CONFIRMATION_THRESHOLD} for verified)`}
             </span>
             <span className="rounded-full bg-slate-100 px-2.5 py-1">
               by {incident.reporter.name}

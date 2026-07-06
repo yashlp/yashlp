@@ -7,18 +7,32 @@ import { isPhotoRequired } from "@/lib/categories";
 import {
   addTimelineEvent,
   findNearbyDuplicate,
+  getExpiresAtForCategory,
   incidentInclude,
   recalculateIncident,
 } from "@/lib/incident-service";
-import { INCIDENT_STATUSES, MAX_PHOTOS_PER_REPORT, VISIBILITY } from "@/lib/constants";
+import {
+  INCIDENT_STATUSES,
+  MAX_PHOTOS_PER_REPORT,
+  VISIBILITY,
+  VISIBILITY_STAGE,
+} from "@/lib/constants";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const includePrivate = searchParams.get("includePrivate") === "true";
+  const now = new Date();
+
   const incidents = await prisma.incident.findMany({
     where: {
-      OR: [
-        { visibility: "public" },
-        { status: INCIDENT_STATUSES.PENDING },
-      ],
+      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      ...(includePrivate
+        ? {}
+        : {
+            visibilityStage: {
+              in: [VISIBILITY_STAGE.SEED, VISIBILITY_STAGE.VERIFIED],
+            },
+          }),
     },
     include: { category: true },
     orderBy: { createdAt: "desc" },
@@ -101,6 +115,8 @@ export async function POST(req: Request) {
 
     const ai = mockAIVerify(category.slug, photoUrls.length > 0);
 
+    const expiresAt = getExpiresAtForCategory(category);
+
     const incident = await prisma.incident.create({
       data: {
         categoryId: data.categoryId,
@@ -113,10 +129,12 @@ export async function POST(req: Request) {
         isPositive,
         status: INCIDENT_STATUSES.PENDING,
         visibility: VISIBILITY.HIDDEN,
+        visibilityStage: VISIBILITY_STAGE.PRIVATE,
         aiCategoryMatch: ai.aiCategoryMatch,
         aiImageVerified: ai.aiImageVerified,
         confirmationCount: 0,
         confidenceScore: 0.1,
+        expiresAt,
       },
     });
 

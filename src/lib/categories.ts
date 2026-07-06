@@ -8,6 +8,8 @@ export type CategoryDefinition = {
   group: string;
   photoRule: PhotoRule;
   description: string;
+  /** Pins auto-expire after N days (daily-use categories). Omit = permanent. */
+  ttlDays?: number;
 };
 
 export const MAX_PHOTOS_PER_REPORT = 2;
@@ -80,6 +82,12 @@ export const ISSUE_CATEGORIES: CategoryDefinition[] = [
   // Social Issues (2)
   { slug: "child-labor-exploitation", name: "Child Labor / Exploitation", emoji: "🚫", type: "issue", group: "Social Issues", photoRule: "optional", description: "Child labor or exploitation observed in the area" },
   { slug: "substance-abuse-hotspots", name: "Substance Abuse Hotspots", emoji: "⚠️", type: "issue", group: "Social Issues", photoRule: "optional", description: "Areas with visible substance abuse activity" },
+
+  // Daily Life (30-day pins — high-frequency daily use)
+  { slug: "broken-footpath-sidewalk", name: "Broken Footpath / Sidewalk", emoji: "🚶", type: "issue", group: "Daily Life", photoRule: "optional", description: "Cracked, uneven, or blocked walking path", ttlDays: 30 },
+  { slug: "broken-public-toilet", name: "Broken Public Toilet", emoji: "🚻", type: "issue", group: "Daily Life", photoRule: "required", description: "Unusable or unsanitary public restroom", ttlDays: 30 },
+  { slug: "long-queue-government-office", name: "Long Queue at Government Office", emoji: "⏳", type: "issue", group: "Daily Life", photoRule: "optional", description: "Excessive wait times at a government office or service center", ttlDays: 30 },
+  { slug: "no-shade-heat-hazard", name: "No Shade / Heat Hazard", emoji: "🌡️", type: "issue", group: "Daily Life", photoRule: "optional", description: "No tree cover or shade in hot public areas", ttlDays: 30 },
 ];
 
 /** 17 positive community signals */
@@ -106,12 +114,24 @@ export const POSITIVE_CATEGORIES: CategoryDefinition[] = [
   { slug: "clean-street-market", name: "Clean Street / Market Area", emoji: "🧹", type: "positive", group: "Public Good", photoRule: "optional", description: "Clean and well-kept street or market" },
   { slug: "safe-drinking-water-area", name: "Safe Drinking Water Area", emoji: "🚰", type: "positive", group: "Public Good", photoRule: "optional", description: "Area with reliable safe drinking water" },
   { slug: "safe-walking-zone", name: "Safe Walking Zone", emoji: "🚶", type: "positive", group: "Public Good", photoRule: "optional", description: "Safe and walkable area for pedestrians" },
+
+  // Daily Life positives (30-day freshness)
+  { slug: "clean-public-toilet", name: "Clean Public Toilet", emoji: "✨", type: "positive", group: "Daily Life", photoRule: "optional", description: "Public restroom is clean and well-maintained", ttlDays: 30 },
+  { slug: "trusted-street-food-spot", name: "Trusted Street Food Spot", emoji: "🍛", type: "positive", group: "Daily Life", photoRule: "optional", description: "Reliable, hygienic street food vendor recommended by community", ttlDays: 30 },
+  { slug: "footpath-repaired", name: "Footpath Repaired", emoji: "🦶", type: "positive", group: "Daily Life", photoRule: "optional", description: "Sidewalk or footpath recently repaired", ttlDays: 30 },
 ];
 
 export const ALL_CATEGORIES: CategoryDefinition[] = [
   ...ISSUE_CATEGORIES,
   ...POSITIVE_CATEGORIES,
 ];
+
+export const DAILY_LIFE_TTL_DAYS = 30;
+
+/** Slugs that expire after 30 days — kept in sync with category ttlDays */
+export function getCategoryTtlDays(cat: CategoryDefinition): number | null {
+  return cat.ttlDays ?? null;
+}
 
 export function getIssueCategories() {
   return ISSUE_CATEGORIES;
