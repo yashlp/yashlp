@@ -8,6 +8,7 @@ import {
   Download,
   Loader2,
   MapPin,
+  Printer,
   Sparkles,
   TrendingDown,
   TrendingUp,
@@ -15,7 +16,7 @@ import {
 import type { IntelligenceReportData } from "@/lib/report-demo-data";
 import { REPORT_PRICING } from "@/lib/report-demo-data";
 import { ReportRichSections } from "@/components/report-rich-sections";
-import { downloadElementAsPdf, reportPdfFilename } from "@/lib/download-report-pdf";
+import { downloadElementAsPdf, printReportAsPdf, reportPdfFilename } from "@/lib/download-report-pdf";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
 
 function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
@@ -63,11 +64,25 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
     try {
       await downloadElementAsPdf(reportRef.current, pdfFilename);
     } catch {
-      setDownloadError("PDF export failed. Try again or use Print → Save as PDF.");
+      try {
+        printReportAsPdf(reportRef.current);
+        setDownloadError(
+          'Direct download failed — print dialog opened. Choose "Save as PDF" as the printer, then save.'
+        );
+      } catch {
+        setDownloadError(
+          'Could not generate PDF. Use the "Print / Save as PDF" button and pick "Save as PDF" as the destination.'
+        );
+      }
     } finally {
       setDownloading(false);
     }
   }, [downloading, pdfFilename]);
+
+  const handlePrintPdf = useCallback(() => {
+    if (!reportRef.current) return;
+    printReportAsPdf(reportRef.current);
+  }, []);
 
   const verdictStyles = {
     positive: "border-emerald-200 bg-emerald-50 text-emerald-900",
@@ -77,7 +92,15 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2 no-print">
+        <button
+          type="button"
+          onClick={handlePrintPdf}
+          className="flex items-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-semibold text-orange-700 hover:bg-orange-50"
+        >
+          <Printer className="h-4 w-4" />
+          Print / Save as PDF
+        </button>
         <button
           type="button"
           onClick={handleDownloadPdf}
@@ -96,7 +119,8 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
 
       <div
         ref={reportRef}
-        className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/40"
+        data-pdf-root
+        className="overflow-visible rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/40"
       >
         {/* Paid receipt strip */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 sm:px-6">
@@ -110,7 +134,10 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
         </div>
 
         {/* Cover header */}
-        <div className="relative bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 px-6 py-8 text-white sm:px-10 sm:py-10">
+        <div
+          className="relative bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 px-6 py-8 text-white sm:px-10 sm:py-10"
+          data-pdf-cover="true"
+        >
           <div className="absolute right-4 top-4 text-right text-xs text-orange-100">
             <p>Order {report.orderRef}</p>
             <p className="mt-0.5 opacity-80">{dateLabel}</p>
@@ -385,20 +412,30 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
           </section>
 
           {/* Post-purchase footer */}
-          <div className="flex flex-col items-center gap-3 border-t border-orange-100 pt-6 sm:flex-row sm:justify-between">
+          <div className="flex flex-col items-center gap-3 border-t border-orange-100 pt-6 sm:flex-row sm:justify-between no-print">
             <div>
               <p className="text-sm font-medium text-stone-700">You paid ₹{report.priceInr} (${report.priceUsd})</p>
-              <p className="text-xs text-stone-400">Save or share this report as PDF</p>
+              <p className="text-xs text-stone-400">Download or print this report</p>
             </div>
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={downloading}
-              className="flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
-            >
-              {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              {downloading ? "Generating…" : "Download PDF"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={handlePrintPdf}
+                className="flex items-center gap-2 rounded-xl border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700 hover:bg-orange-50"
+              >
+                <Printer className="h-4 w-4" />
+                Print
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={downloading}
+                className="flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
+              >
+                {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                {downloading ? "Generating…" : "Download PDF"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
