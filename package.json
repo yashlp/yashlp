@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "rm -rf .next && (fuser -k 3000/tcp 2>/dev/null || true) && next dev",
+    "dev": "(fuser -k 3000/tcp 2>/dev/null || true) && next dev",
+    "dev:reset": "rm -rf .next && (fuser -k 3000/tcp 2>/dev/null || true) && next dev",
     "dev:clean": "rm -rf .next node_modules/.cache && (fuser -k 3000/tcp 2>/dev/null || true) && next dev",
     "dev:turbo": "rm -rf .next && next dev --turbopack",
     "dev:fast": "next dev",
@@ -41,6 +42,7 @@
     "@types/react-dom": "^19.1.6",
     "eslint": "^9.29.0",
     "eslint-config-next": "^15.3.5",
+    "playwright": "^1.61.1",
     "prisma": "^6.11.1",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",

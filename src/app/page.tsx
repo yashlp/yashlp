@@ -7,7 +7,6 @@ import { Activity, Crosshair, Shield, TrendingUp } from "lucide-react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
-import { SearchBar } from "@/components/search-bar";
 
 const MapView = dynamic(() => import("@/components/map-view").then((m) => m.MapView), {
   ssr: false,
@@ -17,6 +16,11 @@ const MapView = dynamic(() => import("@/components/map-view").then((m) => m.MapV
     </div>
   ),
 });
+
+const SearchBar = dynamic(
+  () => import("@/components/search-bar").then((m) => m.SearchBar),
+  { ssr: false, loading: () => <div className="h-11 animate-pulse rounded-2xl bg-orange-100/80" /> }
+);
 
 const IncidentPanel = dynamic(
   () => import("@/components/incident-panel").then((m) => m.IncidentPanel),
@@ -48,12 +52,13 @@ export default function HomePage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
-  const [center, setCenter] = useState(DEFAULT_MAP_CENTER);
+  const [viewCenter, setViewCenter] = useState(DEFAULT_MAP_CENTER);
+  const [healthCenter, setHealthCenter] = useState(DEFAULT_MAP_CENTER);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [zoom, setZoom] = useState(DEFAULT_MAP_ZOOM);
   const [filter, setFilter] = useState<"all" | "issues" | "positive" | "resolved">("all");
 
-  const debouncedCenter = useDebouncedValue(center, 500);
+  const debouncedHealthCenter = useDebouncedValue(healthCenter, 500);
 
   const loadIncidents = useCallback(async () => {
     const res = await fetch("/api/incidents");
@@ -69,12 +74,11 @@ export default function HomePage() {
 
   useEffect(() => {
     loadIncidents();
-    loadHealth(DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng);
-  }, [loadIncidents, loadHealth]);
+  }, [loadIncidents]);
 
   useEffect(() => {
-    loadHealth(debouncedCenter.lat, debouncedCenter.lng);
-  }, [debouncedCenter.lat, debouncedCenter.lng, loadHealth]);
+    loadHealth(debouncedHealthCenter.lat, debouncedHealthCenter.lng);
+  }, [debouncedHealthCenter.lat, debouncedHealthCenter.lng, loadHealth]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -82,7 +86,8 @@ export default function HomePage() {
         (pos) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setUserLocation(loc);
-          setCenter(loc);
+          setViewCenter(loc);
+          setHealthCenter(loc);
           setZoom(USER_LOCATION_ZOOM);
         },
         () => {},
@@ -96,7 +101,8 @@ export default function HomePage() {
     navigator.geolocation.getCurrentPosition((pos) => {
       const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       setUserLocation(loc);
-      setCenter(loc);
+      setViewCenter(loc);
+      setHealthCenter(loc);
       setZoom(USER_LOCATION_ZOOM);
     });
   };
@@ -115,12 +121,12 @@ export default function HomePage() {
       <div className="absolute inset-0 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         <MapView
           incidents={filtered}
-          center={center}
+          center={viewCenter}
           zoom={zoom}
           selectedId={selectedId}
           userLocation={userLocation}
           onSelect={setSelectedId}
-          onMove={(lat, lng) => setCenter({ lat, lng })}
+          onMove={(lat, lng) => setHealthCenter({ lat, lng })}
           onZoom={setZoom}
         />
       </div>
@@ -129,7 +135,8 @@ export default function HomePage() {
         <div className="pointer-events-auto mx-auto w-full max-w-xl">
           <SearchBar
             onSelect={(lat, lng) => {
-              setCenter({ lat, lng });
+              setViewCenter({ lat, lng });
+              setHealthCenter({ lat, lng });
               setZoom(USER_LOCATION_ZOOM);
               setSelectedId(null);
             }}

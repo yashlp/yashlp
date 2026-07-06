@@ -1,20 +1,38 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Eye, Lock } from "lucide-react";
+import { ArrowRight, Check, Eye, Lock, MapPin } from "lucide-react";
 import { FREE_FEATURES, PAID_REPORTS } from "@/lib/categories";
 import { getReportPrice } from "@/lib/report-demo-data";
+import { PlaceSearch } from "@/components/place-search";
 import { PricingRegionBanner, ReportPrice } from "@/components/report-price";
 import { usePricingRegion } from "@/hooks/use-pricing-region";
 import { getLocalizedTierPrice } from "@/lib/report-pricing";
 import type { ReportProductId } from "@/lib/report-demo-data";
+import type { GeocodePlace } from "@/lib/geocode";
+import { placeQueryString } from "@/lib/geocode";
+import { GLOBAL_SAMPLE_PLACES } from "@/lib/constants";
+
+const DEFAULT_PLACE: GeocodePlace = {
+  name: GLOBAL_SAMPLE_PLACES[2].name,
+  lat: GLOBAL_SAMPLE_PLACES[2].lat,
+  lng: GLOBAL_SAMPLE_PLACES[2].lng,
+  countryCode: "IN",
+};
 
 export default function ReportsPage() {
-  const { market } = usePricingRegion();
+  const [selectedPlace, setSelectedPlace] = useState<GeocodePlace | null>(null);
+  const areaCoords = selectedPlace
+    ? { lat: selectedPlace.lat, lng: selectedPlace.lng }
+    : { lat: DEFAULT_PLACE.lat, lng: DEFAULT_PLACE.lng };
+  const { market } = usePricingRegion(areaCoords);
   const smallPrice = getLocalizedTierPrice("small", market);
   const bigPrice = getLocalizedTierPrice("big", market);
   const smallReports = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "small");
   const bigReports = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "big");
+  const placeLabel = selectedPlace?.name ?? DEFAULT_PLACE.name;
+  const demoQuery = selectedPlace ? `?${placeQueryString(selectedPlace)}` : "";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
@@ -24,12 +42,33 @@ export default function ReportsPage() {
         </h1>
         <p className="mt-2 max-w-2xl text-stone-600">
           AI interprets community-verified data so you can answer real questions —{" "}
-          <em>Is this area good? Should I buy? Which neighbourhood is better?</em> See the{" "}
-          <strong>full report</strong> before you buy.
+          <em>Is this area good? Should I buy? Which neighbourhood is better?</em>
         </p>
-        <PricingRegionBanner className="mt-4" />
+
+        <div className="mt-6 rounded-2xl border border-orange-100 bg-white p-4">
+          <PlaceSearch
+            selectedPlace={selectedPlace}
+            onSelect={setSelectedPlace}
+            onClear={() => setSelectedPlace(null)}
+            label="Where do you want a report?"
+            hint="Select country, then search city, neighbourhood, state, or pincode"
+          />
+          {!selectedPlace && (
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-stone-400">
+              <MapPin className="h-3.5 w-3.5" />
+              Showing sample pricing for {DEFAULT_PLACE.name} until you pick a location
+            </p>
+          )}
+          {selectedPlace && (
+            <p className="mt-2 text-xs font-medium text-emerald-700">
+              Reports will use data near {placeLabel}
+            </p>
+          )}
+        </div>
+
+        <PricingRegionBanner areaCoords={areaCoords} className="mt-4" />
         <Link
-          href="/reports/demo/area-insight"
+          href={`/reports/demo/area-insight${demoQuery}`}
           className="mt-4 inline-flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-200 hover:bg-orange-700"
         >
           <Eye className="h-4 w-4" />
@@ -55,14 +94,18 @@ export default function ReportsPage() {
 
       <ReportTierSection
         title={`Standard — ${smallPrice.formatted}`}
-        subtitle="Area Insight, Area Comparison. AI answers: is this area good? which is better?"
+        subtitle={`Area Insight, Area Comparison for ${placeLabel}`}
         reports={smallReports}
+        demoQuery={demoQuery}
+        areaCoords={areaCoords}
       />
 
       <ReportTierSection
         title={`Detailed — ${bigPrice.formatted}`}
-        subtitle="Property Due Diligence, Business Location, Advanced presets. High-stakes decisions."
+        subtitle="Property Due Diligence, Business Location, Advanced presets"
         reports={bigReports}
+        demoQuery={demoQuery}
+        areaCoords={areaCoords}
       />
 
       <p className="mt-8 text-center text-sm text-stone-500">
@@ -80,10 +123,14 @@ function ReportTierSection({
   title,
   subtitle,
   reports,
+  demoQuery,
+  areaCoords,
 }: {
   title: string;
   subtitle: string;
   reports: (typeof PAID_REPORTS)[number][];
+  demoQuery: string;
+  areaCoords: { lat: number; lng: number };
 }) {
   return (
     <section className="mt-10">
@@ -102,7 +149,7 @@ function ReportTierSection({
                 <p className="text-xs italic text-stone-500">&ldquo;{report.customerQuestion}&rdquo;</p>
                 <p className="mt-1 text-xs text-orange-600">{report.audience}</p>
                 <p className="mt-1 text-sm font-semibold text-stone-800">
-                  <ReportPrice productId={report.id as ReportProductId} />
+                  <ReportPrice productId={report.id as ReportProductId} areaCoords={areaCoords} />
                 </p>
               </div>
             </div>
@@ -115,7 +162,7 @@ function ReportTierSection({
               ))}
             </ul>
             <Link
-              href={`/reports/demo/${report.id}`}
+              href={`/reports/demo/${report.id}${demoQuery}`}
               className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-2.5 text-sm font-semibold text-white hover:bg-orange-700"
             >
               <Eye className="h-4 w-4" />

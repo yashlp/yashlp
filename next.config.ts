@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
   experimental: {
-    optimizePackageImports: ["lucide-react", "date-fns"],
+    optimizePackageImports: ["lucide-react", "date-fns", "react-leaflet"],
   },
   images: {
     formats: ["image/avif", "image/webp"],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
 import {
   MapContainer,
@@ -10,7 +10,8 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import { DEFAULT_MAP_ZOOM, STREET_LEVEL_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
+import { DEFAULT_MAP_ZOOM, STREET_LEVEL_ZOOM } from "@/lib/constants";
+import { haversineDistance } from "@/lib/utils";
 import "leaflet/dist/leaflet.css";
 
 type Incident = {
@@ -41,19 +42,7 @@ const userLocationIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
-const pinPickerIcon = L.divIcon({
-  html: `<div style="
-    width:36px;height:36px;
-    background:#ea580c;
-    border:3px solid white;
-    border-radius:50% 50% 50% 0;
-    transform:rotate(-45deg);
-    box-shadow:0 4px 12px rgba(234,88,12,0.45);
-  "></div>`,
-  className: "",
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-});
+const iconCache = new Map<string, L.DivIcon>();
 
 function MapMover({
   center,
@@ -67,13 +56,24 @@ function MapMover({
 
   useEffect(() => {
     if (
-      prev.current.lat !== center.lat ||
-      prev.current.lng !== center.lng ||
-      prev.current.zoom !== zoom
+      prev.current.lat === center.lat &&
+      prev.current.lng === center.lng &&
+      prev.current.zoom === zoom
     ) {
-      map.flyTo([center.lat, center.lng], zoom, { duration: 0.8 });
-      prev.current = { ...center, zoom };
+      return;
     }
+
+    const mapCenter = map.getCenter();
+    const distM = haversineDistance(mapCenter.lat, mapCenter.lng, center.lat, center.lng);
+    const zoomChanged = prev.current.zoom !== zoom;
+
+    if (zoomChanged || distM > 2000) {
+      map.flyTo([center.lat, center.lng], zoom, { duration: 0.5 });
+    } else if (distM > 30) {
+      map.setView([center.lat, center.lng], zoom, { animate: false });
+    }
+
+    prev.current = { ...center, zoom };
   }, [center, zoom, map]);
 
   return null;
@@ -98,18 +98,11 @@ function MapEvents({
   return null;
 }
 
-function PinPickerEvents({
-  onPick,
-}: {
-  onPick: (lat: number, lng: number) => void;
-}) {
-  useMapEvents({
-    click: (e) => onPick(e.latlng.lat, e.latlng.lng),
-  });
-  return null;
-}
-
 function createIcon(incident: Incident, selected: boolean) {
+  const key = `${incident.id}:${incident.status}:${incident.visibilityStage}:${selected}`;
+  const cached = iconCache.get(key);
+  if (cached) return cached;
+
   const stage = incident.visibilityStage ?? "verified";
   const isSeed = stage === "seed";
   const isPrivate = stage === "private";
@@ -165,12 +158,14 @@ function createIcon(incident: Incident, selected: boolean) {
       ${incident.status === "resolved" ? `<span style="position:absolute;bottom:-2px;right:-2px;font-size:10px;background:white;border-radius:50%;padding:1px;">✓</span>` : ""}
     </div>`;
 
-  return L.divIcon({
+  const icon = L.divIcon({
     html,
     className: "",
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
+  iconCache.set(key, icon);
+  return icon;
 }
 
 function visibilityLabel(incident: Incident): string {
@@ -201,10 +196,13 @@ export function MapView({
   onMove: (lat: number, lng: number) => void;
   onZoom?: (zoom: number) => void;
 }) {
-  const visibleIncidents =
-    zoom < STREET_LEVEL_ZOOM
-      ? incidents.filter((i) => i.visibilityStage !== "seed")
-      : incidents;
+  const visibleIncidents = useMemo(
+    () =>
+      zoom < STREET_LEVEL_ZOOM
+        ? incidents.filter((i) => i.visibilityStage !== "seed")
+        : incidents,
+    [incidents, zoom]
+  );
 
   return (
     <MapContainer
@@ -254,52 +252,5 @@ export function MapView({
   );
 }
 
-/** Mini map for picking report location — tap map or drag pin */
-export function LocationPicker({
-  userLocation,
-  pinLocation,
-  onPinChange,
-}: {
-  userLocation: { lat: number; lng: number } | null;
-  pinLocation: { lat: number; lng: number };
-  onPinChange: (lat: number, lng: number) => void;
-}) {
-  const center = userLocation ?? pinLocation;
-
-  return (
-    <div className="overflow-hidden rounded-2xl border border-orange-200 shadow-inner">
-      <MapContainer
-        center={[center.lat, center.lng]}
-        zoom={USER_LOCATION_ZOOM}
-        className="h-56 w-full sm:h-64"
-        zoomControl={true}
-      >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <PinPickerEvents onPick={onPinChange} />
-
-        {userLocation && (
-          <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon} />
-        )}
-
-        <Marker
-          position={[pinLocation.lat, pinLocation.lng]}
-          icon={pinPickerIcon}
-          draggable
-          eventHandlers={{
-            dragend: (e) => {
-              const m = e.target;
-              const pos = m.getLatLng();
-              onPinChange(pos.lat, pos.lng);
-            },
-          }}
-        />
-      </MapContainer>
-      <p className="bg-orange-50 px-3 py-2 text-center text-xs text-stone-500">
-        <span className="inline-block h-2 w-2 rounded-full bg-blue-600 align-middle" /> You
-        {" · "}
-        <span className="inline-block h-2 w-2 rounded-full bg-orange-600 align-middle" /> Report
-        pin — tap map or drag orange pin
-      </p>
-    </div>
-  );
-}
+/** @deprecated Import from `@/components/map-picker` instead */
+export { LocationPicker } from "@/components/map-picker";

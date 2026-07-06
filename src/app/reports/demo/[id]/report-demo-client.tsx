@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft, FileText } from "lucide-react";
@@ -8,6 +8,7 @@ import { IntelligenceReportView } from "@/components/intelligence-report-view";
 import { ComparisonReportView } from "@/components/comparison-report-view";
 import { ReportPrice } from "@/components/report-price";
 import { GLOBAL_SAMPLE_PLACES } from "@/lib/constants";
+import { parsePlaceFromSearchParams } from "@/lib/geocode";
 import {
   buildComparisonDemoReport,
   buildDemoReport,
@@ -30,11 +31,29 @@ export function ReportDemoClient() {
   const resolvedId = resolveReportProductId(rawId);
   const product = resolvedId ? getReportProduct(resolvedId) : undefined;
   const [report, setReport] = useState<IntelligenceReportData | null>(null);
-  const areaCoords = { lat: MUMBAI.lat, lng: MUMBAI.lng };
+
+  const selectedPlace = useMemo(() => parsePlaceFromSearchParams(searchParams), [searchParams]);
+  const areaCoords = selectedPlace
+    ? { lat: selectedPlace.lat, lng: selectedPlace.lng }
+    : { lat: MUMBAI.lat, lng: MUMBAI.lng };
+  const areaLabel = selectedPlace?.name ?? "Bandra West, Mumbai, India";
 
   const presetParam = searchParams.get("preset");
   const preset: AdvancedPreset | undefined =
     presetParam && VALID_PRESETS.has(presetParam as AdvancedPreset) ? (presetParam as AdvancedPreset) : undefined;
+
+  const locationParams = useMemo(() => {
+    if (!selectedPlace) return "";
+    const p = new URLSearchParams({
+      lat: String(selectedPlace.lat),
+      lng: String(selectedPlace.lng),
+      place: selectedPlace.name,
+    });
+    if (selectedPlace.countryCode) p.set("country", selectedPlace.countryCode);
+    return p.toString();
+  }, [selectedPlace]);
+
+  const locationSuffix = locationParams ? `&${locationParams}` : "";
 
   useEffect(() => {
     if (!resolvedId || resolvedId === "area-comparison") return;
@@ -42,15 +61,15 @@ export function ReportDemoClient() {
     const demo = buildDemoReport(resolvedId, {
       preset: preset ?? (resolvedId === "advanced-report" ? "family" : undefined),
     });
-    setReport(demo);
+    setReport(selectedPlace ? { ...demo, areaName: areaLabel } : demo);
 
-    fetch(`/api/health?lat=${MUMBAI.lat}&lng=${MUMBAI.lng}`)
+    fetch(`/api/health?lat=${areaCoords.lat}&lng=${areaCoords.lng}`)
       .then((r) => r.json())
       .then((health) => {
         setReport((prev) => (prev ? mergeLiveHealth(prev, health) : prev));
       })
       .catch(() => {});
-  }, [resolvedId, preset]);
+  }, [resolvedId, preset, areaCoords.lat, areaCoords.lng, areaLabel, selectedPlace]);
 
   if (!product && rawId !== "area-comparison") {
     return (
@@ -89,10 +108,15 @@ export function ReportDemoClient() {
           <ArrowLeft className="h-4 w-4" />
           All reports
         </Link>
-        <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800">
-          <FileText className="h-3.5 w-3.5" />
-          Full report — pay{" "}
-          <ReportPrice productId={resolvedId as ReportProductId} areaCoords={areaCoords} className="font-bold" />
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800">
+            <FileText className="h-3.5 w-3.5" />
+            Full report — pay{" "}
+            <ReportPrice productId={resolvedId as ReportProductId} areaCoords={areaCoords} className="font-bold" />
+          </div>
+          {selectedPlace && (
+            <p className="text-xs text-stone-500">Location: {areaLabel}</p>
+          )}
         </div>
       </div>
 
@@ -101,7 +125,7 @@ export function ReportDemoClient() {
           {ADVANCED_PRESETS.map((p) => (
             <Link
               key={p.id}
-              href={`/reports/demo/advanced-report?preset=${p.id}`}
+              href={`/reports/demo/advanced-report?preset=${p.id}${locationSuffix}`}
               className={`rounded-xl border px-3 py-2 text-sm font-medium ${
                 (preset ?? "family") === p.id
                   ? "border-violet-400 bg-violet-50 text-violet-900"

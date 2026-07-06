@@ -10,9 +10,11 @@ import { photoRuleLabel } from "@/lib/categories";
 import { INSTITUTION_LABELS } from "@/lib/compliance";
 import { CORRUPTION_DISCLAIMER } from "@/lib/compliance/types";
 import { compressImageFile } from "@/lib/image-compress";
+import { PlaceSearch } from "@/components/place-search";
+import type { GeocodePlace } from "@/lib/geocode";
 
 const LocationPicker = dynamic(
-  () => import("@/components/map-view").then((m) => m.LocationPicker),
+  () => import("@/components/map-picker").then((m) => m.LocationPicker),
   { ssr: false, loading: () => <div className="h-56 animate-pulse rounded-2xl bg-orange-50 sm:h-64" /> }
 );
 
@@ -39,6 +41,7 @@ export default function ReportPage() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [pinLocation, setPinLocation] = useState(DEFAULT_MAP_CENTER);
+  const [selectedPlace, setSelectedPlace] = useState<GeocodePlace | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [duplicate, setDuplicate] = useState<{ id: string; title: string } | null>(null);
@@ -83,7 +86,7 @@ export default function ReportPage() {
         setPinLocation(loc);
       },
       () => {},
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 8000 }
     );
   }, []);
 
@@ -165,6 +168,7 @@ export default function ReportPage() {
         description: description || undefined,
         latitude: pinLocation.lat,
         longitude: pinLocation.lng,
+        address: selectedPlace?.name,
         photoUrls: photos,
         attachToExisting,
         institutionType: institutionType || undefined,
@@ -412,9 +416,21 @@ export default function ReportPage() {
             )}
           </div>
 
+          <PlaceSearch
+            selectedPlace={selectedPlace}
+            onSelect={(place) => {
+              setSelectedPlace(place);
+              setPinLocation({ lat: place.lat, lng: place.lng });
+            }}
+            onClear={() => setSelectedPlace(null)}
+            label="Search location"
+            hint="Pick country first, then city, area, state, or pincode / postal code"
+            className="mb-4"
+          />
+
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium text-stone-700">Pin location</label>
+              <label className="text-sm font-medium text-stone-700">Fine-tune on map</label>
               <button
                 type="button"
                 onClick={useMyLocation}
@@ -426,7 +442,10 @@ export default function ReportPage() {
             <LocationPicker
               userLocation={userLocation}
               pinLocation={pinLocation}
-              onPinChange={(lat, lng) => setPinLocation({ lat, lng })}
+              onPinChange={(lat, lng) => {
+                setPinLocation({ lat, lng });
+                setSelectedPlace(null);
+              }}
             />
           </div>
 
