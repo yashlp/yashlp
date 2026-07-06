@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Search, Loader2, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { SearchInput } from "@/components/search-input";
 
 type GeocodeResult = { name: string; lat: number; lng: number };
 
@@ -38,24 +39,18 @@ export function SearchBar({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 py-3 shadow-lg shadow-orange-100/50">
-        {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
-        ) : (
-          <Search className="h-4 w-4 text-orange-400" />
-        )}
-        <input
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 200)}
-          placeholder="Search any city, street, or place worldwide..."
-          className="flex-1 bg-transparent text-sm text-stone-800 outline-none placeholder:text-stone-400"
-        />
-      </div>
+      <SearchInput
+        value={query}
+        onChange={(v) => {
+          setQuery(v);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 200)}
+        loading={loading}
+        placeholder="Search city, street, or place..."
+        className="shadow-lg shadow-orange-100/50"
+      />
       {open && query.length >= 2 && results.length > 0 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-xl">
           {results.map((p) => (
@@ -66,7 +61,7 @@ export function SearchBar({
                 setQuery(p.name.split(",")[0]);
                 setOpen(false);
               }}
-              className="flex w-full items-start gap-2 px-4 py-3 text-left text-sm hover:bg-orange-50"
+              className="flex w-full items-start gap-3 px-4 py-3 text-left text-sm hover:bg-orange-50"
             >
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
               <span className="line-clamp-2 text-stone-700">{p.name}</span>

@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Camera, CheckCircle, Search, X, Zap } from "lucide-react";
+import { AlertTriangle, Camera, CheckCircle, X, Zap } from "lucide-react";
+import { SearchInput } from "@/components/search-input";
 import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT, POPULAR_CATEGORY_SLUGS } from "@/lib/constants";
 import { photoRuleLabel } from "@/lib/categories";
 
@@ -187,16 +188,12 @@ export default function ReportPage() {
 
       {!selected ? (
         <div className="mt-4 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search report type… e.g. pothole, garbage, lights"
-              className="input-field w-full pl-10"
-              autoFocus
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search report type… pothole, garbage, lights"
+            autoFocus
+          />
 
           {!search && popular.length > 0 && (
             <div>
