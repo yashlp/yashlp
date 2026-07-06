@@ -73,8 +73,9 @@ export function TermsGate({ children }: { children: React.ReactNode }) {
 
   if (accepted === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#fffaf7]">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#fffaf7]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-200 border-t-orange-600" />
+        <p className="text-sm text-stone-500">Loading CivicLens...</p>
       </div>
     );
   }

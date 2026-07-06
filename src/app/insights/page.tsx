@@ -31,7 +31,9 @@ export default function InsightsPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 pb-24">
       <h1 className="text-2xl font-bold">Community Insights</h1>
-      <p className="mt-1 text-muted">Trends, rankings, and health patterns across your area.</p>
+        <p className="mt-1 text-muted">
+          Best and worst areas by Community Health Score — grouped by city or neighborhood.
+        </p>
 
       <section className="mt-8">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
@@ -81,18 +83,27 @@ export default function InsightsPage() {
           Area Rankings
         </h2>
         <div className="mt-4 space-y-2">
-          {rankings.map((r, i) => (
+          {rankings.length === 0 ? (
+            <p className="rounded-xl border border-border bg-white p-4 text-sm text-muted">
+              No verified area data yet. Reports need community validation before they appear in
+              rankings.
+            </p>
+          ) : (
+            rankings.map((r, i) => (
             <div
-              key={r.name}
+              key={`${r.name}-${i}`}
               className="flex items-center gap-4 rounded-xl border border-border bg-white p-4"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-sm font-bold">
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-700"
+                title={`Rank ${i + 1}`}
+              >
                 {i + 1}
               </span>
-              <div className="flex-1">
-                <p className="font-medium">{r.name}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{r.name}</p>
                 <p className="text-xs text-muted">
-                  {r.incidentCount} verified · {Math.round(r.confidence * 100)}% confidence
+                  {r.incidentCount} verified reports · {Math.round(r.confidence * 100)}% confidence
                 </p>
               </div>
               <div className="text-right">
@@ -109,7 +120,8 @@ export default function InsightsPage() {
                 <TrendingDown className="h-5 w-5 text-muted opacity-40" />
               )}
             </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
     </div>

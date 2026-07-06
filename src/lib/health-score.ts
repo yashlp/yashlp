@@ -1,10 +1,12 @@
 import { prisma } from "./db";
 import { haversineDistance } from "./utils";
+import { areaGroupKey, resolveAreaName } from "./area-names";
 
 type IncidentForScore = {
   id: string;
   latitude: number;
   longitude: number;
+  address?: string | null;
   isPositive: boolean;
   confidenceScore: number;
   status: string;
@@ -94,26 +96,43 @@ export async function getRankings(limit = 10) {
     include: { category: true },
   });
 
-  const grid = new Map<string, { lat: number; lng: number; incidents: IncidentForScore[] }>();
+  const grid = new Map<
+    string,
+    { lat: number; lng: number; incidents: IncidentForScore[]; addresses: string[] }
+  >();
 
   for (const inc of incidents) {
-    const key = `${inc.latitude.toFixed(2)},${inc.longitude.toFixed(2)}`;
-    const cell = grid.get(key) ?? { lat: inc.latitude, lng: inc.longitude, incidents: [] };
+    const key = areaGroupKey(inc.latitude, inc.longitude, inc.address);
+    const cell = grid.get(key) ?? {
+      lat: inc.latitude,
+      lng: inc.longitude,
+      incidents: [],
+      addresses: [],
+    };
     cell.incidents.push(inc);
+    if (inc.address?.trim()) cell.addresses.push(inc.address.trim());
     grid.set(key, cell);
   }
 
   const rankings = Array.from(grid.values()).map((cell) => {
     const score = computeHealthScore(cell.incidents);
+    const centroidLat =
+      cell.incidents.reduce((s, i) => s + i.latitude, 0) / cell.incidents.length;
+    const centroidLng =
+      cell.incidents.reduce((s, i) => s + i.longitude, 0) / cell.incidents.length;
+
     return {
-      latitude: cell.lat,
-      longitude: cell.lng,
-      name: `Area near ${cell.lat.toFixed(3)}, ${cell.lng.toFixed(3)}`,
+      latitude: centroidLat,
+      longitude: centroidLng,
+      name: resolveAreaName(centroidLat, centroidLng, cell.addresses),
       ...score,
     };
   });
 
-  return rankings.sort((a, b) => b.overallScore - a.overallScore).slice(0, limit);
+  return rankings
+    .filter((r) => r.incidentCount > 0)
+    .sort((a, b) => b.overallScore - a.overallScore)
+    .slice(0, limit);
 }
 
 export async function getTrends(days = 30) {
