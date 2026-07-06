@@ -94,6 +94,7 @@ async function main() {
     { city: GLOBAL_SAMPLE_PLACES[2], cat: "long-queue-government-office", status: INCIDENT_STATUSES.ACTIVE, confirmations: 3, isPositive: false },
     { city: GLOBAL_SAMPLE_PLACES[2], cat: "no-shade-heat-hazard", status: INCIDENT_STATUSES.ACTIVE, confirmations: 5, isPositive: false },
     { city: GLOBAL_SAMPLE_PLACES[2], cat: "trusted-street-food-spot", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 12, isPositive: true },
+    { city: GLOBAL_SAMPLE_PLACES[2], cat: "great-community-area", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 11, isPositive: true },
     { city: GLOBAL_SAMPLE_PLACES[2], cat: "clean-public-toilet", status: INCIDENT_STATUSES.POSITIVE_ACTIVE, confirmations: 7, isPositive: true },
     {
       city: GLOBAL_SAMPLE_PLACES[2],

@@ -124,7 +124,20 @@ export async function POST(req: Request) {
 
     const duplicate = data.attachToExisting
       ? await prisma.incident.findUnique({ where: { id: data.attachToExisting } })
-      : await findNearbyDuplicate(data.latitude, data.longitude, data.categoryId, isPositive);
+      : await findNearbyDuplicate(
+          data.latitude,
+          data.longitude,
+          data.categoryId,
+          isPositive,
+          category.slug
+        );
+
+    if (duplicate && duplicate.reporterId === user.id && data.attachToExisting) {
+      return NextResponse.json(
+        { error: "You cannot confirm your own report — ask a neighbour to verify it" },
+        { status: 400 }
+      );
+    }
 
     if (duplicate && !data.attachToExisting) {
       return NextResponse.json({

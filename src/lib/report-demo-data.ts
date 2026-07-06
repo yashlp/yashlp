@@ -40,8 +40,13 @@ export const LEGACY_REPORT_IDS: Record<string, ReportProductId> = {
 };
 
 export function resolveReportProductId(id: string): ReportProductId | null {
-  if (getReportProduct(id)) return id as ReportProductId;
+  if (PAID_REPORTS.some((r) => r.id === id)) return id as ReportProductId;
   return LEGACY_REPORT_IDS[id] ?? null;
+}
+
+export function getReportProduct(id: string) {
+  const resolved = resolveReportProductId(id);
+  return resolved ? PAID_REPORTS.find((r) => r.id === resolved) : undefined;
 }
 
 export function getReportPrice(productId: ReportProductId) {
@@ -141,11 +146,6 @@ const HEATMAP = [
   { zone: "Carter Road promenade", level: "low" as const, issue: "Strong positive food & cleanliness" },
   { zone: "RTO / service lane", level: "medium" as const, issue: "Queue & wait-time reports" },
 ];
-
-export function getReportProduct(id: string) {
-  const resolved = resolveReportProductId(id);
-  return resolved ? PAID_REPORTS.find((r) => r.id === resolved) : undefined;
-}
 
 export function buildDemoReport(
   productId: ReportProductId,

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Camera, CheckCircle, X, Zap } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
-import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT, POPULAR_CATEGORY_SLUGS } from "@/lib/constants";
+import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT, POPULAR_CATEGORY_SLUGS, POPULAR_POSITIVE_CATEGORY_SLUGS } from "@/lib/constants";
 import { photoRuleLabel } from "@/lib/categories";
 import { INSTITUTION_LABELS } from "@/lib/compliance";
 import { CORRUPTION_DISCLAIMER } from "@/lib/compliance/types";
@@ -79,10 +79,11 @@ export default function ReportPage() {
     );
   }, [categories, search]);
 
-  const popular = useMemo(
-    () => categories.filter((c) => POPULAR_CATEGORY_SLUGS.includes(c.slug)),
-    [categories]
-  );
+  const popular = useMemo(() => {
+    const slugs =
+      signalType === "positive" ? POPULAR_POSITIVE_CATEGORY_SLUGS : POPULAR_CATEGORY_SLUGS;
+    return categories.filter((c) => slugs.includes(c.slug));
+  }, [categories, signalType]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Category[]>();
@@ -202,7 +203,7 @@ export default function ReportPage() {
               : "bg-white text-stone-500 ring-1 ring-orange-100"
           }`}
         >
-          <CheckCircle className="h-4 w-4" /> Positive
+          <CheckCircle className="h-4 w-4" /> Something good
         </button>
       </div>
 

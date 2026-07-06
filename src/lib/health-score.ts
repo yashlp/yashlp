@@ -40,8 +40,9 @@ export function computeHealthScore(incidents: IncidentForScore[]) {
     const slug = inc.category.slug;
 
     if (inc.isPositive || inc.status === "resolved") {
-      bonus += 3 * weight;
-      categoryImpact[slug] = (categoryImpact[slug] ?? 0) + 3 * weight;
+      const boost = inc.category.slug === "great-community-area" ? 5 : 3;
+      bonus += boost * weight;
+      categoryImpact[slug] = (categoryImpact[slug] ?? 0) + boost * weight;
     } else if (inc.status === "active" || inc.status === "pending") {
       penalty += 5 * weight;
       categoryImpact[slug] = (categoryImpact[slug] ?? 0) - 5 * weight;

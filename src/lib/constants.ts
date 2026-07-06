@@ -3,7 +3,9 @@ export const VERIFIED_CONFIRMATION_THRESHOLD = 10;
 export const DISPUTE_REOPEN_THRESHOLD = 2;
 export const RESOLUTION_CONFIRM_THRESHOLD = 2;
 export const DUPLICATE_RADIUS_METERS = 50;
+export const AREA_RECOGNITION_DEDUP_RADIUS_METERS = 200;
 export const DAILY_CATEGORY_TTL_DAYS = 30;
+export const AREA_RECOGNITION_TTL_DAYS = 90;
 
 /** @deprecated use SEED_CONFIRMATION_THRESHOLD */
 export const CONFIRMATION_THRESHOLD = SEED_CONFIRMATION_THRESHOLD;
@@ -49,9 +51,14 @@ export const POPULAR_CATEGORY_SLUGS = [
   "broken-public-toilet",
   "garbage-pile-up",
   "no-shade-heat-hazard",
-  "trusted-street-food-spot",
   "long-queue-government-office",
+];
+
+export const POPULAR_POSITIVE_CATEGORY_SLUGS = [
+  "great-community-area",
+  "trusted-street-food-spot",
   "clean-public-toilet",
+  "volunteer-activity",
 ];
 
 export const GLOBAL_SAMPLE_PLACES = [

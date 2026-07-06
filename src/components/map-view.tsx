@@ -25,7 +25,7 @@ type Incident = {
   confidenceScore: number;
   confirmationCount?: number;
   isPositive: boolean;
-  category: { emoji: string; name: string };
+  category: { emoji: string; name: string; slug?: string };
 };
 
 const userLocationIcon = L.divIcon({
@@ -115,7 +115,14 @@ function createIcon(incident: Incident, selected: boolean) {
   const isPrivate = stage === "private";
 
   let color: string;
-  if (incident.isPositive) {
+  const isAreaRecognition = incident.category.slug === "great-community-area";
+
+  if (isAreaRecognition) {
+    color =
+      incident.status === "positive_active" || incident.status === "active"
+        ? "#16a34a"
+        : "#86efac";
+  } else if (incident.isPositive) {
     color =
       incident.status === "positive_active" || incident.status === "active"
         ? "#2563eb"
@@ -150,7 +157,7 @@ function createIcon(incident: Incident, selected: boolean) {
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
       font-size:${selected ? 18 : isSeed ? 13 : 16}px;
-      box-shadow:0 2px 10px rgba(234,88,12,0.35);
+      box-shadow:0 2px 10px rgba(${isAreaRecognition ? "22,163,74" : "234,88,12"},0.35);
       transform:translate(-50%,-50%);
       position:relative;
     ">

@@ -4,11 +4,13 @@ import {
   VERIFIED_CONFIRMATION_THRESHOLD,
   DISPUTE_REOPEN_THRESHOLD,
   DUPLICATE_RADIUS_METERS,
+  AREA_RECOGNITION_DEDUP_RADIUS_METERS,
   INCIDENT_STATUSES,
   RESOLUTION_CONFIRM_THRESHOLD,
   VISIBILITY,
   VISIBILITY_STAGE,
 } from "./constants";
+import { isAreaRecognitionCategory } from "./categories";
 import { haversineDistance } from "./utils";
 import { buildAggregationSummary } from "./compliance";
 
@@ -76,9 +78,15 @@ export async function findNearbyDuplicate(
   latitude: number,
   longitude: number,
   categoryId: string,
-  isPositive: boolean
+  isPositive: boolean,
+  categorySlug?: string
 ) {
   const now = new Date();
+  const radiusMeters =
+    categorySlug && isAreaRecognitionCategory(categorySlug)
+      ? AREA_RECOGNITION_DEDUP_RADIUS_METERS
+      : DUPLICATE_RADIUS_METERS;
+
   const incidents = await prisma.incident.findMany({
     where: {
       categoryId,
@@ -100,8 +108,7 @@ export async function findNearbyDuplicate(
 
   return incidents.find(
     (inc) =>
-      haversineDistance(latitude, longitude, inc.latitude, inc.longitude) <=
-      DUPLICATE_RADIUS_METERS
+      haversineDistance(latitude, longitude, inc.latitude, inc.longitude) <= radiusMeters
   );
 }
 

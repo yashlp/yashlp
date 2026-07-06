@@ -90,7 +90,7 @@ export const ISSUE_CATEGORIES: CategoryDefinition[] = [
   { slug: "no-shade-heat-hazard", name: "No Shade / Heat Hazard", emoji: "🌡️", type: "issue", group: "Daily Life", photoRule: "optional", description: "No tree cover or shade in hot public areas", ttlDays: 30 },
 ];
 
-/** 17 positive community signals */
+/** 18 positive community signals */
 export const POSITIVE_CATEGORIES: CategoryDefinition[] = [
   // Infrastructure Improvements (7)
   { slug: "road-repaired", name: "Road Repaired", emoji: "🛣️", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Road has been repaired or resurfaced" },
@@ -101,7 +101,18 @@ export const POSITIVE_CATEGORIES: CategoryDefinition[] = [
   { slug: "building-safety-improved", name: "Building Safety Improved", emoji: "🏢", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Building safety has been improved" },
   { slug: "traffic-system-improved", name: "Traffic System Improved", emoji: "🚦", type: "positive", group: "Infrastructure Improvements", photoRule: "optional", description: "Traffic signals or flow improved" },
 
-  // Community & Social Positives (5)
+  // Community & Social Positives (6)
+  {
+    slug: "great-community-area",
+    name: "Great Community Area",
+    emoji: "🏘️",
+    type: "positive",
+    group: "Community & Social",
+    photoRule: "optional",
+    description:
+      "This neighbourhood feels welcoming, well-kept, and strong on community — worth recommending to others",
+    ttlDays: 90,
+  },
   { slug: "local-festival", name: "Local Festival", emoji: "🎉", type: "positive", group: "Community & Social", photoRule: "optional", description: "Community festival or cultural event" },
   { slug: "blood-donation-camp", name: "Blood Donation Camp", emoji: "🩸", type: "positive", group: "Community & Social", photoRule: "optional", description: "Blood donation drive in the community" },
   { slug: "volunteer-activity", name: "Volunteer Activity", emoji: "🤝", type: "positive", group: "Community & Social", photoRule: "optional", description: "Community volunteer work or cleanup" },
@@ -128,7 +139,14 @@ export const ALL_CATEGORIES: CategoryDefinition[] = [
 
 export const DAILY_LIFE_TTL_DAYS = 30;
 
-/** Slugs that expire after 30 days — kept in sync with category ttlDays */
+/** Area-recognition positives — longer TTL, stricter verification */
+export const AREA_RECOGNITION_SLUGS = ["great-community-area"] as const;
+
+export function isAreaRecognitionCategory(slug: string): boolean {
+  return (AREA_RECOGNITION_SLUGS as readonly string[]).includes(slug);
+}
+
+/** Slugs that expire after N days — kept in sync with category ttlDays */
 export function getCategoryTtlDays(cat: CategoryDefinition): number | null {
   return cat.ttlDays ?? null;
 }

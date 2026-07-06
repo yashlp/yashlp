@@ -13,6 +13,20 @@ export async function POST(
 
   const { id } = await params;
 
+  const target = await prisma.incident.findUnique({
+    where: { id },
+    select: { reporterId: true },
+  });
+  if (!target) {
+    return NextResponse.json({ error: "Incident not found" }, { status: 404 });
+  }
+  if (target.reporterId === user.id) {
+    return NextResponse.json(
+      { error: "You cannot confirm your own report — ask a neighbour to verify it" },
+      { status: 400 }
+    );
+  }
+
   const existing = await prisma.confirmation.findUnique({
     where: { incidentId_userId: { incidentId: id, userId: user.id } },
   });
