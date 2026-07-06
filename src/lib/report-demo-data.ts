@@ -1,4 +1,5 @@
 import { PAID_REPORTS } from "./categories";
+import { getRichReportContent, type RichReportContent } from "./report-rich-content";
 
 export type ReportProductId = (typeof PAID_REPORTS)[number]["id"];
 
@@ -66,6 +67,7 @@ export type IntelligenceReportData = {
   aiVerdict: string;
   aiVerdictTone: "positive" | "neutral" | "caution";
   extraSections: { title: string; items: { label: string; value: string; hint?: string }[] }[];
+  richContent: RichReportContent | null;
   disclaimer: string;
 };
 
@@ -332,6 +334,7 @@ export function buildDemoReport(productId: ReportProductId): IntelligenceReportD
     areaComparisons: isBig ? COMPARISONS : COMPARISONS.slice(0, 2),
     heatmapZones: isBig ? HEATMAP : HEATMAP.slice(0, 3),
     extraSections: extraForProduct(productId),
+    richContent: getRichReportContent(productId, isBig),
     aiVerdict,
     aiVerdictTone,
     disclaimer: DISCLAIMER,

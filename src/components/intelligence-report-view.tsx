@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { IntelligenceReportData } from "@/lib/report-demo-data";
 import { REPORT_PRICING } from "@/lib/report-demo-data";
+import { ReportRichSections } from "@/components/report-rich-sections";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
 
 function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
@@ -131,6 +132,8 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
               </div>
             </div>
           </section>
+
+          {report.richContent && <ReportRichSections rich={report.richContent} />}
 
           {/* Plain language — full, not blurred */}
           <section>
