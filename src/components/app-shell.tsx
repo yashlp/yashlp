@@ -105,7 +105,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className="flex min-h-11 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-orange-700 hover:bg-orange-50"
               >
                 <LogIn className="h-4 w-4" />
-                <span className="hidden xs:inline">Sign in</span>
+                Sign in
               </Link>
             )}
             <Link
