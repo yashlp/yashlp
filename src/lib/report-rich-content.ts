@@ -163,14 +163,11 @@ export function getRichReportContent(productId: ReportProductId, isBig: boolean)
   if (!isBig) return null;
 
   switch (productId) {
-    case "real-estate":
+    case "property-due-diligence":
       return REAL_ESTATE_RICH;
     case "business-location":
       return BUSINESS_RICH;
-    case "insurance-risk":
-      return INSURANCE_RICH;
-    case "municipal-dashboard":
-    case "enterprise-dashboard":
+    case "advanced-report":
       return trimRichForGeneric(REAL_ESTATE_RICH);
     default:
       return null;

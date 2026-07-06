@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState } from "react";
 import {
   AlertTriangle,
-  BarChart3,
   CheckCircle2,
   Download,
   Loader2,
@@ -16,6 +15,14 @@ import {
 import type { IntelligenceReportData } from "@/lib/report-demo-data";
 import { REPORT_PRICING } from "@/lib/report-demo-data";
 import { ReportRichSections } from "@/components/report-rich-sections";
+import {
+  AdvancedPresetBadge,
+  BusinessLensSection,
+  PropertyLensSection,
+  ReportAnalysisBlocks,
+  ReportTrendWindows,
+  VisitorBriefSection,
+} from "@/components/report-lens-sections";
 import { formatPriceForMarket } from "@/components/report-price";
 import { usePricingRegion } from "@/hooks/use-pricing-region";
 import { downloadElementAsPdf, printReportAsPdf, reportPdfFilename } from "@/lib/download-report-pdf";
@@ -35,11 +42,7 @@ function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
 }
 
 function HeatLevel({ level }: { level: "high" | "medium" | "low" }) {
-  const styles = {
-    high: "bg-rose-500",
-    medium: "bg-amber-400",
-    low: "bg-emerald-500",
-  };
+  const styles = { high: "bg-rose-500", medium: "bg-amber-400", low: "bg-emerald-500" };
   return <span className={cn("inline-block h-2.5 w-2.5 rounded-full", styles[level])} />;
 }
 
@@ -71,23 +74,14 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
     } catch {
       try {
         printReportAsPdf(reportRef.current);
-        setDownloadError(
-          'Direct download failed — print dialog opened. Choose "Save as PDF" as the printer, then save.'
-        );
+        setDownloadError('Print dialog opened — choose "Save as PDF".');
       } catch {
-        setDownloadError(
-          'Could not generate PDF. Use the "Print / Save as PDF" button and pick "Save as PDF" as the destination.'
-        );
+        setDownloadError('Use "Print / Save as PDF" instead.');
       }
     } finally {
       setDownloading(false);
     }
   }, [downloading, pdfFilename]);
-
-  const handlePrintPdf = useCallback(() => {
-    if (!reportRef.current) return;
-    printReportAsPdf(reportRef.current);
-  }, []);
 
   const verdictStyles = {
     positive: "border-emerald-200 bg-emerald-50 text-emerald-900",
@@ -97,10 +91,10 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-4 flex flex-wrap items-center justify-end gap-2 no-print">
+      <div className="mb-4 flex flex-wrap justify-end gap-2 no-print">
         <button
           type="button"
-          onClick={handlePrintPdf}
+          onClick={() => reportRef.current && printReportAsPdf(reportRef.current)}
           className="flex items-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-semibold text-orange-700 hover:bg-orange-50"
         >
           <Printer className="h-4 w-4" />
@@ -117,9 +111,7 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
         </button>
       </div>
       {downloadError && (
-        <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">
-          {downloadError}
-        </p>
+        <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">{downloadError}</p>
       )}
 
       <div
@@ -127,7 +119,6 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
         data-pdf-root
         className="overflow-visible rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/40"
       >
-        {/* Paid receipt strip */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 sm:px-6">
           <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
             <CheckCircle2 className="h-4 w-4" />
@@ -138,7 +129,6 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
           </div>
         </div>
 
-        {/* Cover header */}
         <div
           className="relative bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 px-6 py-8 text-white sm:px-10 sm:py-10"
           data-pdf-cover="true"
@@ -152,6 +142,7 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
             <div>
               <p className="text-sm font-medium text-orange-100">CivicLens Intelligence</p>
               <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{report.productName}</h1>
+              <p className="mt-2 text-sm italic text-orange-50">&ldquo;{report.customerQuestion}&rdquo;</p>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-orange-50">
                 <span className="flex items-center gap-1.5">
                   <MapPin className="h-4 w-4" />
@@ -165,55 +156,63 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
         </div>
 
         <div className="space-y-8 p-6 sm:p-10">
-          {/* Hero score */}
-          <section className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">
-                Community Health Score
-              </p>
-              <div className="mt-2 flex items-end gap-2">
-                <span className={cn("text-5xl font-bold sm:text-6xl", scoreColor(report.overallScore))}>
-                  {report.overallScore}
-                </span>
-                <span className="mb-2 text-lg text-stone-400">/ 100</span>
+          {report.advancedPreset && <AdvancedPresetBadge preset={report.advancedPreset} />}
+
+          {/* Executive summary */}
+          <section className="rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white p-5">
+            <h2 className="text-lg font-bold text-stone-900">Executive summary</h2>
+            <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">CivicLens Score</p>
+                <div className="mt-1 flex items-end gap-2">
+                  <span className={cn("text-5xl font-bold", scoreColor(report.overallScore))}>{report.overallScore}</span>
+                  <span className="mb-2 text-lg text-stone-400">/ 100</span>
+                </div>
+                <div className="mt-2 h-2.5 w-full max-w-xs overflow-hidden rounded-full bg-orange-100">
+                  <div className={cn("h-full rounded-full", scoreBg(report.overallScore))} style={{ width: `${report.overallScore}%` }} />
+                </div>
               </div>
-              <div className="mt-3 h-3 w-full max-w-xs overflow-hidden rounded-full bg-orange-100">
-                <div
-                  className={cn("h-full rounded-full", scoreBg(report.overallScore))}
-                  style={{ width: `${report.overallScore}%` }}
-                />
+              <div className="grid flex-1 grid-cols-2 gap-2 text-center text-sm">
+                <div className="rounded-xl bg-white p-3 ring-1 ring-orange-100">
+                  <p className="font-bold text-stone-900">{report.incidentCount}</p>
+                  <p className="text-xs text-stone-500">Verified signals</p>
+                </div>
+                <div className="rounded-xl bg-white p-3 ring-1 ring-orange-100">
+                  <p className="font-bold text-stone-900">{Math.round(report.confidence * 100)}%</p>
+                  <p className="text-xs text-stone-500">Confidence</p>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div className="rounded-2xl border border-orange-100 bg-orange-50/50 p-4 text-center">
-                <p className="text-2xl font-bold text-stone-900">{report.incidentCount}</p>
-                <p className="text-xs text-stone-500">Verified signals</p>
-              </div>
-              <div className="rounded-2xl border border-orange-100 bg-orange-50/50 p-4 text-center">
-                <p className="text-2xl font-bold text-stone-900">{Math.round(report.confidence * 100)}%</p>
-                <p className="text-xs text-stone-500">Confidence</p>
-              </div>
-              <div className="col-span-2 flex items-center justify-center gap-2 rounded-2xl border border-orange-100 bg-white p-3 text-sm">
-                {report.trendDirection === "improving" ? (
-                  <TrendingUp className="h-4 w-4 text-emerald-600" />
-                ) : report.trendDirection === "declining" ? (
-                  <TrendingDown className="h-4 w-4 text-rose-600" />
-                ) : (
-                  <BarChart3 className="h-4 w-4 text-stone-400" />
-                )}
-                <span className="capitalize text-stone-600">{report.trendDirection} over 30 days</span>
-              </div>
+            <p className="mt-4 text-sm leading-relaxed text-stone-700">{report.executiveSummary}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {report.verdictBadges.map((b) => (
+                <span
+                  key={b.text}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-semibold",
+                    b.type === "positive" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                  )}
+                >
+                  {b.type === "positive" ? "✔" : "⚠"} {b.text}
+                </span>
+              ))}
             </div>
           </section>
 
+          <ReportAnalysisBlocks blocks={report.analysisBlocks} />
+          <ReportTrendWindows windows={report.trendWindows} />
+
+          {report.visitorBrief && <VisitorBriefSection brief={report.visitorBrief} />}
+          {report.propertyLens && <PropertyLensSection lens={report.propertyLens} />}
+          {report.businessLens && <BusinessLensSection lens={report.businessLens} />}
           {report.richContent && <ReportRichSections rich={report.richContent} />}
 
-          {/* Plain language — full, not blurred */}
+          {/* AI nine questions */}
           <section>
-            <h2 className="text-lg font-bold text-stone-900">Plain-language answers</h2>
-            <p className="mt-1 text-sm text-stone-500">Written for everyday decisions — no jargon.</p>
+            <h2 className="text-lg font-bold text-stone-900">AI analysis — your 9 questions answered</h2>
+            <p className="mt-1 text-sm text-stone-500">Interpretation is the product — not raw data.</p>
             <div className="mt-4 space-y-3">
-              {report.plainLanguageAnswers.map((item) => (
+              {report.aiNineQuestions.map((item) => (
                 <div key={item.question} className="rounded-2xl border border-orange-100 bg-orange-50/40 p-4">
                   <p className="text-sm font-semibold text-stone-800">{item.question}</p>
                   <p className="mt-1.5 text-sm leading-relaxed text-stone-600">{item.answer}</p>
@@ -222,91 +221,13 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
             </div>
           </section>
 
-          {/* Category breakdown */}
-          <section>
-            <h2 className="text-lg font-bold text-stone-900">Category performance</h2>
-            <div className="mt-4 space-y-3">
-              {report.categoryScores.map((cat) => (
-                <div key={cat.name} className="flex items-center gap-3">
-                  <span className="w-6 text-center text-lg">{cat.emoji}</span>
-                  <div className="flex-1">
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span className="font-medium text-stone-700">{cat.name}</span>
-                      <span className={cn("font-bold", scoreColor(cat.score))}>{cat.score}</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-stone-100">
-                      <div
-                        className={cn("h-full rounded-full", scoreBg(cat.score))}
-                        style={{ width: `${cat.score}%` }}
-                      />
-                    </div>
-                  </div>
-                  {cat.trend === "up" && <TrendingUp className="h-4 w-4 shrink-0 text-emerald-500" />}
-                  {cat.trend === "down" && <TrendingDown className="h-4 w-4 shrink-0 text-rose-500" />}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Area comparison */}
-          {report.areaComparisons.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold text-stone-900">How this area compares</h2>
-              <div className="mt-3 overflow-hidden rounded-2xl border border-orange-100">
-                {report.areaComparisons.map((row, i) => (
-                  <div
-                    key={row.name}
-                    className={cn(
-                      "flex items-center justify-between gap-4 px-4 py-3",
-                      i > 0 && "border-t border-orange-50",
-                      row.note === "Your selected location" && "bg-orange-50/60"
-                    )}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-stone-800">{row.name}</p>
-                      <p className="text-xs text-stone-400">{row.note}</p>
-                    </div>
-                    <span className={cn("text-xl font-bold", scoreColor(row.score))}>{row.score}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Heatmap zones */}
-          {report.heatmapZones.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold text-stone-900">Issue heatmap by zone</h2>
-              <div className="mt-3 space-y-2">
-                {report.heatmapZones.map((z) => (
-                  <div
-                    key={z.zone}
-                    className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3"
-                  >
-                    <HeatLevel level={z.level} />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-stone-800">{z.zone}</p>
-                      <p className="text-xs text-stone-500">{z.issue}</p>
-                    </div>
-                    <span className="text-xs capitalize text-stone-400">{z.level} activity</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Issues & improvements — full lists */}
+          {/* Issues & heatmap */}
           <div className="grid gap-6 sm:grid-cols-2">
             <section>
-              <h2 className="text-lg font-bold text-stone-900">
-                Top issues ({report.topIssues.length})
-              </h2>
+              <h2 className="text-lg font-bold text-stone-900">Top issues</h2>
               <ul className="mt-3 space-y-2">
                 {report.topIssues.map((issue) => (
-                  <li
-                    key={issue.title}
-                    className="flex items-start gap-2 rounded-xl border border-rose-100 bg-rose-50/30 p-3"
-                  >
+                  <li key={issue.title} className="flex items-start gap-2 rounded-xl border border-rose-100 bg-rose-50/30 p-3">
                     <span className="text-lg">{issue.emoji}</span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-stone-800">{issue.title}</p>
@@ -318,15 +239,10 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
               </ul>
             </section>
             <section>
-              <h2 className="text-lg font-bold text-stone-900">
-                Top improvements ({report.topImprovements.length})
-              </h2>
+              <h2 className="text-lg font-bold text-stone-900">Top improvements</h2>
               <ul className="mt-3 space-y-2">
                 {report.topImprovements.map((item) => (
-                  <li
-                    key={item.title}
-                    className="flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50/30 p-3"
-                  >
+                  <li key={item.title} className="flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50/30 p-3">
                     <span className="text-lg">{item.emoji}</span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-stone-800">{item.title}</p>
@@ -338,106 +254,70 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
             </section>
           </div>
 
-          {/* Trend chart */}
           <section>
-            <h2 className="text-lg font-bold text-stone-900">Activity trend</h2>
+            <h2 className="text-lg font-bold text-stone-900">Issue heatmap by zone</h2>
+            <div className="mt-3 space-y-2">
+              {report.heatmapZones.map((z) => (
+                <div key={z.zone} className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
+                  <HeatLevel level={z.level} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-stone-800">{z.zone}</p>
+                    <p className="text-xs text-stone-500">{z.issue}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-stone-900">Weekly activity</h2>
             <div className="mt-4 rounded-2xl border border-orange-100 bg-orange-50/30 p-4">
-              <div className="flex min-h-[120px] items-end gap-2">
+              <div className="flex min-h-[100px] items-end gap-2">
                 {report.trends.map((t) => (
                   <div key={t.label} className="flex flex-1 flex-col items-center gap-1">
-                    <div className="flex h-24 w-full items-end justify-center gap-0.5">
-                      <div
-                        className="w-full max-w-[14px] rounded-t bg-rose-400"
-                        style={{ height: `${(t.reported / maxReported) * 100}%` }}
-                      />
-                      <div
-                        className="w-full max-w-[14px] rounded-t bg-indigo-400"
-                        style={{ height: `${(t.resolved / maxReported) * 100}%` }}
-                      />
-                      <div
-                        className="w-full max-w-[14px] rounded-t bg-emerald-400"
-                        style={{ height: `${(t.positive / maxReported) * 100}%` }}
-                      />
+                    <div className="flex h-20 w-full items-end justify-center gap-0.5">
+                      <div className="w-full max-w-[12px] rounded-t bg-rose-400" style={{ height: `${(t.reported / maxReported) * 100}%` }} />
+                      <div className="w-full max-w-[12px] rounded-t bg-indigo-400" style={{ height: `${(t.resolved / maxReported) * 100}%` }} />
+                      <div className="w-full max-w-[12px] rounded-t bg-emerald-400" style={{ height: `${(t.positive / maxReported) * 100}%` }} />
                     </div>
                     <span className="text-[10px] text-stone-400">{t.label}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 flex flex-wrap gap-4 text-xs text-stone-500">
-                <span className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded bg-rose-400" /> Reported
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded bg-indigo-400" /> Resolved
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded bg-emerald-400" /> Positive
-                </span>
+              <div className="mt-2 flex items-center justify-center gap-2 text-xs text-stone-500">
+                {report.trendDirection === "improving" ? (
+                  <TrendingUp className="h-4 w-4 text-emerald-600" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-rose-600" />
+                )}
+                <span className="capitalize">{report.trendDirection} · {report.engagementLevel} engagement</span>
               </div>
             </div>
           </section>
 
-          {/* Product-specific sections */}
-          {report.extraSections.map((section) => (
-            <section key={section.title}>
-              <h2 className="text-lg font-bold text-stone-900">{section.title}</h2>
-              <div className="mt-3 overflow-hidden rounded-2xl border border-orange-100">
-                {section.items.map((item, i) => (
-                  <div
-                    key={item.label}
-                    className={cn(
-                      "flex items-center justify-between gap-4 px-4 py-3",
-                      i > 0 && "border-t border-orange-50"
-                    )}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-stone-800">{item.label}</p>
-                      {item.hint && <p className="text-xs text-stone-400">{item.hint}</p>}
-                    </div>
-                    <p className="text-right text-sm font-semibold text-orange-700">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-
-          {/* AI verdict */}
           <section className={cn("rounded-2xl border p-5", verdictStyles[report.aiVerdictTone])}>
             <div className="flex items-center gap-2 font-semibold">
               <Sparkles className="h-5 w-5" />
-              CivicLens AI Summary
+              AI verdict
             </div>
             <p className="mt-3 text-sm leading-relaxed">{report.aiVerdict}</p>
           </section>
 
-          {/* Disclaimer */}
           <section className="flex gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-4">
             <AlertTriangle className="h-5 w-5 shrink-0 text-stone-400" />
             <p className="text-xs leading-relaxed text-stone-500">{report.disclaimer}</p>
           </section>
 
-          {/* Post-purchase footer */}
           <div className="flex flex-col items-center gap-3 border-t border-orange-100 pt-6 sm:flex-row sm:justify-between no-print">
             <div>
               <p className="text-sm font-medium text-stone-700">You paid {localizedPrice.formatted}</p>
               <p className="text-xs text-stone-400">Download or print this report</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={handlePrintPdf}
-                className="flex items-center gap-2 rounded-xl border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700 hover:bg-orange-50"
-              >
-                <Printer className="h-4 w-4" />
+            <div className="flex gap-2">
+              <button type="button" onClick={() => reportRef.current && printReportAsPdf(reportRef.current)} className="rounded-xl border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700">
                 Print
               </button>
-              <button
-                type="button"
-                onClick={handleDownloadPdf}
-                disabled={downloading}
-                className="flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
-              >
-                {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              <button type="button" onClick={handleDownloadPdf} disabled={downloading} className="rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
                 {downloading ? "Generating…" : "Download PDF"}
               </button>
             </div>
@@ -446,8 +326,7 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
       </div>
 
       <p className="mt-4 text-center text-xs text-stone-400">
-        Demo uses sample Mumbai data. After purchase, your report uses your chosen location and live verified
-        data.
+        Demo uses sample Mumbai data. After purchase, your report uses your chosen location and live verified data.
       </p>
     </div>
   );
