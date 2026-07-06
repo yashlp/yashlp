@@ -28,7 +28,7 @@ export async function GET() {
 
 const createSchema = z.object({
   categoryId: z.string(),
-  title: z.string().min(2),
+  title: z.string().optional(),
   description: z.string().optional(),
   latitude: z.number(),
   longitude: z.number(),
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
       data: {
         categoryId: data.categoryId,
         reporterId: user.id,
-        title: data.title,
+        title: data.title || `${category.emoji} ${category.name}`,
         description: data.description,
         latitude: data.latitude,
         longitude: data.longitude,

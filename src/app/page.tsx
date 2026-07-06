@@ -40,6 +40,7 @@ export default function HomePage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
   const [center, setCenter] = useState(DEFAULT_MAP_CENTER);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [zoom, setZoom] = useState(DEFAULT_MAP_ZOOM);
   const [filter, setFilter] = useState<"all" | "issues" | "positive" | "resolved">("all");
 
@@ -62,7 +63,9 @@ export default function HomePage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserLocation(loc);
+          setCenter(loc);
           setZoom(USER_LOCATION_ZOOM);
         },
         () => {},
@@ -74,7 +77,9 @@ export default function HomePage() {
   const goToMyLocation = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((pos) => {
-      setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setUserLocation(loc);
+      setCenter(loc);
       setZoom(USER_LOCATION_ZOOM);
     });
   };
@@ -96,6 +101,7 @@ export default function HomePage() {
           center={center}
           zoom={zoom}
           selectedId={selectedId}
+          userLocation={userLocation}
           onSelect={setSelectedId}
           onMove={(lat, lng) => setCenter({ lat, lng })}
         />
@@ -169,7 +175,7 @@ export default function HomePage() {
           className="glass-card flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-stone-600 shadow hover:bg-orange-50"
           title="Go to my location"
         >
-          <Crosshair className="h-4 w-4 text-orange-600" />
+          <Crosshair className="h-4 w-4 text-blue-600" />
           My location
         </button>
         <div className="glass-card hidden items-center gap-2 rounded-xl px-3 py-2 text-xs text-stone-400 md:flex">

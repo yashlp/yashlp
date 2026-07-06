@@ -24,7 +24,17 @@ export const VISIBILITY = {
   PUBLIC: "public",
 } as const;
 
-/** Sample global cities for compare demo (worldwide, not US-only) */
+/** Quick-access report types shown at top of report flow */
+export const POPULAR_CATEGORY_SLUGS = [
+  "potholes-bad-roads",
+  "garbage-pile-up",
+  "no-street-lights",
+  "water-logging-flooding",
+  "illegal-parking",
+  "open-sewage",
+  "clean-street-market",
+  "road-repaired",
+];
 export const GLOBAL_SAMPLE_PLACES = [
   { name: "London, UK", lat: 51.5074, lng: -0.1278 },
   { name: "Lagos, Nigeria", lat: 6.5244, lng: 3.3792 },

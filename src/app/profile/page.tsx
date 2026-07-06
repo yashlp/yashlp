@@ -7,7 +7,7 @@ import { Award, LogOut, Shield } from "lucide-react";
 type User = {
   id: string;
   name: string;
-  email: string;
+  phone: string;
   reputation: number;
   reliabilityScore: number;
 };
@@ -44,7 +44,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <h1 className="text-xl font-bold">{user.name}</h1>
-            <p className="text-sm text-muted">{user.email}</p>
+            <p className="text-sm text-muted">{user.phone}</p>
             <span className="mt-1 inline-block rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-700">
               {tier}
             </span>

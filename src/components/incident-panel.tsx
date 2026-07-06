@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCircle, MessageSquare, X, XCircle } from "lucide-react";
 import Link from "next/link";
-import { confidenceLabel } from "@/lib/utils";
+import { confidenceLabel, statusLabel } from "@/lib/utils";
 import { CONFIRMATION_THRESHOLD } from "@/lib/constants";
 
 type IncidentDetail = {

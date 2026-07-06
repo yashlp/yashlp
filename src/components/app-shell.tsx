@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TermsGate } from "@/components/terms-gate";
 
-type UserInfo = { id: string; name: string; email: string; reputation: number } | null;
+type UserInfo = { id: string; name: string; phone: string; reputation: number } | null;
 
 const navItems = [
   { href: "/", label: "Map", icon: Home },

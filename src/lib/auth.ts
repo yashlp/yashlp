@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 
 const SESSION_COOKIE = "civiclens_session";
@@ -7,19 +6,17 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 export type SessionUser = {
   id: string;
-  email: string;
+  phone: string;
   name: string;
   reputation: number;
   reliabilityScore: number;
   role: string;
 };
 
-export async function hashPassword(password: string) {
-  return bcrypt.hash(password, 10);
-}
-
-export async function verifyPassword(password: string, hash: string) {
-  return bcrypt.compare(password, hash);
+export function normalizePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length < 10) throw new Error("Enter a valid phone number");
+  return `+${digits}`;
 }
 
 export async function createSession(userId: string) {
@@ -47,7 +44,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     where: { id: userId },
     select: {
       id: true,
-      email: true,
+      phone: true,
       name: true,
       reputation: true,
       reliabilityScore: true,

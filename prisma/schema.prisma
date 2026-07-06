@@ -9,9 +9,10 @@ datasource db {
 
 model User {
   id               String   @id @default(cuid())
-  email            String   @unique
+  phone            String   @unique
+  email            String?
   name             String
-  passwordHash     String
+  passwordHash     String?
   reputation       Int      @default(0)
   reliabilityScore Float    @default(0.5)
   role             String   @default("user")
@@ -25,6 +26,16 @@ model User {
   timelineEvents   TimelineEvent[]
   savedPlaces      SavedPlace[]
   notifications    Notification[]
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
 }
 
 model Category {
