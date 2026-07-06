@@ -16,6 +16,8 @@ import {
 import type { IntelligenceReportData } from "@/lib/report-demo-data";
 import { REPORT_PRICING } from "@/lib/report-demo-data";
 import { ReportRichSections } from "@/components/report-rich-sections";
+import { formatPriceForMarket } from "@/components/report-price";
+import { usePricingRegion } from "@/hooks/use-pricing-region";
 import { downloadElementAsPdf, printReportAsPdf, reportPdfFilename } from "@/lib/download-report-pdf";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
 
@@ -55,6 +57,9 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
     minute: "2-digit",
   });
   const tierLabel = report.tier === "big" ? REPORT_PRICING.big.label : REPORT_PRICING.small.label;
+  const areaCoords = { lat: report.areaLat, lng: report.areaLng };
+  const { market } = usePricingRegion(areaCoords);
+  const localizedPrice = formatPriceForMarket(report.productId, market);
   const pdfFilename = reportPdfFilename(report.productId, report.areaName);
 
   const handleDownloadPdf = useCallback(async () => {
@@ -129,7 +134,7 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
             Payment successful — full report unlocked
           </div>
           <div className="text-xs text-emerald-700">
-            ₹{report.priceInr} · ${report.priceUsd} USD · {tierLabel}
+            {localizedPrice.formatted} · {tierLabel}
           </div>
         </div>
 
@@ -414,7 +419,7 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
           {/* Post-purchase footer */}
           <div className="flex flex-col items-center gap-3 border-t border-orange-100 pt-6 sm:flex-row sm:justify-between no-print">
             <div>
-              <p className="text-sm font-medium text-stone-700">You paid ₹{report.priceInr} (${report.priceUsd})</p>
+              <p className="text-sm font-medium text-stone-700">You paid {localizedPrice.formatted}</p>
               <p className="text-xs text-stone-400">Download or print this report</p>
             </div>
             <div className="flex flex-wrap gap-2">

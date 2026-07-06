@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, FileText } from "lucide-react";
 import { IntelligenceReportView } from "@/components/intelligence-report-view";
+import { ReportPrice } from "@/components/report-price";
 import { GLOBAL_SAMPLE_PLACES } from "@/lib/constants";
 import {
   buildDemoReport,
-  getReportPrice,
   getReportProduct,
   mergeLiveHealth,
   type IntelligenceReportData,
@@ -22,6 +22,7 @@ export default function ReportDemoPage() {
   const id = params.id as string;
   const product = getReportProduct(id);
   const [report, setReport] = useState<IntelligenceReportData | null>(null);
+  const areaCoords = { lat: MUMBAI.lat, lng: MUMBAI.lng };
 
   useEffect(() => {
     if (!product) return;
@@ -48,8 +49,6 @@ export default function ReportDemoPage() {
     );
   }
 
-  const pricing = getReportPrice(id as ReportProductId);
-
   return (
     <div className="px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <div className="mx-auto mb-6 flex max-w-3xl flex-wrap items-center justify-between gap-3">
@@ -62,7 +61,8 @@ export default function ReportDemoPage() {
         </Link>
         <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800">
           <FileText className="h-3.5 w-3.5" />
-          Full report — exactly what you get after paying ₹{pricing.inr} (${pricing.usd})
+          Full report — pay{" "}
+          <ReportPrice productId={id as ReportProductId} areaCoords={areaCoords} className="font-bold" />
         </div>
       </div>
 

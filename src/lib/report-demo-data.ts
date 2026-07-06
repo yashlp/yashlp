@@ -50,6 +50,8 @@ export type IntelligenceReportData = {
   priceUsd: number;
   orderRef: string;
   areaName: string;
+  areaLat: number;
+  areaLng: number;
   radiusM: number;
   generatedAt: string;
   overallScore: number;
@@ -298,6 +300,8 @@ export function buildDemoReport(productId: ReportProductId): IntelligenceReportD
     priceUsd: pricing.usd,
     orderRef: `CL-${Date.now().toString(36).toUpperCase().slice(-8)}`,
     areaName: "Bandra West, Mumbai, India",
+    areaLat: 19.0596,
+    areaLng: 72.8295,
     radiusM: isBig ? 1200 : 800,
     generatedAt: new Date().toISOString(),
     overallScore: 62,

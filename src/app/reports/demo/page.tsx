@@ -1,11 +1,23 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Eye } from "lucide-react";
 import { PAID_REPORTS } from "@/lib/categories";
-import { getReportPrice, REPORT_PRICING } from "@/lib/report-demo-data";
+import { getReportPrice, type ReportProductId } from "@/lib/report-demo-data";
+import { GLOBAL_SAMPLE_PLACES } from "@/lib/constants";
+import { PricingRegionBanner, ReportPrice } from "@/components/report-price";
+import { usePricingRegion } from "@/hooks/use-pricing-region";
+import { getLocalizedTierPrice } from "@/lib/report-pricing";
+
+const MUMBAI = GLOBAL_SAMPLE_PLACES[2];
 
 export default function ReportDemosIndexPage() {
-  const small = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "small");
-  const big = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "big");
+  const areaCoords = { lat: MUMBAI.lat, lng: MUMBAI.lng };
+  const { market } = usePricingRegion(areaCoords);
+  const small = getLocalizedTierPrice("small", market);
+  const big = getLocalizedTierPrice("big", market);
+  const smallReports = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "small");
+  const bigReports = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "big");
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
@@ -15,38 +27,39 @@ export default function ReportDemosIndexPage() {
         blurred.
       </p>
 
-      <div className="mt-6 flex flex-wrap gap-3">
-        <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm">
-          <span className="font-bold text-orange-800">India:</span> ₹{REPORT_PRICING.small.inr} standard · ₹
-          {REPORT_PRICING.big.inr} detailed
-        </div>
-        <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm">
-          <span className="font-bold text-orange-800">International:</span> ${REPORT_PRICING.small.usd} · $
-          {REPORT_PRICING.big.usd}
-        </div>
-      </div>
+      <PricingRegionBanner areaCoords={areaCoords} className="mt-6" />
 
       <section className="mt-10">
-        <h2 className="text-lg font-bold text-stone-900">
-          Standard — ₹{REPORT_PRICING.small.inr} / ${REPORT_PRICING.small.usd}
-        </h2>
+        <h2 className="text-lg font-bold text-stone-900">Standard — {small.formatted}</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {small.map((report) => (
-            <DemoCard key={report.id} id={report.id} name={report.name} emoji={report.emoji} audience={report.audience} />
+          {smallReports.map((report) => (
+            <DemoCard
+              key={report.id}
+              id={report.id}
+              name={report.name}
+              emoji={report.emoji}
+              audience={report.audience}
+              areaCoords={areaCoords}
+            />
           ))}
         </div>
       </section>
 
       <section className="mt-10">
-        <h2 className="text-lg font-bold text-stone-900">
-          Detailed — ₹{REPORT_PRICING.big.inr} / ${REPORT_PRICING.big.usd}
-        </h2>
+        <h2 className="text-lg font-bold text-stone-900">Detailed — {big.formatted}</h2>
         <p className="mt-1 text-sm text-stone-500">
           More comparisons, heatmap zones, plain-language Q&A, and longer issue lists.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {big.map((report) => (
-            <DemoCard key={report.id} id={report.id} name={report.name} emoji={report.emoji} audience={report.audience} />
+          {bigReports.map((report) => (
+            <DemoCard
+              key={report.id}
+              id={report.id}
+              name={report.name}
+              emoji={report.emoji}
+              audience={report.audience}
+              areaCoords={areaCoords}
+            />
           ))}
         </div>
       </section>
@@ -59,13 +72,14 @@ function DemoCard({
   name,
   emoji,
   audience,
+  areaCoords,
 }: {
   id: string;
   name: string;
   emoji: string;
   audience: string;
+  areaCoords: { lat: number; lng: number };
 }) {
-  const price = getReportPrice(id as Parameters<typeof getReportPrice>[0]);
   return (
     <Link
       href={`/reports/demo/${id}`}
@@ -77,7 +91,7 @@ function DemoCard({
           <h3 className="font-bold text-stone-900 group-hover:text-orange-700">{name}</h3>
           <p className="text-xs text-orange-600">{audience}</p>
           <p className="mt-1 text-sm font-semibold text-stone-700">
-            ₹{price.inr} · ${price.usd}
+            <ReportPrice productId={id as ReportProductId} areaCoords={areaCoords} />
           </p>
         </div>
       </div>
