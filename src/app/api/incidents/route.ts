@@ -5,10 +5,10 @@ import { getSessionUser } from "@/lib/auth";
 import { mockAIVerify } from "@/lib/ai";
 import { isPhotoRequired } from "@/lib/categories";
 import {
-  assessLegalRisk,
   getLegalProfile,
   resolveProfileForCountry,
 } from "@/lib/legal-engine";
+import { processCompliance } from "@/lib/compliance";
 import {
   addTimelineEvent,
   findNearbyDuplicate,
@@ -55,6 +55,9 @@ const createSchema = z.object({
   address: z.string().optional(),
   photoUrls: z.array(z.string()).max(MAX_PHOTOS_PER_REPORT).optional(),
   attachToExisting: z.string().optional(),
+  institutionType: z.string().optional(),
+  servicePoint: z.string().optional(),
+  corruptionIssueType: z.string().optional(),
 });
 
 async function savePhotos(incidentId: string, userId: string, urls: string[]) {
@@ -126,37 +129,47 @@ export async function POST(req: Request) {
       : resolveProfileForCountry(user.countryCode ?? "INT");
     const legalProfile = getLegalProfile(profileId);
 
-    const legalCheck = assessLegalRisk({
+    const compliance = processCompliance({
       categorySlug: category.slug,
       title: data.title,
       description: data.description,
-      legalProfile,
+      institutionType: data.institutionType,
+      servicePoint: data.servicePoint,
+      corruptionIssueType: data.corruptionIssueType,
+      hasPhoto: photoUrls.length > 0,
+      userTrustScore: user.reliabilityScore,
+      legalProfileId: legalProfile.id,
+      countryCode: user.countryCode ?? undefined,
     });
 
-    if (legalCheck.recommendation === "block") {
+    if (compliance.action === "block" || compliance.originalBlocked) {
       return NextResponse.json(
         {
           error:
-            "This report was blocked by our legal safety filter. Avoid naming individuals or making unverified accusations. Rephrase as a general community observation.",
-          legal: legalCheck,
+            compliance.blockReason ??
+            "This report was blocked by our legal safety filter. Use location-based wording only — do not name individuals or make unverified accusations.",
+          compliance,
         },
         { status: 422 }
       );
     }
 
     const expiresAt = getExpiresAtForCategory(category);
+    const underReview =
+      compliance.underReview || compliance.action === "under_review" || compliance.action === "limit_visibility";
 
     const incident = await prisma.incident.create({
       data: {
         categoryId: data.categoryId,
         reporterId: user.id,
-        title: data.title || `${category.emoji} ${category.name}`,
-        description: data.description,
+        title: compliance.sanitizedTitle || `${category.emoji} ${category.name}`,
+        description: compliance.sanitizedDescription || data.description,
+        originalDescription: data.description ?? null,
         latitude: data.latitude,
         longitude: data.longitude,
         address: data.address,
         isPositive,
-        status: INCIDENT_STATUSES.PENDING,
+        status: underReview ? INCIDENT_STATUSES.UNDER_REVIEW : INCIDENT_STATUSES.PENDING,
         visibility: VISIBILITY.HIDDEN,
         visibilityStage: VISIBILITY_STAGE.PRIVATE,
         aiCategoryMatch: ai.aiCategoryMatch,
@@ -164,16 +177,24 @@ export async function POST(req: Request) {
         confirmationCount: 0,
         confidenceScore: 0.1,
         expiresAt,
-        legalRiskScore: legalCheck.legalRiskScore,
-        underLegalReview: legalCheck.underReview,
-        legalFlags: legalCheck.flags.length ? JSON.stringify(legalCheck.flags) : null,
+        legalRiskScore: compliance.legalRiskScore,
+        contentRiskScore: compliance.contentRiskScore,
+        complianceAction: compliance.action,
+        underLegalReview: underReview,
+        legalFlags: compliance.flags.length ? JSON.stringify(compliance.flags) : null,
+        displayLabel: compliance.displayLabel,
+        institutionType: compliance.institutionType ?? null,
+        servicePoint: compliance.servicePoint ?? null,
+        corruptionIssueType: compliance.corruptionIssueType ?? null,
+        aggregationText: compliance.aggregationText ?? null,
       },
     });
 
-    if (legalCheck.underReview) {
+    if (underReview) {
       await addTimelineEvent(incident.id, "legal_review", user.id, {
-        flags: legalCheck.flags,
-        score: legalCheck.legalRiskScore,
+        flags: compliance.flags,
+        contentRiskScore: compliance.contentRiskScore,
+        action: compliance.action,
       });
     }
 
@@ -186,7 +207,7 @@ export async function POST(req: Request) {
       include: incidentInclude,
     });
 
-    return NextResponse.json({ incident: full, ai, legal: legalCheck });
+    return NextResponse.json({ incident: full, ai, compliance });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: e.errors[0].message }, { status: 400 });

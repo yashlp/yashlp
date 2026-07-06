@@ -27,6 +27,7 @@ export const INCIDENT_STATUSES = {
   DISPUTED: "disputed",
   POSITIVE_ACTIVE: "positive_active",
   RESOLUTION_PENDING: "resolution_pending",
+  UNDER_REVIEW: "under_review",
 } as const;
 
 export const VISIBILITY_STAGE = {

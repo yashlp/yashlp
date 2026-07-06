@@ -25,6 +25,8 @@ type Incident = {
   longitude: number;
   status: string;
   visibilityStage?: string;
+  displayLabel?: string | null;
+  underLegalReview?: boolean;
   confidenceScore: number;
   confirmationCount?: number;
   isPositive: boolean;

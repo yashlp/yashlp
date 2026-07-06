@@ -7,6 +7,8 @@ import { AlertTriangle, Camera, CheckCircle, X, Zap } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
 import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT, POPULAR_CATEGORY_SLUGS } from "@/lib/constants";
 import { photoRuleLabel } from "@/lib/categories";
+import { INSTITUTION_LABELS } from "@/lib/compliance";
+import { CORRUPTION_DISCLAIMER } from "@/lib/compliance/types";
 
 const LocationPicker = dynamic(
   () => import("@/components/map-view").then((m) => m.LocationPicker),
@@ -38,6 +40,11 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [duplicate, setDuplicate] = useState<{ id: string; title: string } | null>(null);
+  const [institutionType, setInstitutionType] = useState("");
+  const [servicePoint, setServicePoint] = useState("");
+  const [corruptionIssueType, setCorruptionIssueType] = useState("");
+
+  const isCorruptionReport = selected?.slug === "corruption-bribery";
 
   useEffect(() => {
     fetch(`/api/categories?type=${signalType}`)
@@ -120,6 +127,11 @@ export default function ReportPage() {
       return;
     }
 
+    if (isCorruptionReport && !institutionType) {
+      setError("Select the institution or service location. Corruption reports must be location-based only.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -133,6 +145,9 @@ export default function ReportPage() {
         longitude: pinLocation.lng,
         photoUrls: photos,
         attachToExisting,
+        institutionType: institutionType || undefined,
+        servicePoint: servicePoint || undefined,
+        corruptionIssueType: corruptionIssueType || undefined,
       }),
     });
 
@@ -156,6 +171,9 @@ export default function ReportPage() {
     setSelected(cat);
     setDuplicate(null);
     setError("");
+    setInstitutionType("");
+    setServicePoint("");
+    setCorruptionIssueType("");
   };
 
   return (
@@ -299,17 +317,77 @@ export default function ReportPage() {
             />
           </div>
 
+          {isCorruptionReport && (
+            <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
+              <p className="text-xs font-semibold text-amber-900">Location-based reporting only</p>
+              <p className="text-xs text-amber-800">
+                Do not name individuals, officials, or badge numbers. Report the institution or service
+                point only.
+              </p>
+              <div>
+                <label className="text-sm font-medium text-stone-700">Institution type *</label>
+                <select
+                  value={institutionType}
+                  onChange={(e) => setInstitutionType(e.target.value)}
+                  className="input-field mt-1 w-full"
+                >
+                  <option value="">Select institution…</option>
+                  {Object.entries(INSTITUTION_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-stone-700">
+                  Service point <span className="font-normal text-stone-400">(e.g. licensing desk)</span>
+                </label>
+                <input
+                  value={servicePoint}
+                  onChange={(e) => setServicePoint(e.target.value)}
+                  placeholder="Counter area, department, or zone"
+                  className="input-field mt-1 w-full"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-stone-700">Issue type</label>
+                <select
+                  value={corruptionIssueType}
+                  onChange={(e) => setCorruptionIssueType(e.target.value)}
+                  className="input-field mt-1 w-full"
+                >
+                  <option value="">Auto-detect from details</option>
+                  <option value="bribery_allegation">Bribery allegation</option>
+                  <option value="service_delay">Delay in service</option>
+                  <option value="misconduct_pattern">Misconduct pattern</option>
+                  <option value="irregular_practices">Irregular practices</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="text-sm font-medium text-stone-700">
-              Details <span className="font-normal text-stone-400">(optional)</span>
+              Details{" "}
+              <span className="font-normal text-stone-400">
+                {isCorruptionReport ? "(describe the service experience)" : "(optional)"}
+              </span>
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="Anything else we should know?"
+              placeholder={
+                isCorruptionReport
+                  ? "e.g. Unusual fee requested at the licensing counter"
+                  : "Anything else we should know?"
+              }
               className="input-field mt-1 w-full resize-none"
             />
+            {isCorruptionReport && (
+              <p className="mt-1 text-xs text-stone-400">{CORRUPTION_DISCLAIMER}</p>
+            )}
           </div>
 
           <div>

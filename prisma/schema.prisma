@@ -82,6 +82,14 @@ model Incident {
   legalRiskScore     Float?
   underLegalReview   Boolean   @default(false)
   legalFlags         String?
+  contentRiskScore   Int?
+  complianceAction   String?
+  displayLabel       String?
+  institutionType    String?
+  servicePoint       String?
+  corruptionIssueType String?
+  aggregationText    String?
+  originalDescription String?
 
   category           Category           @relation(fields: [categoryId], references: [id])
   reporter           User               @relation("Reporter", fields: [reporterId], references: [id])

@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { CheckCircle, MessageSquare, X, XCircle } from "lucide-react";
 import Link from "next/link";
 import { confidenceLabel, statusLabel, visibilityStageLabel } from "@/lib/utils";
+import { LEGAL_DISCLAIMER } from "@/lib/compliance/types";
 import {
   SEED_CONFIRMATION_THRESHOLD,
   VERIFIED_CONFIRMATION_THRESHOLD,
@@ -16,6 +17,10 @@ type IncidentDetail = {
   description: string | null;
   status: string;
   visibilityStage?: string;
+  displayLabel?: string | null;
+  aggregationText?: string | null;
+  underLegalReview?: boolean;
+  contentRiskScore?: number | null;
   confidenceScore: number;
   confirmationCount: number;
   isPositive: boolean;
@@ -96,10 +101,13 @@ export function IncidentPanel({
             <div className="flex items-center gap-2">
               <span className="text-2xl">{incident.category.emoji}</span>
               <div>
-                <h2 className="font-semibold">{incident.category.name}</h2>
+                <h2 className="font-semibold">
+                  {incident.displayLabel ?? incident.category.name}
+                </h2>
                 <p className="text-xs capitalize text-muted">
                   {statusLabel(incident.status, incident.isPositive)} · {stageLabel} ·{" "}
                   {confidenceLabel(incident.confidenceScore)}
+                  {incident.underLegalReview && " · ⚖️ Under Review"}
                 </p>
               </div>
             </div>
@@ -110,9 +118,19 @@ export function IncidentPanel({
         </div>
 
         <div className="space-y-4 p-4">
+          {incident.aggregationText && (
+            <p className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-900">
+              {incident.aggregationText}
+            </p>
+          )}
+
           {incident.description && (
             <p className="text-sm text-slate-700">{incident.description}</p>
           )}
+
+          <p className="rounded-lg border border-orange-100 bg-orange-50/60 px-3 py-2 text-xs text-stone-600">
+            {LEGAL_DISCLAIMER}
+          </p>
 
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="rounded-full bg-slate-100 px-2.5 py-1">

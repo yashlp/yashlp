@@ -20,6 +20,8 @@ type Incident = {
   longitude: number;
   status: string;
   visibilityStage?: string;
+  displayLabel?: string | null;
+  underLegalReview?: boolean;
   confidenceScore: number;
   confirmationCount?: number;
   isPositive: boolean;
@@ -120,6 +122,8 @@ function createIcon(incident: Incident, selected: boolean) {
         : "#93c5fd";
   } else if (incident.status === "resolved") {
     color = "#16a34a";
+  } else if (incident.status === "under_review" || incident.underLegalReview) {
+    color = "#a855f7";
   } else if (incident.status === "resolution_pending") {
     color = "#eab308";
   } else if (incident.status === "disputed") {
@@ -163,6 +167,7 @@ function createIcon(incident: Incident, selected: boolean) {
 }
 
 function visibilityLabel(incident: Incident): string {
+  if (incident.status === "under_review" || incident.underLegalReview) return "Under Review";
   if (incident.status === "resolution_pending") return "Resolution Pending";
   if (incident.status === "resolved") return "Resolved";
   if (incident.visibilityStage === "seed") return "Community Report (Unverified)";
@@ -226,7 +231,7 @@ export function MapView({
           <Popup>
             <div className="text-sm">
               <strong>
-                {inc.category.emoji} {inc.category.name}
+                {inc.category.emoji} {inc.displayLabel ?? inc.category.name}
               </strong>
               <p className="mt-1 text-stone-500">
                 {visibilityLabel(inc)} · {Math.round(inc.confidenceScore * 100)}% confidence
