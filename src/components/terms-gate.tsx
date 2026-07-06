@@ -18,11 +18,15 @@ export function TermsGate({ children }: { children: React.ReactNode }) {
   const [detection, setDetection] = useState<CountryDetectionResult | null>(null);
 
   useEffect(() => {
-    const storedVersion = localStorage.getItem(TERMS_VERSION_KEY);
-    const isAccepted =
-      localStorage.getItem(TERMS_STORAGE_KEY) === "true" &&
-      storedVersion === LEGAL_DOCUMENT_VERSION;
-    setAccepted(isAccepted);
+    try {
+      const storedVersion = localStorage.getItem(TERMS_VERSION_KEY);
+      const isAccepted =
+        localStorage.getItem(TERMS_STORAGE_KEY) === "true" &&
+        storedVersion === LEGAL_DOCUMENT_VERSION;
+      setAccepted(isAccepted);
+    } catch {
+      setAccepted(false);
+    }
 
     const deviceCountry = navigator.language?.includes("-")
       ? navigator.language.split("-")[1]?.toUpperCase()

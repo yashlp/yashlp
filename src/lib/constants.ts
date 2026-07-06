@@ -17,8 +17,7 @@ export const TERMS_STORAGE_KEY = "civiclens_terms_accepted";
 export const TERMS_VERSION_KEY = "civiclens_terms_version";
 export const LEGAL_PROFILE_KEY = "civiclens_legal_profile";
 export const LEGAL_COUNTRY_KEY = "civiclens_legal_country";
-
-export { LEGAL_DOCUMENT_VERSION } from "@/lib/legal-engine";
+export const LEGAL_DOCUMENT_VERSION = "2026.07.06";
 
 export const INCIDENT_STATUSES = {
   PENDING: "pending",
