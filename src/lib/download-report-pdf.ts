@@ -23,58 +23,47 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
   }
 
   try {
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    const scale = pickExportScale(width, height);
+    const canvas = await html2canvas(element, {
+      scale,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      foreignObjectRendering: false,
+      width,
+      height,
+      windowWidth: width,
+      windowHeight: height,
+      scrollX: 0,
+      scrollY: 0,
+      onclone: (_doc, clonedElement) => {
+        prepareCloneForPdf(element, clonedElement);
+      },
+    });
 
-    const slices = planCaptureSlices(width, height);
-    let pdfY = 0;
-    let pageAdded = false;
-
-    for (const slice of slices) {
-      const canvas = await captureSlice(element, width, slice, (clonedDoc, clonedElement) => {
-        prepareCloneForPdf(element, clonedElement, clonedDoc);
-      });
-
-      if (isCanvasBlank(canvas)) {
-        throw new Error("Blank canvas");
-      }
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.92);
-      const sliceHeightMm = (canvas.height * pageWidth) / canvas.width;
-      let offsetMm = 0;
-
-      while (offsetMm < sliceHeightMm) {
-        const spaceLeft = pageHeight - pdfY;
-        if (spaceLeft < 1) {
-          pdf.addPage();
-          pdfY = 0;
-          pageAdded = true;
-          continue;
-        }
-
-        const drawHeightMm = Math.min(spaceLeft, sliceHeightMm - offsetMm);
-        const sourceYPx = (offsetMm / sliceHeightMm) * canvas.height;
-        const sourceHeightPx = (drawHeightMm / sliceHeightMm) * canvas.height;
-
-        const tile = cropCanvas(canvas, 0, sourceYPx, canvas.width, sourceHeightPx);
-        const tileData = tile.toDataURL("image/jpeg", 0.92);
-        const tileHeightMm = (tile.height * pageWidth) / tile.width;
-
-        pdf.addImage(tileData, "JPEG", 0, pdfY, pageWidth, tileHeightMm);
-        pdfY += tileHeightMm;
-        offsetMm += drawHeightMm;
-
-        if (offsetMm < sliceHeightMm && pdfY >= pageHeight - 0.5) {
-          pdf.addPage();
-          pdfY = 0;
-          pageAdded = true;
-        }
-      }
+    if (!isCanvasUsable(canvas)) {
+      throw new Error("Blank canvas");
     }
 
-    if (!pageAdded && pdfY < 1) {
-      throw new Error("Blank canvas");
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
     }
 
     pdf.save(filename);
@@ -123,52 +112,13 @@ export function printReportAsPdf(element: HTMLElement): void {
   window.print();
 }
 
-type CaptureSlice = { offsetY: number; height: number; scale: number };
-
-const MAX_CANVAS_PX = 12000;
-const SLICE_HEIGHT_PX = 3200;
-
-function planCaptureSlices(width: number, totalHeight: number): CaptureSlice[] {
-  const slices: CaptureSlice[] = [];
-  let offsetY = 0;
-
-  while (offsetY < totalHeight) {
-    const height = Math.min(SLICE_HEIGHT_PX, totalHeight - offsetY);
-    const scale = Math.min(2, MAX_CANVAS_PX / width, MAX_CANVAS_PX / height);
-    slices.push({ offsetY, height, scale: Math.max(scale, 0.35) });
-    offsetY += height;
-  }
-
-  return slices;
+/** Keep canvas within browser limits while preserving readable text. */
+function pickExportScale(width: number, height: number): number {
+  const maxDim = 14000;
+  return Math.min(2, maxDim / width, maxDim / height);
 }
 
-async function captureSlice(
-  element: HTMLElement,
-  width: number,
-  slice: CaptureSlice,
-  onclone: (doc: Document, el: HTMLElement) => void
-): Promise<HTMLCanvasElement> {
-  const { default: html2canvas } = await import("html2canvas");
-
-  return html2canvas(element, {
-    scale: slice.scale,
-    useCORS: true,
-    logging: false,
-    backgroundColor: "#ffffff",
-    foreignObjectRendering: false,
-    width,
-    height: slice.height,
-    x: 0,
-    y: slice.offsetY,
-    windowWidth: width,
-    windowHeight: slice.height,
-    scrollX: 0,
-    scrollY: -slice.offsetY,
-    onclone,
-  });
-}
-
-function prepareCloneForPdf(original: HTMLElement, clone: HTMLElement, doc: Document): void {
+function prepareCloneForPdf(original: HTMLElement, clone: HTMLElement): void {
   clone.style.overflow = "visible";
   clone.style.height = "auto";
   clone.style.maxHeight = "none";
@@ -182,18 +132,8 @@ function prepareCloneForPdf(original: HTMLElement, clone: HTMLElement, doc: Docu
   origNodes.forEach((origEl, idx) => {
     const cloneEl = cloneNodes[idx] as HTMLElement | undefined;
     if (!cloneEl || !(origEl instanceof HTMLElement)) return;
-
     inlineComputedStyles(origEl, cloneEl);
   });
-
-  const styleFix = doc.createElement("style");
-  styleFix.textContent = `
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-  `;
-  doc.head.appendChild(styleFix);
 }
 
 const INLINE_PROPS = [
@@ -231,12 +171,6 @@ const INLINE_PROPS = [
   "justifyContent",
   "gap",
   "opacity",
-  "width",
-  "minWidth",
-  "maxWidth",
-  "height",
-  "minHeight",
-  "maxHeight",
 ] as const;
 
 function inlineComputedStyles(origEl: HTMLElement, cloneEl: HTMLElement): void {
@@ -260,39 +194,30 @@ function inlineComputedStyles(origEl: HTMLElement, cloneEl: HTMLElement): void {
   }
 }
 
-function cropCanvas(
-  source: HTMLCanvasElement,
-  x: number,
-  y: number,
-  width: number,
-  height: number
-): HTMLCanvasElement {
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.floor(width));
-  canvas.height = Math.max(1, Math.floor(height));
+function isCanvasUsable(canvas: HTMLCanvasElement): boolean {
   const ctx = canvas.getContext("2d");
-  if (!ctx) return source;
-  ctx.drawImage(source, x, y, width, height, 0, 0, width, height);
-  return canvas;
-}
+  if (!ctx || canvas.width === 0 || canvas.height === 0) return false;
 
-function isCanvasBlank(canvas: HTMLCanvasElement): boolean {
-  const ctx = canvas.getContext("2d");
-  if (!ctx || canvas.width === 0 || canvas.height === 0) return true;
-
-  const sampleW = Math.min(160, canvas.width);
-  const sampleH = Math.min(160, canvas.height);
+  const sampleW = Math.min(200, canvas.width);
+  const sampleH = Math.min(200, canvas.height);
   const data = ctx.getImageData(0, 0, sampleW, sampleH).data;
 
-  let nonWhite = 0;
+  let contentPixels = 0;
+  let blackPixels = 0;
+
   for (let i = 0; i < data.length; i += 4) {
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
     const a = data[i + 3];
-    if (a > 10 && (r < 248 || g < 248 || b < 248)) nonWhite++;
+    if (a < 10) continue;
+
+    if (r < 30 && g < 30 && b < 30) blackPixels++;
+    if (r < 248 || g < 248 || b < 248) contentPixels++;
   }
-  return nonWhite < 12;
+
+  if (blackPixels > contentPixels * 0.8) return false;
+  return contentPixels >= 12;
 }
 
 function waitForPaint(): Promise<void> {
