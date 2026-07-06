@@ -1,10 +1,12 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
   CheckCircle2,
   Download,
+  Loader2,
   MapPin,
   Sparkles,
   TrendingDown,
@@ -13,6 +15,7 @@ import {
 import type { IntelligenceReportData } from "@/lib/report-demo-data";
 import { REPORT_PRICING } from "@/lib/report-demo-data";
 import { ReportRichSections } from "@/components/report-rich-sections";
+import { downloadElementAsPdf, reportPdfFilename } from "@/lib/download-report-pdf";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
 
 function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
@@ -38,6 +41,10 @@ function HeatLevel({ level }: { level: "high" | "medium" | "low" }) {
 }
 
 export function IntelligenceReportView({ report }: { report: IntelligenceReportData }) {
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+
   const maxReported = Math.max(...report.trends.map((t) => t.reported), 1);
   const dateLabel = new Date(report.generatedAt).toLocaleDateString("en-IN", {
     day: "numeric",
@@ -47,6 +54,20 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
     minute: "2-digit",
   });
   const tierLabel = report.tier === "big" ? REPORT_PRICING.big.label : REPORT_PRICING.small.label;
+  const pdfFilename = reportPdfFilename(report.productId, report.areaName);
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (!reportRef.current || downloading) return;
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      await downloadElementAsPdf(reportRef.current, pdfFilename);
+    } catch {
+      setDownloadError("PDF export failed. Try again or use Print → Save as PDF.");
+    } finally {
+      setDownloading(false);
+    }
+  }, [downloading, pdfFilename]);
 
   const verdictStyles = {
     positive: "border-emerald-200 bg-emerald-50 text-emerald-900",
@@ -56,7 +77,27 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/40">
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={handleDownloadPdf}
+          disabled={downloading}
+          className="flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-orange-700 disabled:opacity-60"
+        >
+          {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {downloading ? "Generating PDF…" : "Download PDF"}
+        </button>
+      </div>
+      {downloadError && (
+        <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">
+          {downloadError}
+        </p>
+      )}
+
+      <div
+        ref={reportRef}
+        className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/40"
+      >
         {/* Paid receipt strip */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 sm:px-6">
           <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
@@ -347,15 +388,16 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
           <div className="flex flex-col items-center gap-3 border-t border-orange-100 pt-6 sm:flex-row sm:justify-between">
             <div>
               <p className="text-sm font-medium text-stone-700">You paid ₹{report.priceInr} (${report.priceUsd})</p>
-              <p className="text-xs text-stone-400">PDF download & email delivery coming soon</p>
+              <p className="text-xs text-stone-400">Save or share this report as PDF</p>
             </div>
             <button
               type="button"
-              disabled
-              className="flex items-center gap-2 rounded-xl border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700"
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
             >
-              <Download className="h-4 w-4" />
-              Download PDF
+              {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {downloading ? "Generating…" : "Download PDF"}
             </button>
           </div>
         </div>
