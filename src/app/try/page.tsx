@@ -97,6 +97,10 @@ export default function TryHubPage() {
           <code className="rounded bg-stone-100 px-1.5 py-0.5 text-xs">http://localhost:3000/try</code>
           ).
         </p>
+        <p className="mt-2 text-xs text-stone-500">
+          Blank white page? Run <code className="rounded bg-stone-100 px-1 py-0.5">npm run dev</code> (clears cache),
+          then hard-refresh with <strong>Ctrl+Shift+R</strong>.
+        </p>
       </div>
 
       <section className="mt-8">

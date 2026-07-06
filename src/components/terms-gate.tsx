@@ -18,6 +18,10 @@ export function TermsGate({ children }: { children: React.ReactNode }) {
   const [detection, setDetection] = useState<CountryDetectionResult | null>(null);
 
   useEffect(() => {
+    const fallback = window.setTimeout(() => {
+      setAccepted((prev) => (prev === null ? false : prev));
+    }, 2500);
+
     try {
       const storedVersion = localStorage.getItem(TERMS_VERSION_KEY);
       const isAccepted =
@@ -44,6 +48,8 @@ export function TermsGate({ children }: { children: React.ReactNode }) {
           detectionSource: "fallback",
         })
       );
+
+    return () => clearTimeout(fallback);
   }, []);
 
   const accept = async () => {
