@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Award, LogOut, Shield } from "lucide-react";
+import { Award, LogOut, RefreshCw, Shield, UserRound } from "lucide-react";
+import { MAX_NAME_CHANGES, nameChangesRemaining } from "@/lib/random-name";
 
 type User = {
   id: string;
   name: string;
   phone: string;
+  nameChangeCount: number;
   reputation: number;
   reliabilityScore: number;
 };
@@ -15,15 +17,49 @@ type User = {
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => {
         if (!d.user) router.push("/login");
         else setUser(d.user);
       });
+  };
+
+  useEffect(() => {
+    load();
   }, [router]);
+
+  const remaining = user ? nameChangesRemaining(user.nameChangeCount) : 0;
+  const canEdit = remaining > 0;
+
+  const changeName = async (useRandom: boolean) => {
+    if (!user) return;
+    setLoading(true);
+    setError("");
+    const res = await fetch("/api/auth/name", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        useRandom,
+        name: useRandom ? undefined : newName.trim(),
+      }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) {
+      setError(data.error ?? "Could not update name");
+      return;
+    }
+    setUser(data.user);
+    setNewName("");
+    setEditing(false);
+  };
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -49,6 +85,78 @@ export default function ProfilePage() {
               {tier}
             </span>
           </div>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-orange-100 bg-orange-50/50 p-4">
+          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-stone-800">
+            <UserRound className="h-4 w-4 text-orange-500" />
+            Display name
+          </div>
+          <p className="text-xs text-stone-500">
+            Use a random name to protect your privacy. You can change your display name{" "}
+            <strong>{MAX_NAME_CHANGES} times</strong> only.
+          </p>
+          <p className="mt-2 text-sm font-medium text-orange-700">
+            {remaining} of {MAX_NAME_CHANGES} changes remaining
+          </p>
+
+          {canEdit && !editing && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                onClick={() => changeName(true)}
+                disabled={loading}
+                className="flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Random name
+              </button>
+              <button
+                onClick={() => {
+                  setEditing(true);
+                  setNewName(user.name);
+                }}
+                disabled={loading}
+                className="rounded-lg border border-orange-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:bg-orange-50 disabled:opacity-50"
+              >
+                Choose name
+              </button>
+            </div>
+          )}
+
+          {editing && (
+            <div className="mt-3 space-y-2">
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                maxLength={32}
+                className="input-field w-full"
+                placeholder="New display name"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => changeName(false)}
+                  disabled={loading || newName.trim().length < 2 || newName.trim() === user.name}
+                  className="rounded-lg bg-orange-600 px-3 py-2 text-sm text-white disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="rounded-lg border px-3 py-2 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!canEdit && (
+            <p className="mt-2 text-xs text-stone-500">
+              Your display name is locked after {MAX_NAME_CHANGES} changes.
+            </p>
+          )}
+
+          {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4">

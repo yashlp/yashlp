@@ -8,6 +8,7 @@ export type SessionUser = {
   id: string;
   phone: string;
   name: string;
+  nameChangeCount: number;
   reputation: number;
   reliabilityScore: number;
   role: string;
@@ -50,6 +51,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       id: true,
       phone: true,
       name: true,
+      nameChangeCount: true,
       reputation: true,
       reliabilityScore: true,
       role: true,

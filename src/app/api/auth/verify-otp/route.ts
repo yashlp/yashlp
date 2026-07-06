@@ -3,11 +3,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createSession, normalizePhone } from "@/lib/auth";
 import { verifyOtp } from "@/lib/otp";
+import { generateRandomDisplayName } from "@/lib/random-name";
 
 const schema = z.object({
   phone: z.string().min(10),
   otp: z.string().length(6),
-  name: z.string().min(2).optional(),
+  name: z.string().min(2).max(32).optional(),
+  useRandomName: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
@@ -24,14 +26,13 @@ export async function POST(req: Request) {
     let user = await prisma.user.findUnique({ where: { phone } });
 
     if (!user) {
-      const displayName = data.name?.trim() || `User ${phone.slice(-4)}`;
+      const displayName =
+        data.useRandomName !== false && !data.name?.trim()
+          ? generateRandomDisplayName()
+          : data.name?.trim() || generateRandomDisplayName();
+
       user = await prisma.user.create({
-        data: { phone, name: displayName },
-      });
-    } else if (data.name?.trim() && user.name.startsWith("User ")) {
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: { name: data.name.trim() },
+        data: { phone, name: displayName, nameChangeCount: 0 },
       });
     }
 
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
         id: user.id,
         phone: user.phone,
         name: user.name,
+        nameChangeCount: user.nameChangeCount,
         reputation: user.reputation,
       },
     });

@@ -1,19 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Phone, Shield } from "lucide-react";
+import { Phone, RefreshCw, Shield, UserRound } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [name, setName] = useState("");
+  const [useRandomName, setUseRandomName] = useState(true);
+  const [randomName, setRandomName] = useState("");
+  const [customName, setCustomName] = useState("");
   const [error, setError] = useState("");
   const [hint, setHint] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const refreshRandomName = async () => {
+    const res = await fetch("/api/auth/name");
+    const data = await res.json();
+    setRandomName(data.name);
+  };
+
+  useEffect(() => {
+    if (step === "otp" && !randomName) {
+      refreshRandomName();
+    }
+  }, [step, randomName]);
 
   const sendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +55,12 @@ export default function LoginPage() {
     const res = await fetch("/api/auth/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, otp, name: name || undefined }),
+      body: JSON.stringify({
+        phone,
+        otp,
+        useRandomName,
+        name: useRandomName ? undefined : customName.trim() || undefined,
+      }),
     });
     const data = await res.json();
     setLoading(false);
@@ -120,17 +139,62 @@ export default function LoginPage() {
                 className="input-field mt-1 w-full text-center text-2xl tracking-[0.4em]"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium text-stone-700">
-                Your name <span className="text-stone-400">(optional)</span>
+
+            <div className="rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-800">
+                <UserRound className="h-4 w-4 text-orange-500" />
+                Display name (privacy)
+              </div>
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="radio"
+                  checked={useRandomName}
+                  onChange={() => setUseRandomName(true)}
+                  className="mt-1"
+                />
+                <span className="text-sm text-stone-700">
+                  <strong>Use random name</strong> — recommended for privacy
+                </span>
               </label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="How should we call you?"
-                className="input-field mt-1 w-full"
-              />
+              {useRandomName && (
+                <div className="mt-2 flex items-center gap-2 rounded-xl bg-white px-3 py-2">
+                  <span className="flex-1 font-medium text-orange-700">
+                    {randomName || "Generating..."}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={refreshRandomName}
+                    className="rounded-lg p-1.5 text-orange-600 hover:bg-orange-50"
+                    title="New random name"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+              <label className="mt-3 flex cursor-pointer items-start gap-3">
+                <input
+                  type="radio"
+                  checked={!useRandomName}
+                  onChange={() => setUseRandomName(false)}
+                  className="mt-1"
+                />
+                <span className="text-sm text-stone-700">Choose my own name</span>
+              </label>
+              {!useRandomName && (
+                <input
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  placeholder="Your display name"
+                  maxLength={32}
+                  className="input-field mt-2 w-full"
+                />
+              )}
+              <p className="mt-2 text-xs text-stone-500">
+                New accounts get a privacy-friendly name. You can change it up to 2 times later in
+                Profile.
+              </p>
             </div>
+
             {hint && (
               <p className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-xs text-blue-800">
                 <Shield className="h-4 w-4 shrink-0" />
@@ -140,7 +204,7 @@ export default function LoginPage() {
             {error && <p className="text-sm text-rose-600">{error}</p>}
             <button
               type="submit"
-              disabled={loading || otp.length !== 6}
+              disabled={loading || otp.length !== 6 || (!useRandomName && customName.trim().length < 2)}
               className="w-full rounded-2xl bg-orange-600 py-3.5 font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
             >
               {loading ? "Verifying..." : "Verify & continue"}

@@ -12,6 +12,7 @@ model User {
   phone            String   @unique
   email            String?
   name             String
+  nameChangeCount  Int      @default(0)
   passwordHash     String?
   reputation       Int      @default(0)
   reliabilityScore Float    @default(0.5)
