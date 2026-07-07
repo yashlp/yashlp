@@ -23,7 +23,7 @@ export default function ProfilePage() {
   const [newName, setNewName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [contactEmail, setContactEmail] = useState("support@civiclens.app");
+  const [contactEmail, setContactEmail] = useState("yash.shah.uk@gmail.com");
 
   const load = () => {
     fetch("/api/auth/me", { credentials: "include" })

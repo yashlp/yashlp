@@ -10,7 +10,7 @@ const DEFAULTS: Record<SiteSettingKey, string> = {
   [SITE_SETTING_KEYS.DEFAULT_MAP_LAT]: "19.076",
   [SITE_SETTING_KEYS.DEFAULT_MAP_LNG]: "72.8777",
   [SITE_SETTING_KEYS.SITE_NAME]: "CivicLens",
-  [SITE_SETTING_KEYS.CONTACT_EMAIL]: "support@civiclens.app",
+  [SITE_SETTING_KEYS.CONTACT_EMAIL]: "yash.shah.uk@gmail.com",
 };
 
 export async function getSiteSetting(key: SiteSettingKey): Promise<string> {
@@ -47,7 +47,7 @@ export async function getPublicSiteConfig() {
       lng: parseFloat(settings[SITE_SETTING_KEYS.DEFAULT_MAP_LNG]) || 72.8777,
     },
     siteName: settings[SITE_SETTING_KEYS.SITE_NAME] || "CivicLens",
-    contactEmail: settings[SITE_SETTING_KEYS.CONTACT_EMAIL] || "support@civiclens.app",
+    contactEmail: settings[SITE_SETTING_KEYS.CONTACT_EMAIL] || "yash.shah.uk@gmail.com",
   };
 }
 
