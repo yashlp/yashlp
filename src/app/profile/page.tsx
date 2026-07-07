@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Award, LogOut, RefreshCw, Shield, UserRound, Settings } from "lucide-react";
+import { Award, LogOut, Mail, RefreshCw, Shield, UserRound, Settings } from "lucide-react";
 import Link from "next/link";
 import { MAX_NAME_CHANGES, nameChangesRemaining } from "@/lib/random-name";
 
@@ -23,14 +23,21 @@ export default function ProfilePage() {
   const [newName, setNewName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [contactEmail, setContactEmail] = useState("support@civiclens.app");
 
   const load = () => {
-    fetch("/api/auth/me")
+    fetch("/api/auth/me", { credentials: "include" })
       .then((r) => r.json())
       .then((d) => {
         if (!d.user) router.push("/login");
         else setUser(d.user);
       });
+    fetch("/api/site-config")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.contactEmail) setContactEmail(d.contactEmail);
+      })
+      .catch(() => {});
   };
 
   useEffect(() => {
@@ -182,6 +189,23 @@ export default function ProfilePage() {
           Earn reputation by confirming incidents, submitting accurate reports, and verifying resolutions.
           Higher reliability increases the weight of your contributions.
         </p>
+
+        <div className="mt-6 rounded-xl border border-orange-100 bg-orange-50/40 p-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-stone-800">
+            <Mail className="h-4 w-4 text-orange-500" />
+            Contact us
+          </div>
+          <p className="mt-2 text-sm text-stone-600">
+            Have an issue with your account, a report, or need help? Email us and we&apos;ll get back to you.
+          </p>
+          <a
+            href={`mailto:${contactEmail}?subject=${encodeURIComponent("CivicLens support request")}`}
+            className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-orange-700 ring-1 ring-orange-200 hover:bg-orange-50"
+          >
+            <Mail className="h-4 w-4" />
+            {contactEmail}
+          </a>
+        </div>
 
         <button
           onClick={logout}

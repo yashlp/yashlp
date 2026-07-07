@@ -10,6 +10,7 @@ const DEFAULTS: Record<SiteSettingKey, string> = {
   [SITE_SETTING_KEYS.DEFAULT_MAP_LAT]: "19.076",
   [SITE_SETTING_KEYS.DEFAULT_MAP_LNG]: "72.8777",
   [SITE_SETTING_KEYS.SITE_NAME]: "CivicLens",
+  [SITE_SETTING_KEYS.CONTACT_EMAIL]: "support@civiclens.app",
 };
 
 export async function getSiteSetting(key: SiteSettingKey): Promise<string> {
@@ -46,6 +47,7 @@ export async function getPublicSiteConfig() {
       lng: parseFloat(settings[SITE_SETTING_KEYS.DEFAULT_MAP_LNG]) || 72.8777,
     },
     siteName: settings[SITE_SETTING_KEYS.SITE_NAME] || "CivicLens",
+    contactEmail: settings[SITE_SETTING_KEYS.CONTACT_EMAIL] || "support@civiclens.app",
   };
 }
 
@@ -53,7 +55,10 @@ export async function seedDefaultSiteSettings() {
   for (const [key, value] of Object.entries(DEFAULTS)) {
     await prisma.siteSetting.upsert({
       where: { key },
-      update: key === SITE_SETTING_KEYS.DEMO_MODE ? { value } : {},
+      update:
+        key === SITE_SETTING_KEYS.DEMO_MODE || key === SITE_SETTING_KEYS.CONTACT_EMAIL
+          ? { value }
+          : {},
       create: { key, value },
     });
   }

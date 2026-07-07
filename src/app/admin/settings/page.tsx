@@ -73,6 +73,20 @@ export default function AdminSettingsPage() {
       </div>
 
       <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
+        <h2 className="font-semibold text-stone-900">Contact email</h2>
+        <p className="mt-1 text-xs text-stone-400">
+          Shown on Profile so customers can email you about issues or account help.
+        </p>
+        <input
+          type="email"
+          value={settings[SITE_SETTING_KEYS.CONTACT_EMAIL] ?? ""}
+          onChange={(e) => set(SITE_SETTING_KEYS.CONTACT_EMAIL, e.target.value)}
+          placeholder="support@yourdomain.com"
+          className="input-field mt-3 w-full"
+        />
+      </div>
+
+      <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
         <h2 className="font-semibold text-stone-900">Default map center</h2>
         <p className="mt-1 text-xs text-stone-400">Used when geolocation is unavailable</p>
         <div className="mt-3 flex gap-3">
