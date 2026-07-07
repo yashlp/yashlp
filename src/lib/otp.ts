@@ -1,5 +1,5 @@
 import { prisma } from "./db";
-import { isProduction, isSmsConfigured } from "./env";
+import { isDemoOtpAllowed, isProduction, isSmsConfigured } from "./env";
 import { rateLimit } from "./rate-limit";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -10,7 +10,7 @@ export const DEMO_OTP = "123456";
 const verifyFailures = new Map<string, { count: number; lockedUntil: number }>();
 
 export function generateOtp(): string {
-  if (!isProduction()) return DEMO_OTP;
+  if (isDemoOtpAllowed()) return DEMO_OTP;
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
@@ -38,7 +38,9 @@ function clearVerifyFailures(phone: string): void {
 
 export async function sendOtp(phone: string) {
   if (isProduction() && !isSmsConfigured()) {
-    throw new Error("SMS verification is not configured. Contact support.");
+    if (!isDemoOtpAllowed()) {
+      throw new Error("SMS verification is not configured. Contact support.");
+    }
   }
 
   const sendLimit = rateLimit(`otp-send:${phone}`, 3, 15 * 60 * 1000);
@@ -62,7 +64,7 @@ export async function sendOtp(phone: string) {
 export async function verifyOtp(phone: string, code: string): Promise<boolean> {
   if (isPhoneLocked(phone)) return false;
 
-  if (isProduction() && code === DEMO_OTP) {
+  if (isProduction() && code === DEMO_OTP && !isDemoOtpAllowed()) {
     recordVerifyFailure(phone);
     return false;
   }

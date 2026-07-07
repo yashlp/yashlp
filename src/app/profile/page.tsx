@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Award, LogOut, RefreshCw, Shield, UserRound } from "lucide-react";
+import { Award, LogOut, RefreshCw, Shield, UserRound, Settings } from "lucide-react";
+import Link from "next/link";
 import { MAX_NAME_CHANGES, nameChangesRemaining } from "@/lib/random-name";
 
 type User = {
@@ -12,6 +13,7 @@ type User = {
   nameChangeCount: number;
   reputation: number;
   reliabilityScore: number;
+  role?: string;
 };
 
 export default function ProfilePage() {
@@ -188,6 +190,16 @@ export default function ProfilePage() {
           <LogOut className="h-4 w-4" />
           Sign Out
         </button>
+
+        {user.role === "admin" && (
+          <Link
+            href="/admin"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 py-2.5 text-sm font-semibold text-white hover:bg-violet-700"
+          >
+            <Settings className="h-4 w-4" />
+            Open admin panel
+          </Link>
+        )}
       </div>
     </div>
   );

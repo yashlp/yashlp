@@ -18,6 +18,10 @@ export function isProduction(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
+export function isDemoOtpAllowed(): boolean {
+  return process.env.ALLOW_DEMO_OTP === "true" || !isProduction();
+}
+
 export function isSmsConfigured(): boolean {
   return Boolean(process.env.SMS_API_KEY && process.env.SMS_PROVIDER);
 }

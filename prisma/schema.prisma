@@ -228,3 +228,11 @@ model HealthScoreSnapshot {
   @@index([placeKey])
   @@index([latitude, longitude])
 }
+
+/** Runtime config editable from /admin without redeploying */
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}

@@ -27,10 +27,13 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) — accept Terms & Conditions on first visit.
 
-### Demo account
+### Demo sign-in (phone OTP)
 
-- **Email:** demo@civiclens.app
-- **Password:** demo1234
+- **Phone:** `919988776655` (or any number in dev)
+- **OTP:** `123456` (demo mode; set `ALLOW_DEMO_OTP=true` on live demo)
+- **Admin panel:** [/admin](http://localhost:3000/admin) — phone must be in `ADMIN_PHONES`
+
+See **[DEPLOY.md](./DEPLOY.md)** for going live on Vercel + Neon.
 
 ## Design
 
@@ -56,6 +59,7 @@ Master product spec: [`CivicLens_Master_PRD.md`](./CivicLens_Master_PRD.md)
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server |
+| `npm run dev` | Start dev server (fast, keeps cache) |
+| `npm run dev:reset` | Clear `.next` and restart (fixes blank page) |
 | `npm run build` | Production build |
 | `npm run db:setup` | Push schema + seed global demo data |

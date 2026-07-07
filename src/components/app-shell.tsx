@@ -16,8 +16,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TermsGate } from "@/components/terms-gate";
+import { SiteBanners, type PublicSiteConfig } from "@/components/site-banners";
 
-type UserInfo = { id: string; name: string; phone: string; reputation: number } | null;
+type UserInfo = { id: string; name: string; phone: string; reputation: number; role?: string } | null;
 
 const navItems = [
   { href: "/", label: "Map", shortLabel: "Map", icon: Home },
@@ -32,9 +33,11 @@ const MOBILE_NAV = navItems.slice(0, 4);
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<UserInfo>(null);
+  const [siteConfig, setSiteConfig] = useState<PublicSiteConfig | null>(null);
   const prevPath = useRef(pathname);
   const isLegalPage =
     pathname === "/terms" || pathname === "/privacy" || pathname === "/content-policy";
+  const isAdminPage = pathname.startsWith("/admin");
   const isMapPage = pathname === "/";
 
   const refreshUser = () => {
@@ -46,6 +49,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     refreshUser();
+    fetch("/api/site-config")
+      .then((r) => r.json())
+      .then(setSiteConfig)
+      .catch(() => setSiteConfig({ demoMode: true, announcement: null, maintenanceMode: false }));
   }, []);
 
   useEffect(() => {
@@ -58,6 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const shell = (
     <div className="flex min-h-dvh flex-col">
+      {!isAdminPage && <SiteBanners config={siteConfig} />}
       <header className="sticky top-0 z-50 border-b border-orange-100 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
@@ -89,16 +97,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2">
             {user ? (
-              <Link
-                href="/profile"
-                className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-orange-50"
-              >
+              <>
+                {user.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="hidden min-h-11 items-center rounded-xl px-2.5 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 md:flex"
+                  >
+                    Admin
+                  </Link>
+                )}
+                <Link
+                  href="/profile"
+                  className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-orange-50"
+                >
                 <User className="h-4 w-4 text-orange-600" />
                 <span className="hidden sm:inline text-stone-800">{user.name}</span>
                 <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-700">
                   {user.reputation}
                 </span>
               </Link>
+              </>
             ) : (
               <Link
                 href="/login"
@@ -120,7 +138,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className={cn("flex-1", !isMapPage && "pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0")}>
-        {children}
+        {siteConfig?.maintenanceMode && !isAdminPage ? (
+          <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
+            <p className="text-lg font-semibold text-stone-800">We&apos;ll be back shortly</p>
+            <p className="mt-2 max-w-md text-sm text-stone-500">
+              CivicLens is in maintenance mode. Check again in a little while.
+            </p>
+          </div>
+        ) : (
+          children
+        )}
       </main>
 
       <footer className="hidden border-t border-orange-100 bg-white py-3 text-center text-xs text-stone-400 md:block">

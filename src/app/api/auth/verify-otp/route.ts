@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createSession, normalizePhone } from "@/lib/auth";
+import { getAdminPhones, ADMIN_ROLE } from "@/lib/admin";
 import { rateLimitKey, rateLimitResponse } from "@/lib/api-security";
 import { verifyOtp } from "@/lib/otp";
 import { generateRandomDisplayName } from "@/lib/random-name";
@@ -38,8 +39,20 @@ export async function POST(req: Request) {
           ? generateRandomDisplayName()
           : data.name?.trim() || generateRandomDisplayName();
 
+      const isAdminPhone = getAdminPhones().includes(phone);
+
       user = await prisma.user.create({
-        data: { phone, name: displayName, nameChangeCount: 0 },
+        data: {
+          phone,
+          name: displayName,
+          nameChangeCount: 0,
+          role: isAdminPhone ? ADMIN_ROLE : "user",
+        },
+      });
+    } else if (getAdminPhones().includes(phone) && user.role !== ADMIN_ROLE) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { role: ADMIN_ROLE },
       });
     }
 
@@ -52,6 +65,7 @@ export async function POST(req: Request) {
         name: user.name,
         nameChangeCount: user.nameChangeCount,
         reputation: user.reputation,
+        role: user.role,
       },
     });
   } catch (e) {

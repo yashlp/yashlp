@@ -1,11 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 import { ALL_CATEGORIES, getCategoryTtlDays, isPhotoRequired } from "../src/lib/categories";
+import { ADMIN_ROLE } from "../src/lib/admin";
 import {
   GLOBAL_SAMPLE_PLACES,
   INCIDENT_STATUSES,
   VISIBILITY,
   VISIBILITY_STAGE,
 } from "../src/lib/constants";
+import { seedDefaultSiteSettings } from "../src/lib/site-settings";
 
 const prisma = new PrismaClient();
 
@@ -64,7 +66,7 @@ async function main() {
     { phone: "+919876543210", name: "Amara Okafor", reputation: 120, reliabilityScore: 0.85 },
     { phone: "+819012345678", name: "Yuki Tanaka", reputation: 95, reliabilityScore: 0.78 },
     { phone: "+5511987654321", name: "Sofia Mendes", reputation: 210, reliabilityScore: 0.92 },
-    { phone: "+919988776655", name: "Demo User", reputation: 50, reliabilityScore: 0.7 },
+    { phone: "+919988776655", name: "Demo Admin", reputation: 50, reliabilityScore: 0.7, role: ADMIN_ROLE },
   ];
 
   await prisma.contentDispute.deleteMany();
@@ -73,7 +75,10 @@ async function main() {
 
   const users = [];
   for (const u of demoUsers) {
-    const user = await prisma.user.create({ data: u });
+    const { role, ...rest } = u as typeof u & { role?: string };
+    const user = await prisma.user.create({
+      data: { ...rest, role: role ?? "user" },
+    });
     users.push(user);
   }
 
@@ -178,8 +183,11 @@ async function main() {
     });
   }
 
+  await seedDefaultSiteSettings();
+
   console.log("Seed complete!");
-  console.log("Demo phone: 919988776655 → OTP: 123456");
+  console.log("Demo admin phone: 919988776655 → OTP: 123456");
+  console.log("Admin panel: /admin");
 }
 
 main()
