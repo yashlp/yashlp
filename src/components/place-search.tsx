@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Globe, MapPin, X } from "lucide-react";
-import { countrySelectOptions } from "@/lib/countries";
+import { ChevronDown, Globe, MapPin, X } from "lucide-react";
+import { countrySelectOptions, getCountryName } from "@/lib/countries";
 import type { GeocodePlace } from "@/lib/geocode";
 import { LEGAL_COUNTRY_KEY } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
@@ -109,24 +109,28 @@ export function PlaceSearch({
       <label className="text-sm font-medium text-stone-700">{label}</label>
       <p className="mt-0.5 text-xs text-stone-400">{hint}</p>
 
-      <div className="mt-2 flex gap-2">
-        <div className="relative shrink-0">
-          <Globe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-500" />
+      <div className="mt-2 flex items-stretch gap-2">
+        <div
+          className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-orange-200 bg-white px-2.5 py-2 shadow-sm sm:px-3"
+          title={getCountryName(countryCode)}
+        >
+          <Globe className="h-4 w-4 shrink-0 text-orange-500" aria-hidden />
           <select
             value={countryCode}
             onChange={(e) => {
               setCountryCode(e.target.value);
               setOpen(true);
             }}
-            className="input-field min-h-11 appearance-none rounded-2xl py-2.5 pl-9 pr-8 text-sm font-medium"
+            className="w-11 cursor-pointer appearance-none border-0 bg-transparent py-0.5 text-sm font-semibold text-stone-800 outline-none sm:w-12"
             aria-label="Country"
           >
             {countries.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name}
+              <option key={c.code} value={c.code} title={c.name}>
+                {c.code === "INT" ? "All" : c.code}
               </option>
             ))}
           </select>
+          <ChevronDown className="pointer-events-none h-3.5 w-3.5 shrink-0 text-stone-400" aria-hidden />
         </div>
         <div className="relative min-w-0 flex-1">
           <SearchInput

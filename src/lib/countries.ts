@@ -1,5 +1,7 @@
 import { getCountryName } from "./legal-engine/legalProfiles";
 
+export { getCountryName };
+
 /** Countries supported in location search (ISO 3166-1 alpha-2) */
 export const SEARCH_COUNTRIES = [
   "IN",
