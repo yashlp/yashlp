@@ -68,6 +68,7 @@ export default function LoginPage() {
       setError(data.error ?? "Invalid code");
       return;
     }
+    window.dispatchEvent(new Event("civiclens-auth"));
     router.push("/");
     router.refresh();
   };

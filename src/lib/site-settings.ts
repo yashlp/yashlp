@@ -4,7 +4,7 @@ import { SITE_SETTING_KEYS, type SiteSettingKey } from "./site-setting-keys";
 export { SITE_SETTING_KEYS, type SiteSettingKey };
 
 const DEFAULTS: Record<SiteSettingKey, string> = {
-  [SITE_SETTING_KEYS.DEMO_MODE]: "true",
+  [SITE_SETTING_KEYS.DEMO_MODE]: "false",
   [SITE_SETTING_KEYS.ANNOUNCEMENT]: "",
   [SITE_SETTING_KEYS.MAINTENANCE_MODE]: "false",
   [SITE_SETTING_KEYS.DEFAULT_MAP_LAT]: "19.076",
@@ -53,7 +53,7 @@ export async function seedDefaultSiteSettings() {
   for (const [key, value] of Object.entries(DEFAULTS)) {
     await prisma.siteSetting.upsert({
       where: { key },
-      update: {},
+      update: key === SITE_SETTING_KEYS.DEMO_MODE ? { value } : {},
       create: { key, value },
     });
   }

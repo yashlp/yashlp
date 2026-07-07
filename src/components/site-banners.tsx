@@ -1,38 +1,33 @@
 "use client";
 
-import Link from "next/link";
-import { Shield } from "lucide-react";
-
 export type PublicSiteConfig = {
   demoMode: boolean;
   announcement: string | null;
   maintenanceMode: boolean;
 };
 
-export function SiteBanners({ config }: { config: PublicSiteConfig | null }) {
+export function SiteBanners({
+  config,
+  isAdmin,
+}: {
+  config: PublicSiteConfig | null;
+  isAdmin?: boolean;
+}) {
   if (!config) return null;
 
   if (config.maintenanceMode) {
     return (
       <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-900">
-        <strong>Maintenance:</strong> CivicLens is briefly unavailable. Admins can still use{" "}
-        <Link href="/admin" className="underline">
-          /admin
-        </Link>
-        .
+        <strong>Maintenance:</strong> CivicLens is briefly unavailable. Please check back soon.
       </div>
     );
   }
 
   return (
     <>
-      {config.demoMode && (
-        <div className="flex items-center justify-center gap-2 border-b border-violet-200 bg-violet-50 px-4 py-1.5 text-center text-xs font-medium text-violet-900">
-          <Shield className="h-3.5 w-3.5 shrink-0" />
-          Demo mode · Sample data · Reports are previews
-          <Link href="/admin" className="underline hover:text-violet-700">
-            Admin
-          </Link>
+      {config.demoMode && isAdmin && (
+        <div className="border-b border-violet-200 bg-violet-50 px-4 py-1.5 text-center text-xs font-medium text-violet-900">
+          Admin preview · Demo data · Reports are previews
         </div>
       )}
       {config.announcement && (

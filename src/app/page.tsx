@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Activity, Crosshair, Shield, TrendingUp } from "lucide-react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
-import { cn, scoreBg, scoreColor } from "@/lib/utils";
+import { cn, haversineDistance, scoreBg, scoreColor } from "@/lib/utils";
 
 const MapView = dynamic(() => import("@/components/map-view").then((m) => m.MapView), {
   ssr: false,
@@ -46,7 +46,11 @@ type HealthData = {
   overallScore: number;
   confidence: number;
   incidentCount: number;
+  issueCount: number;
+  totalInArea: number;
 };
+
+const AREA_RADIUS_M = 800;
 
 export default function HomePage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -57,6 +61,8 @@ export default function HomePage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [zoom, setZoom] = useState(DEFAULT_MAP_ZOOM);
   const [filter, setFilter] = useState<"all" | "issues" | "positive" | "resolved">("all");
+  const [locationHint, setLocationHint] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
 
   const debouncedHealthCenter = useDebouncedValue(healthCenter, 500);
 
@@ -67,7 +73,7 @@ export default function HomePage() {
   }, []);
 
   const loadHealth = useCallback(async (lat: number, lng: number) => {
-    const res = await fetch(`/api/health?lat=${lat}&lng=${lng}`);
+    const res = await fetch(`/api/health?lat=${lat}&lng=${lng}&radius=${AREA_RADIUS_M}`);
     const data = await res.json();
     setHealth(data);
   }, []);
@@ -80,31 +86,45 @@ export default function HomePage() {
     loadHealth(debouncedHealthCenter.lat, debouncedHealthCenter.lng);
   }, [debouncedHealthCenter.lat, debouncedHealthCenter.lng, loadHealth]);
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setUserLocation(loc);
-          setViewCenter(loc);
-          setHealthCenter(loc);
-          setZoom(USER_LOCATION_ZOOM);
-        },
-        () => {},
-        { enableHighAccuracy: false, timeout: 8000 }
-      );
-    }
+  const applyUserLocation = useCallback((loc: { lat: number; lng: number }) => {
+    setUserLocation(loc);
+    setViewCenter(loc);
+    setHealthCenter(loc);
+    setZoom(USER_LOCATION_ZOOM);
+    setLocationHint(null);
   }, []);
 
-  const goToMyLocation = () => {
+  useEffect(() => {
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      setUserLocation(loc);
-      setViewCenter(loc);
-      setHealthCenter(loc);
-      setZoom(USER_LOCATION_ZOOM);
-    });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => applyUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }, [applyUserLocation]);
+
+  const goToMyLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationHint("Location is not supported in this browser.");
+      return;
+    }
+    setLocating(true);
+    setLocationHint(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        applyUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      (err) => {
+        setLocating(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setLocationHint("Allow location access in your browser settings, then try again.");
+        } else {
+          setLocationHint("Could not get your location. Check GPS or try again.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
   };
 
   const filtered = incidents.filter((i) => {
@@ -114,10 +134,18 @@ export default function HomePage() {
     return true;
   });
 
+  const pinsInArea = useMemo(() => {
+    return filtered.filter(
+      (i) =>
+        haversineDistance(healthCenter.lat, healthCenter.lng, i.latitude, i.longitude) <=
+        AREA_RADIUS_M
+    ).length;
+  }, [filtered, healthCenter]);
+
   const selected = incidents.find((i) => i.id === selectedId) ?? null;
 
   return (
-    <div className="relative h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-3.5rem)]">
+    <div className="relative h-full min-h-0">
       <div className="absolute inset-0 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         <MapView
           incidents={filtered}
@@ -181,7 +209,10 @@ export default function HomePage() {
               />
             </div>
             <p className="mt-2 text-xs text-stone-400">
-              {health.incidentCount} verified · {Math.round(health.confidence * 100)}% confidence
+              {health.issueCount} {health.issueCount === 1 ? "issue" : "issues"} in this area
+              {health.incidentCount > 0 && (
+                <> · {health.incidentCount} verified</>
+              )}
             </p>
             <Link
               href="/insights"
@@ -194,18 +225,25 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="pointer-events-auto absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-3 z-[1000] flex flex-col gap-2 md:bottom-4 md:right-4">
+      <div className="pointer-events-auto absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-3 z-[1000] flex flex-col items-end gap-2 md:bottom-4 md:right-4">
         <button
+          type="button"
           onClick={goToMyLocation}
-          className="glass-card flex min-h-11 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium text-stone-600 shadow hover:bg-orange-50"
+          disabled={locating}
+          className="glass-card flex min-h-11 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium text-stone-600 shadow hover:bg-orange-50 disabled:opacity-60"
           title="Go to my location"
         >
-          <Crosshair className="h-4 w-4 text-blue-600" />
-          <span className="hidden sm:inline">My location</span>
+          <Crosshair className={cn("h-4 w-4 text-blue-600", locating && "animate-pulse")} />
+          <span className="hidden sm:inline">{locating ? "Locating…" : "My location"}</span>
         </button>
+        {locationHint && (
+          <p className="max-w-[11rem] rounded-lg bg-white/95 px-2 py-1.5 text-[10px] leading-snug text-rose-700 shadow ring-1 ring-rose-100 sm:max-w-xs sm:text-xs">
+            {locationHint}
+          </p>
+        )}
         <div className="glass-card hidden items-center gap-2 rounded-xl px-3 py-2 text-xs text-stone-400 md:flex">
           <Shield className="h-3.5 w-3.5 text-orange-500" />
-          {filtered.length} pins worldwide
+          {pinsInArea} pins in this area
         </div>
       </div>
 

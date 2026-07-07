@@ -27,9 +27,13 @@ export function normalizePhone(raw: string): string {
 export async function createSession(userId: string) {
   const token = createSessionToken(userId);
   const cookieStore = await cookies();
+  const secure =
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL === "1" ||
+    process.env.FORCE_SECURE_COOKIES === "true";
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure,
     sameSite: "lax",
     maxAge: SESSION_MAX_AGE_SEC,
     path: "/",

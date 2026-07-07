@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, Camera, CheckCircle, X, Zap } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
-import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT, POPULAR_CATEGORY_SLUGS, POPULAR_POSITIVE_CATEGORY_SLUGS } from "@/lib/constants";
+import { DEFAULT_MAP_CENTER, MAX_PHOTOS_PER_REPORT } from "@/lib/constants";
 import { photoRuleLabel } from "@/lib/categories";
 import { INSTITUTION_LABELS } from "@/lib/compliance";
 import { CORRUPTION_DISCLAIMER } from "@/lib/compliance/types";
@@ -48,6 +48,8 @@ export default function ReportPage() {
   const [institutionType, setInstitutionType] = useState("");
   const [servicePoint, setServicePoint] = useState("");
   const [corruptionIssueType, setCorruptionIssueType] = useState("");
+  const [popularCategories, setPopularCategories] = useState<Category[]>([]);
+  const [popularCounts, setPopularCounts] = useState<Record<string, number>>({});
 
   const isCorruptionReport = selected?.slug === "corruption-bribery";
 
@@ -86,9 +88,21 @@ export default function ReportPage() {
         setPinLocation(loc);
       },
       () => {},
-      { enableHighAccuracy: false, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   }, []);
+
+  useEffect(() => {
+    const lat = selectedPlace?.lat ?? pinLocation.lat;
+    const lng = selectedPlace?.lng ?? pinLocation.lng;
+    fetch(`/api/categories/popular?type=${signalType}&lat=${lat}&lng=${lng}`)
+      .then((r) => r.json())
+      .then((d) => {
+        setPopularCategories(d.categories ?? []);
+        setPopularCounts(d.counts ?? {});
+      })
+      .catch(() => setPopularCategories([]));
+  }, [signalType, pinLocation.lat, pinLocation.lng, selectedPlace?.lat, selectedPlace?.lng]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -101,11 +115,7 @@ export default function ReportPage() {
     );
   }, [categories, search]);
 
-  const popular = useMemo(() => {
-    const slugs =
-      signalType === "positive" ? POPULAR_POSITIVE_CATEGORY_SLUGS : POPULAR_CATEGORY_SLUGS;
-    return categories.filter((c) => slugs.includes(c.slug));
-  }, [categories, signalType]);
+  const popular = popularCategories;
 
   const grouped = useMemo(() => {
     const map = new Map<string, Category[]>();
@@ -242,7 +252,7 @@ export default function ReportPage() {
           {!search && popular.length > 0 && (
             <div>
               <p className="mb-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-orange-600">
-                <Zap className="h-3.5 w-3.5" /> Popular
+                <Zap className="h-3.5 w-3.5" /> Popular in this area
               </p>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {popular.map((cat) => (
@@ -253,6 +263,11 @@ export default function ReportPage() {
                   >
                     <span>{cat.emoji}</span>
                     {cat.name}
+                    {(popularCounts[cat.slug] ?? 0) > 0 && (
+                      <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold text-orange-700">
+                        {popularCounts[cat.slug]}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

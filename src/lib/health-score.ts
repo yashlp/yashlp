@@ -15,19 +15,23 @@ type IncidentForScore = {
 };
 
 export function computeHealthScore(incidents: IncidentForScore[]) {
-  const verified = incidents.filter(
-    (i) =>
-      i.visibilityStage === "verified" &&
-      i.confidenceScore >= 0.5 &&
-      i.status !== "disputed"
+  const active = incidents.filter((i) => i.status !== "disputed");
+  const verified = active.filter(
+    (i) => i.visibilityStage === "verified" && i.confidenceScore >= 0.5
   );
+  const issueCount = active.filter(
+    (i) => !i.isPositive && i.status !== "resolved" && i.status !== "positive_active"
+  ).length;
+  const totalInArea = active.length;
 
   if (verified.length === 0) {
     return {
       overallScore: 75,
-      confidence: 0.2,
+      confidence: totalInArea > 0 ? Math.min(totalInArea / 10, 1) * 0.3 : 0.2,
       categoryScores: {} as Record<string, number>,
-      incidentCount: 0,
+      incidentCount: verified.length,
+      issueCount,
+      totalInArea,
     };
   }
 
@@ -63,6 +67,8 @@ export function computeHealthScore(incidents: IncidentForScore[]) {
     confidence: Math.round(confidence * 100) / 100,
     categoryScores,
     incidentCount: verified.length,
+    issueCount,
+    totalInArea,
   };
 }
 
@@ -73,7 +79,6 @@ export async function getAreaHealthScore(
 ) {
   const incidents = await prisma.incident.findMany({
     where: {
-      visibilityStage: "verified",
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       latitude: { gte: latitude - 0.02, lte: latitude + 0.02 },
       longitude: { gte: longitude - 0.02, lte: longitude + 0.02 },
@@ -86,6 +91,38 @@ export async function getAreaHealthScore(
   );
 
   return computeHealthScore(nearby);
+}
+
+export async function getPopularCategoriesInArea(
+  latitude: number,
+  longitude: number,
+  type: "issue" | "positive",
+  radiusM = 800,
+  limit = 6
+) {
+  const incidents = await prisma.incident.findMany({
+    where: {
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      latitude: { gte: latitude - 0.02, lte: latitude + 0.02 },
+      longitude: { gte: longitude - 0.02, lte: longitude + 0.02 },
+      category: { type },
+    },
+    include: { category: true },
+  });
+
+  const counts = new Map<string, number>();
+  for (const inc of incidents) {
+    if (haversineDistance(latitude, longitude, inc.latitude, inc.longitude) > radiusM) continue;
+    const slug = inc.category.slug;
+    counts.set(slug, (counts.get(slug) ?? 0) + 1);
+  }
+
+  const slugs = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([slug]) => slug);
+
+  return { slugs, counts: Object.fromEntries(counts) };
 }
 
 export async function getRankings(limit = 10) {

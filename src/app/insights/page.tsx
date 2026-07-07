@@ -10,6 +10,7 @@ type Ranking = {
   overallScore: number;
   confidence: number;
   incidentCount: number;
+  issueCount?: number;
 };
 
 export default function InsightsPage() {
@@ -105,7 +106,8 @@ export default function InsightsPage() {
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{r.name}</p>
                 <p className="text-xs text-muted">
-                  {r.incidentCount} verified reports · {Math.round(r.confidence * 100)}% confidence
+                  {(r.issueCount ?? r.incidentCount)} {(r.issueCount ?? r.incidentCount) === 1 ? "issue" : "issues"} in area
+                  {r.incidentCount > 0 && <> · {r.incidentCount} verified</>}
                 </p>
               </div>
               <div className="text-right">

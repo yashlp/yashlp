@@ -41,9 +41,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isMapPage = pathname === "/";
 
   const refreshUser = () => {
-    fetch("/api/auth/me")
+    fetch("/api/auth/me", { credentials: "include" })
       .then((r) => r.json())
-      .then((d) => setUser(d.user))
+      .then((d) => setUser(d.user ?? null))
       .catch(() => setUser(null));
   };
 
@@ -52,7 +52,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     fetch("/api/site-config")
       .then((r) => r.json())
       .then(setSiteConfig)
-      .catch(() => setSiteConfig({ demoMode: true, announcement: null, maintenanceMode: false }));
+      .catch(() => setSiteConfig({ demoMode: false, announcement: null, maintenanceMode: false }));
+
+    const onAuth = () => refreshUser();
+    window.addEventListener("civiclens-auth", onAuth);
+    window.addEventListener("focus", onAuth);
+    return () => {
+      window.removeEventListener("civiclens-auth", onAuth);
+      window.removeEventListener("focus", onAuth);
+    };
   }, []);
 
   useEffect(() => {
@@ -64,8 +72,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const shell = (
-    <div className="flex min-h-dvh flex-col">
-      {!isAdminPage && <SiteBanners config={siteConfig} />}
+    <div className={cn("flex min-h-dvh flex-col", isMapPage && "h-dvh overflow-hidden")}>
+      {!isAdminPage && <SiteBanners config={siteConfig} isAdmin={user?.role === "admin"} />}
       <header className="sticky top-0 z-50 border-b border-orange-100 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
@@ -137,7 +145,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className={cn("flex-1", !isMapPage && "pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0")}>
+      <main
+        className={cn(
+          "flex-1",
+          isMapPage ? "relative min-h-0 overflow-hidden" : "pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
+        )}
+      >
         {siteConfig?.maintenanceMode && !isAdminPage ? (
           <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
             <p className="text-lg font-semibold text-stone-800">We&apos;ll be back shortly</p>
