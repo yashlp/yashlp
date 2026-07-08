@@ -12,6 +12,7 @@ export function PlaceSearch({
   onSelect,
   selectedPlace,
   onClear,
+  onCountryChange,
   label = "Where is this?",
   hint = "City, neighbourhood, state, or pincode / postal code",
   className,
@@ -19,6 +20,7 @@ export function PlaceSearch({
   onSelect: (place: GeocodePlace) => void;
   selectedPlace?: GeocodePlace | null;
   onClear?: () => void;
+  onCountryChange?: (countryCode: string) => void;
   label?: string;
   hint?: string;
   className?: string;
@@ -43,6 +45,10 @@ export function PlaceSearch({
         .catch(() => {});
     }
   }, []);
+
+  useEffect(() => {
+    onCountryChange?.(countryCode);
+  }, [countryCode, onCountryChange]);
 
   const search = useCallback(
     async (q: string, country: string, signal: AbortSignal) => {
@@ -155,7 +161,10 @@ export function PlaceSearch({
                   key={`${p.lat}-${p.lng}-${p.name}`}
                   type="button"
                   onMouseDown={() => {
-                    onSelect(p);
+                    onSelect({
+                      ...p,
+                      countryCode: p.countryCode ?? countryCode,
+                    });
                     setQuery(p.name.split(",")[0] ?? p.name);
                     setOpen(false);
                   }}

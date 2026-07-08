@@ -27,10 +27,14 @@ export function resolvePricingMarket(input: {
   areaLng?: number | null;
   countryCode?: string | null;
 }): PricingMarket {
+  const code = input.countryCode?.toUpperCase();
+  if (code && code !== "INT") {
+    return marketFromCountryCode(code);
+  }
   if (input.areaLat != null && input.areaLng != null) {
     return marketFromCoords(input.areaLat, input.areaLng);
   }
-  return marketFromCountryCode(input.countryCode);
+  return "international";
 }
 
 export function getLocalizedTierPrice(tier: ReportTier, market: PricingMarket): LocalizedPrice {

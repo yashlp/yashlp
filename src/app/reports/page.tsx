@@ -23,10 +23,15 @@ const DEFAULT_PLACE: GeocodePlace = {
 
 export default function ReportsPage() {
   const [selectedPlace, setSelectedPlace] = useState<GeocodePlace | null>(null);
-  const areaCoords = selectedPlace
+  const [searchCountry, setSearchCountry] = useState<string | null>(null);
+  const pricingCountry = selectedPlace?.countryCode ?? searchCountry;
+  const areaCoordsForPricing = selectedPlace
     ? { lat: selectedPlace.lat, lng: selectedPlace.lng }
-    : { lat: DEFAULT_PLACE.lat, lng: DEFAULT_PLACE.lng };
-  const { market } = usePricingRegion(areaCoords);
+    : null;
+  const { market } = usePricingRegion({
+    countryCode: pricingCountry,
+    areaCoords: areaCoordsForPricing,
+  });
   const smallPrice = getLocalizedTierPrice("small", market);
   const bigPrice = getLocalizedTierPrice("big", market);
   const smallReports = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "small");
@@ -49,13 +54,14 @@ export default function ReportsPage() {
             selectedPlace={selectedPlace}
             onSelect={setSelectedPlace}
             onClear={() => setSelectedPlace(null)}
+            onCountryChange={setSearchCountry}
             label="Where do you want a report?"
             hint="Select country, then search city, neighbourhood, state, or pincode"
           />
           {!selectedPlace && (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-stone-400">
               <MapPin className="h-3.5 w-3.5" />
-              Pick a location before checkout · sample pricing shown for {DEFAULT_PLACE.name}
+              Change country above to see ₹ (India) or $ (international) pricing
             </p>
           )}
           {selectedPlace && (
@@ -65,7 +71,11 @@ export default function ReportsPage() {
           )}
         </div>
 
-        <PricingRegionBanner areaCoords={areaCoords} className="mt-4" />
+        <PricingRegionBanner
+          areaCoords={areaCoordsForPricing}
+          countryCode={pricingCountry}
+          className="mt-4"
+        />
 
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
@@ -101,7 +111,8 @@ export default function ReportsPage() {
         subtitle={`Area Insight, Area Comparison for ${placeLabel}`}
         reports={smallReports}
         checkoutQuery={checkoutQuery}
-        areaCoords={areaCoords}
+        pricingCountry={pricingCountry}
+        areaCoords={areaCoordsForPricing}
       />
 
       <ReportTierSection
@@ -109,7 +120,8 @@ export default function ReportsPage() {
         subtitle="Property Due Diligence, Business Location, Advanced presets"
         reports={bigReports}
         checkoutQuery={checkoutQuery}
-        areaCoords={areaCoords}
+        pricingCountry={pricingCountry}
+        areaCoords={areaCoordsForPricing}
       />
     </div>
   );
@@ -120,13 +132,15 @@ function ReportTierSection({
   subtitle,
   reports,
   checkoutQuery,
+  pricingCountry,
   areaCoords,
 }: {
   title: string;
   subtitle: string;
   reports: (typeof PAID_REPORTS)[number][];
   checkoutQuery: string;
-  areaCoords: { lat: number; lng: number };
+  pricingCountry: string | null;
+  areaCoords: { lat: number; lng: number } | null;
 }) {
   return (
     <section className="mt-10">
@@ -145,7 +159,11 @@ function ReportTierSection({
                 <p className="text-xs italic text-stone-500">&ldquo;{report.customerQuestion}&rdquo;</p>
                 <p className="mt-1 text-xs text-orange-600">{report.audience}</p>
                 <p className="mt-1 text-sm font-semibold text-stone-800">
-                  <ReportPrice productId={report.id as ReportProductId} areaCoords={areaCoords} />
+                  <ReportPrice
+                    productId={report.id as ReportProductId}
+                    areaCoords={areaCoords}
+                    countryCode={pricingCountry}
+                  />
                 </p>
               </div>
             </div>

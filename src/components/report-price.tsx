@@ -12,18 +12,21 @@ import { cn } from "@/lib/utils";
 
 type AreaCoords = { lat: number; lng: number };
 
+type PricingProps = {
+  areaCoords?: AreaCoords | null;
+  countryCode?: string | null;
+  className?: string;
+  showAlt?: boolean;
+};
+
 export function ReportPrice({
   productId,
   areaCoords,
+  countryCode,
   className,
   showAlt = false,
-}: {
-  productId: ReportProductId;
-  areaCoords?: AreaCoords | null;
-  className?: string;
-  showAlt?: boolean;
-}) {
-  const { market } = usePricingRegion(areaCoords);
+}: PricingProps & { productId: ReportProductId }) {
+  const { market } = usePricingRegion({ areaCoords, countryCode });
   const price = getLocalizedReportPrice(productId, market);
   return <PriceText price={price} className={className} showAlt={showAlt} />;
 }
@@ -31,15 +34,11 @@ export function ReportPrice({
 export function TierPrice({
   tier,
   areaCoords,
+  countryCode,
   className,
   showAlt = false,
-}: {
-  tier: ReportTier;
-  areaCoords?: AreaCoords | null;
-  className?: string;
-  showAlt?: boolean;
-}) {
-  const { market } = usePricingRegion(areaCoords);
+}: PricingProps & { tier: ReportTier }) {
+  const { market } = usePricingRegion({ areaCoords, countryCode });
   const price = getLocalizedTierPrice(tier, market);
   return <PriceText price={price} className={className} showAlt={showAlt} />;
 }
@@ -66,12 +65,14 @@ function PriceText({
 
 export function PricingRegionBanner({
   areaCoords,
+  countryCode,
   className,
 }: {
   areaCoords?: AreaCoords | null;
+  countryCode?: string | null;
   className?: string;
 }) {
-  const { market, regionLabel } = usePricingRegion(areaCoords);
+  const { market, regionLabel } = usePricingRegion({ areaCoords, countryCode });
   const small = getLocalizedTierPrice("small", market);
   const big = getLocalizedTierPrice("big", market);
 
@@ -86,8 +87,8 @@ export function PricingRegionBanner({
       <strong>{small.formatted}</strong> standard · <strong>{big.formatted}</strong> detailed
       <span className="mt-1 block text-xs text-stone-500">
         {market === "india"
-          ? "Indian pricing applies to reports for locations in India."
-          : "International USD pricing applies outside India."}
+          ? "₹ pricing for locations in India."
+          : "$ USD pricing for locations outside India."}
       </span>
     </div>
   );

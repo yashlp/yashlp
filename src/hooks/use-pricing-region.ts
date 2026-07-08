@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getCountryName } from "@/lib/countries";
 import { LEGAL_COUNTRY_KEY } from "@/lib/constants";
 import {
   marketFromCoords,
@@ -12,9 +13,18 @@ import {
 
 type AreaCoords = { lat: number; lng: number };
 
-export function usePricingRegion(areaCoords?: AreaCoords | null) {
-  const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [countryName, setCountryName] = useState("");
+type PricingRegionOptions = {
+  areaCoords?: AreaCoords | null;
+  /** Country from place search picker or selected place — drives ₹ vs $ */
+  countryCode?: string | null;
+};
+
+export function usePricingRegion(options?: PricingRegionOptions | AreaCoords | null) {
+  const normalized: PricingRegionOptions =
+    options && "lat" in options ? { areaCoords: options } : (options ?? {});
+
+  const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
+  const [detectedName, setDetectedName] = useState("");
 
   useEffect(() => {
     const stored =
@@ -24,8 +34,8 @@ export function usePricingRegion(areaCoords?: AreaCoords | null) {
     fetch(`/api/legal/detect${query}`)
       .then((r) => r.json())
       .then((d: { countryCode?: string; country?: string }) => {
-        if (d.countryCode) setCountryCode(d.countryCode);
-        if (d.country) setCountryName(d.country);
+        if (d.countryCode) setDetectedCountry(d.countryCode);
+        if (d.country) setDetectedName(d.country);
         if (d.countryCode && d.countryCode !== "INT" && typeof window !== "undefined") {
           localStorage.setItem(LEGAL_COUNTRY_KEY, d.countryCode);
         }
@@ -33,24 +43,37 @@ export function usePricingRegion(areaCoords?: AreaCoords | null) {
       .catch(() => {});
   }, []);
 
-  const areaBased = areaCoords != null;
+  const effectiveCountry = normalized.countryCode ?? detectedCountry;
 
   const market: PricingMarket = useMemo(
     () =>
       resolvePricingMarket({
-        areaLat: areaCoords?.lat,
-        areaLng: areaCoords?.lng,
-        countryCode,
+        areaLat: normalized.areaCoords?.lat,
+        areaLng: normalized.areaCoords?.lng,
+        countryCode: effectiveCountry,
       }),
-    [areaCoords?.lat, areaCoords?.lng, countryCode]
+    [normalized.areaCoords?.lat, normalized.areaCoords?.lng, effectiveCountry]
   );
 
   const regionLabel = useMemo(() => {
-    if (areaCoords) {
-      return pricingRegionLabel(marketFromCoords(areaCoords.lat, areaCoords.lng), { areaBased: true });
+    const code = effectiveCountry?.toUpperCase();
+    if (code && code !== "INT") {
+      const name = getCountryName(code);
+      if (code === "IN") return "India";
+      return name || "International";
     }
-    return pricingRegionLabel(marketFromCountryCode(countryCode), { countryName });
-  }, [areaCoords, countryCode, countryName, market]);
+    if (normalized.areaCoords) {
+      return pricingRegionLabel(marketFromCoords(normalized.areaCoords.lat, normalized.areaCoords.lng), {
+        areaBased: true,
+      });
+    }
+    return pricingRegionLabel(market, { countryName: detectedName });
+  }, [effectiveCountry, normalized.areaCoords, market, detectedName]);
 
-  return { market, regionLabel, countryCode, areaBased };
+  return {
+    market,
+    regionLabel,
+    countryCode: effectiveCountry,
+    areaBased: Boolean(normalized.areaCoords),
+  };
 }

@@ -6,7 +6,6 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, CreditCard, Lock, MapPin } from "lucide-react";
 import { PlaceSearch } from "@/components/place-search";
 import { PricingRegionBanner, ReportPrice } from "@/components/report-price";
-import { GLOBAL_SAMPLE_PLACES } from "@/lib/constants";
 import { parsePlaceFromSearchParams, placeQueryString, type GeocodePlace } from "@/lib/geocode";
 import { markReportPaid } from "@/lib/report-access";
 import {
@@ -14,13 +13,6 @@ import {
   resolveReportProductId,
   type ReportProductId,
 } from "@/lib/report-demo-data";
-
-const DEFAULT_PLACE: GeocodePlace = {
-  name: GLOBAL_SAMPLE_PLACES[2].name,
-  lat: GLOBAL_SAMPLE_PLACES[2].lat,
-  lng: GLOBAL_SAMPLE_PLACES[2].lng,
-  countryCode: "IN",
-};
 
 export function ReportCheckoutClient() {
   const params = useParams();
@@ -32,11 +24,15 @@ export function ReportCheckoutClient() {
 
   const initialPlace = useMemo(() => parsePlaceFromSearchParams(searchParams), [searchParams]);
   const [selectedPlace, setSelectedPlace] = useState<GeocodePlace | null>(initialPlace);
+  const [searchCountry, setSearchCountry] = useState<string | null>(initialPlace?.countryCode ?? null);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
 
-  const place = selectedPlace ?? DEFAULT_PLACE;
-  const areaCoords = { lat: place.lat, lng: place.lng };
+  const pricingCountry = selectedPlace?.countryCode ?? searchCountry;
+  const areaCoordsForPricing = selectedPlace
+    ? { lat: selectedPlace.lat, lng: selectedPlace.lng }
+    : null;
+
   const preset = searchParams.get("preset");
 
   if (!product || !resolvedId) {
@@ -50,9 +46,13 @@ export function ReportCheckoutClient() {
     );
   }
 
-  const query = new URLSearchParams(placeQueryString(place));
+  const query = new URLSearchParams(
+    selectedPlace ? placeQueryString(selectedPlace) : ""
+  );
   if (preset) query.set("preset", preset);
-  const viewUrl = `/reports/view/${resolvedId}?${query.toString()}`;
+  const viewUrl = selectedPlace
+    ? `/reports/view/${resolvedId}?${query.toString()}`
+    : `/reports/view/${resolvedId}`;
 
   const handlePay = async () => {
     if (!selectedPlace) {
@@ -62,7 +62,7 @@ export function ReportCheckoutClient() {
     setPaying(true);
     setError("");
     await new Promise((r) => setTimeout(r, 800));
-    markReportPaid(resolvedId, place.lat, place.lng);
+    markReportPaid(resolvedId, selectedPlace.lat, selectedPlace.lng);
     router.push(viewUrl);
   };
 
@@ -80,7 +80,11 @@ export function ReportCheckoutClient() {
             <h1 className="text-2xl font-bold text-stone-900">{product.name}</h1>
             <p className="mt-1 text-sm italic text-stone-500">&ldquo;{product.customerQuestion}&rdquo;</p>
             <p className="mt-2 text-lg font-bold text-orange-700">
-              <ReportPrice productId={resolvedId as ReportProductId} areaCoords={areaCoords} />
+              <ReportPrice
+                productId={resolvedId as ReportProductId}
+                areaCoords={areaCoordsForPricing}
+                countryCode={pricingCountry}
+              />
             </p>
           </div>
         </div>
@@ -102,6 +106,7 @@ export function ReportCheckoutClient() {
               setError("");
             }}
             onClear={() => setSelectedPlace(null)}
+            onCountryChange={setSearchCountry}
             label="Report location"
             hint="Country first, then city, neighbourhood, state, or pincode"
           />
@@ -113,7 +118,11 @@ export function ReportCheckoutClient() {
           )}
         </div>
 
-        <PricingRegionBanner areaCoords={areaCoords} className="mt-4" />
+        <PricingRegionBanner
+          areaCoords={areaCoordsForPricing}
+          countryCode={pricingCountry}
+          className="mt-4"
+        />
 
         {error && <p className="mt-4 text-sm text-rose-600">{error}</p>}
 
@@ -126,7 +135,14 @@ export function ReportCheckoutClient() {
           <CreditCard className="h-5 w-5" />
           {paying ? "Processing…" : (
             <>
-              Pay <ReportPrice productId={resolvedId as ReportProductId} areaCoords={areaCoords} className="font-bold text-white" /> & get report
+              Pay{" "}
+              <ReportPrice
+                productId={resolvedId as ReportProductId}
+                areaCoords={areaCoordsForPricing}
+                countryCode={pricingCountry}
+                className="font-bold text-white"
+              />{" "}
+              & get report
             </>
           )}
         </button>
