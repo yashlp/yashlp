@@ -55,12 +55,12 @@ body {
   margin-bottom: calc(4.5rem + var(--safe-bottom));
 }
 
-@media (max-width: 767px) {
-  .leaflet-bottom.leaflet-right {
-    bottom: calc(5rem + var(--safe-bottom));
-    right: 0.5rem;
-  }
+.leaflet-control-attribution {
+  margin-right: 0.5rem;
+  margin-bottom: calc(0.25rem + var(--safe-bottom));
+}
 
+@media (max-width: 767px) {
   .leaflet-control-zoom a {
     min-width: 44px;
     min-height: 44px;
