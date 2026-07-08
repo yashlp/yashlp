@@ -50,6 +50,11 @@ body {
   touch-action: pan-x pan-y;
 }
 
+.leaflet-right .leaflet-control-zoom {
+  margin-right: 0.5rem;
+  margin-bottom: calc(4.5rem + var(--safe-bottom));
+}
+
 @media (max-width: 767px) {
   .leaflet-bottom.leaflet-right {
     bottom: calc(5rem + var(--safe-bottom));

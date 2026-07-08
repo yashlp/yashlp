@@ -9,6 +9,7 @@ import {
   TileLayer,
   useMap,
   useMapEvents,
+  ZoomControl,
 } from "react-leaflet";
 import { DEFAULT_MAP_ZOOM, STREET_LEVEL_ZOOM } from "@/lib/constants";
 import { haversineDistance } from "@/lib/utils";
@@ -222,7 +223,7 @@ export function MapView({
       center={[center.lat, center.lng]}
       zoom={zoom}
       className="h-full w-full"
-      zoomControl={true}
+      zoomControl={false}
       worldCopyJump={true}
     >
       <TileLayer
@@ -232,6 +233,7 @@ export function MapView({
       />
       <MapMover center={center} zoom={zoom} />
       <MapEvents onMove={onMove} onZoom={onZoom} />
+      <ZoomControl position="bottomright" />
 
       {userLocation && (
         <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
