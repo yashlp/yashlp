@@ -163,8 +163,8 @@ function createIcon(incident: Incident, selected: boolean) {
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
       font-size:${selected ? 18 : isSeed ? 13 : 16}px;
+      line-height:1;
       box-shadow:0 2px 10px rgba(${isReelSpot ? "192,38,211" : isPhotogenic ? "236,72,153" : isAreaRecognition ? "22,163,74" : "234,88,12"},0.35);
-      transform:translate(-50%,-50%);
       position:relative;
     ">
       ${incident.category.emoji}
