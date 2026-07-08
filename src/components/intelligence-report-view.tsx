@@ -46,7 +46,13 @@ function HeatLevel({ level }: { level: "high" | "medium" | "low" }) {
   return <span className={cn("inline-block h-2.5 w-2.5 rounded-full", styles[level])} />;
 }
 
-export function IntelligenceReportView({ report }: { report: IntelligenceReportData }) {
+export function IntelligenceReportView({
+  report,
+  variant = "paid",
+}: {
+  report: IntelligenceReportData;
+  variant?: "paid" | "sample";
+}) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
@@ -119,6 +125,17 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
         data-pdf-root
         className="overflow-visible rounded-3xl border border-orange-100 bg-white shadow-xl shadow-orange-100/40"
       >
+        {variant === "sample" ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-orange-100 bg-amber-50 px-4 py-2.5 sm:px-6">
+          <div className="flex items-center gap-2 text-sm font-semibold text-amber-900">
+            <Sparkles className="h-4 w-4" />
+            Sample report — illustrative preview only
+          </div>
+          <div className="text-xs text-amber-800">
+            Purchase to get this report for your chosen location
+          </div>
+        </div>
+      ) : (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 sm:px-6">
           <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
             <CheckCircle2 className="h-4 w-4" />
@@ -128,6 +145,7 @@ export function IntelligenceReportView({ report }: { report: IntelligenceReportD
             {localizedPrice.formatted} · {tierLabel}
           </div>
         </div>
+      )}
 
         <div
           className="relative bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 px-6 py-8 text-white sm:px-10 sm:py-10"

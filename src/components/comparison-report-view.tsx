@@ -9,7 +9,13 @@ import { usePricingRegion } from "@/hooks/use-pricing-region";
 import { downloadElementAsPdf, printReportAsPdf, reportPdfFilename } from "@/lib/download-report-pdf";
 import { cn, scoreColor } from "@/lib/utils";
 
-export function ComparisonReportView({ report }: { report: ComparisonReportData }) {
+export function ComparisonReportView({
+  report,
+  variant = "paid",
+}: {
+  report: ComparisonReportData;
+  variant?: "paid" | "sample";
+}) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const areaCoords = { lat: report.areaA.lat, lng: report.areaA.lng };
@@ -59,15 +65,24 @@ export function ComparisonReportView({ report }: { report: ComparisonReportData 
       </div>
 
       <div ref={reportRef} data-pdf-root className="overflow-visible rounded-3xl border border-orange-100 bg-white shadow-xl">
-        <div className="flex flex-wrap justify-between gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 sm:px-6">
-          <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
-            <CheckCircle2 className="h-4 w-4" />
-            Payment successful — comparison unlocked
+        {variant === "sample" ? (
+          <div className="flex flex-wrap justify-between gap-2 border-b border-amber-100 bg-amber-50 px-4 py-2.5 sm:px-6">
+            <div className="flex items-center gap-2 text-sm font-semibold text-amber-900">
+              <Sparkles className="h-4 w-4" />
+              Sample comparison — illustrative preview only
+            </div>
           </div>
-          <div className="text-xs text-emerald-700">
-            {localizedPrice.formatted} · {tierLabel}
+        ) : (
+          <div className="flex flex-wrap justify-between gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 sm:px-6">
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+              <CheckCircle2 className="h-4 w-4" />
+              Payment successful — comparison unlocked
+            </div>
+            <div className="text-xs text-emerald-700">
+              {localizedPrice.formatted} · {tierLabel}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="bg-gradient-to-br from-orange-600 to-amber-500 px-6 py-8 text-white sm:px-10" data-pdf-cover="true">
           <p className="text-sm text-orange-100">CivicLens Intelligence</p>

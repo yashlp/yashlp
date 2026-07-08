@@ -37,9 +37,9 @@ const CORE_LINKS = [
     accent: "bg-blue-100 text-blue-700",
   },
   {
-    href: "/reports/demo",
-    title: "Full report demos",
-    desc: "Every paid report preview — AI verdict included",
+    href: "/reports/sample/area-insight",
+    title: "Sample report",
+    desc: "See what a paid Area Insight report looks like — one preview only",
     icon: FileText,
     accent: "bg-violet-100 text-violet-700",
   },
@@ -128,12 +128,13 @@ export default function TryHubPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-lg font-bold text-stone-900">Report demos (direct links)</h2>
+        <h2 className="text-lg font-bold text-stone-900">Buy a report</h2>
+        <p className="mt-1 text-sm text-stone-500">Pay to unlock — sample preview available for Area Insight only.</p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {PAID_REPORTS.map((report) => (
             <Link
               key={report.id}
-              href={`/reports/demo/${report.id}`}
+              href={`/reports/checkout/${report.id}`}
               className="flex items-center gap-3 rounded-xl border border-orange-100 bg-white px-4 py-3 text-sm transition hover:border-orange-300 hover:bg-orange-50/50"
             >
               <span className="text-xl">{report.emoji}</span>

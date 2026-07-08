@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Eye, Lock, MapPin } from "lucide-react";
+import { ArrowRight, Check, Eye, Lock, MapPin, ShoppingCart } from "lucide-react";
 import { FREE_FEATURES, PAID_REPORTS } from "@/lib/categories";
 import { getReportPrice } from "@/lib/report-demo-data";
 import { PlaceSearch } from "@/components/place-search";
@@ -32,7 +32,7 @@ export default function ReportsPage() {
   const smallReports = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "small");
   const bigReports = PAID_REPORTS.filter((r) => getReportPrice(r.id).tier === "big");
   const placeLabel = selectedPlace?.name ?? DEFAULT_PLACE.name;
-  const demoQuery = selectedPlace ? `?${placeQueryString(selectedPlace)}` : "";
+  const checkoutQuery = selectedPlace ? `?${placeQueryString(selectedPlace)}` : "";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
@@ -41,8 +41,7 @@ export default function ReportsPage() {
           CivicLens <span className="text-orange-600">Intelligence Reports</span>
         </h1>
         <p className="mt-2 max-w-2xl text-stone-600">
-          AI interprets community-verified data so you can answer real questions —{" "}
-          <em>Is this area good? Should I buy? Which neighbourhood is better?</em>
+          Pay for a location-based report — AI interprets community-verified data for your area.
         </p>
 
         <div className="mt-6 rounded-2xl border border-orange-100 bg-white p-4">
@@ -56,7 +55,7 @@ export default function ReportsPage() {
           {!selectedPlace && (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-stone-400">
               <MapPin className="h-3.5 w-3.5" />
-              Showing sample pricing for {DEFAULT_PLACE.name} until you pick a location
+              Pick a location before checkout · sample pricing shown for {DEFAULT_PLACE.name}
             </p>
           )}
           {selectedPlace && (
@@ -67,14 +66,19 @@ export default function ReportsPage() {
         </div>
 
         <PricingRegionBanner areaCoords={areaCoords} className="mt-4" />
-        <Link
-          href={`/reports/demo/area-insight${demoQuery}`}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-200 hover:bg-orange-700"
-        >
-          <Eye className="h-4 w-4" />
-          See full {smallPrice.formatted} Area Insight demo
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link
+            href="/reports/sample/area-insight"
+            className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-semibold text-orange-700 hover:bg-orange-50"
+          >
+            <Eye className="h-4 w-4" />
+            See sample report
+          </Link>
+          <p className="flex items-center text-xs text-stone-500">
+            One preview only — all other reports require payment
+          </p>
+        </div>
       </div>
 
       <section className="mt-10">
@@ -96,7 +100,7 @@ export default function ReportsPage() {
         title={`Standard — ${smallPrice.formatted}`}
         subtitle={`Area Insight, Area Comparison for ${placeLabel}`}
         reports={smallReports}
-        demoQuery={demoQuery}
+        checkoutQuery={checkoutQuery}
         areaCoords={areaCoords}
       />
 
@@ -104,17 +108,9 @@ export default function ReportsPage() {
         title={`Detailed — ${bigPrice.formatted}`}
         subtitle="Property Due Diligence, Business Location, Advanced presets"
         reports={bigReports}
-        demoQuery={demoQuery}
+        checkoutQuery={checkoutQuery}
         areaCoords={areaCoords}
       />
-
-      <p className="mt-8 text-center text-sm text-stone-500">
-        Payment launching soon.{" "}
-        <Link href="/login" className="font-medium text-orange-600 hover:underline">
-          Sign in
-        </Link>{" "}
-        for early access.
-      </p>
     </div>
   );
 }
@@ -123,13 +119,13 @@ function ReportTierSection({
   title,
   subtitle,
   reports,
-  demoQuery,
+  checkoutQuery,
   areaCoords,
 }: {
   title: string;
   subtitle: string;
   reports: (typeof PAID_REPORTS)[number][];
-  demoQuery: string;
+  checkoutQuery: string;
   areaCoords: { lat: number; lng: number };
 }) {
   return (
@@ -162,11 +158,11 @@ function ReportTierSection({
               ))}
             </ul>
             <Link
-              href={`/reports/demo/${report.id}${demoQuery}`}
+              href={`/reports/checkout/${report.id}${checkoutQuery}`}
               className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-2.5 text-sm font-semibold text-white hover:bg-orange-700"
             >
-              <Eye className="h-4 w-4" />
-              See full report demo
+              <ShoppingCart className="h-4 w-4" />
+              Buy report
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

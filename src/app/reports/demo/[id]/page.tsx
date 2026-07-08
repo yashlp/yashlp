@@ -1,18 +1,8 @@
-import { Suspense } from "react";
-import { ReportDemoClient } from "./report-demo-client";
+import { redirect } from "next/navigation";
 
-function ReportDemoFallback() {
-  return (
-    <div className="flex min-h-[50vh] items-center justify-center px-4">
-      <div className="h-10 w-10 animate-spin rounded-full border-2 border-orange-200 border-t-orange-600" />
-    </div>
-  );
-}
+type Props = { params: Promise<{ id: string }> };
 
-export default function ReportDemoPage() {
-  return (
-    <Suspense fallback={<ReportDemoFallback />}>
-      <ReportDemoClient />
-    </Suspense>
-  );
+export default async function ReportDemoRedirect({ params }: Props) {
+  const { id } = await params;
+  redirect(`/reports/checkout/${id}`);
 }
