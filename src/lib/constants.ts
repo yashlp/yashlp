@@ -64,10 +64,10 @@ export const POPULAR_POSITIVE_CATEGORY_SLUGS = [
 ];
 
 export const GLOBAL_SAMPLE_PLACES = [
-  { name: "London, UK", lat: 51.5074, lng: -0.1278 },
-  { name: "Lagos, Nigeria", lat: 6.5244, lng: 3.3792 },
-  { name: "Mumbai, India", lat: 19.076, lng: 72.8777 },
-  { name: "São Paulo, Brazil", lat: -23.5505, lng: -46.6333 },
-  { name: "Tokyo, Japan", lat: 35.6762, lng: 139.6503 },
-  { name: "Sydney, Australia", lat: -33.8688, lng: 151.2093 },
+  { name: "London, UK", lat: 51.5074, lng: -0.1278, countryCode: "GB" },
+  { name: "Lagos, Nigeria", lat: 6.5244, lng: 3.3792, countryCode: "NG" },
+  { name: "Mumbai, India", lat: 19.076, lng: 72.8777, countryCode: "IN" },
+  { name: "São Paulo, Brazil", lat: -23.5505, lng: -46.6333, countryCode: "BR" },
+  { name: "Tokyo, Japan", lat: 35.6762, lng: 139.6503, countryCode: "JP" },
+  { name: "Sydney, Australia", lat: -33.8688, lng: 151.2093, countryCode: "AU" },
 ];

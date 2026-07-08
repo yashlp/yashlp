@@ -69,6 +69,7 @@ model Incident {
   latitude           Float
   longitude          Float
   address            String?
+  countryCode        String?
   status             String    @default("pending")
   visibility         String    @default("hidden")
   visibilityStage    String    @default("private")
@@ -104,6 +105,7 @@ model Incident {
 
   @@index([visibilityStage])
   @@index([latitude, longitude])
+  @@index([countryCode])
   @@index([createdAt])
 }
 

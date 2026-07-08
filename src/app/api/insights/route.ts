@@ -1,12 +1,12 @@
 import { CACHE_PUBLIC_SHORT, jsonWithCache } from "@/lib/api-cache";
-import { getRankings, getTrends } from "@/lib/health-score";
+import { getCountryRankings, getTrends } from "@/lib/health-score";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") ?? "trends";
 
   if (type === "rankings") {
-    const rankings = await getRankings(10);
+    const rankings = await getCountryRankings(20);
     return jsonWithCache({ rankings }, CACHE_PUBLIC_SHORT);
   }
 

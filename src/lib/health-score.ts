@@ -1,6 +1,7 @@
 import { prisma } from "./db";
+import { inferCountryCode } from "./country-from-coords";
+import { getCountryName } from "./countries";
 import { haversineDistance } from "./utils";
-import { areaGroupKey, resolveAreaName } from "./area-names";
 
 type IncidentForScore = {
   id: string;
@@ -125,52 +126,48 @@ export async function getPopularCategoriesInArea(
   return { slugs, counts: Object.fromEntries(counts) };
 }
 
-export async function getRankings(limit = 10) {
+export async function getCountryRankings(limit = 20) {
   const incidents = await prisma.incident.findMany({
     where: {
-      visibilityStage: "verified",
+      visibilityStage: { in: ["verified", "seed"] },
+      underLegalReview: false,
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     include: { category: true },
   });
 
-  const grid = new Map<
-    string,
-    { lat: number; lng: number; incidents: IncidentForScore[]; addresses: string[] }
-  >();
+  const byCountry = new Map<string, IncidentForScore[]>();
 
   for (const inc of incidents) {
-    const key = areaGroupKey(inc.latitude, inc.longitude, inc.address);
-    const cell = grid.get(key) ?? {
-      lat: inc.latitude,
-      lng: inc.longitude,
-      incidents: [],
-      addresses: [],
-    };
-    cell.incidents.push(inc);
-    if (inc.address?.trim()) cell.addresses.push(inc.address.trim());
-    grid.set(key, cell);
+    const code =
+      inc.countryCode ??
+      inferCountryCode(inc.latitude, inc.longitude, inc.address);
+    if (!code) continue;
+
+    const bucket = byCountry.get(code) ?? [];
+    bucket.push(inc);
+    byCountry.set(code, bucket);
   }
 
-  const rankings = Array.from(grid.values()).map((cell) => {
-    const score = computeHealthScore(cell.incidents);
-    const centroidLat =
-      cell.incidents.reduce((s, i) => s + i.latitude, 0) / cell.incidents.length;
-    const centroidLng =
-      cell.incidents.reduce((s, i) => s + i.longitude, 0) / cell.incidents.length;
-
+  const rankings = Array.from(byCountry.entries()).map(([countryCode, countryIncidents]) => {
+    const score = computeHealthScore(countryIncidents);
     return {
-      latitude: centroidLat,
-      longitude: centroidLng,
-      name: resolveAreaName(centroidLat, centroidLng, cell.addresses),
+      countryCode,
+      name: getCountryName(countryCode),
+      pinCount: countryIncidents.length,
       ...score,
     };
   });
 
   return rankings
-    .filter((r) => r.incidentCount > 0)
+    .filter((r) => r.pinCount > 0)
     .sort((a, b) => b.overallScore - a.overallScore)
     .slice(0, limit);
+}
+
+/** @deprecated Use getCountryRankings — area rankings replaced by country score rankings */
+export async function getRankings(limit = 10) {
+  return getCountryRankings(limit);
 }
 
 export async function getTrends(days = 30) {

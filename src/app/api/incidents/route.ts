@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { CACHE_PUBLIC_SHORT, jsonWithCache } from "@/lib/api-cache";
 import { getSessionUser } from "@/lib/auth";
 import { rateLimitResponse } from "@/lib/api-security";
+import { inferCountryCode } from "@/lib/country-from-coords";
 import { mockAIVerify } from "@/lib/ai";
 import { isPhotoRequired } from "@/lib/categories";
 import {
@@ -71,6 +72,7 @@ const createSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
   address: z.string().optional(),
+  countryCode: z.string().optional(),
   photoUrls: z.array(z.string()).max(MAX_PHOTOS_PER_REPORT).optional(),
   attachToExisting: z.string().optional(),
   institutionType: z.string().optional(),
@@ -213,6 +215,12 @@ export async function POST(req: Request) {
     const underReview =
       compliance.underReview || compliance.action === "under_review" || compliance.action === "limit_visibility";
 
+    const countryCode =
+      data.countryCode?.toUpperCase() ??
+      inferCountryCode(data.latitude, data.longitude, data.address) ??
+      user.countryCode ??
+      null;
+
     const incident = await prisma.incident.create({
       data: {
         categoryId: data.categoryId,
@@ -223,6 +231,7 @@ export async function POST(req: Request) {
         latitude: data.latitude,
         longitude: data.longitude,
         address: data.address,
+        countryCode,
         isPositive,
         status: underReview ? INCIDENT_STATUSES.UNDER_REVIEW : INCIDENT_STATUSES.PENDING,
         visibility: VISIBILITY.HIDDEN,

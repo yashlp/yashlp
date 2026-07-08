@@ -143,6 +143,7 @@ async function main() {
         latitude: sample.city.lat + offset.lat,
         longitude: sample.city.lng + offset.lng,
         address: sample.city.name,
+        countryCode: sample.city.countryCode,
         status: sample.status,
         visibility,
         visibilityStage,
