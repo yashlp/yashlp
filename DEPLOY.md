@@ -2,6 +2,69 @@
 
 CivicLens runs on **Vercel** + **PostgreSQL** (Neon recommended). SQLite only works locally.
 
+**Deploy branch:** `main` (includes map, city insights, country rankings, admin security).
+
+---
+
+## Already prepared in the repo
+
+- Next.js production build (`npm run build` passes)
+- `vercel.json` — Prisma migrate on deploy, Mumbai region (`bom1`)
+- Admin password gate, demo OTP mode, security headers
+- Seed script with Mumbai sample data and demo categories
+
+---
+
+## Your steps to go live (~20 minutes)
+
+### A. Neon database (5 min)
+
+1. Sign up at [neon.tech](https://neon.tech) → **New project** → name it `civiclens`.
+2. Dashboard → **Connection details** → enable **Pooled connection**.
+3. Copy the connection string (must start with `postgresql://`).
+
+### B. Vercel project (5 min)
+
+1. Sign up at [vercel.com](https://vercel.com) → **Add New** → **Project**.
+2. Import GitHub repo **`yashlp/yashlp`**.
+3. **Production branch:** `main`.
+4. Do **not** deploy yet — add env vars first (step C).
+
+### C. Environment variables (5 min)
+
+Vercel → your project → **Settings** → **Environment Variables** → add for **Production**:
+
+| Name | Value |
+|------|--------|
+| `DATABASE_URL` | Neon pooled URL from step A |
+| `SESSION_SECRET` | Run locally: `openssl rand -base64 32` |
+| `ADMIN_PHONES` | Your phone, E.164 format e.g. `+447700900123` or `+919876543210` |
+| `ALLOW_DEMO_OTP` | `true` |
+
+Click **Deploy** (or redeploy if you already deployed).
+
+### D. Seed demo data once (2 min)
+
+On your laptop (replace with your Neon URL):
+
+```bash
+git clone https://github.com/yashlp/yashlp.git
+cd yashlp
+npm install
+DATABASE_URL="postgresql://..." npm run db:seed
+```
+
+### E. Verify (5 min)
+
+1. Open `https://<your-project>.vercel.app`
+2. `/login` → enter your `ADMIN_PHONES` number → OTP **`123456`**
+3. `/admin` → set admin password (12+ characters)
+4. Home map, `/insights` (City Insights), country rankings
+
+Share the Vercel URL — it stays live (unlike localhost tunnels).
+
+---
+
 ## 1. Database (Neon — free tier)
 
 1. Create a project at [https://neon.tech](https://neon.tech)
@@ -95,7 +158,7 @@ In Vercel → Project → Settings → Domains, add your domain and follow DNS i
 
 ## 7. Branch to deploy
 
-Deploy branch: `cursor/live-admin-deploy-ec9d` (merge to `main` when ready).
+**Production branch:** `main`
 
 ---
 
