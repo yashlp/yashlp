@@ -1,4 +1,5 @@
 import { prisma } from "./db";
+import { incidentInCity, resolveCityFromCoordinates } from "./city-insights";
 import { inferCountryCode } from "./country-from-coords";
 import { getCountryName } from "./countries";
 import { haversineDistance } from "./utils";
@@ -180,16 +181,82 @@ export async function getTrends(days = 30) {
     orderBy: { createdAt: "asc" },
   });
 
+  return buildTrendSeries(incidents, days);
+}
+
+function buildTrendSeries(
+  incidents: Array<{ createdAt: Date; isPositive: boolean; status: string }>,
+  days: number
+) {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  since.setHours(0, 0, 0, 0);
+
   const byDay = new Map<string, { reported: number; resolved: number; positive: number }>();
+
+  for (let i = 0; i < days; i++) {
+    const d = new Date(since);
+    d.setDate(since.getDate() + i);
+    byDay.set(d.toISOString().slice(0, 10), { reported: 0, resolved: 0, positive: 0 });
+  }
 
   for (const inc of incidents) {
     const day = inc.createdAt.toISOString().slice(0, 10);
-    const entry = byDay.get(day) ?? { reported: 0, resolved: 0, positive: 0 };
+    if (!byDay.has(day)) continue;
+    const entry = byDay.get(day)!;
     entry.reported += 1;
     if (inc.isPositive) entry.positive += 1;
     if (inc.status === "resolved") entry.resolved += 1;
-    byDay.set(day, entry);
   }
 
   return Array.from(byDay.entries()).map(([date, stats]) => ({ date, ...stats }));
+}
+
+export async function getCityInsights(latitude: number, longitude: number, days = 30) {
+  const city = await resolveCityFromCoordinates(latitude, longitude);
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const incidents = await prisma.incident.findMany({
+    where: {
+      underLegalReview: false,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
+    include: { category: true },
+  });
+
+  const cityIncidents = incidents.filter((inc) => incidentInCity(inc, city));
+  const recentCityIncidents = cityIncidents.filter((inc) => inc.createdAt >= since);
+
+  const health = computeHealthScore(cityIncidents);
+  const trends = buildTrendSeries(recentCityIncidents, days);
+
+  const issueCounts = new Map<string, { name: string; emoji: string; count: number }>();
+  const positiveCounts = new Map<string, { name: string; emoji: string; count: number }>();
+
+  for (const inc of cityIncidents) {
+    const map = inc.isPositive ? positiveCounts : issueCounts;
+    const entry = map.get(inc.category.slug) ?? {
+      name: inc.category.name,
+      emoji: inc.category.emoji,
+      count: 0,
+    };
+    entry.count += 1;
+    map.set(inc.category.slug, entry);
+  }
+
+  const topIssues = [...issueCounts.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+  const topPositive = [...positiveCounts.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+
+  return {
+    city: city.cityName,
+    state: city.state,
+    countryCode: city.countryCode,
+    center: { lat: city.centerLat, lng: city.centerLng },
+    health,
+    trends,
+    pinCount: cityIncidents.length,
+    topIssues,
+    topPositive,
+  };
 }

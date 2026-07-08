@@ -308,7 +308,7 @@ export default function HomePage() {
               className="mt-3 flex items-center gap-1 text-xs font-semibold text-orange-600 hover:text-orange-700"
             >
               <TrendingUp className="h-3.5 w-3.5" />
-              View trends & rankings
+              View city insights
             </Link>
           </div>
         </div>

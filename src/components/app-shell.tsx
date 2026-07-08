@@ -22,7 +22,7 @@ type UserInfo = { id: string; name: string; phone: string; reputation: number; r
 
 const navItems = [
   { href: "/", label: "Map", shortLabel: "Map", icon: Home },
-  { href: "/insights", label: "Insights", shortLabel: "Stats", icon: BarChart3 },
+  { href: "/insights", label: "City Insights", shortLabel: "Stats", icon: BarChart3 },
   { href: "/reports", label: "Reports", shortLabel: "Reports", icon: FileText },
   { href: "/compare", label: "Compare", shortLabel: "Compare", icon: GitCompare },
   { href: "/ask", label: "Ask AI", shortLabel: "Ask", icon: MessageCircle },
