@@ -146,14 +146,6 @@ const BUSINESS_RICH: RichReportContent = {
   verdictBadge: { label: "Open F&B / café", sub: "Avoid warehouse or low-footfall retail", tone: "positive" },
 };
 
-const INSURANCE_RICH: RichReportContent = {
-  ...REAL_ESTATE_RICH,
-  sectionCount: 18,
-  executiveSummary:
-    "Composite property risk 58/100. Seasonal waterlogging elevates ground-floor exposure. No fire or crime clusters in 90 days. Stable claims trend — price premiums for monsoon months.",
-  verdictBadge: { label: "Moderate risk", sub: "Seasonal flood loading recommended", tone: "caution" },
-};
-
 function trimRichForGeneric(rich: RichReportContent): RichReportContent {
   return {
     ...rich,

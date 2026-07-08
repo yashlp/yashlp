@@ -5,7 +5,6 @@ import { getCountryName } from "@/lib/countries";
 import { LEGAL_COUNTRY_KEY } from "@/lib/constants";
 import {
   marketFromCoords,
-  marketFromCountryCode,
   pricingRegionLabel,
   resolvePricingMarket,
   type PricingMarket,

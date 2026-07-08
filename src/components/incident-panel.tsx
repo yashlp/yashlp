@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCircle, MessageSquare, X, XCircle } from "lucide-react";
 import Link from "next/link";
@@ -55,15 +55,15 @@ export function IncidentPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const load = () => {
+  const load = useCallback(() => {
     fetch(`/api/incidents/${incidentId}`)
       .then((r) => r.json())
       .then((d) => setIncident(d.incident));
-  };
+  }, [incidentId]);
 
   useEffect(() => {
     load();
-  }, [incidentId]);
+  }, [load]);
 
   const action = async (path: string, body?: object) => {
     setLoading(true);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Award, LogOut, Mail, RefreshCw, Shield, UserRound, Settings } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [contactEmail, setContactEmail] = useState("yash.shah.uk@gmail.com");
 
-  const load = () => {
+  const load = useCallback(() => {
     fetch("/api/auth/me", { credentials: "include" })
       .then((r) => r.json())
       .then((d) => {
@@ -38,11 +38,11 @@ export default function ProfilePage() {
         if (d.contactEmail) setContactEmail(d.contactEmail);
       })
       .catch(() => {});
-  };
+  }, [router]);
 
   useEffect(() => {
     load();
-  }, [router]);
+  }, [load]);
 
   const remaining = user ? nameChangesRemaining(user.nameChangeCount) : 0;
   const canEdit = remaining > 0;

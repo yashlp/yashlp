@@ -3,6 +3,14 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  const path = request.nextUrl.pathname;
+
+  // Never process Next.js static/runtime assets through app security middleware.
+  // This avoids bad-request responses for chunk/css fetches in production mode.
+  if (path.startsWith("/_next/") || path === "/favicon.ico") {
+    return response;
+  }
+
   const isProd = process.env.NODE_ENV === "production";
 
   // In development, skip strict CSP so Turbopack/HMR and dev tooling work reliably.
@@ -31,7 +39,6 @@ export function middleware(request: NextRequest) {
 
   response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
 
-  const path = request.nextUrl.pathname;
   const isAuth = path.startsWith("/api/auth/");
   const isMutation = request.method !== "GET";
 

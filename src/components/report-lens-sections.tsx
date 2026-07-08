@@ -6,7 +6,7 @@ import type { TrendWindow, VisitorBrief } from "@/lib/report-structure";
 import type { PropertyLens, BusinessLens } from "@/lib/report-structure";
 import { ADVANCED_PRESETS } from "@/lib/report-structure";
 import type { AdvancedPreset } from "@/lib/report-structure";
-import { cn, scoreBg, scoreColor } from "@/lib/utils";
+import { cn, scoreColor } from "@/lib/utils";
 
 export function ReportAnalysisBlocks({ blocks }: { blocks: AnalysisBlock[] }) {
   return (
