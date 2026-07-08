@@ -3,6 +3,7 @@ import { z } from "zod";
 import { normalizePhone } from "@/lib/auth";
 import { rateLimitKey, rateLimitResponse } from "@/lib/api-security";
 import { sendOtp } from "@/lib/otp";
+import { isDemoOtpAllowed } from "@/lib/env";
 
 const schema = z.object({
   phone: z.string().min(10),
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
       ok: true,
       phone,
       message: "Verification code sent",
-      demoHint: process.env.NODE_ENV !== "production" ? "Demo code: 123456" : undefined,
+      demoHint: isDemoOtpAllowed() ? "Demo code: 123456" : undefined,
     });
   } catch (e) {
     if (e instanceof z.ZodError) {

@@ -47,6 +47,7 @@ This loads categories, Mumbai sample pins, demo admin user, and default site set
 
 1. Sign in with a phone listed in `ADMIN_PHONES` (demo: `919988776655`, OTP `123456` if `ALLOW_DEMO_OTP=true`)
 2. Open **https://your-domain.vercel.app/admin**
+3. On first admin visit, set an **admin password** (minimum 12 chars). This is now required to unlock admin APIs.
 
 ### Admin can:
 
@@ -56,6 +57,22 @@ This loads categories, Mumbai sample pins, demo admin user, and default site set
 - Change **default map center**
 - Review / hold / resolve / delete **incidents**
 - Promote users to **admin**
+- Rotate **admin password** from **Admin → Settings**
+
+## 4.1 Admin password workflow (new)
+
+- First admin login: `/admin` prompts to create password.
+- Later admin sessions: `/admin` asks for password verification before backend access.
+- Passwords are stored as salted scrypt hashes (`passwordHash`) and never stored in plain text.
+
+## 4.2 Security checklist for production
+
+1. `ALLOW_DEMO_OTP=false`
+2. Configure real SMS (`SMS_PROVIDER` + `SMS_API_KEY`)
+3. Use strong `SESSION_SECRET` (32+ random chars)
+4. Keep `ADMIN_PHONES` minimal (only trusted numbers)
+5. Rotate admin password periodically in Admin Settings
+6. Use HTTPS-only deployment (Vercel default)
 
 ## 5. Local development
 

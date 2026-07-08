@@ -8,6 +8,12 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -30,6 +36,35 @@ export default function AdminSettingsPage() {
 
   const set = (key: string, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const saveAdminPassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New password and confirmation do not match.");
+      return;
+    }
+    setPasswordSaving(true);
+    setPasswordSaved(false);
+    setPasswordError("");
+    const res = await fetch("/api/admin/auth/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        currentPassword: currentPassword || undefined,
+        newPassword,
+      }),
+    });
+    const data = await res.json();
+    setPasswordSaving(false);
+    if (!res.ok) {
+      setPasswordError(data.error ?? "Could not update admin password.");
+      return;
+    }
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordSaved(true);
+    setTimeout(() => setPasswordSaved(false), 2500);
   };
 
   return (
@@ -115,6 +150,44 @@ export default function AdminSettingsPage() {
         <Save className="h-4 w-4" />
         {saving ? "Saving…" : saved ? "Saved!" : "Save settings"}
       </button>
+
+      <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
+        <h2 className="font-semibold text-stone-900">Admin password</h2>
+        <p className="mt-1 text-xs text-stone-500">
+          Rotate your admin password regularly. Use at least 12 characters with letters, numbers, and symbols.
+        </p>
+        <div className="mt-3 space-y-3">
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="Current password"
+            className="input-field w-full"
+          />
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="New password"
+            className="input-field w-full"
+          />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm new password"
+            className="input-field w-full"
+          />
+          {passwordError && <p className="text-sm text-rose-600">{passwordError}</p>}
+          <button
+            onClick={saveAdminPassword}
+            disabled={passwordSaving || newPassword.length < 12 || confirmPassword.length < 12}
+            className="rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50"
+          >
+            {passwordSaving ? "Updating..." : passwordSaved ? "Password updated" : "Update admin password"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
