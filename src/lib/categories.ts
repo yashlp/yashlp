@@ -130,6 +130,28 @@ export const POSITIVE_CATEGORIES: CategoryDefinition[] = [
   { slug: "clean-public-toilet", name: "Clean Public Toilet", emoji: "✨", type: "positive", group: "Daily Life", photoRule: "optional", description: "Public restroom is clean and well-maintained", ttlDays: 30 },
   { slug: "trusted-street-food-spot", name: "Trusted Street Food Spot", emoji: "🍛", type: "positive", group: "Daily Life", photoRule: "optional", description: "Reliable, hygienic street food vendor recommended by community", ttlDays: 30 },
   { slug: "footpath-repaired", name: "Footpath Repaired", emoji: "🦶", type: "positive", group: "Daily Life", photoRule: "optional", description: "Sidewalk or footpath recently repaired", ttlDays: 30 },
+
+  // Creator & discovery spots (60-day freshness)
+  {
+    slug: "reel-making-spot",
+    name: "Reel Making Spot",
+    emoji: "🎬",
+    type: "positive",
+    group: "Creator & Discovery",
+    photoRule: "optional",
+    description: "Great backdrop or vibe for short-form video / reels — lighting, framing, or energy",
+    ttlDays: 60,
+  },
+  {
+    slug: "photogenic-place",
+    name: "Photogenic Place",
+    emoji: "📸",
+    type: "positive",
+    group: "Creator & Discovery",
+    photoRule: "optional",
+    description: "Scenic or picture-worthy spot — views, architecture, street art, or golden-hour angles",
+    ttlDays: 60,
+  },
 ];
 
 export const ALL_CATEGORIES: CategoryDefinition[] = [

@@ -55,6 +55,8 @@ export const POPULAR_CATEGORY_SLUGS = [
 ];
 
 export const POPULAR_POSITIVE_CATEGORY_SLUGS = [
+  "reel-making-spot",
+  "photogenic-place",
   "great-community-area",
   "trusted-street-food-spot",
   "clean-public-toilet",

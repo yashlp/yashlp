@@ -108,9 +108,22 @@ function createIcon(incident: Incident, selected: boolean) {
   const isPrivate = stage === "private";
 
   let color: string;
-  const isAreaRecognition = incident.category.slug === "great-community-area";
+  const slug = incident.category.slug;
+  const isAreaRecognition = slug === "great-community-area";
+  const isReelSpot = slug === "reel-making-spot";
+  const isPhotogenic = slug === "photogenic-place";
 
-  if (isAreaRecognition) {
+  if (isReelSpot) {
+    color =
+      incident.status === "positive_active" || incident.status === "active"
+        ? "#c026d3"
+        : "#e9d5ff";
+  } else if (isPhotogenic) {
+    color =
+      incident.status === "positive_active" || incident.status === "active"
+        ? "#ec4899"
+        : "#fbcfe8";
+  } else if (isAreaRecognition) {
     color =
       incident.status === "positive_active" || incident.status === "active"
         ? "#16a34a"
@@ -150,7 +163,7 @@ function createIcon(incident: Incident, selected: boolean) {
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
       font-size:${selected ? 18 : isSeed ? 13 : 16}px;
-      box-shadow:0 2px 10px rgba(${isAreaRecognition ? "22,163,74" : "234,88,12"},0.35);
+      box-shadow:0 2px 10px rgba(${isReelSpot ? "192,38,211" : isPhotogenic ? "236,72,153" : isAreaRecognition ? "22,163,74" : "234,88,12"},0.35);
       transform:translate(-50%,-50%);
       position:relative;
     ">

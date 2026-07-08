@@ -5,6 +5,12 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Activity, Crosshair, Shield, TrendingUp } from "lucide-react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
+import {
+  filterMapIncidents,
+  MAP_CATEGORY_FILTERS,
+  NEAR_ME_RADIUS_M,
+  type MapFilterMode,
+} from "@/lib/map-filters";
 import { useDebouncedValue } from "@/lib/use-debounce";
 import { cn, haversineDistance, scoreBg, scoreColor } from "@/lib/utils";
 
@@ -60,7 +66,9 @@ export default function HomePage() {
   const [healthCenter, setHealthCenter] = useState(DEFAULT_MAP_CENTER);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [zoom, setZoom] = useState(DEFAULT_MAP_ZOOM);
-  const [filter, setFilter] = useState<"all" | "issues" | "positive" | "resolved">("all");
+  const [filter, setFilter] = useState<MapFilterMode>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [nearMeOnly, setNearMeOnly] = useState(false);
   const [locationHint, setLocationHint] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
 
@@ -127,12 +135,38 @@ export default function HomePage() {
     );
   };
 
-  const filtered = incidents.filter((i) => {
-    if (filter === "issues") return !i.isPositive && i.status !== "resolved";
-    if (filter === "positive") return i.isPositive || i.status === "positive_active";
-    if (filter === "resolved") return i.status === "resolved";
-    return true;
-  });
+  const filtered = useMemo(
+    () =>
+      filterMapIncidents(incidents, {
+        filter,
+        categorySlug: categoryFilter,
+        nearMeOnly,
+        userLocation,
+        nearRadiusM: NEAR_ME_RADIUS_M,
+      }),
+    [incidents, filter, categoryFilter, nearMeOnly, userLocation]
+  );
+
+  const activeCategoryLabel = categoryFilter
+    ? MAP_CATEGORY_FILTERS.find((c) => c.slug === categoryFilter)?.label
+    : null;
+
+  const toggleNearMe = () => {
+    if (!userLocation) {
+      goToMyLocation();
+      setNearMeOnly(true);
+      return;
+    }
+    setNearMeOnly((v) => !v);
+  };
+
+  useEffect(() => {
+    if (nearMeOnly && userLocation) {
+      setViewCenter(userLocation);
+      setHealthCenter(userLocation);
+      setZoom(USER_LOCATION_ZOOM);
+    }
+  }, [categoryFilter, nearMeOnly, userLocation]);
 
   const pinsInArea = useMemo(() => {
     return filtered.filter(
@@ -171,21 +205,76 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="pointer-events-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
-          {(["all", "issues", "positive", "resolved"] as const).map((f) => (
+        <div className="pointer-events-auto space-y-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {(["all", "issues", "positive", "resolved"] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "min-h-9 rounded-full px-3 py-2 text-xs font-semibold capitalize shadow-sm transition sm:px-3.5",
+                  filter === f
+                    ? "bg-orange-600 text-white shadow-orange-200"
+                    : "glass-card text-stone-700 hover:bg-white"
+                )}
+              >
+                {f}
+              </button>
+            ))}
             <button
-              key={f}
-              onClick={() => setFilter(f)}
+              type="button"
+              onClick={toggleNearMe}
               className={cn(
-                "min-h-9 rounded-full px-3 py-2 text-xs font-semibold capitalize shadow-sm transition sm:px-3.5",
-                filter === f
-                  ? "bg-orange-600 text-white shadow-orange-200"
+                "min-h-9 rounded-full px-3 py-2 text-xs font-semibold shadow-sm transition sm:px-3.5",
+                nearMeOnly
+                  ? "bg-emerald-600 text-white shadow-emerald-200"
                   : "glass-card text-stone-700 hover:bg-white"
               )}
             >
-              {f}
+              {nearMeOnly ? `Near me (${NEAR_ME_RADIUS_M / 1000}km)` : "Near me"}
             </button>
-          ))}
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none sm:gap-2">
+            <button
+              type="button"
+              onClick={() => setCategoryFilter(null)}
+              className={cn(
+                "shrink-0 min-h-9 rounded-full px-3 py-2 text-xs font-semibold shadow-sm transition",
+                !categoryFilter
+                  ? "bg-stone-800 text-white"
+                  : "glass-card text-stone-700 hover:bg-white"
+              )}
+            >
+              All pins
+            </button>
+            {MAP_CATEGORY_FILTERS.map((cat) => (
+              <button
+                key={cat.slug}
+                type="button"
+                onClick={() => {
+                  setCategoryFilter((prev) => (prev === cat.slug ? null : cat.slug));
+                  if (!userLocation && nearMeOnly) goToMyLocation();
+                }}
+                className={cn(
+                  "shrink-0 min-h-9 whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold shadow-sm transition",
+                  categoryFilter === cat.slug
+                    ? "bg-stone-800 text-white"
+                    : "glass-card text-stone-700 hover:bg-white"
+                )}
+              >
+                {cat.emoji} {cat.label}
+              </button>
+            ))}
+          </div>
+          {(categoryFilter || nearMeOnly) && (
+            <p className="text-xs text-stone-500">
+              Showing {filtered.length} pin{filtered.length === 1 ? "" : "s"}
+              {activeCategoryLabel ? ` · ${activeCategoryLabel}` : ""}
+              {nearMeOnly ? ` · within ${NEAR_ME_RADIUS_M / 1000}km` : ""}
+              {!userLocation && nearMeOnly ? " · enable location" : ""}
+            </p>
+          )}
         </div>
       </div>
 
