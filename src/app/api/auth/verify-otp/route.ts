@@ -23,6 +23,13 @@ export async function POST(req: Request) {
     const data = schema.parse(body);
     const phone = normalizePhone(data.phone);
 
+    if (getAdminPhones().includes(phone)) {
+      return NextResponse.json(
+        { error: "Use the admin sign-in page at /admin/login for this number." },
+        { status: 403 }
+      );
+    }
+
     const phoneLimited = rateLimitKey("verify-otp-phone", phone, 10, 15 * 60 * 1000);
     if (phoneLimited) return phoneLimited;
 

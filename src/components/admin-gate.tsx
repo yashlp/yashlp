@@ -101,10 +101,10 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
           Sign in with an admin phone number configured in <code>ADMIN_PHONES</code>.
         </p>
         <button
-          onClick={() => router.push("/login")}
-          className="mt-6 rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white"
+          onClick={() => router.push("/admin/login")}
+          className="mt-6 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white"
         >
-          Sign in
+          Admin OTP sign in
         </button>
       </div>
     );

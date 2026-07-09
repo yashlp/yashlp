@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Activity, Crosshair, Shield, TrendingUp } from "lucide-react";
+import { Activity, Crosshair, Minus, Plus, Shield, TrendingUp } from "lucide-react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
 import {
   filterMapIncidents,
@@ -329,6 +329,26 @@ export default function HomePage() {
       )}
 
       <div className="pointer-events-auto absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-3 z-[1000] flex flex-col items-end gap-2 md:bottom-4 md:right-4">
+        <div className="glass-card flex flex-col overflow-hidden rounded-xl shadow">
+          <button
+            type="button"
+            onClick={() => setZoom((z) => Math.min(z + 1, 19))}
+            className="flex h-11 w-11 items-center justify-center border-b border-orange-100 text-stone-700 hover:bg-orange-50"
+            title="Zoom in"
+            aria-label="Zoom in"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoom((z) => Math.max(z - 1, 2))}
+            className="flex h-11 w-11 items-center justify-center text-stone-700 hover:bg-orange-50"
+            title="Zoom out"
+            aria-label="Zoom out"
+          >
+            <Minus className="h-4 w-4" />
+          </button>
+        </div>
         <button
           type="button"
           onClick={goToMyLocation}

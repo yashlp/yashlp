@@ -50,27 +50,14 @@ body {
   touch-action: pan-x pan-y;
 }
 
-.leaflet-right .leaflet-control-zoom {
-  margin-right: 0.5rem;
-  margin-bottom: calc(8.5rem + var(--safe-bottom));
-}
-
 .leaflet-control-attribution {
   margin-right: 0.5rem;
   margin-bottom: calc(0.25rem + var(--safe-bottom));
 }
 
 @media (max-width: 767px) {
-  .leaflet-control-zoom a {
-    min-width: 44px;
-    min-height: 44px;
-    line-height: 44px;
-  }
-}
-
-@media (min-width: 768px) {
-  .leaflet-right .leaflet-control-zoom {
-    margin-bottom: calc(5.5rem + var(--safe-bottom));
+  .leaflet-control-attribution {
+    font-size: 10px;
   }
 }
 

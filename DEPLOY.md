@@ -83,7 +83,7 @@ Share the Vercel URL — it stays live (unlike localhost tunnels).
 |----------|---------|--------|
 | `DATABASE_URL` | `postgresql://...` | **Required** — Neon **pooled** URL (omit `channel_binding=require` if deploy fails) |
 | `SESSION_SECRET` | `openssl rand -base64 32` | **Required** — min 32 chars |
-| `ADMIN_PHONES` | `+919988776655` | Comma-separated admin login phones |
+| `ADMIN_PHONES` | `+919558812335` | Comma-separated admin login phones (OTP at `/admin/login`) |
 | `ALLOW_DEMO_OTP` | `true` | Demo live site: OTP always `123456` |
 | `NODE_ENV` | `production` | Set by Vercel automatically |
 
@@ -108,9 +108,9 @@ This loads categories, Mumbai sample pins, demo admin user, and default site set
 
 ## 4. Admin backend (change site without redeploy)
 
-1. Sign in with a phone listed in `ADMIN_PHONES` (demo: `919988776655`, OTP `123456` if `ALLOW_DEMO_OTP=true`)
-2. Open **https://your-domain.vercel.app/admin**
-3. On first admin visit, set an **admin password** (minimum 12 chars). This is now required to unlock admin APIs.
+1. Open **https://your-domain.vercel.app/admin/login** (separate from customer sign-in)
+2. Your fixed admin phone from `ADMIN_PHONES` is shown — tap **Send OTP**, enter code (`123456` if `ALLOW_DEMO_OTP=true`)
+3. Set admin password on first visit, then manage pins, comments, users, and site settings
 
 ### Admin can:
 

@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MapPin, Settings, Users } from "lucide-react";
+import { LayoutDashboard, MapPin, MessageSquare, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/incidents", label: "Incidents", icon: MapPin },
+  { href: "/admin/incidents", label: "Pins", icon: MapPin },
+  { href: "/admin/comments", label: "Comments", icon: MessageSquare },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Site settings", icon: Settings },
 ];

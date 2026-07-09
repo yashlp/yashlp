@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { normalizePhone } from "@/lib/auth";
+import { getAdminPhones } from "@/lib/admin";
 import { rateLimitKey, rateLimitResponse } from "@/lib/api-security";
 import { sendOtp } from "@/lib/otp";
 import { isDemoOtpAllowed } from "@/lib/env";
-import { getAdminPhones } from "@/lib/admin";
 
 const schema = z.object({
   phone: z.string().min(10),
@@ -19,6 +19,13 @@ export async function POST(req: Request) {
     const { phone: raw } = schema.parse(body);
     const phone = normalizePhone(raw);
 
+    if (getAdminPhones().includes(phone)) {
+      return NextResponse.json(
+        { error: "Use the admin sign-in page at /admin/login for this number." },
+        { status: 403 }
+      );
+    }
+
     const phoneLimited = rateLimitKey("send-otp-phone", phone, 3, 15 * 60 * 1000);
     if (phoneLimited) return phoneLimited;
 
@@ -27,7 +34,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       phone,
-      isAdminPhone: getAdminPhones().includes(phone),
       message: "Verification code sent",
       demoHint: isDemoOtpAllowed() ? "Demo code: 123456" : undefined,
     });
