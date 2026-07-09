@@ -81,7 +81,7 @@ Share the Vercel URL — it stays live (unlike localhost tunnels).
 
 | Variable | Example | Notes |
 |----------|---------|--------|
-| `DATABASE_URL` | `postgresql://...` | **Required** — Neon pooled URL |
+| `DATABASE_URL` | `postgresql://...` | **Required** — Neon **pooled** URL (omit `channel_binding=require` if deploy fails) |
 | `SESSION_SECRET` | `openssl rand -base64 32` | **Required** — min 32 chars |
 | `ADMIN_PHONES` | `+919988776655` | Comma-separated admin login phones |
 | `ALLOW_DEMO_OTP` | `true` | Demo live site: OTP always `123456` |

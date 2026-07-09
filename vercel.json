@@ -1,5 +1,5 @@
 {
-  "buildCommand": "prisma generate && prisma db push && next build",
+  "buildCommand": "npm run vercel-build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["bom1"]
