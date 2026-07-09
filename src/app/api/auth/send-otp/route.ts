@@ -4,6 +4,7 @@ import { normalizePhone } from "@/lib/auth";
 import { rateLimitKey, rateLimitResponse } from "@/lib/api-security";
 import { sendOtp } from "@/lib/otp";
 import { isDemoOtpAllowed } from "@/lib/env";
+import { getAdminPhones } from "@/lib/admin";
 
 const schema = z.object({
   phone: z.string().min(10),
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       phone,
+      isAdminPhone: getAdminPhones().includes(phone),
       message: "Verification code sent",
       demoHint: isDemoOtpAllowed() ? "Demo code: 123456" : undefined,
     });

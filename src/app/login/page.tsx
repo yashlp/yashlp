@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [customName, setCustomName] = useState("");
   const [error, setError] = useState("");
   const [hint, setHint] = useState("");
+  const [isAdminPhone, setIsAdminPhone] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const refreshRandomName = async () => {
@@ -28,6 +29,16 @@ export default function LoginPage() {
       refreshRandomName();
     }
   }, [step, randomName]);
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.user) return;
+        router.replace(d.user.role === "admin" ? "/admin" : "/");
+      })
+      .catch(() => {});
+  }, [router]);
 
   const sendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +55,7 @@ export default function LoginPage() {
       setError(data.error ?? "Could not send code");
       return;
     }
+    setIsAdminPhone(Boolean(data.isAdminPhone));
     setHint(data.demoHint ?? "");
     setStep("otp");
   };
@@ -69,7 +81,7 @@ export default function LoginPage() {
       return;
     }
     window.dispatchEvent(new Event("civiclens-auth"));
-    router.push("/");
+    router.push(data.user?.role === "admin" ? "/admin" : "/");
     router.refresh();
   };
 
@@ -141,60 +153,66 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-800">
-                <UserRound className="h-4 w-4 text-orange-500" />
-                Display name (privacy)
-              </div>
-              <label className="flex cursor-pointer items-start gap-3">
-                <input
-                  type="radio"
-                  checked={useRandomName}
-                  onChange={() => setUseRandomName(true)}
-                  className="mt-1"
-                />
-                <span className="text-sm text-stone-700">
-                  <strong>Use random name</strong> — recommended for privacy
-                </span>
-              </label>
-              {useRandomName && (
-                <div className="mt-2 flex items-center gap-2 rounded-xl bg-white px-3 py-2">
-                  <span className="flex-1 font-medium text-orange-700">
-                    {randomName || "Generating..."}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={refreshRandomName}
-                    className="rounded-lg p-1.5 text-orange-600 hover:bg-orange-50"
-                    title="New random name"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </button>
+            {!isAdminPhone ? (
+              <div className="rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
+                <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-800">
+                  <UserRound className="h-4 w-4 text-orange-500" />
+                  Display name (privacy)
                 </div>
-              )}
-              <label className="mt-3 flex cursor-pointer items-start gap-3">
-                <input
-                  type="radio"
-                  checked={!useRandomName}
-                  onChange={() => setUseRandomName(false)}
-                  className="mt-1"
-                />
-                <span className="text-sm text-stone-700">Choose my own name</span>
-              </label>
-              {!useRandomName && (
-                <input
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  placeholder="Your display name"
-                  maxLength={32}
-                  className="input-field mt-2 w-full"
-                />
-              )}
-              <p className="mt-2 text-xs text-stone-500">
-                New accounts get a privacy-friendly name. You can change it up to 2 times later in
-                Profile.
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="radio"
+                    checked={useRandomName}
+                    onChange={() => setUseRandomName(true)}
+                    className="mt-1"
+                  />
+                  <span className="text-sm text-stone-700">
+                    <strong>Use random name</strong> — recommended for privacy
+                  </span>
+                </label>
+                {useRandomName && (
+                  <div className="mt-2 flex items-center gap-2 rounded-xl bg-white px-3 py-2">
+                    <span className="flex-1 font-medium text-orange-700">
+                      {randomName || "Generating..."}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={refreshRandomName}
+                      className="rounded-lg p-1.5 text-orange-600 hover:bg-orange-50"
+                      title="New random name"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+                <label className="mt-3 flex cursor-pointer items-start gap-3">
+                  <input
+                    type="radio"
+                    checked={!useRandomName}
+                    onChange={() => setUseRandomName(false)}
+                    className="mt-1"
+                  />
+                  <span className="text-sm text-stone-700">Choose my own name</span>
+                </label>
+                {!useRandomName && (
+                  <input
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    placeholder="Your display name"
+                    maxLength={32}
+                    className="input-field mt-2 w-full"
+                  />
+                )}
+                <p className="mt-2 text-xs text-stone-500">
+                  New accounts get a privacy-friendly name. You can change it up to 2 times later in
+                  Profile.
+                </p>
+              </div>
+            ) : (
+              <p className="rounded-xl bg-violet-50 px-3 py-2 text-xs text-violet-700">
+                Admin verification mode: OTP login will take you directly to the admin panel.
               </p>
-            </div>
+            )}
 
             {hint && (
               <p className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-xs text-blue-800">
@@ -205,7 +223,11 @@ export default function LoginPage() {
             {error && <p className="text-sm text-rose-600">{error}</p>}
             <button
               type="submit"
-              disabled={loading || otp.length !== 6 || (!useRandomName && customName.trim().length < 2)}
+              disabled={
+                loading ||
+                otp.length !== 6 ||
+                (!isAdminPhone && !useRandomName && customName.trim().length < 2)
+              }
               className="w-full rounded-2xl bg-orange-600 py-3.5 font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
             >
               {loading ? "Verifying..." : "Verify & continue"}

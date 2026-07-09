@@ -57,6 +57,18 @@ type HealthData = {
 };
 
 const AREA_RADIUS_M = 800;
+const STATE_RADIUS_M = 15000;
+const COUNTRY_RADIUS_M = 120000;
+
+function getHealthScopeForZoom(zoom: number) {
+  if (zoom >= 11) {
+    return { label: "City Health Score", radiusM: AREA_RADIUS_M, insightsCta: "View city insights" };
+  }
+  if (zoom >= 6) {
+    return { label: "State Health Score", radiusM: STATE_RADIUS_M, insightsCta: "View state-level trends" };
+  }
+  return { label: "Country Health Score", radiusM: COUNTRY_RADIUS_M, insightsCta: "View country rankings" };
+}
 
 export default function HomePage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -73,6 +85,7 @@ export default function HomePage() {
   const [locating, setLocating] = useState(false);
 
   const debouncedHealthCenter = useDebouncedValue(healthCenter, 500);
+  const healthScope = useMemo(() => getHealthScopeForZoom(zoom), [zoom]);
 
   const loadIncidents = useCallback(async () => {
     const res = await fetch("/api/incidents");
@@ -81,10 +94,10 @@ export default function HomePage() {
   }, []);
 
   const loadHealth = useCallback(async (lat: number, lng: number) => {
-    const res = await fetch(`/api/health?lat=${lat}&lng=${lng}&radius=${AREA_RADIUS_M}`);
+    const res = await fetch(`/api/health?lat=${lat}&lng=${lng}&radius=${healthScope.radiusM}`);
     const data = await res.json();
     setHealth(data);
-  }, []);
+  }, [healthScope.radiusM]);
 
   useEffect(() => {
     loadIncidents();
@@ -172,9 +185,9 @@ export default function HomePage() {
     return filtered.filter(
       (i) =>
         haversineDistance(healthCenter.lat, healthCenter.lng, i.latitude, i.longitude) <=
-        AREA_RADIUS_M
+        healthScope.radiusM
     ).length;
-  }, [filtered, healthCenter]);
+  }, [filtered, healthCenter, healthScope.radiusM]);
 
   const selected = incidents.find((i) => i.id === selectedId) ?? null;
 
@@ -283,7 +296,7 @@ export default function HomePage() {
           <div className="glass-card w-[min(100vw-1.5rem,16rem)] rounded-2xl p-3 sm:w-64 sm:p-4">
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-400">
               <Activity className="h-3.5 w-3.5 text-orange-500" />
-              Community Health Score
+              {healthScope.label}
             </div>
             <div className="flex items-end gap-2">
               <span className={cn("text-3xl font-bold sm:text-4xl", scoreColor(health.overallScore))}>
@@ -298,7 +311,8 @@ export default function HomePage() {
               />
             </div>
             <p className="mt-2 text-xs text-stone-400">
-              {health.issueCount} {health.issueCount === 1 ? "issue" : "issues"} in this area
+              {health.issueCount} {health.issueCount === 1 ? "issue" : "issues"} in this{" "}
+              {healthScope.label.toLowerCase().replace(" health score", "")}
               {health.incidentCount > 0 && (
                 <> · {health.incidentCount} verified</>
               )}
@@ -308,7 +322,7 @@ export default function HomePage() {
               className="mt-3 flex items-center gap-1 text-xs font-semibold text-orange-600 hover:text-orange-700"
             >
               <TrendingUp className="h-3.5 w-3.5" />
-              View city insights
+              {healthScope.insightsCta}
             </Link>
           </div>
         </div>

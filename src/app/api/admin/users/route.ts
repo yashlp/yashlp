@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { ADMIN_ROLE, adminErrorResponse, requireAdmin } from "@/lib/admin";
+import { ADMIN_ROLE, adminErrorResponse, getAdminPhones, requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
@@ -35,9 +35,30 @@ export async function PATCH(req: Request) {
   try {
     const admin = await requireAdmin();
     const data = patchSchema.parse(await req.json());
+    const adminPhones = getAdminPhones();
+
+    const target = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { id: true, phone: true, role: true },
+    });
+    if (!target) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
     if (data.userId === admin.id && data.role !== ADMIN_ROLE) {
       return NextResponse.json({ error: "Cannot demote yourself" }, { status: 400 });
+    }
+    if (data.role === ADMIN_ROLE && !adminPhones.includes(target.phone)) {
+      return NextResponse.json(
+        { error: "Only phone numbers listed in ADMIN_PHONES can be admins." },
+        { status: 400 }
+      );
+    }
+    if (data.role !== ADMIN_ROLE && adminPhones.includes(target.phone)) {
+      return NextResponse.json(
+        { error: "Configured admin phones cannot be demoted from the dashboard." },
+        { status: 400 }
+      );
     }
 
     const user = await prisma.user.update({

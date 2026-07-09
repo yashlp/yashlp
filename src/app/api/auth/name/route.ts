@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSessionUser } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import {
   canChangeName,
@@ -21,6 +22,12 @@ export async function GET() {
 export async function PATCH(req: Request) {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  if (isAdmin(user)) {
+    return NextResponse.json(
+      { error: "Admin profile identity is locked and cannot be changed here." },
+      { status: 403 }
+    );
+  }
 
   const data = schema.parse(await req.json());
 

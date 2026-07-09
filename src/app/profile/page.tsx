@@ -45,7 +45,7 @@ export default function ProfilePage() {
   }, [load]);
 
   const remaining = user ? nameChangesRemaining(user.nameChangeCount) : 0;
-  const canEdit = remaining > 0;
+  const canEdit = user ? user.role !== "admin" && remaining > 0 : false;
 
   const changeName = async (useRandom: boolean) => {
     if (!user) return;
@@ -101,13 +101,27 @@ export default function ProfilePage() {
             <UserRound className="h-4 w-4 text-orange-500" />
             Display name
           </div>
-          <p className="text-xs text-stone-500">
-            Use a random name to protect your privacy. You can change your display name{" "}
-            <strong>{MAX_NAME_CHANGES} times</strong> only.
-          </p>
-          <p className="mt-2 text-sm font-medium text-orange-700">
-            {remaining} of {MAX_NAME_CHANGES} changes remaining
-          </p>
+          {user.role === "admin" ? (
+            <div className="space-y-2 text-xs text-stone-600">
+              <p>Admin identity is locked for security.</p>
+              <p>
+                <strong>Phone:</strong> {user.phone}
+              </p>
+              <p>
+                <strong>Email:</strong> {contactEmail}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="text-xs text-stone-500">
+                Use a random name to protect your privacy. You can change your display name{" "}
+                <strong>{MAX_NAME_CHANGES} times</strong> only.
+              </p>
+              <p className="mt-2 text-sm font-medium text-orange-700">
+                {remaining} of {MAX_NAME_CHANGES} changes remaining
+              </p>
+            </>
+          )}
 
           {canEdit && !editing && (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -159,7 +173,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {!canEdit && (
+          {!canEdit && user.role !== "admin" && (
             <p className="mt-2 text-xs text-stone-500">
               Your display name is locked after {MAX_NAME_CHANGES} changes.
             </p>
