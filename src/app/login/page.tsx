@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Phone, RefreshCw, Shield, UserRound } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get("next");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -45,10 +47,11 @@ export default function LoginPage() {
       .then((d) => {
         if (!d.user) return;
         if (d.user.role === "admin") router.replace("/admin");
+        else if (nextPath?.startsWith("/")) router.replace(nextPath);
         else router.replace("/");
       })
       .catch(() => {});
-  }, [router]);
+  }, [router, nextPath]);
 
   const sendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +93,11 @@ export default function LoginPage() {
       return;
     }
     window.dispatchEvent(new Event("civiclens-auth"));
-    router.push("/");
+    if (nextPath?.startsWith("/")) {
+      router.push(nextPath);
+    } else {
+      router.push("/");
+    }
     router.refresh();
   };
 

@@ -174,6 +174,43 @@ Or run once from your machine:
 DATABASE_URL="your-neon-url" npm run db:go-live
 ```
 
+## 9. Real payments (reports)
+
+Customers pay for intelligence reports at `/reports`. Money goes to **your** Razorpay or Stripe business account — CivicLens does not hold funds.
+
+### India — Razorpay (mandatory for INR)
+
+1. Sign up at [https://razorpay.com](https://razorpay.com) and complete KYC (business or sole proprietor).
+2. Dashboard → **Settings → API Keys** → generate **Key ID** and **Key Secret** (live mode for production).
+3. Link your **bank account** in Razorpay → settlements deposit there (typically T+2 days).
+4. In Vercel → Environment Variables (Production):
+   - `RAZORPAY_KEY_ID` = `rzp_live_...`
+   - `RAZORPAY_KEY_SECRET` = your secret key
+5. Redeploy. Checkout shows Razorpay (UPI, cards, netbanking).
+
+### International — Stripe (optional, for USD)
+
+1. Sign up at [https://stripe.com](https://stripe.com) and complete business verification.
+2. Dashboard → **Developers → API keys** → copy publishable + secret keys (live mode).
+3. Link your **bank account** for payouts.
+4. In Vercel:
+   - `STRIPE_PUBLISHABLE_KEY` = `pk_live_...`
+   - `STRIPE_SECRET_KEY` = `sk_live_...`
+5. International report areas use Stripe Checkout automatically when Stripe is configured.
+
+### Official launch checklist (no demo mode)
+
+| Step | Action |
+|------|--------|
+| 1 | `DATABASE_URL`, `SESSION_SECRET`, `ADMIN_PHONES` set |
+| 2 | MSG91: `SMS_PROVIDER=msg91`, `SMS_API_KEY`, `SMS_SENDER_ID` |
+| 3 | `ALLOW_DEMO_OTP=false` after SMS works |
+| 4 | Razorpay live keys for India payments |
+| 5 | Stripe live keys (if selling internationally) |
+| 6 | `NEXT_PUBLIC_SITE_URL` = your `.com` domain |
+| 7 | Admin → **Publish for customers** |
+| 8 | Custom domain on Vercel (optional) |
+
 ## 7. Branch to deploy
 
 **Production branch:** `main`

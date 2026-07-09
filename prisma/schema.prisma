@@ -32,6 +32,7 @@ model User {
   savedPlaces      SavedPlace[]
   notifications    Notification[]
   contentDisputes  ContentDispute[]
+  reportPurchases  ReportPurchase[]
 }
 
 model OtpCode {
@@ -248,4 +249,27 @@ model SiteSetting {
   value     String
   updatedAt DateTime @updatedAt
   updatedBy String?
+}
+
+model ReportPurchase {
+  id                  String    @id @default(cuid())
+  userId              String
+  productId           String
+  latitude            Float
+  longitude           Float
+  placeName           String?
+  amount              Int
+  currency            String
+  provider            String
+  providerOrderId     String?
+  providerPaymentId   String?   @unique
+  status              String    @default("pending")
+  createdAt           DateTime  @default(now())
+  paidAt              DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, productId])
+  @@index([status])
 }

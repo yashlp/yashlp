@@ -9,7 +9,6 @@ import { ComparisonReportView } from "@/components/comparison-report-view";
 import { ReportPrice } from "@/components/report-price";
 import { GLOBAL_SAMPLE_PLACES } from "@/lib/constants";
 import { parsePlaceFromSearchParams } from "@/lib/geocode";
-import { hasPaidForReport } from "@/lib/report-access";
 import {
   buildComparisonDemoReport,
   buildDemoReport,
@@ -68,13 +67,39 @@ export function ReportExperience({ mode }: { mode: "sample" | "paid" }) {
 
   useEffect(() => {
     if (mode !== "paid" || !resolvedId) return;
-    const paid = hasPaidForReport(resolvedId, areaCoords.lat, areaCoords.lng);
-    if (!paid) {
-      router.replace(`/reports/checkout/${resolvedId}${checkoutQuery}`);
-      return;
-    }
-    setAccessChecked(true);
-  }, [mode, resolvedId, areaCoords.lat, areaCoords.lng, router, checkoutQuery]);
+
+    const sessionId = searchParams.get("session_id");
+
+    const verifyAccess = async () => {
+      if (sessionId) {
+        await fetch("/api/payments/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider: "stripe", sessionId }),
+        });
+      }
+
+      const res = await fetch(
+        `/api/payments/access?productId=${encodeURIComponent(resolvedId)}&lat=${areaCoords.lat}&lng=${areaCoords.lng}`,
+        { credentials: "include" }
+      );
+      const data = await res.json();
+
+      if (!data.authenticated) {
+        router.replace(`/login?next=${encodeURIComponent(`/reports/checkout/${resolvedId}${checkoutQuery}`)}`);
+        return;
+      }
+
+      if (!data.paid) {
+        router.replace(`/reports/checkout/${resolvedId}${checkoutQuery}`);
+        return;
+      }
+
+      setAccessChecked(true);
+    };
+
+    verifyAccess();
+  }, [mode, resolvedId, areaCoords.lat, areaCoords.lng, router, checkoutQuery, searchParams]);
 
   useEffect(() => {
     if (!resolvedId || resolvedId === "area-comparison") return;

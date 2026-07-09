@@ -1,18 +1,35 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Check, CreditCard, Lock, MapPin } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, Lock, LogIn, MapPin } from "lucide-react";
 import { PlaceSearch } from "@/components/place-search";
 import { PricingRegionBanner, ReportPrice } from "@/components/report-price";
 import { parsePlaceFromSearchParams, placeQueryString, type GeocodePlace } from "@/lib/geocode";
-import { markReportPaid } from "@/lib/report-access";
 import {
   getReportProduct,
   resolveReportProductId,
   type ReportProductId,
 } from "@/lib/report-demo-data";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpayScript(): Promise<void> {
+  if (window.Razorpay) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Could not load Razorpay"));
+    document.body.appendChild(script);
+  });
+}
 
 export function ReportCheckoutClient() {
   const params = useParams();
@@ -27,6 +44,8 @@ export function ReportCheckoutClient() {
   const [searchCountry, setSearchCountry] = useState<string | null>(initialPlace?.countryCode ?? null);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [paymentsReady, setPaymentsReady] = useState<boolean | null>(null);
 
   const pricingCountry = selectedPlace?.countryCode ?? searchCountry;
   const areaCoordsForPricing = selectedPlace
@@ -34,6 +53,16 @@ export function ReportCheckoutClient() {
     : null;
 
   const preset = searchParams.get("preset");
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setSignedIn(Boolean(d.user)));
+    fetch("/api/payments/status")
+      .then((r) => r.json())
+      .then((d) => setPaymentsReady(Boolean(d.paymentsConfigured)))
+      .catch(() => setPaymentsReady(false));
+  }, []);
 
   if (!product || !resolvedId) {
     return (
@@ -54,16 +83,104 @@ export function ReportCheckoutClient() {
     ? `/reports/view/${resolvedId}?${query.toString()}`
     : `/reports/view/${resolvedId}`;
 
+  const loginNext = `/reports/checkout/${resolvedId}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+
   const handlePay = async () => {
     if (!selectedPlace) {
       setError("Please select the location for your report first.");
       return;
     }
+    if (!signedIn) {
+      router.push(`/login?next=${encodeURIComponent(loginNext)}`);
+      return;
+    }
+
     setPaying(true);
     setError("");
-    await new Promise((r) => setTimeout(r, 800));
-    markReportPaid(resolvedId, selectedPlace.lat, selectedPlace.lng);
-    router.push(viewUrl);
+
+    try {
+      const res = await fetch("/api/payments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: resolvedId,
+          latitude: selectedPlace.lat,
+          longitude: selectedPlace.lng,
+          placeName: selectedPlace.name,
+          countryCode: selectedPlace.countryCode,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Could not start payment");
+        setPaying(false);
+        return;
+      }
+
+      if (data.provider === "stripe" && data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      if (data.provider === "razorpay") {
+        await loadRazorpayScript();
+        if (!window.Razorpay) {
+          setError("Payment gateway failed to load");
+          setPaying(false);
+          return;
+        }
+
+        const rzp = new window.Razorpay({
+          key: data.keyId,
+          amount: data.amount,
+          currency: data.currency,
+          name: "CivicLens",
+          description: product.name,
+          order_id: data.orderId,
+          prefill: {},
+          theme: { color: "#ea580c" },
+          handler: async (response: {
+            razorpay_order_id: string;
+            razorpay_payment_id: string;
+            razorpay_signature: string;
+          }) => {
+            const verifyRes = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                provider: "razorpay",
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                productId: resolvedId,
+                latitude: selectedPlace.lat,
+                longitude: selectedPlace.lng,
+                placeName: selectedPlace.name,
+                amount: data.amount,
+                currency: data.currency,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) {
+              setError(verifyData.error ?? "Payment verification failed");
+              setPaying(false);
+              return;
+            }
+            router.push(viewUrl);
+          },
+          modal: {
+            ondismiss: () => setPaying(false),
+          },
+        });
+        rzp.open();
+        return;
+      }
+
+      setError("Unsupported payment provider");
+    } catch {
+      setError("Payment could not be started. Try again.");
+    }
+    setPaying(false);
   };
 
   return (
@@ -98,6 +215,18 @@ export function ReportCheckoutClient() {
           ))}
         </ul>
 
+        {signedIn === false && (
+          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <LogIn className="mb-1 inline h-4 w-4" /> Sign in before checkout so your report is saved to your account.
+          </div>
+        )}
+
+        {paymentsReady === false && (
+          <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+            Payments are not configured yet. Add Razorpay keys in Vercel to accept real payments.
+          </div>
+        )}
+
         <div className="mt-6 rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
           <PlaceSearch
             selectedPlace={selectedPlace}
@@ -129,11 +258,13 @@ export function ReportCheckoutClient() {
         <button
           type="button"
           onClick={handlePay}
-          disabled={paying}
+          disabled={paying || paymentsReady === false}
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-200 hover:bg-orange-700 disabled:opacity-60"
         >
           <CreditCard className="h-5 w-5" />
-          {paying ? "Processing…" : (
+          {paying ? "Processing…" : signedIn === false ? (
+            "Sign in & pay"
+          ) : (
             <>
               Pay{" "}
               <ReportPrice
@@ -148,7 +279,7 @@ export function ReportCheckoutClient() {
         </button>
 
         <p className="mt-3 text-center text-xs text-stone-500">
-          Demo checkout — no real charge yet. Stripe/Razorpay can be connected for production.
+          India: Razorpay (UPI, cards, netbanking). International: Stripe (cards). Money goes to your connected business account.
         </p>
 
         <Link
@@ -161,7 +292,7 @@ export function ReportCheckoutClient() {
 
       <div className="mt-6 flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-xs text-stone-600">
         <Lock className="h-4 w-4 shrink-0 text-stone-400" />
-        After payment you get the full PDF-style report for your selected area — not a demo preview.
+        After payment you get the full PDF-style report for your selected area — unlocked on this account only.
       </div>
     </div>
   );
