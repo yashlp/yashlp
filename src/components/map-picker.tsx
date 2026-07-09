@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents, ZoomControl } from "react-leaflet";
 import { USER_LOCATION_ZOOM } from "@/lib/constants";
 import "leaflet/dist/leaflet.css";
 
@@ -53,9 +53,10 @@ export function LocationPicker({
         center={[center.lat, center.lng]}
         zoom={USER_LOCATION_ZOOM}
         className="h-56 w-full sm:h-64"
-        zoomControl={true}
+        zoomControl={false}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <ZoomControl position="topleft" />
         <MapCenter lat={pinLocation.lat} lng={pinLocation.lng} />
         <PinPickerEvents onPick={onPinChange} />
 
