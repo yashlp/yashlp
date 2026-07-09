@@ -10,6 +10,7 @@ import {
   VISIBILITY,
   VISIBILITY_STAGE,
 } from "./constants";
+import { PHOTO_APPROVAL_STATUS } from "./photo-approval";
 import { isAreaRecognitionCategory } from "./categories";
 import { haversineDistance } from "./utils";
 import { buildAggregationSummary } from "./compliance";
@@ -345,4 +346,10 @@ export const incidentInclude = {
     include: { user: { select: { name: true } } },
     orderBy: { createdAt: "desc" as const },
   },
+};
+
+/** Public API: only approved incident photos are included */
+export const publicIncidentInclude = {
+  ...incidentInclude,
+  photos: { where: { approvalStatus: PHOTO_APPROVAL_STATUS.APPROVED } },
 };

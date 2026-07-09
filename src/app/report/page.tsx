@@ -200,6 +200,12 @@ export default function ReportPage() {
       return;
     }
 
+    if (data.photosPendingReview) {
+      alert(
+        "Report submitted. Your photos are pending admin approval and will appear publicly once approved."
+      );
+    }
+
     router.push("/");
   };
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { incidentInclude } from "@/lib/incident-service";
+import { publicIncidentInclude } from "@/lib/incident-service";
+import { sanitizePublicIncident } from "@/lib/photo-approval";
 
 export async function GET(
   _req: Request,
@@ -9,12 +10,12 @@ export async function GET(
   const { id } = await params;
   const incident = await prisma.incident.findUnique({
     where: { id },
-    include: incidentInclude,
+    include: publicIncidentInclude,
   });
 
   if (!incident) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ incident });
+  return NextResponse.json({ incident: sanitizePublicIncident(incident) });
 }

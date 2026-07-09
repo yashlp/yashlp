@@ -18,10 +18,11 @@ import {
   addTimelineEvent,
   findNearbyDuplicate,
   getExpiresAtForCategory,
-  incidentInclude,
+  publicIncidentInclude,
   recalculateIncident,
 } from "@/lib/incident-service";
 import { validatePhotoDataUrls } from "@/lib/photo-validation";
+import { PHOTO_APPROVAL_STATUS, sanitizePublicIncident } from "@/lib/photo-approval";
 import {
   INCIDENT_STATUSES,
   MAX_PHOTOS_PER_REPORT,
@@ -83,7 +84,12 @@ const createSchema = z.object({
 async function savePhotos(incidentId: string, userId: string, urls: string[]) {
   for (const url of urls.slice(0, MAX_PHOTOS_PER_REPORT)) {
     await prisma.incidentPhoto.create({
-      data: { incidentId, url, uploadedBy: userId },
+      data: {
+        incidentId,
+        url,
+        uploadedBy: userId,
+        approvalStatus: PHOTO_APPROVAL_STATUS.PENDING,
+      },
     });
   }
 }
@@ -162,7 +168,7 @@ export async function POST(req: Request) {
       if (photoUrls.length > 0) await savePhotos(duplicate.id, user.id, photoUrls);
       await addTimelineEvent(duplicate.id, "confirmation_added", user.id);
       const updated = await recalculateIncident(duplicate.id);
-      return NextResponse.json({ incident: updated, merged: true });
+      return NextResponse.json({ incident: sanitizePublicIncident(updated), merged: true });
     }
 
     const ai = mockAIVerify(category.slug, photoUrls.length > 0);
@@ -268,10 +274,16 @@ export async function POST(req: Request) {
 
     const full = await prisma.incident.findUnique({
       where: { id: incident.id },
-      include: incidentInclude,
+      include: publicIncidentInclude,
     });
 
-    return NextResponse.json({ incident: full, ai, compliance, evidence });
+    return NextResponse.json({
+      incident: full ? sanitizePublicIncident(full) : full,
+      ai,
+      compliance,
+      evidence,
+      photosPendingReview: photoUrls.length > 0,
+    });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: e.errors[0].message }, { status: 400 });

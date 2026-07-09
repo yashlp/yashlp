@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/auth";
 import { addTimelineEvent, recalculateIncident } from "@/lib/incident-service";
 import { rewardValidDispute } from "@/lib/compliance/trustService";
 import { INCIDENT_STATUSES } from "@/lib/constants";
+import { sanitizePublicIncident } from "@/lib/photo-approval";
 
 const schema = z.object({
   reason: z.string().min(10).max(500),
@@ -50,5 +51,5 @@ export async function POST(
   await rewardValidDispute(user.id);
 
   const updated = await recalculateIncident(id);
-  return NextResponse.json({ incident: updated });
+  return NextResponse.json({ incident: sanitizePublicIncident(updated) });
 }

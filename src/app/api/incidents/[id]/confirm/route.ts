@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { addTimelineEvent, recalculateIncident } from "@/lib/incident-service";
 import { rewardConfirmation } from "@/lib/compliance/trustService";
+import { sanitizePublicIncident } from "@/lib/photo-approval";
 
 export async function POST(
   _req: Request,
@@ -43,5 +44,7 @@ export async function POST(
   await addTimelineEvent(id, "confirmed", user.id);
   const incident = await recalculateIncident(id);
 
-  return NextResponse.json({ incident });
+  return NextResponse.json({
+    incident: incident ? sanitizePublicIncident(incident) : null,
+  });
 }

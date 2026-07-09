@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { CheckCircle, MessageSquare, X, XCircle } from "lucide-react";
+import { Camera, CheckCircle, MessageSquare, X, XCircle } from "lucide-react";
 import Link from "next/link";
 import { confidenceLabel, statusLabel, visibilityStageLabel } from "@/lib/utils";
 import { LEGAL_DISCLAIMER } from "@/lib/compliance/types";
+import { compressImageFile } from "@/lib/image-compress";
 import {
   SEED_CONFIRMATION_THRESHOLD,
   VERIFIED_CONFIRMATION_THRESHOLD,
@@ -28,7 +29,14 @@ type IncidentDetail = {
   category: { emoji: string; name: string; slug: string };
   reporter: { name: string; reputation: number };
   confirmations: { id: string; comment: string | null; user: { name: string }; createdAt: string }[];
-  comments: { id: string; body: string; user: { name: string }; createdAt: string }[];
+  comments: {
+    id: string;
+    body: string;
+    photoUrl?: string | null;
+    user: { name: string };
+    createdAt: string;
+  }[];
+  photos?: { id: string; url: string; createdAt: string }[];
   timelineEvents: { id: string; action: string; createdAt: string }[];
   resolutionUpdates: {
     id: string;
@@ -50,6 +58,9 @@ export function IncidentPanel({
 }) {
   const [incident, setIncident] = useState<IncidentDetail | null>(null);
   const [comment, setComment] = useState("");
+  const [commentPhoto, setCommentPhoto] = useState<string | null>(null);
+  const [commentNotice, setCommentNotice] = useState("");
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [disputeReason, setDisputeReason] = useState("");
   const [showDispute, setShowDispute] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,6 +79,7 @@ export function IncidentPanel({
   const action = async (path: string, body?: object) => {
     setLoading(true);
     setError("");
+    setCommentNotice("");
     const res = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -77,10 +89,25 @@ export function IncidentPanel({
     setLoading(false);
     if (!res.ok) {
       setError(data.error ?? "Action failed");
-      return;
+      return data;
+    }
+    if (data.photoPendingReview) {
+      setCommentNotice("Your comment was posted. The photo is pending admin approval before it appears publicly.");
     }
     load();
     onUpdate();
+    return data;
+  };
+
+  const handleCommentPhoto = async (files: FileList | null) => {
+    if (!files?.[0]) return;
+    try {
+      const compressed = await compressImageFile(files[0]);
+      setCommentPhoto(compressed);
+      setError("");
+    } catch {
+      setError("Could not process the image. Try a different file.");
+    }
   };
 
   if (!incident) {
@@ -133,6 +160,23 @@ export function IncidentPanel({
 
           {incident.description && (
             <p className="text-sm text-slate-700">{incident.description}</p>
+          )}
+
+          {incident.photos && incident.photos.length > 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              {incident.photos.map((photo) => (
+                <a
+                  key={photo.id}
+                  href={photo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block overflow-hidden rounded-lg ring-1 ring-slate-200"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.url} alt="Report evidence" className="aspect-[4/3] w-full object-cover" />
+                </a>
+              ))}
+            </div>
           )}
 
           <p className="rounded-lg border border-orange-100 bg-orange-50/60 px-3 py-2 text-xs text-stone-600">
@@ -248,25 +292,92 @@ export function IncidentPanel({
             <label className="mb-1 flex items-center gap-1 text-xs font-medium text-muted">
               <MessageSquare className="h-3.5 w-3.5" /> Add comment
             </label>
-            <div className="flex gap-2">
-              <input
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Share what you observed..."
-                className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-orange-500"
-              />
-              <button
-                disabled={!comment.trim() || loading}
-                onClick={() => {
-                  action(`/api/incidents/${incidentId}/comment`, { body: comment });
-                  setComment("");
-                }}
-                className="rounded-lg bg-slate-800 px-3 py-2 text-sm text-white disabled:opacity-50"
-              >
-                Post
-              </button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Share what you observed..."
+                  className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-orange-500"
+                />
+                <button
+                  disabled={!comment.trim() || loading}
+                  onClick={async () => {
+                    await action(`/api/incidents/${incidentId}/comment`, {
+                      body: comment,
+                      photoUrl: commentPhoto ?? undefined,
+                    });
+                    setComment("");
+                    setCommentPhoto(null);
+                  }}
+                  className="rounded-lg bg-slate-800 px-3 py-2 text-sm text-white disabled:opacity-50"
+                >
+                  Post
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleCommentPhoto(e.target.files)}
+                />
+                <button
+                  type="button"
+                  onClick={() => photoInputRef.current?.click()}
+                  className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-stone-600 hover:bg-slate-50"
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                  {commentPhoto ? "Change photo" : "Add photo (optional)"}
+                </button>
+                {commentPhoto && (
+                  <div className="flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={commentPhoto} alt="Comment attachment preview" className="h-10 w-10 rounded object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setCommentPhoto(null)}
+                      className="text-xs text-rose-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+              {commentNotice && (
+                <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">{commentNotice}</p>
+              )}
+              <p className="text-xs text-stone-400">
+                Comments post immediately. Photos require admin approval before they appear publicly.
+              </p>
             </div>
           </div>
+
+          {incident.comments.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase text-muted">Comments</h3>
+              <div className="space-y-2">
+                {incident.comments.map((c) => (
+                  <div key={c.id} className="rounded-lg bg-slate-50 px-3 py-2 text-sm">
+                    <span className="font-medium">{c.user.name}</span>
+                    <p className="text-slate-600">{c.body}</p>
+                    {c.photoUrl && (
+                      <a
+                        href={c.photoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 block overflow-hidden rounded-lg ring-1 ring-slate-200"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={c.photoUrl} alt="Comment attachment" className="max-h-40 w-full object-cover" />
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {incident.confirmations.length > 0 && (
             <div>

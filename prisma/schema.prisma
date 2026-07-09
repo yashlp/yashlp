@@ -110,14 +110,19 @@ model Incident {
 }
 
 model IncidentPhoto {
-  id         String   @id @default(cuid())
-  incidentId String
-  url        String
-  caption    String?
-  uploadedBy String
-  createdAt  DateTime @default(now())
+  id             String    @id @default(cuid())
+  incidentId     String
+  url            String
+  caption        String?
+  uploadedBy     String
+  approvalStatus String    @default("approved")
+  reviewedAt     DateTime?
+  reviewedBy     String?
+  createdAt      DateTime  @default(now())
 
   incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@index([approvalStatus])
 }
 
 model Confirmation {
@@ -135,14 +140,20 @@ model Confirmation {
 }
 
 model Comment {
-  id         String   @id @default(cuid())
-  incidentId String
-  userId     String
-  body       String
-  createdAt  DateTime @default(now())
+  id                  String    @id @default(cuid())
+  incidentId          String
+  userId              String
+  body                String
+  photoUrl            String?
+  photoApprovalStatus String?
+  photoReviewedAt     DateTime?
+  photoReviewedBy     String?
+  createdAt           DateTime  @default(now())
 
   incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id])
+
+  @@index([photoApprovalStatus])
 }
 
 model ContentDispute {
