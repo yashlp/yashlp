@@ -156,6 +156,24 @@ If the page is blank: `npm run dev:reset` then hard-refresh (Ctrl+Shift+R).
 
 In Vercel → Project → Settings → Domains, add your domain and follow DNS instructions.
 
+## 8. Go live for customers
+
+Your production site is already at **https://yashlp.vercel.app**. To open it for customers:
+
+1. In **Admin → Site settings**, click **Publish for customers** (no redeploy).
+2. Share the public URL — map, reports, and sign-in work for everyone.
+3. For **real SMS OTP** (recommended before wide launch), add in Vercel:
+   - `SMS_PROVIDER` = `msg91`
+   - `SMS_API_KEY` = your MSG91 auth key
+   - `SMS_SENDER_ID` = your approved sender ID (optional, default `CIVCLN`)
+4. After SMS works, set `ALLOW_DEMO_OTP=false` in Vercel and redeploy.
+
+Or run once from your machine:
+
+```bash
+DATABASE_URL="your-neon-url" npm run db:go-live
+```
+
 ## 7. Branch to deploy
 
 **Production branch:** `main`

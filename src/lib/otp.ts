@@ -1,6 +1,7 @@
 import { prisma } from "./db";
 import { isDemoOtpAllowed, isProduction, isSmsConfigured } from "./env";
 import { rateLimit } from "./rate-limit";
+import { sendSmsOtp } from "./sms";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const MAX_VERIFY_FAILURES = 5;
@@ -10,6 +11,9 @@ export const DEMO_OTP = "123456";
 const verifyFailures = new Map<string, { count: number; lockedUntil: number }>();
 
 export function generateOtp(): string {
+  if (isSmsConfigured()) {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
   if (isDemoOtpAllowed()) return DEMO_OTP;
   return String(Math.floor(100000 + Math.random() * 900000));
 }
@@ -55,10 +59,18 @@ export async function sendOtp(phone: string) {
   await prisma.otpCode.create({ data: { phone, code, expiresAt } });
 
   if (isProduction() && isSmsConfigured()) {
-    await dispatchSms(phone, code);
+    const sent = await sendSmsOtp(phone, code);
+    if (!sent.ok) {
+      throw new Error("Could not send verification SMS. Please try again in a moment.");
+    }
+    return { code, expiresAt, delivered: true as const };
   }
 
-  return { code, expiresAt };
+  if (isProduction() && !isSmsConfigured() && !isDemoOtpAllowed()) {
+    throw new Error("SMS verification is not configured. Contact support.");
+  }
+
+  return { code, expiresAt, delivered: false as const };
 }
 
 export async function verifyOtp(phone: string, code: string): Promise<boolean> {
@@ -90,15 +102,4 @@ export async function verifyOtp(phone: string, code: string): Promise<boolean> {
   await prisma.otpCode.delete({ where: { id: record.id } });
   clearVerifyFailures(phone);
   return true;
-}
-
-async function dispatchSms(phone: string, code: string): Promise<void> {
-  const provider = process.env.SMS_PROVIDER;
-  const apiKey = process.env.SMS_API_KEY;
-
-  if (!provider || !apiKey) return;
-
-  // Provider-specific integration point — wire Twilio, MSG91, etc. here.
-  console.info(`[SMS:${provider}] OTP dispatched to ${phone.slice(0, 4)}****`);
-  void code;
 }

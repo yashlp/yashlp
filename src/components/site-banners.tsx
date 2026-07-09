@@ -4,6 +4,7 @@ export type PublicSiteConfig = {
   demoMode: boolean;
   announcement: string | null;
   maintenanceMode: boolean;
+  authMode?: "sms" | "demo" | "unavailable";
 };
 
 export function SiteBanners({

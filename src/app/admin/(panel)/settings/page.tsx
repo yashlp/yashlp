@@ -14,6 +14,8 @@ export default function AdminSettingsPage() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordSaved, setPasswordSaved] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [goingLive, setGoingLive] = useState(false);
+  const [liveSaved, setLiveSaved] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -36,6 +38,24 @@ export default function AdminSettingsPage() {
 
   const set = (key: string, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const publishForCustomers = async () => {
+    if (!confirm("Publish CivicLens for customers? This turns off demo/maintenance mode and shows the launch banner.")) {
+      return;
+    }
+    setGoingLive(true);
+    setLiveSaved(false);
+    const res = await fetch("/api/admin/go-live", { method: "POST" });
+    const data = await res.json();
+    setGoingLive(false);
+    if (!res.ok) {
+      alert(data.error ?? "Could not apply go-live settings");
+      return;
+    }
+    setSettings(data.settings ?? {});
+    setLiveSaved(true);
+    setTimeout(() => setLiveSaved(false), 3000);
   };
 
   const saveAdminPassword = async () => {
@@ -69,6 +89,21 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="max-w-xl space-y-6">
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5 shadow-sm">
+        <h2 className="font-semibold text-stone-900">Go live for customers</h2>
+        <p className="mt-1 text-sm text-stone-600">
+          Turns off demo and maintenance mode, and shows a welcome announcement on the public site.
+          No redeploy needed.
+        </p>
+        <button
+          onClick={publishForCustomers}
+          disabled={goingLive}
+          className="mt-4 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+        >
+          {goingLive ? "Publishing…" : liveSaved ? "Published!" : "Publish for customers"}
+        </button>
+      </div>
+
       <div className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
         <h2 className="font-semibold text-stone-900">Demo & visibility</h2>
         <div className="mt-4 space-y-4">
@@ -102,7 +137,7 @@ export default function AdminSettingsPage() {
           value={settings[SITE_SETTING_KEYS.ANNOUNCEMENT] ?? ""}
           onChange={(e) => set(SITE_SETTING_KEYS.ANNOUNCEMENT, e.target.value)}
           rows={2}
-          placeholder="e.g. Demo site — sample Mumbai data"
+          placeholder="e.g. Welcome to CivicLens — report issues in your neighbourhood"
           className="input-field mt-3 w-full resize-none"
         />
       </div>

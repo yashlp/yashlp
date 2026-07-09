@@ -3,6 +3,9 @@ import { SITE_SETTING_KEYS, type SiteSettingKey } from "./site-setting-keys";
 
 export { SITE_SETTING_KEYS, type SiteSettingKey };
 
+export const CUSTOMER_LAUNCH_ANNOUNCEMENT =
+  "CivicLens is now live — report issues, confirm neighbourhood pins, and help your community stay informed.";
+
 const DEFAULTS: Record<SiteSettingKey, string> = {
   [SITE_SETTING_KEYS.DEMO_MODE]: "false",
   [SITE_SETTING_KEYS.ANNOUNCEMENT]: "",

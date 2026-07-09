@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [customName, setCustomName] = useState("");
   const [error, setError] = useState("");
   const [hint, setHint] = useState("");
+  const [authMode, setAuthMode] = useState<"sms" | "demo" | "unavailable">("sms");
   const [loading, setLoading] = useState(false);
 
   const refreshRandomName = async () => {
@@ -28,6 +29,15 @@ export default function LoginPage() {
       refreshRandomName();
     }
   }, [step, randomName]);
+
+  useEffect(() => {
+    fetch("/api/site-config")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.authMode) setAuthMode(d.authMode);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include" })
@@ -207,16 +217,34 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {hint && (
+            {authMode === "demo" && (
+              <p className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                <Shield className="h-4 w-4 shrink-0" />
+                SMS is not live yet — use verification code <strong>123456</strong> to sign in during
+                early access.
+              </p>
+            )}
+            {hint && authMode !== "demo" && (
               <p className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-xs text-blue-800">
                 <Shield className="h-4 w-4 shrink-0" />
                 {hint}
               </p>
             )}
             {error && <p className="text-sm text-rose-600">{error}</p>}
+            {authMode === "unavailable" && (
+              <p className="text-sm text-rose-600">
+                Sign-in is temporarily unavailable. Please try again later or email support from your
+                profile page after we restore access.
+              </p>
+            )}
             <button
               type="submit"
-              disabled={loading || otp.length !== 6 || (!useRandomName && customName.trim().length < 2)}
+              disabled={
+                loading ||
+                otp.length !== 6 ||
+                (!useRandomName && customName.trim().length < 2) ||
+                authMode === "unavailable"
+              }
               className="w-full rounded-2xl bg-orange-600 py-3.5 font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
             >
               {loading ? "Verifying..." : "Verify & continue"}

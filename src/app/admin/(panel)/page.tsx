@@ -57,8 +57,9 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-900">
-        <strong>Live demo tip:</strong> Use <em>Site settings</em> to toggle demo banner, announcement bar,
-        or maintenance mode without redeploying. Changes apply within ~30 seconds.
+        <strong>Customer launch:</strong> Use <em>Site settings → Publish for customers</em> to show the
+        welcome banner and confirm demo/maintenance are off. Wire MSG91 SMS in Vercel when you are ready
+        for real OTP codes.
       </div>
     </div>
   );
