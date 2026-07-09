@@ -112,8 +112,14 @@ function createIcon(incident: Incident, selected: boolean) {
   const isAreaRecognition = slug === "great-community-area";
   const isReelSpot = slug === "reel-making-spot";
   const isPhotogenic = slug === "photogenic-place";
+  const isPoliceBooth = slug === "police-booth";
+  const isWomenHelp = slug === "women-help-desk";
 
-  if (isReelSpot) {
+  if (isPoliceBooth) {
+    color = "#1d4ed8";
+  } else if (isWomenHelp) {
+    color = "#7c3aed";
+  } else if (isReelSpot) {
     color =
       incident.status === "positive_active" || incident.status === "active"
         ? "#c026d3"

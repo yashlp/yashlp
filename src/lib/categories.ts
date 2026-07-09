@@ -57,9 +57,17 @@ export const ISSUE_CATEGORIES: CategoryDefinition[] = [
   { slug: "industrial-pollution", name: "Industrial Pollution", emoji: "🏭", type: "issue", group: "Pollution & Environment", photoRule: "optional", description: "Pollution from industrial sources" },
   { slug: "environmental-damage", name: "Environmental Damage", emoji: "🌳", type: "issue", group: "Pollution & Environment", photoRule: "optional", description: "Deforestation, land damage, or environmental harm" },
 
-  // Women's Safety (2)
+  // Women's Safety (2 issues + 2 safe-spot positives)
   { slug: "unsafe-unlit-areas", name: "Unsafe / Unlit Areas", emoji: "🌙", type: "issue", group: "Women's Safety", photoRule: "optional", description: "Poorly lit or unsafe areas especially at night" },
-  { slug: "harassment-points", name: "Harassment Points", emoji: "⚠️", type: "issue", group: "Women's Safety", photoRule: "optional", description: "Locations known for harassment or safety concerns" },
+  {
+    slug: "harassment-points",
+    name: "Harassment Points",
+    emoji: "⚠️",
+    type: "issue",
+    group: "Women's Safety",
+    photoRule: "allowed",
+    description: "Location-based safety concern reports — text + map pin only, no photo required",
+  },
 
   // Animal Welfare (2)
   { slug: "stray-dog-packs", name: "Stray Dog Packs", emoji: "🐕", type: "issue", group: "Animal Welfare", photoRule: "required", description: "Aggressive or dangerous stray dog packs" },
@@ -126,6 +134,28 @@ export const POSITIVE_CATEGORIES: CategoryDefinition[] = [
   { slug: "safe-drinking-water-area", name: "Safe Drinking Water Area", emoji: "🚰", type: "positive", group: "Public Good", photoRule: "optional", description: "Area with reliable safe drinking water" },
   { slug: "safe-walking-zone", name: "Safe Walking Zone", emoji: "🚶", type: "positive", group: "Public Good", photoRule: "optional", description: "Safe and walkable area for pedestrians" },
 
+  // Women's Safety — safe spots
+  {
+    slug: "police-booth",
+    name: "Police Booth / Help Post",
+    emoji: "🚔",
+    type: "positive",
+    group: "Women's Safety",
+    photoRule: "optional",
+    description: "Visible police booth, beat chowky, or public safety help post",
+    ttlDays: 90,
+  },
+  {
+    slug: "women-help-desk",
+    name: "Women's Help Desk",
+    emoji: "🛡️",
+    type: "positive",
+    group: "Women's Safety",
+    photoRule: "optional",
+    description: "Women's helpline desk, SHE team point, or dedicated help counter",
+    ttlDays: 90,
+  },
+
   // Daily Life positives (30-day freshness)
   { slug: "clean-public-toilet", name: "Clean Public Toilet", emoji: "✨", type: "positive", group: "Daily Life", photoRule: "optional", description: "Public restroom is clean and well-maintained", ttlDays: 30 },
   { slug: "trusted-street-food-spot", name: "Trusted Street Food Spot", emoji: "🍛", type: "positive", group: "Daily Life", photoRule: "optional", description: "Reliable, hygienic street food vendor recommended by community", ttlDays: 30 },
@@ -163,6 +193,19 @@ export const DAILY_LIFE_TTL_DAYS = 30;
 
 /** Area-recognition positives — longer TTL, stricter verification */
 export const AREA_RECOGNITION_SLUGS = ["great-community-area"] as const;
+
+/** Map filter + analytics grouping for women's safety pins */
+export const WOMENS_SAFETY_CATEGORY_SLUGS = [
+  "harassment-points",
+  "unsafe-unlit-areas",
+  "police-booth",
+  "women-help-desk",
+  "safe-walking-zone",
+] as const;
+
+export function isWomensSafetyCategory(slug: string): boolean {
+  return (WOMENS_SAFETY_CATEGORY_SLUGS as readonly string[]).includes(slug);
+}
 
 export function isAreaRecognitionCategory(slug: string): boolean {
   return (AREA_RECOGNITION_SLUGS as readonly string[]).includes(slug);

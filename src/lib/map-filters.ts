@@ -1,6 +1,8 @@
 import { haversineDistance } from "./utils";
+import { WOMENS_SAFETY_CATEGORY_SLUGS } from "./categories";
 
 export const NEAR_ME_RADIUS_M = 3000;
+export const WOMENS_SAFETY_FILTER_SLUG = "__womens_safety__";
 
 export type MapFilterMode = "all" | "issues" | "positive" | "resolved";
 
@@ -17,6 +19,7 @@ export const MAP_CATEGORY_FILTERS: MapCategoryFilter[] = [
   { slug: "great-community-area", label: "Great areas", emoji: "🏘️" },
   { slug: "trusted-street-food-spot", label: "Food spots", emoji: "🍛" },
   { slug: "clean-park", label: "Parks", emoji: "🌳" },
+  { slug: WOMENS_SAFETY_FILTER_SLUG, label: "Women's safety", emoji: "🛡️" },
   { slug: "potholes-bad-roads", label: "Road issues", emoji: "🕳️" },
 ];
 
@@ -49,7 +52,13 @@ export function filterMapIncidents<T extends MappableIncident>(
   }
 
   if (options.categorySlug) {
-    result = result.filter((i) => i.category.slug === options.categorySlug);
+    if (options.categorySlug === WOMENS_SAFETY_FILTER_SLUG) {
+      result = result.filter((i) =>
+        (WOMENS_SAFETY_CATEGORY_SLUGS as readonly string[]).includes(i.category.slug)
+      );
+    } else {
+      result = result.filter((i) => i.category.slug === options.categorySlug);
+    }
   }
 
   if (options.nearMeOnly && options.userLocation) {

@@ -9,6 +9,7 @@ import {
   filterMapIncidents,
   MAP_CATEGORY_FILTERS,
   NEAR_ME_RADIUS_M,
+  WOMENS_SAFETY_FILTER_SLUG,
   type MapFilterMode,
 } from "@/lib/map-filters";
 import { useDebouncedValue } from "@/lib/use-debounce";
@@ -161,7 +162,9 @@ export default function HomePage() {
   );
 
   const activeCategoryLabel = categoryFilter
-    ? MAP_CATEGORY_FILTERS.find((c) => c.slug === categoryFilter)?.label
+    ? categoryFilter === WOMENS_SAFETY_FILTER_SLUG
+      ? "Women's safety"
+      : MAP_CATEGORY_FILTERS.find((c) => c.slug === categoryFilter)?.label
     : null;
 
   const toggleNearMe = () => {

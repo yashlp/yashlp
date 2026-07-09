@@ -120,6 +120,53 @@ async function main() {
           "Multiple users reported irregular practice reports related to Licensing counter at RTO Office.",
       },
     },
+    {
+      city: GLOBAL_SAMPLE_PLACES[2],
+      cat: "harassment-points",
+      status: INCIDENT_STATUSES.ACTIVE,
+      confirmations: 7,
+      isPositive: false,
+      offset: { lat: 0.038, lng: -0.009 },
+      compliance: {
+        displayLabel: "Andheri metro exit – evening safety reports",
+        description:
+          "Multiple community reports describe discomfort near this stretch after dark. Reports are location-based patterns only.",
+        aggregationText:
+          "Several users flagged evening safety concerns near Andheri metro east exit.",
+      },
+    },
+    {
+      city: GLOBAL_SAMPLE_PLACES[2],
+      cat: "unsafe-unlit-areas",
+      status: INCIDENT_STATUSES.ACTIVE,
+      confirmations: 5,
+      isPositive: false,
+      offset: { lat: -0.002, lng: 0.03 },
+    },
+    {
+      city: GLOBAL_SAMPLE_PLACES[2],
+      cat: "police-booth",
+      status: INCIDENT_STATUSES.POSITIVE_ACTIVE,
+      confirmations: 9,
+      isPositive: true,
+      offset: { lat: -0.136, lng: -0.043 },
+    },
+    {
+      city: GLOBAL_SAMPLE_PLACES[2],
+      cat: "women-help-desk",
+      status: INCIDENT_STATUSES.POSITIVE_ACTIVE,
+      confirmations: 8,
+      isPositive: true,
+      offset: { lat: 0.01, lng: 0.031 },
+    },
+    {
+      city: GLOBAL_SAMPLE_PLACES[2],
+      cat: "safe-walking-zone",
+      status: INCIDENT_STATUSES.POSITIVE_ACTIVE,
+      confirmations: 10,
+      isPositive: true,
+      offset: { lat: -0.133, lng: -0.055 },
+    },
   ];
 
   for (const [i, sample] of citySamples.entries()) {
@@ -127,7 +174,9 @@ async function main() {
       ? positiveCats.find((c) => c.slug === sample.cat)!
       : categories.find((c) => c.slug === sample.cat)!;
     const reporter = users[i % users.length];
-    const offset = { lat: (Math.random() - 0.5) * 0.008, lng: (Math.random() - 0.5) * 0.008 };
+    const offset =
+      (sample as { offset?: { lat: number; lng: number } }).offset ??
+      { lat: (Math.random() - 0.5) * 0.008, lng: (Math.random() - 0.5) * 0.008 };
     const visibilityStage = stageForConfirmations(sample.confirmations);
     const visibility = visibilityForStage(visibilityStage);
     const expiresAt = cat.ttlDays ? addDays(new Date(), cat.ttlDays) : null;
