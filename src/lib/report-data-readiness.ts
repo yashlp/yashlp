@@ -149,7 +149,7 @@ export function evaluateReportDataReadiness(
 
   const message = ready
     ? `This area has enough community data for a ${requirements.label.toLowerCase()}.`
-    : `Not enough community data near this location yet for a ${requirements.label.toLowerCase()}. Reports need real neighbourhood pins from CivicLens users — check back as more people report and confirm issues nearby.`;
+    : "Not enough community data near this location.";
 
   return {
     ready,

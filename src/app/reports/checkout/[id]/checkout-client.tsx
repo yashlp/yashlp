@@ -293,7 +293,7 @@ export function ReportCheckoutClient() {
         >
           <CreditCard className="h-5 w-5" />
           {paying ? "Processing…" : dataReady === false ? (
-            "Not enough data yet"
+            "Not enough community data near this location"
           ) : signedIn === false ? (
             "Sign in & pay"
           ) : (
