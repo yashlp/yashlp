@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, CreditCard, Lock, LogIn, MapPin } from "lucide-react";
 import { PlaceSearch } from "@/components/place-search";
 import { PricingRegionBanner, ReportPrice } from "@/components/report-price";
+import { ReportDataReadinessBanner } from "@/components/report-data-readiness";
 import { parsePlaceFromSearchParams, placeQueryString, type GeocodePlace } from "@/lib/geocode";
 import {
   getReportProduct,
@@ -46,6 +47,7 @@ export function ReportCheckoutClient() {
   const [error, setError] = useState("");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [paymentsReady, setPaymentsReady] = useState<boolean | null>(null);
+  const [dataReady, setDataReady] = useState<boolean | null>(null);
 
   const pricingCountry = selectedPlace?.countryCode ?? searchCountry;
   const areaCoordsForPricing = selectedPlace
@@ -63,6 +65,22 @@ export function ReportCheckoutClient() {
       .then((d) => setPaymentsReady(Boolean(d.paymentsConfigured)))
       .catch(() => setPaymentsReady(false));
   }, []);
+
+  useEffect(() => {
+    if (!selectedPlace || !resolvedId) {
+      setDataReady(null);
+      return;
+    }
+    const params = new URLSearchParams({
+      productId: resolvedId,
+      lat: String(selectedPlace.lat),
+      lng: String(selectedPlace.lng),
+    });
+    fetch(`/api/reports/data-readiness?${params}`)
+      .then((r) => r.json())
+      .then((d) => setDataReady(Boolean(d.ready)))
+      .catch(() => setDataReady(null));
+  }, [selectedPlace, resolvedId]);
 
   if (!product || !resolvedId) {
     return (
@@ -112,6 +130,9 @@ export function ReportCheckoutClient() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.code === "INSUFFICIENT_DATA") {
+          setDataReady(false);
+        }
         setError(data.error ?? "Could not start payment");
         setPaying(false);
         return;
@@ -253,16 +274,27 @@ export function ReportCheckoutClient() {
           className="mt-4"
         />
 
+        {selectedPlace && (
+          <ReportDataReadinessBanner
+            productId={resolvedId}
+            lat={selectedPlace.lat}
+            lng={selectedPlace.lng}
+            className="mt-4"
+          />
+        )}
+
         {error && <p className="mt-4 text-sm text-rose-600">{error}</p>}
 
         <button
           type="button"
           onClick={handlePay}
-          disabled={paying || paymentsReady === false}
+          disabled={paying || paymentsReady === false || dataReady === false}
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-200 hover:bg-orange-700 disabled:opacity-60"
         >
           <CreditCard className="h-5 w-5" />
-          {paying ? "Processing…" : signedIn === false ? (
+          {paying ? "Processing…" : dataReady === false ? (
+            "Not enough data yet"
+          ) : signedIn === false ? (
             "Sign in & pay"
           ) : (
             <>

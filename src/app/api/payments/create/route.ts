@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSessionUser } from "@/lib/auth";
-import { resolveReportProductId } from "@/lib/report-demo-data";
+import { resolveReportProductId, getReportPrice } from "@/lib/report-demo-data";
 import { getLocalizedReportPrice, resolvePricingMarket } from "@/lib/report-pricing";
+import { checkReportDataReadinessForProduct } from "@/lib/report-data-readiness";
 import { createPendingPurchase } from "@/lib/payments/access";
 import {
   getRazorpayKeyId,
@@ -42,6 +43,23 @@ export async function POST(req: Request) {
     const resolvedId = resolveReportProductId(data.productId);
     if (!resolvedId) {
       return NextResponse.json({ error: "Invalid report product" }, { status: 400 });
+    }
+
+    const { tier } = getReportPrice(resolvedId);
+    const readiness = await checkReportDataReadinessForProduct(
+      tier,
+      data.latitude,
+      data.longitude
+    );
+    if (!readiness.ready) {
+      return NextResponse.json(
+        {
+          error: readiness.message,
+          code: "INSUFFICIENT_DATA",
+          readiness,
+        },
+        { status: 422 }
+      );
     }
 
     const market = resolvePricingMarket({

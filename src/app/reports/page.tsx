@@ -7,6 +7,8 @@ import { FREE_FEATURES, PAID_REPORTS } from "@/lib/categories";
 import { getReportPrice } from "@/lib/report-demo-data";
 import { PlaceSearch } from "@/components/place-search";
 import { PricingRegionBanner, ReportPrice } from "@/components/report-price";
+import { ReportDataReadinessBanner } from "@/components/report-data-readiness";
+import type { ReportTier } from "@/lib/report-demo-data";
 import { usePricingRegion } from "@/hooks/use-pricing-region";
 import { getLocalizedTierPrice } from "@/lib/report-pricing";
 import type { ReportProductId } from "@/lib/report-demo-data";
@@ -113,6 +115,7 @@ export default function ReportsPage() {
         checkoutQuery={checkoutQuery}
         pricingCountry={pricingCountry}
         areaCoords={areaCoordsForPricing}
+        tier="small"
       />
 
       <ReportTierSection
@@ -122,6 +125,7 @@ export default function ReportsPage() {
         checkoutQuery={checkoutQuery}
         pricingCountry={pricingCountry}
         areaCoords={areaCoordsForPricing}
+        tier="big"
       />
     </div>
   );
@@ -134,6 +138,7 @@ function ReportTierSection({
   checkoutQuery,
   pricingCountry,
   areaCoords,
+  tier,
 }: {
   title: string;
   subtitle: string;
@@ -141,6 +146,7 @@ function ReportTierSection({
   checkoutQuery: string;
   pricingCountry: string | null;
   areaCoords: { lat: number; lng: number } | null;
+  tier: ReportTier;
 }) {
   return (
     <section className="mt-10">
@@ -149,6 +155,14 @@ function ReportTierSection({
         {title}
       </h2>
       <p className="mt-1 text-sm text-stone-500">{subtitle}</p>
+      {areaCoords && (
+        <ReportDataReadinessBanner
+          tier={tier}
+          lat={areaCoords.lat}
+          lng={areaCoords.lng}
+          className="mt-4"
+        />
+      )}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {reports.map((report) => (
           <div key={report.id} className="flex flex-col rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
