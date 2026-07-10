@@ -1,7 +1,89 @@
 import { prisma } from "./db";
 import { getAreaHealthScore } from "./health-score";
 
-export async function askAI(
+function isOpenAiConfigured(): boolean {
+  return Boolean(process.env.OPENAI_API_KEY?.trim());
+}
+
+async function buildAreaContext(latitude: number, longitude: number) {
+  const health = await getAreaHealthScore(latitude, longitude);
+  const incidents = await prisma.incident.findMany({
+    where: {
+      visibilityStage: { in: ["seed", "verified"] },
+      underLegalReview: false,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      latitude: { gte: latitude - 0.015, lte: latitude + 0.015 },
+      longitude: { gte: longitude - 0.015, lte: longitude + 0.015 },
+    },
+    include: { category: true },
+    take: 25,
+    orderBy: { confidenceScore: "desc" },
+  });
+
+  const summary = incidents
+    .slice(0, 12)
+    .map(
+      (i) =>
+        `- ${i.category.name} (${i.status}, confidence ${Math.round(i.confidenceScore * 100)}%, ${i.isPositive ? "positive" : "issue"})`
+    )
+    .join("\n");
+
+  return {
+    health,
+    context: `Community Health Score: ${health.overallScore}/100
+Confidence: ${Math.round(health.confidence * 100)}%
+Verified incidents in area: ${health.incidentCount}
+Total pins nearby: ${health.totalInArea}
+Active issues: ${health.issueCount}
+
+Recent community signals:
+${summary || "(no pins yet)"}`,
+  };
+}
+
+async function askAIWithOpenAI(
+  question: string,
+  latitude: number,
+  longitude: number
+): Promise<{ answer: string; sources: string[] }> {
+  const { default: OpenAI } = await import("openai");
+  const { health, context } = await buildAreaContext(latitude, longitude);
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  const completion = await client.chat.completions.create({
+    model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+    temperature: 0.3,
+    max_tokens: 600,
+    messages: [
+      {
+        role: "system",
+        content: `You are CivicLens Ask AI. Answer using ONLY the community data provided. 
+Do not invent incidents. Frame answers as community-reported observations, not proven facts about individuals.
+If data is sparse, say confidence is limited and suggest checking the map.
+Keep answers concise (2-4 short paragraphs max).`,
+      },
+      {
+        role: "user",
+        content: `Area data:\n${context}\n\nUser question: ${question}`,
+      },
+    ],
+  });
+
+  const answer =
+    completion.choices[0]?.message?.content?.trim() ??
+    "I could not generate an answer. Try asking about safety, cleanliness, roads, or the health score.";
+
+  return {
+    answer,
+    sources: [
+      "Community Health Score",
+      `${health.incidentCount} verified incidents`,
+      "OpenAI (grounded on CivicLens data)",
+    ],
+  };
+}
+
+async function askAIRules(
   question: string,
   latitude: number,
   longitude: number
@@ -92,6 +174,21 @@ export async function askAI(
     answer: `Near this location: ${activeIssues.length} active issues, ${resolved.length} resolved, ${positive.length} positive signals. Community Health Score: ${health.overallScore}/100. Ask about safety, cleanliness, roads, trends, or the health score for more detail.`,
     sources,
   };
+}
+
+export async function askAI(
+  question: string,
+  latitude: number,
+  longitude: number
+): Promise<{ answer: string; sources: string[] }> {
+  if (isOpenAiConfigured()) {
+    try {
+      return await askAIWithOpenAI(question, latitude, longitude);
+    } catch (e) {
+      console.error("OpenAI ask failed, using rules fallback", e);
+    }
+  }
+  return askAIRules(question, latitude, longitude);
 }
 
 export function mockAIVerify(categorySlug: string, hasPhoto = false) {

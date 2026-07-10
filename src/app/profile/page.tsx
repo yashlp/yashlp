@@ -24,6 +24,12 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [contactEmail, setContactEmail] = useState("yash.shah.uk@gmail.com");
+  const [supportFormEnabled, setSupportFormEnabled] = useState(false);
+  const [supportSubject, setSupportSubject] = useState("");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportSent, setSupportSent] = useState(false);
+  const [supportLoading, setSupportLoading] = useState(false);
+  const [supportError, setSupportError] = useState("");
 
   const load = useCallback(() => {
     fetch("/api/auth/me", { credentials: "include" })
@@ -36,6 +42,7 @@ export default function ProfilePage() {
       .then((r) => r.json())
       .then((d) => {
         if (d.contactEmail) setContactEmail(d.contactEmail);
+        setSupportFormEnabled(Boolean(d.supportFormEnabled));
       })
       .catch(() => {});
   }, [router]);
@@ -73,6 +80,27 @@ export default function ProfilePage() {
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
+  };
+
+  const sendSupport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSupportLoading(true);
+    setSupportError("");
+    setSupportSent(false);
+    const res = await fetch("/api/support", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject: supportSubject, message: supportMessage }),
+    });
+    const data = await res.json();
+    setSupportLoading(false);
+    if (!res.ok) {
+      setSupportError(data.error ?? "Could not send message");
+      return;
+    }
+    setSupportSent(true);
+    setSupportSubject("");
+    setSupportMessage("");
   };
 
   if (!user) return <div className="p-8 text-center text-muted">Loading...</div>;
@@ -210,15 +238,48 @@ export default function ProfilePage() {
             Contact us
           </div>
           <p className="mt-2 text-sm text-stone-600">
-            Have an issue with your account, a report, or need help? Email us and we&apos;ll get back to you.
+            Have an issue with your account, a report, or need help? We&apos;ll get back to you.
           </p>
-          <a
-            href={`mailto:${contactEmail}?subject=${encodeURIComponent("CivicLens support request")}`}
-            className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-orange-700 ring-1 ring-orange-200 hover:bg-orange-50"
-          >
-            <Mail className="h-4 w-4" />
-            {contactEmail}
-          </a>
+          {supportFormEnabled ? (
+            <form onSubmit={sendSupport} className="mt-3 space-y-2">
+              <input
+                value={supportSubject}
+                onChange={(e) => setSupportSubject(e.target.value)}
+                maxLength={120}
+                required
+                className="input-field w-full"
+                placeholder="Subject"
+              />
+              <textarea
+                value={supportMessage}
+                onChange={(e) => setSupportMessage(e.target.value)}
+                maxLength={2000}
+                required
+                rows={4}
+                className="input-field w-full resize-y"
+                placeholder="Describe your issue..."
+              />
+              {supportError && <p className="text-sm text-rose-600">{supportError}</p>}
+              {supportSent && (
+                <p className="text-sm text-emerald-700">Message sent — we&apos;ll reply soon.</p>
+              )}
+              <button
+                type="submit"
+                disabled={supportLoading}
+                className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
+              >
+                {supportLoading ? "Sending..." : "Send message"}
+              </button>
+            </form>
+          ) : (
+            <a
+              href={`mailto:${contactEmail}?subject=${encodeURIComponent("CivicLens support request")}`}
+              className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-orange-700 ring-1 ring-orange-200 hover:bg-orange-50"
+            >
+              <Mail className="h-4 w-4" />
+              {contactEmail}
+            </a>
+          )}
         </div>
 
         <button

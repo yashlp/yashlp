@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ImageIcon, LayoutDashboard, MapPin, MessageSquare, Settings, Users } from "lucide-react";
+import { ImageIcon, LayoutDashboard, MapPin, MessageSquare, Rocket, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/launch", label: "Launch", icon: Rocket },
   { href: "/admin/incidents", label: "Pins", icon: MapPin },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
   { href: "/admin/picture-approvals", label: "Picture Approval", icon: ImageIcon },
