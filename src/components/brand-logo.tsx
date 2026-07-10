@@ -11,14 +11,14 @@ const BRAND = {
   },
   header: {
     src: "/brand/civiclens-logo-header.png",
-    width: 864,
-    height: 454,
+    width: 634,
+    height: 482,
     alt: "CivicLens",
   },
   full: {
     src: "/brand/civiclens-logo.png",
-    width: 1200,
-    height: 630,
+    width: 634,
+    height: 632,
     alt: "CivicLens — Aware today, better tomorrow",
   },
 } as const;

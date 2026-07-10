@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "CivicLens",
     type: "website",
-    images: [{ url: "/brand/civiclens-logo.png", width: 1200, height: 630, alt: "CivicLens" }],
+    images: [{ url: "/brand/civiclens-logo.png", width: 634, height: 632, alt: "CivicLens" }],
   },
   icons: {
     icon: [{ url: "/favicon.png", sizes: "32x32", type: "image/png" }],
