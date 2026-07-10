@@ -8,28 +8,28 @@ export const metadata: Metadata = {
 
 const samples = [
   {
-    id: "icon",
-    title: "Sample 1 — Icon only",
-    subtitle: "Header, favicon, app icon",
-    src: "/brand/civiclens-logo-icon-sample.png",
-    width: 1024,
-    height: 1024,
-  },
-  {
-    id: "full",
-    title: "Sample 2 — Full logo + tagline",
-    subtitle: "Login page, marketing, social",
-    src: "/brand/civiclens-logo-full-sample.png",
-    width: 1200,
-    height: 675,
-  },
-  {
-    id: "original",
-    title: "Your ChatGPT reference",
-    subtitle: "Original design you shared",
-    src: "/brand/civiclens-logo-source.png",
+    id: "official",
+    title: "Your logo (live on site)",
+    subtitle: "From your ChatGPT design — header, login, favicon",
+    src: "/brand/civiclens-logo.png",
     width: 1200,
     height: 630,
+  },
+  {
+    id: "icon",
+    title: "Icon mark",
+    subtitle: "Favicon and compact uses",
+    src: "/brand/civiclens-icon.png",
+    width: 512,
+    height: 512,
+  },
+  {
+    id: "header",
+    title: "Header crop",
+    subtitle: "Used in top navigation bar",
+    src: "/brand/civiclens-logo-header.png",
+    width: 864,
+    height: 454,
   },
 ];
 
@@ -38,8 +38,7 @@ export default function LogoPreviewPage() {
     <div className="mx-auto max-w-3xl px-4 py-10 pb-16">
       <h1 className="text-2xl font-bold text-stone-900">CivicLens logo samples</h1>
       <p className="mt-2 text-sm text-stone-600">
-        Review these in your browser. Reply in chat with which one you want on the site (or changes
-        to make). Nothing is applied to the live header yet.
+        Your ChatGPT logo is now applied across the site. Use this page to verify assets.
       </p>
 
       <div className="mt-8 space-y-10">

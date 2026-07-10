@@ -9,7 +9,6 @@ import {
   GitCompare,
   Home,
   LogIn,
-  MapPin,
   MessageCircle,
   Plus,
   User,
@@ -17,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TermsGate } from "@/components/terms-gate";
 import { SiteBanners, type PublicSiteConfig } from "@/components/site-banners";
+import { BrandLogo } from "@/components/brand-logo";
 
 type UserInfo = { id: string; name: string; phone: string; reputation: number; role?: string } | null;
 
@@ -76,14 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {!isAdminPage && <SiteBanners config={siteConfig} isAdmin={user?.role === "admin"} />}
       <header className="sticky top-0 z-50 border-b border-orange-100 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200">
-              <MapPin className="h-4 w-4" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-stone-900">
-              Civic<span className="text-orange-600">Lens</span>
-            </span>
-          </Link>
+          <BrandLogo variant="header" priority className="min-w-0" />
 
           <nav className="hidden items-center gap-1 md:flex">
             {navItems.map(({ href, label, icon: Icon }) => (

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Mail, Phone, Shield } from "lucide-react";
+import { Mail, Phone, Shield } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -70,10 +71,8 @@ export default function AdminLoginPage() {
     <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-12">
       <div className="rounded-3xl border border-violet-100 bg-white p-8 shadow-xl shadow-violet-100/50">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-violet-700 text-white shadow-lg shadow-violet-200">
-            <Lock className="h-7 w-7" />
-          </div>
-          <h1 className="text-2xl font-bold text-stone-900">Admin sign in</h1>
+          <BrandLogo variant="icon" href="/" className="mx-auto justify-center" imageClassName="h-14 w-14" />
+          <h1 className="mt-4 text-2xl font-bold text-stone-900">Admin sign in</h1>
           <p className="mt-1 text-sm text-stone-500">
             Secure backend access — OTP only for the registered admin number.
           </p>

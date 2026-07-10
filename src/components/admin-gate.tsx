@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminNav } from "@/components/admin-nav";
+import { BrandLogo } from "@/components/brand-logo";
 
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -175,10 +176,11 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 pb-24">
-      <div className="mb-6">
-        <p className="text-xs font-bold uppercase tracking-wider text-orange-600">Backend</p>
-        <h1 className="text-2xl font-bold text-stone-900">CivicLens Admin</h1>
-        <p className="text-sm text-stone-500">Manage incidents, users, and live site settings</p>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <BrandLogo variant="header" href="/admin" />
+          <p className="mt-2 text-sm text-stone-500">Manage incidents, users, and live site settings</p>
+        </div>
       </div>
       <AdminNav />
       <div className="mt-6">{children}</div>

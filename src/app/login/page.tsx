@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Phone, RefreshCw, Shield, UserRound } from "lucide-react";
+import { RefreshCw, Shield, UserRound } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -105,10 +106,8 @@ export default function LoginPage() {
     <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-md flex-col justify-center px-4 py-12 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-12">
       <div className="rounded-3xl border border-orange-100 bg-white p-8 shadow-xl shadow-orange-100/50">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200">
-            <Phone className="h-7 w-7" />
-          </div>
-          <h1 className="text-2xl font-bold text-stone-900">Customer sign in</h1>
+          <BrandLogo variant="full" href={false} className="mx-auto justify-center" priority />
+          <h1 className="mt-4 text-2xl font-bold text-stone-900">Customer sign in</h1>
           <p className="mt-1 text-sm text-stone-500">
             No password needed — we&apos;ll text you a quick code.
           </p>
