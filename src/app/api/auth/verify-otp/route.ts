@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     if (getAdminPhones().includes(phone)) {
       return NextResponse.json(
-        { error: "Use the admin sign-in page at /admin/login for this number." },
+        { error: "This mobile number cannot be used here. Try a different number or contact support." },
         { status: 403 }
       );
     }

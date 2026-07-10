@@ -98,26 +98,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2">
             {user ? (
-              <>
-                {user.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    className="hidden min-h-11 items-center rounded-xl px-2.5 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 md:flex"
-                  >
-                    Admin
-                  </Link>
-                )}
-                <Link
-                  href="/profile"
-                  className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-orange-50"
-                >
+              <Link
+                href="/profile"
+                className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-orange-50"
+              >
                 <User className="h-4 w-4 text-orange-600" />
                 <span className="hidden sm:inline text-stone-800">{user.name}</span>
                 <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-700">
                   {user.reputation}
                 </span>
               </Link>
-              </>
             ) : (
               <Link
                 href="/login"

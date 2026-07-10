@@ -107,7 +107,7 @@ export default function LoginPage() {
       <div className="rounded-3xl border border-orange-100 bg-white p-8 shadow-xl shadow-orange-100/50">
         <div className="mb-6 text-center">
           <BrandLogo variant="full" href={false} className="mx-auto justify-center" priority />
-          <h1 className="mt-4 text-2xl font-bold text-stone-900">Customer sign in</h1>
+          <h1 className="mt-4 text-2xl font-bold text-stone-900">Sign in</h1>
           <p className="mt-1 text-sm text-stone-500">
             No password needed — we&apos;ll text you a quick code.
           </p>
@@ -262,10 +262,6 @@ export default function LoginPage() {
       <p className="mt-4 text-center text-sm text-stone-500">
         <Link href="/" className="text-orange-600 hover:underline">
           ← Continue without signing in
-        </Link>
-        {" · "}
-        <Link href="/admin/login" className="text-violet-700 hover:underline">
-          Admin sign in
         </Link>
       </p>
     </div>

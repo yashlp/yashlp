@@ -97,15 +97,15 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   if (state === "denied") {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <h1 className="text-xl font-bold text-stone-900">Admin access required</h1>
+        <h1 className="text-xl font-bold text-stone-900">Page not found</h1>
         <p className="mt-2 text-sm text-stone-500">
-          Sign in with an admin phone number configured in <code>ADMIN_PHONES</code>.
+          The page you&apos;re looking for doesn&apos;t exist or isn&apos;t available.
         </p>
         <button
-          onClick={() => router.push("/admin/login")}
-          className="mt-6 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white"
+          onClick={() => router.push("/")}
+          className="mt-6 rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
         >
-          Admin OTP sign in
+          Back to home
         </button>
       </div>
     );

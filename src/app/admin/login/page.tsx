@@ -151,11 +151,7 @@ export default function AdminLoginPage() {
 
       <p className="mt-4 text-center text-sm text-stone-500">
         <Link href="/" className="text-orange-600 hover:underline">
-          ← Back to public site
-        </Link>
-        {" · "}
-        <Link href="/login" className="text-stone-500 hover:underline">
-          Customer sign in
+          ← Back to site
         </Link>
       </p>
     </div>
