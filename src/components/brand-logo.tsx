@@ -2,21 +2,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+const BRAND_VERSION = "v3";
+
 const BRAND = {
   icon: {
-    src: "/brand/civiclens-icon.png",
+    src: `/brand/civiclens-icon.png?${BRAND_VERSION}`,
     width: 512,
     height: 512,
     alt: "CivicLens",
   },
   header: {
-    src: "/brand/civiclens-logo-header.png",
+    src: `/brand/civiclens-logo-header.png?${BRAND_VERSION}`,
     width: 634,
     height: 482,
     alt: "CivicLens",
   },
   full: {
-    src: "/brand/civiclens-logo.png",
+    src: `/brand/civiclens-logo.png?${BRAND_VERSION}`,
     width: 634,
     height: 632,
     alt: "CivicLens — Aware today, better tomorrow",
