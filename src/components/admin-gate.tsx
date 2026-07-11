@@ -10,6 +10,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<
     "loading" | "ok" | "denied" | "needs-password" | "set-password"
   >("loading");
+  const [deniedRedirect, setDeniedRedirect] = useState<"/admin/login" | "/">("/admin/login");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,12 +22,14 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
       .then((r) => r.json())
       .then(async (d) => {
         if (d.user?.role !== "admin") {
+          setDeniedRedirect(d.user ? "/" : "/admin/login");
           setState("denied");
           return;
         }
         const statusRes = await fetch("/api/admin/auth/status");
         const status = await statusRes.json();
         if (!statusRes.ok) {
+          setDeniedRedirect("/admin/login");
           setState("denied");
           return;
         }
@@ -40,8 +43,17 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
         }
         setState("ok");
       })
-      .catch(() => setState("denied"));
+      .catch(() => {
+        setDeniedRedirect("/admin/login");
+        setState("denied");
+      });
   }, []);
+
+  useEffect(() => {
+    if (state === "denied") {
+      router.replace(deniedRedirect);
+    }
+  }, [state, deniedRedirect, router]);
 
   const verifyPassword = async () => {
     setSaving(true);
@@ -96,17 +108,8 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
 
   if (state === "denied") {
     return (
-      <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <h1 className="text-xl font-bold text-stone-900">Page not found</h1>
-        <p className="mt-2 text-sm text-stone-500">
-          The page you&apos;re looking for doesn&apos;t exist or isn&apos;t available.
-        </p>
-        <button
-          onClick={() => router.push("/")}
-          className="mt-6 rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
-        >
-          Back to home
-        </button>
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-200 border-t-orange-600" />
       </div>
     );
   }
