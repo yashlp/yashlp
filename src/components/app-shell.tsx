@@ -38,6 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isLegalPage =
     pathname === "/terms" || pathname === "/privacy" || pathname === "/content-policy";
   const isAdminPage = pathname.startsWith("/admin");
+  const isAestheticDemo = pathname.startsWith("/aesthetic-demo");
   const isMapPage = pathname === "/";
 
   const refreshUser = () => {
@@ -70,6 +71,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       refreshUser();
     }
   }, [pathname]);
+
+  if (isAestheticDemo) {
+    return <>{children}</>;
+  }
 
   const shell = (
     <div className={cn("flex min-h-dvh flex-col", isMapPage && "h-dvh overflow-hidden")}>
