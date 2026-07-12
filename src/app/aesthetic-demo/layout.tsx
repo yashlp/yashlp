@@ -16,9 +16,9 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Curio Reel Shop — Demo",
+  title: "Aesthetic — Demo",
   description:
-    "Interactive demo: scroll aesthetic products in reel form. Swipe right to cart, left to pass. AI learns your taste.",
+    "Interactive demo: scroll aesthetic products in reel form or browse classic shop grid. Swipe right to cart, left to pass. AI learns your taste.",
 };
 
 export const viewport: Viewport = {

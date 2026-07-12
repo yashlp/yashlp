@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { ReelFeed } from "@/components/aesthetic-demo/reel-feed";
+import { ArrowRight, Film, LayoutGrid, Sparkles } from "lucide-react";
+import { AestheticApp } from "@/components/aesthetic-demo/aesthetic-app";
 
 export default function AestheticDemoPage() {
   const [started, setStarted] = useState(false);
@@ -24,31 +24,36 @@ export default function AestheticDemoPage() {
             interactive demo
           </p>
           <h1 className="text-5xl font-semibold italic leading-[1.05] tracking-tight text-[#0a1628] sm:text-6xl">
-            Curio
+            Aesthetic
           </h1>
-          <p className="mt-1 text-2xl font-light italic text-[#1b3a6b]/70">reel shop</p>
-
-          <p className="mx-auto mt-6 max-w-xs text-lg leading-relaxed text-[#1b3a6b]/80">
-            Scroll aesthetic products like reels. Swipe right to cart, left to pass. The feed learns
-            what you love.
+          <p className="mt-2 text-lg italic text-[#1b3a6b]/70">
+            scroll reels first · browse shop anytime
           </p>
 
-          <div className="mx-auto mt-8 grid max-w-xs grid-cols-3 gap-3 text-left">
-            {[
-              { label: "Scroll", hint: "↕ next product" },
-              { label: "Swipe →", hint: "add to cart" },
-              { label: "Swipe ←", hint: "pass & learn" },
-            ].map(({ label, hint }) => (
-              <div
-                key={label}
-                className="rounded-2xl border border-[#1b3a6b]/8 bg-[#fffef7]/80 p-3 backdrop-blur-sm"
-              >
+          <p className="mx-auto mt-6 max-w-xs text-lg leading-relaxed text-[#1b3a6b]/80">
+            Discover aesthetic products in reel form. Swipe right to cart, left to pass. Switch to
+            classic shop view whenever you want.
+          </p>
+
+          <div className="mx-auto mt-8 grid max-w-xs grid-cols-2 gap-3 text-left">
+            <div className="rounded-2xl border border-[#1b3a6b]/8 bg-[#fffef7]/80 p-3 backdrop-blur-sm">
+              <div className="mb-2 flex items-center gap-2">
+                <Film className="h-4 w-4 text-[#4a7cbb]" />
                 <p className="aesthetic-mono text-[10px] uppercase tracking-wider text-[#4a7cbb]">
-                  {label}
+                  Reels
                 </p>
-                <p className="mt-1 text-sm italic text-[#0a1628]/70">{hint}</p>
               </div>
-            ))}
+              <p className="text-sm italic text-[#0a1628]/70">scroll ↕ · swipe ↔</p>
+            </div>
+            <div className="rounded-2xl border border-[#1b3a6b]/8 bg-[#fffef7]/80 p-3 backdrop-blur-sm">
+              <div className="mb-2 flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4 text-[#4a7cbb]" />
+                <p className="aesthetic-mono text-[10px] uppercase tracking-wider text-[#4a7cbb]">
+                  Shop
+                </p>
+              </div>
+              <p className="text-sm italic text-[#0a1628]/70">classic grid browse</p>
+            </div>
           </div>
 
           <button
@@ -66,7 +71,6 @@ export default function AestheticDemoPage() {
           </p>
         </div>
 
-        {/* Phone frame hint on larger screens */}
         <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 md:block">
           <p className="aesthetic-mono text-[10px] uppercase tracking-wider text-[#1b3a6b]/30">
             best on mobile — resize browser or open on phone
@@ -78,7 +82,7 @@ export default function AestheticDemoPage() {
 
   return (
     <div className="aesthetic-demo-root mx-auto h-dvh w-full max-w-lg border-x border-[#1b3a6b]/5 shadow-2xl md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[2.5rem] md:overflow-hidden">
-      <ReelFeed />
+      <AestheticApp />
     </div>
   );
 }
