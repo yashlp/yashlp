@@ -39,6 +39,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname === "/terms" || pathname === "/privacy" || pathname === "/content-policy";
   const isAdminPage = pathname.startsWith("/admin");
   const isAestheticDemo = pathname.startsWith("/aesthetic-demo");
+  const isAestheticsPlatform =
+    pathname.startsWith("/aesthetics") ||
+    pathname.startsWith("/seller") ||
+    pathname.startsWith("/platform-admin");
   const isMapPage = pathname === "/";
 
   const refreshUser = () => {
@@ -72,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [pathname]);
 
-  if (isAestheticDemo) {
+  if (isAestheticDemo || isAestheticsPlatform) {
     return <>{children}</>;
   }
 
