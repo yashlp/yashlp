@@ -131,17 +131,25 @@ const PRODUCTS = [
 async function main() {
   console.log("Seeding Aesthetics commerce...");
 
-  const adminEmail = process.env.COMMERCE_ADMIN_EMAIL || "admin@aesthetics.app";
+  const adminEmail = (process.env.COMMERCE_ADMIN_EMAIL || "yash.shah.lp2@gmail.com")
+    .toLowerCase()
+    .trim();
   const adminPassword = process.env.COMMERCE_ADMIN_PASSWORD || "ChangeMe123!";
+  const passwordHash = await hashPassword(adminPassword);
 
   await prisma.commerceAdmin.upsert({
     where: { email: adminEmail },
-    update: {},
+    update: {
+      passwordHash,
+      name: "Super Admin",
+      role: "SUPER_ADMIN",
+      isActive: true,
+    },
     create: {
       email: adminEmail,
       name: "Super Admin",
       role: "SUPER_ADMIN",
-      passwordHash: await hashPassword(adminPassword),
+      passwordHash,
       mfaEnabled: false,
     },
   });

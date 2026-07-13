@@ -20,7 +20,17 @@ NestJS can be introduced as a separate `apps/api` service later; services in `sr
 npm run db:setup-commerce
 ```
 
-Default admin: `admin@aesthetics.app` / `ChangeMe123!` (override via `COMMERCE_ADMIN_EMAIL` / `COMMERCE_ADMIN_PASSWORD`).
+Platform admin login: `/admin/login`
+
+Set credentials via environment variables (never commit passwords):
+
+```bash
+COMMERCE_ADMIN_EMAIL="yash.shah.lp2@gmail.com"
+COMMERCE_ADMIN_PASSWORD="your-secure-password"
+npm run db:ensure-commerce-admin
+```
+
+On Vercel, add `COMMERCE_ADMIN_EMAIL` and `COMMERCE_ADMIN_PASSWORD` to Environment Variables — the build runs `ensure-commerce-admin` automatically when the password is set.
 
 ## Admin routes
 

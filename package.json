@@ -15,6 +15,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-commerce": "tsx prisma/seed-commerce.ts",
+    "db:ensure-commerce-admin": "tsx scripts/ensure-commerce-admin.ts",
     "db:seed-safety": "tsx prisma/seed-womens-safety-pins.ts",
     "db:go-live": "tsx scripts/go-live.ts",
     "db:setup": "prisma db push && tsx prisma/seed.ts",
