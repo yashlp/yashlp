@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
   const path = request.nextUrl.pathname;
+
+  // Legacy CivicLens admin → Only Aesthetics D2C admin
+  if (path === "/civic-admin" || path.startsWith("/civic-admin/")) {
+    const target = path.replace(/^\/civic-admin/, "/admin") || "/admin";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
+
+  const response = NextResponse.next();
+  response.headers.set("x-pathname", path);
 
   // Never process Next.js static/runtime assets through app security middleware.
   // This avoids bad-request responses for chunk/css fetches in production mode.

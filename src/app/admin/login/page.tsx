@@ -72,6 +72,9 @@ export default function PlatformAdminLoginPage() {
           <p className="aes-mono mt-2 text-[10px] uppercase tracking-[0.3em] text-[var(--aes-dusty)]">
             D2C Admin Portal
           </p>
+          <p className="mt-3 text-xs text-[var(--aes-charcoal-muted)]">
+            Inventory · Orders · Purchases · Analytics
+          </p>
         </div>
 
         <form
