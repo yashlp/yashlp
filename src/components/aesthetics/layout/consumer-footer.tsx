@@ -7,7 +7,7 @@ export function ConsumerFooter() {
     <footer className="bg-[var(--aes-ink)] text-white">
       <div className="border-b border-white/10 px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl text-center">
-          <p className="aes-joy-title-lower text-white">join the joy</p>
+          <p className="aes-joy-title-lower text-white">good taste, delivered</p>
           <p className="mx-auto mt-4 max-w-md text-sm text-white/60">
             Get curated drops and exclusive offers from independent makers.
           </p>

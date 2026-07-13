@@ -1,19 +1,19 @@
 const PILLARS = [
   {
     title: "Unwind & Reset",
-    body: "Take a breath and let the day melt off. Made for slow mornings, cozy nights in, and quiet moments when you finally get to come back to yourself.",
+    body: "Slow mornings, soft light, objects that exhale with you. Built for the moment you finally close the laptop.",
   },
   {
     title: "Gather & Connect",
-    body: "Good company, easy laughter, and spaces that linger. Perfect for dinner parties, creative studios, and everyday moments that feel special together.",
+    body: "Tablescapes and textures that get conversations going. Dinner parties, studio nights, the hangs that linger.",
   },
   {
     title: "Celebrate & Spark",
-    body: "Bring a little extra glow to the occasion. From housewarmings to spontaneous plans, these are the objects made to feel lively, light, and unforgettable.",
+    body: "Pieces with personality for housewarmings, creative launches, and plans you said yes to last minute.",
   },
   {
     title: "Play & Indulge",
-    body: "Say yes to the fun part. Think weekend markets, studio visits, and carefree afternoons where the mood is sunny, social, and full of joy.",
+    body: "Weekend markets, sunny afternoons, the joy of owning something nobody else picked from a warehouse shelf.",
   },
 ];
 
@@ -23,20 +23,20 @@ export function LifestyleSection() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center">
           <h2 className="aes-section-title text-[var(--aes-ink)]">
-            Life is a Lot.
+            Busy Life.
             <br />
-            Joy Should be Too.
+            Beautiful Home.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base">
-            Aesthetics is crafted to turn those hectic moments and busy days into joyful harmony
-            and total balance.
+            Your space should work as hard at relaxing as you do at everything else — we find the
+            objects that make that actually happen.
           </p>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2">
           {PILLARS.map((pillar) => (
-            <article key={pillar.title} className="text-center sm:text-left">
-              <h3 className="text-base font-bold text-[var(--aes-ink)] sm:text-lg">{pillar.title}</h3>
+            <article key={pillar.title} className="aes-panel rounded-2xl p-6 text-center sm:text-left">
+              <h3 className="text-base font-black text-[var(--aes-ink)] sm:text-lg">{pillar.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-[var(--aes-ink-muted)]">{pillar.body}</p>
             </article>
           ))}

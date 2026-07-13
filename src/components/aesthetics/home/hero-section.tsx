@@ -32,20 +32,26 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
   return (
     <section className="aes-bg-hero px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
       <div className="mx-auto max-w-5xl text-center">
+        <p className="aes-tagline-band aes-animate-fade-up mb-6">
+          <span>always curated</span>
+          <span>joyfully bold</span>
+          <span>effortlessly stylish</span>
+        </p>
+
         <h1 className="aes-joy-title aes-animate-fade-up text-[var(--aes-ink)]">
           curated design
           <br />
-          objects &amp;
+          objectS &amp;
           <br />
           wellness
         </h1>
 
         <p
-          className="aes-animate-fade-up mx-auto mt-6 max-w-lg text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base"
+          className="aes-animate-fade-up mx-auto mt-6 max-w-xl text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base"
           style={{ animationDelay: "0.1s" }}
         >
-          Crafted for those who want to live fully and savor joyful moments — all while making
-          smarter, more beautiful choices for their space.
+          For people who want spaces that feel alive — independent makers, mood-matched edits,
+          and zero algorithm fatigue.
         </p>
 
         <div className="aes-animate-fade-up mt-8" style={{ animationDelay: "0.2s" }}>
@@ -54,7 +60,6 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
           </Link>
         </div>
 
-        {/* Product lineup — Joy Rush style */}
         <div
           className="aes-animate-fade-up mx-auto mt-12 flex max-w-4xl items-end justify-center gap-3 sm:mt-16 sm:gap-5"
           style={{ animationDelay: "0.3s" }}

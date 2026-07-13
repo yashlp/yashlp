@@ -33,7 +33,7 @@ export function TestimonialsSection() {
     <section className="aes-bg-testimonial px-4 py-16 sm:px-6 sm:py-20">
       <div className="mx-auto max-w-7xl">
         <h2 className="aes-section-title text-center text-[var(--aes-ink)]">
-          Don&apos;t take our word for it
+          Real people. Real rooms. Real taste.
         </h2>
 
         <div className="aes-joy-scroll mt-12 -mx-4 px-4 sm:-mx-6 sm:px-6">

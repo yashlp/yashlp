@@ -31,15 +31,15 @@ export default async function AestheticsHomePage() {
         <HeroSection products={featured} />
         <MarqueeBand />
         <ProductRow
-          title="Objects as beautiful"
-          titleLine2="as they are meaningful"
+          title="Pieces as stunning"
+          titleLine2="as they are intentional"
           titleStyle="upper"
           products={featured.slice(0, 5)}
           bg="blush"
           quickAdd
         />
         <ProductRow
-          title="curated to match your mood"
+          title="edits built to match moods"
           titleStyle="lower"
           products={newArrivals.slice(0, 5)}
           bg="lavender"

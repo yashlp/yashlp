@@ -4,41 +4,42 @@
  */
 
 .aesthetics-root {
-  /* Base — Joy Rush warm cream */
-  --aes-cream: #fff8eb;
-  --aes-cream-deep: #ffecd0;
-  --aes-sand: #fff9f2;
-  --aes-sand-deep: #ffecd0;
+  /* Joy Rush palette — saturated butter cream, hot pink, lemon yellow, periwinkle */
+  --aes-cream: #fff5e1;
+  --aes-cream-deep: #ffe4b8;
+  --aes-sand: #fff9ee;
+  --aes-sand-deep: #ffe8c8;
   --aes-white: #ffffff;
-  --aes-ink: #1a1a1a;
-  --aes-ink-muted: #5c5c5c;
-  --aes-ink-soft: #8a8a8a;
+  --aes-ink: #121212;
+  --aes-ink-muted: #4a4a4a;
+  --aes-ink-soft: #767676;
 
-  /* Section background shades (Joy Rush alternating washes) */
-  --aes-bg-base: #fff8eb;
-  --aes-bg-blush: #fff0f4;
-  --aes-bg-blush-deep: #ffe4ec;
-  --aes-bg-lavender: #f3ecff;
-  --aes-bg-lavender-deep: #e8dcff;
-  --aes-bg-peach: #fff4e8;
-  --aes-bg-peach-deep: #ffe8d4;
-  --aes-bg-sand: #fff9f2;
-  --aes-bg-warm: #fff2de;
-  --aes-bg-testimonial: #fff6fa;
-  --aes-bg-bundle: #f6efff;
-  --aes-bg-dark: #1c1c1c;
+  /* Bold section washes — clearly distinct, not same-shade cream */
+  --aes-bg-base: #fff5e1;
+  --aes-bg-blush: #ffcfe0;
+  --aes-bg-blush-deep: #ff9ec4;
+  --aes-bg-lavender: #d4c4ff;
+  --aes-bg-lavender-deep: #b388ff;
+  --aes-bg-peach: #ffd9a8;
+  --aes-bg-peach-deep: #ffb347;
+  --aes-bg-sand: #fff3d6;
+  --aes-bg-warm: #ffe8b0;
+  --aes-bg-testimonial: #ffe8f2;
+  --aes-bg-bundle: #e4d4ff;
+  --aes-bg-mint: #c8f5e8;
+  --aes-bg-dark: #121212;
 
-  --aes-pink: #ff2d6b;
+  --aes-pink: #ff2a5f;
   --aes-pink-soft: #ff6b95;
-  --aes-orange: #ff8a3d;
-  --aes-orange-soft: #ffb366;
-  --aes-yellow: #ffeb66;
-  --aes-yellow-deep: #ffd93d;
-  --aes-lavender: #c9a0ff;
-  --aes-lavender-soft: #e4ccff;
-  --aes-mint: #5ee0c7;
-  --aes-mint-soft: #9ef0df;
-  --aes-sky: #8ecfff;
+  --aes-orange: #ff7a2f;
+  --aes-orange-soft: #ffa366;
+  --aes-yellow: #ffe135;
+  --aes-yellow-deep: #ffc800;
+  --aes-lavender: #9b6dff;
+  --aes-lavender-soft: #c9a8ff;
+  --aes-mint: #3dd6b5;
+  --aes-mint-soft: #7ee8d0;
+  --aes-sky: #5eb8ff;
   --aes-coral: var(--aes-pink);
   --aes-coral-soft: var(--aes-pink-soft);
 
@@ -68,25 +69,25 @@
   --aes-charcoal: var(--aes-ink);
   --aes-charcoal-muted: var(--aes-ink-muted);
 
-  --aes-pedestal-1: #ffd6e8;
-  --aes-pedestal-2: #ffe4c4;
-  --aes-pedestal-3: #e8d4ff;
-  --aes-pedestal-4: #d4f5ed;
-  --aes-pedestal-5: #fff0b8;
+  --aes-pedestal-1: #ff9ec4;
+  --aes-pedestal-2: #ffb347;
+  --aes-pedestal-3: #b388ff;
+  --aes-pedestal-4: #ff8c69;
+  --aes-pedestal-5: #ffe566;
 
   --aes-gradient-hero:
-    radial-gradient(ellipse 70% 55% at 85% 15%, rgba(255, 182, 210, 0.45), transparent 55%),
-    radial-gradient(ellipse 60% 50% at 10% 25%, rgba(201, 160, 255, 0.35), transparent 50%),
-    radial-gradient(ellipse 55% 45% at 50% 95%, rgba(255, 214, 150, 0.4), transparent 55%),
-    linear-gradient(180deg, #fff8eb 0%, #fff5f0 45%, #fff8eb 100%);
+    radial-gradient(ellipse 75% 60% at 90% 10%, rgba(255, 90, 140, 0.42), transparent 52%),
+    radial-gradient(ellipse 65% 55% at 8% 22%, rgba(155, 109, 255, 0.38), transparent 48%),
+    radial-gradient(ellipse 55% 50% at 50% 100%, rgba(255, 179, 71, 0.4), transparent 52%),
+    linear-gradient(180deg, #fff5e1 0%, #ffe8f2 42%, #fff5e1 100%);
   --aes-gradient-site:
-    radial-gradient(ellipse 90% 60% at 95% 5%, rgba(255, 182, 210, 0.28), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 5% 15%, rgba(201, 160, 255, 0.22), transparent 50%),
-    radial-gradient(ellipse 60% 45% at 50% 100%, rgba(255, 214, 150, 0.25), transparent 55%),
+    radial-gradient(ellipse 85% 65% at 100% 0%, rgba(255, 90, 140, 0.32), transparent 52%),
+    radial-gradient(ellipse 70% 55% at 0% 18%, rgba(155, 109, 255, 0.28), transparent 48%),
+    radial-gradient(ellipse 55% 45% at 50% 100%, rgba(255, 179, 71, 0.3), transparent 52%),
     var(--aes-bg-base);
   --aes-gradient-peach: linear-gradient(180deg, var(--aes-bg-peach) 0%, var(--aes-bg-warm) 100%);
   --aes-gradient-lavender: linear-gradient(180deg, var(--aes-bg-lavender) 0%, var(--aes-bg-blush) 100%);
-  --aes-gradient-bundle: linear-gradient(135deg, #f6efff 0%, #fff0f5 50%, #fff4e8 100%);
+  --aes-gradient-bundle: linear-gradient(135deg, #e4d4ff 0%, #ffcfe0 45%, #ffd9a8 100%);
   --aes-gradient-brand: linear-gradient(120deg, var(--aes-pink), var(--aes-orange), var(--aes-lavender));
 
   --aes-border: rgba(26, 26, 26, 0.1);
@@ -169,11 +170,11 @@
 }
 
 .aes-bg-lavender {
-  background: var(--aes-gradient-lavender);
+  background: var(--aes-bg-lavender);
 }
 
 .aes-bg-peach {
-  background: var(--aes-gradient-peach);
+  background: var(--aes-bg-peach);
 }
 
 .aes-bg-sand {
@@ -182,6 +183,10 @@
 
 .aes-bg-warm {
   background: var(--aes-bg-warm);
+}
+
+.aes-bg-mint {
+  background: var(--aes-bg-mint);
 }
 
 .aes-bg-testimonial {
@@ -205,8 +210,8 @@
 }
 
 .aes-card {
-  background: rgba(255, 248, 252, 0.92);
-  border: 1px solid rgba(255, 228, 236, 0.85);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 207, 224, 0.9);
   border-radius: var(--aes-radius-xl);
   box-shadow: var(--aes-shadow);
   backdrop-filter: blur(10px);
@@ -282,6 +287,29 @@
   filter: brightness(1.08);
 }
 
+.aes-tagline-band {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.25rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--aes-pink);
+}
+
+.aes-tagline-band span::after {
+  content: "·";
+  margin-left: 1.25rem;
+  color: var(--aes-ink-soft);
+}
+
+.aes-tagline-band span:last-child::after {
+  content: none;
+  margin: 0;
+}
+
 .aes-input {
   width: 100%;
   border-radius: 9999px;
@@ -300,32 +328,32 @@
 }
 
 .aes-panel {
-  background: rgba(255, 248, 252, 0.92);
-  border: 1px solid rgba(255, 228, 236, 0.85);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 207, 224, 0.95);
   border-radius: var(--aes-radius-xl);
   box-shadow: var(--aes-shadow);
   backdrop-filter: blur(10px);
 }
 
 .aes-panel-peach {
-  background: rgba(255, 244, 232, 0.95);
-  border: 1px solid rgba(255, 232, 212, 0.9);
+  background: rgba(255, 232, 176, 0.85);
+  border: 1px solid rgba(255, 179, 71, 0.45);
   border-radius: var(--aes-radius-xl);
   box-shadow: var(--aes-shadow);
   backdrop-filter: blur(10px);
 }
 
 .aes-panel-lavender {
-  background: rgba(243, 236, 255, 0.95);
-  border: 1px solid rgba(232, 220, 255, 0.9);
+  background: rgba(212, 196, 255, 0.88);
+  border: 1px solid rgba(179, 136, 255, 0.45);
   border-radius: var(--aes-radius-xl);
   box-shadow: var(--aes-shadow);
   backdrop-filter: blur(10px);
 }
 
 .aes-panel-warm {
-  background: rgba(255, 242, 222, 0.95);
-  border: 1px solid rgba(255, 228, 200, 0.9);
+  background: rgba(255, 232, 176, 0.9);
+  border: 1px solid rgba(255, 200, 100, 0.5);
   border-radius: var(--aes-radius-xl);
   box-shadow: var(--aes-shadow);
   backdrop-filter: blur(10px);

@@ -11,21 +11,17 @@ export function BundleSection() {
     <section className="aes-bg-bundle px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-7xl text-center">
         <h2 className="aes-section-title text-[var(--aes-ink)]">Bundle &amp; SAVE</h2>
-        <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-[var(--aes-ink-muted)]">
-          Why pick one? Explore collections or build your cart — a little something for every
-          feeling.
+        <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-[var(--aes-ink)]">
+          Why pick one vibe? Build a cart that covers every mood — morning calm to dinner-party glow.
         </p>
 
-        <p className="mt-8 text-sm font-bold lowercase text-[var(--aes-ink)]">
-          order more. save more. joy more.
+        <p className="mt-8 text-sm font-black lowercase text-[var(--aes-pink)]">
+          shop more. save more. style more.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {TIERS.map((tier) => (
-            <div
-              key={tier.spend}
-              className="rounded-2xl aes-panel px-6 py-10"
-            >
+            <div key={tier.spend} className="aes-panel rounded-2xl px-6 py-10">
               <p className="text-xs font-bold lowercase text-[var(--aes-ink-muted)]">
                 spend {tier.spend}
               </p>
