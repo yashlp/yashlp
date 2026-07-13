@@ -15,7 +15,7 @@ export function BundleSection() {
           Why pick one vibe? Build a cart that covers every mood — morning calm to dinner-party glow.
         </p>
 
-        <p className="mt-8 text-sm font-black lowercase text-[var(--aes-pink)]">
+        <p className="mt-8 text-sm font-medium lowercase tracking-wide text-[var(--aes-royal)]">
           shop more. save more. style more.
         </p>
 

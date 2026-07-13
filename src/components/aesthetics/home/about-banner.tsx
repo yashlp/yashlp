@@ -16,8 +16,8 @@ export function AboutBanner() {
           <span className="ml-2 text-sm font-bold text-[var(--aes-ink)]">Loved by design people</span>
         </div>
 
-        <h4 className="mt-8 text-base font-bold leading-relaxed text-[var(--aes-ink)] sm:text-lg">
-          Aesthetics isn&apos;t another store. It&apos;s a shortcut to taste — a cultural shift in how
+        <h4 className="mt-8 text-base font-medium leading-relaxed text-[var(--aes-ink)] sm:text-lg">
+          Only Aesthetics isn&apos;t another store. It&apos;s a shortcut to taste — a cultural shift in how
           we discover makers, style our spaces, and celebrate the objects we keep.
         </h4>
 

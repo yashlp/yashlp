@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/lib/aesthetics/types";
+import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 
 const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=500&q=80",
@@ -22,39 +23,29 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
         }));
 
   return (
-    <section className="aes-bg-hero px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
+    <section className="aes-bg-hero px-4 pb-12 pt-8 sm:px-6 sm:pb-16 sm:pt-12">
       <div className="mx-auto max-w-5xl text-center">
-        <p className="aes-tagline-band aes-animate-fade-up mb-6">
-          <span>always curated</span>
-          <span>joyfully bold</span>
-          <span>effortlessly stylish</span>
-        </p>
-
-        <h1 className="aes-joy-title aes-animate-fade-up text-[var(--aes-ink)]">
-          curated design
-          <br />
-          objectS &amp;
-          <br />
-          wellness
-        </h1>
+        <div className="aes-animate-fade-up">
+          <BrandLogo variant="hero" />
+        </div>
 
         <p
-          className="aes-animate-fade-up mx-auto mt-6 max-w-xl text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base"
-          style={{ animationDelay: "0.1s" }}
+          className="aes-animate-fade-up mx-auto mt-8 max-w-lg text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base"
+          style={{ animationDelay: "0.15s" }}
         >
-          For people who want spaces that feel alive — independent makers, mood-matched edits,
-          and zero algorithm fatigue.
+          A curated marketplace for independent makers — objects chosen with the same care you
+          bring to your space.
         </p>
 
-        <div className="aes-animate-fade-up mt-8" style={{ animationDelay: "0.2s" }}>
+        <div className="aes-animate-fade-up mt-10" style={{ animationDelay: "0.25s" }}>
           <Link href="/aesthetics/shop" className="aes-btn aes-btn-primary px-10 py-4 text-xs">
             Shop now
           </Link>
         </div>
 
         <div
-          className="aes-animate-fade-up mx-auto mt-12 flex max-w-4xl items-end justify-center gap-3 sm:mt-16 sm:gap-5"
-          style={{ animationDelay: "0.3s" }}
+          className="aes-animate-fade-up mx-auto mt-14 flex max-w-4xl items-end justify-center gap-3 sm:mt-20 sm:gap-5"
+          style={{ animationDelay: "0.35s" }}
         >
           {heroItems.map((item, i) => (
             <div

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, ShoppingBag, X } from "lucide-react";
+import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -36,16 +37,15 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
     <header
       className={cn(
         "sticky top-0 z-[200] w-full transition-all duration-300",
-        scrolled ? "bg-[var(--aes-bg-base)]/90 shadow-sm backdrop-blur-md" : "bg-transparent"
+        scrolled ? "bg-[var(--aes-bg-base)]/92 shadow-sm backdrop-blur-md" : "bg-transparent"
       )}
     >
       <div className="mx-auto grid max-w-7xl grid-cols-3 items-center gap-2 px-4 py-4 sm:px-6">
-        {/* Left — menu */}
         <div className="flex items-center justify-start">
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--aes-ink)]"
+            className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)]"
             aria-label="Menu"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -53,26 +53,21 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
           </button>
         </div>
 
-        {/* Center — logo */}
-        <Link
-          href="/aesthetics"
-          className="aes-display text-center text-2xl tracking-tight text-[var(--aes-ink)] sm:text-3xl"
-        >
-          Aesthetics
-        </Link>
+        <div className="flex justify-center">
+          <BrandLogo variant="nav" />
+        </div>
 
-        {/* Right — cart */}
         <div className="flex items-center justify-end">
           <Link
             href="/aesthetics/cart"
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--aes-ink)]"
+            className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)]"
             aria-label="Cart"
           >
             <span className="hidden sm:inline">Cart</span>
             <span className="relative">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aes-pink)] px-1 text-[9px] font-bold text-white">
+                <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aes-royal)] px-1 text-[9px] font-bold text-white">
                   {cartCount}
                 </span>
               )}
@@ -86,7 +81,7 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
             <Link
               href="/aesthetics"
-              className="py-3 text-sm font-bold uppercase tracking-widest text-[var(--aes-ink)]"
+              className="py-3 text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink)]"
             >
               Home
             </Link>
@@ -95,10 +90,10 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
                 key={href}
                 href={href}
                 className={cn(
-                  "py-3 text-sm font-bold uppercase tracking-widest transition-colors",
+                  "py-3 text-sm font-medium uppercase tracking-[0.15em] transition-colors",
                   pathname === href || pathname.startsWith(`${href}/`)
-                    ? "text-[var(--aes-pink)]"
-                    : "text-[var(--aes-ink)] hover:text-[var(--aes-pink)]"
+                    ? "text-[var(--aes-royal)]"
+                    : "text-[var(--aes-ink-muted)] hover:text-[var(--aes-royal)]"
                 )}
               >
                 {label}
@@ -106,7 +101,7 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
             ))}
             <Link
               href="/aesthetics/search"
-              className="py-3 text-sm font-bold uppercase tracking-widest text-[var(--aes-ink)] hover:text-[var(--aes-pink)]"
+              className="py-3 text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)] hover:text-[var(--aes-royal)]"
             >
               Search
             </Link>
