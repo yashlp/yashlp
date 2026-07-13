@@ -307,22 +307,6 @@
   letter-spacing: 0.02em;
 }
 
-.aes-discover-scroll {
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-.aes-discover-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.aes-snap-item {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .aes-card:hover,
   .aes-card-editorial:hover {

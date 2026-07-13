@@ -11,7 +11,7 @@ export function AboutBanner() {
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--aes-ink-muted)]">
           Aesthetics isn&apos;t just another marketplace. It&apos;s a cultural shift in how we shop,
-          discover, and celebrate independent design — with AI that learns your taste as you browse.
+          shop, and celebrate independent design — with AI that learns your taste as you browse.
         </p>
         <Link href="/aesthetics/shop" className="mt-8 inline-block">
           <Button variant="secondary">About us</Button>
