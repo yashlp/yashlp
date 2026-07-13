@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { HeroSection } from "@/components/aesthetics/home/hero-section";
-import { PhilosophySection } from "@/components/aesthetics/home/philosophy-section";
 import { MarqueeBand } from "@/components/aesthetics/home/marquee-band";
-import { CollectionRow } from "@/components/aesthetics/home/collection-row";
 import { ProductRow } from "@/components/aesthetics/home/product-row";
-import { TranquilitySection } from "@/components/aesthetics/home/tranquility-section";
-import { PromoSection } from "@/components/aesthetics/home/promo-section";
+import { CollectionRow } from "@/components/aesthetics/home/collection-row";
+import { AboutBanner } from "@/components/aesthetics/home/about-banner";
+import { LifestyleSection } from "@/components/aesthetics/home/lifestyle-section";
+import { FunctionFunSection } from "@/components/aesthetics/home/function-fun-section";
+import { TestimonialsSection } from "@/components/aesthetics/home/testimonials-section";
+import { BundleSection } from "@/components/aesthetics/home/bundle-section";
 import { BrandStrip } from "@/components/aesthetics/home/brand-strip";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { productService } from "@/lib/commerce/services/product.service";
@@ -28,48 +30,42 @@ export default async function AestheticsHomePage() {
     // Database not seeded
   }
 
-  const curated = featured.slice(0, 4);
-
   return (
     <>
       <ConsumerNav />
       <main className="relative">
         <HeroSection />
-        <PhilosophySection />
         <MarqueeBand />
+        <ProductRow
+          title="Objects as beautiful as they are meaningful"
+          products={featured.slice(0, 5)}
+          href="/aesthetics/shop"
+          bg="white"
+          quickAdd
+        />
         <CollectionRow collections={collections.filter((c) => c.featured)} />
         <ProductRow
-          title="Aesthetics menu"
-          subtitle="Choose from our wide range of curated objects — from sculptural ceramics to wellness essentials and artisan lighting."
-          products={featured}
-          href="/aesthetics/shop"
-          accent="sage"
-        />
-        <TranquilitySection />
-        <ProductRow
-          title="New arrivals"
-          subtitle="Fresh from independent studios"
-          products={newArrivals}
+          title="Blends built to match moods"
+          subtitle="Gummies-style curation — collections for every vibe"
+          products={newArrivals.slice(0, 5)}
           href="/aesthetics/shop?sort=new"
-          accent="coral"
+          bg="pink"
+          quickAdd
         />
-        <PromoSection />
+        <AboutBanner />
+        <LifestyleSection />
+        <FunctionFunSection />
+        <TestimonialsSection />
+        <BundleSection />
         <BrandStrip brands={brands} />
-        <ProductRow
-          title="Continue discovering"
-          subtitle="Immerse yourself in full-screen mode"
-          products={curated}
-          href="/aesthetics/discover"
-          accent="lavender"
-        />
         {!featured.length && (
-          <section className="px-6 py-24 text-center sm:px-8">
-            <p className="aes-serif text-2xl italic text-[var(--aes-ink-muted)]">
-              Your sanctuary is waiting — add products from the admin panel.
+          <section className="px-4 py-20 text-center sm:px-6">
+            <p className="text-lg font-medium text-[var(--aes-ink-muted)]">
+              Your shop is waiting — add products from the admin panel.
             </p>
             <Link
               href="/platform-admin/login"
-              className="aes-btn aes-btn-primary mt-8 inline-flex px-8 py-4"
+              className="aes-btn aes-btn-primary mt-6 inline-flex px-8 py-4"
             >
               Open admin
             </Link>

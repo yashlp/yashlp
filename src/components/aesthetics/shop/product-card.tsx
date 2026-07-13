@@ -1,71 +1,82 @@
 "use client";
 
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Badge } from "@/components/aesthetics/ui/badge";
+import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import type { Product } from "@/lib/aesthetics/types";
+
+const CARD_BG = [
+  "bg-gradient-to-br from-pink-100 to-rose-50",
+  "bg-gradient-to-br from-orange-100 to-amber-50",
+  "bg-gradient-to-br from-violet-100 to-purple-50",
+  "bg-gradient-to-br from-teal-100 to-cyan-50",
+  "bg-gradient-to-br from-yellow-100 to-amber-50",
+];
 
 type ProductCardProps = {
   product: Product;
   priority?: boolean;
   index?: number;
+  quickAdd?: boolean;
 };
 
-export function ProductCard({ product, priority }: ProductCardProps) {
-  const brandName = product.brand?.name ?? "Independent";
+export function ProductCard({ product, priority, index = 0, quickAdd = false }: ProductCardProps) {
+  const { addToCart } = useCart();
+  const bg = CARD_BG[index % CARD_BG.length];
 
   return (
-    <Link href={`/aesthetics/product/${product.slug}`} className="group block">
-      <article>
-        <div className="relative aspect-[3/4] overflow-hidden bg-[var(--aes-sand-deep)]">
+    <article className="group flex flex-col">
+      <Link href={`/aesthetics/product/${product.slug}`} className="block">
+        <div className={`relative aspect-[4/5] overflow-hidden rounded-3xl ${bg}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={product.images[0]}
             alt={product.name}
-            className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover p-6 transition duration-500 group-hover:scale-105"
             loading={priority ? "eager" : "lazy"}
             draggable={false}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--aes-forest-deep)]/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
           {product.compareAtPrice && (
-            <Badge variant="coral" className="absolute left-3 top-3">
+            <Badge variant="coral" className="absolute left-4 top-4">
               Sale
             </Badge>
           )}
           {product.newArrival && !product.compareAtPrice && (
-            <Badge variant="sage" className="absolute left-3 top-3">
+            <Badge variant="sage" className="absolute left-4 top-4">
               New
             </Badge>
           )}
-
-          <button
-            type="button"
-            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center border border-white/30 bg-white/10 text-white opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
-            aria-label="Add to wishlist"
-            onClick={(e) => e.preventDefault()}
-          >
-            <Heart className="h-4 w-4" strokeWidth={1.5} />
-          </button>
         </div>
+      </Link>
 
-        <div className="mt-4">
-          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--aes-ink-soft)]">
-            {brandName}
-          </p>
-          <h3 className="aes-display mt-1 text-xl leading-tight text-[var(--aes-ink)] transition group-hover:text-[var(--aes-forest)]">
+      <div className="mt-4 flex flex-col gap-2">
+        <Link href={`/aesthetics/product/${product.slug}`}>
+          <h3 className="text-base font-bold text-[var(--aes-ink)] transition group-hover:text-[var(--aes-pink)]">
             {product.name}
           </h3>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-sm font-medium text-[var(--aes-ink)]">${product.price}</span>
-            {product.compareAtPrice && (
-              <span className="text-sm text-[var(--aes-ink-soft)] line-through">
-                ${product.compareAtPrice}
-              </span>
-            )}
-          </div>
+        </Link>
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-bold text-[var(--aes-ink)]">${product.price}</span>
+          {quickAdd ? (
+            <button
+              type="button"
+              onClick={() => addToCart(product)}
+              className="flex items-center gap-1 rounded-full bg-[var(--aes-ink)] px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-[var(--aes-pink)]"
+            >
+              <Plus className="h-3 w-3" />
+              Quick add
+            </button>
+          ) : (
+            <Link
+              href={`/aesthetics/product/${product.slug}`}
+              className="text-[10px] font-bold uppercase tracking-wider text-[var(--aes-pink)] hover:underline"
+            >
+              View
+            </Link>
+          )}
         </div>
-      </article>
-    </Link>
+      </div>
+    </article>
   );
 }

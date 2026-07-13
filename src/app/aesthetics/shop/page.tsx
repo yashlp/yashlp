@@ -54,28 +54,25 @@ export default function ShopPage() {
   return (
     <>
       <ConsumerNav cartCount={cartCount} />
-      <main className="mx-auto max-w-7xl px-6 pb-16 pt-28 sm:px-8 sm:pt-32">
-        <div className="border-b border-[var(--aes-border)] pb-12">
-          <p className="aes-label">Classic shopping</p>
-          <h1 className="aes-display mt-3 text-4xl text-[var(--aes-ink)] sm:text-5xl">
-            The shop
-          </h1>
-          <p className="aes-serif mt-4 max-w-lg text-lg italic text-[var(--aes-ink-muted)]">
-            Browse our full catalogue of curated wellness objects and artisan design.
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
+        <div className="py-10 text-center">
+          <h1 className="aes-section-title text-[var(--aes-ink)]">Shop the entire collection</h1>
+          <p className="mx-auto mt-4 max-w-lg text-sm text-[var(--aes-ink-muted)]">
+            Browse curated wellness objects, artisan design, and independent maker favorites.
           </p>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-2">
+        <div className="mb-8 flex flex-wrap justify-center gap-2">
           {categories.map(({ id, label }) => (
             <button
               key={id}
               type="button"
               onClick={() => setCategory(id)}
               className={cn(
-                "px-4 py-2 text-[10px] font-medium uppercase tracking-[0.2em] transition-all",
+                "rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all",
                 category === id
-                  ? "bg-[var(--aes-forest)] text-[var(--aes-sand)]"
-                  : "border border-[var(--aes-border)] text-[var(--aes-ink-muted)] hover:border-[var(--aes-forest)] hover:text-[var(--aes-forest)]"
+                  ? "bg-[var(--aes-ink)] text-white"
+                  : "border-2 border-[var(--aes-ink)] text-[var(--aes-ink)] hover:bg-[var(--aes-ink)] hover:text-white"
               )}
             >
               {label}
@@ -98,9 +95,9 @@ export default function ShopPage() {
             .
           </p>
         ) : (
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {sorted.map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i < 4} index={i} />
+              <ProductCard key={p.id} product={p} priority={i < 4} index={i} quickAdd />
             ))}
           </div>
         )}

@@ -1,29 +1,25 @@
-const WORDS = [
-  "Wellness",
-  "Tranquility",
-  "Restore",
-  "Mindful",
-  "Curated",
-  "Serene",
+const BENEFITS = [
   "Handcrafted",
-  "Sanctuary",
-  "Balance",
-  "Harmony",
+  "Independent makers",
+  "Curated daily",
+  "AI taste learning",
+  "Discover mode",
+  "Free returns",
 ];
 
 export function MarqueeBand() {
-  const items = [...WORDS, ...WORDS];
+  const items = [...BENEFITS, ...BENEFITS];
 
   return (
-    <div className="overflow-hidden border-y border-[var(--aes-border-light)] bg-[var(--aes-forest)] py-5">
-      <div className="aes-marquee-track gap-16 px-6">
+    <div className="overflow-hidden border-y-2 border-[var(--aes-ink)] bg-[var(--aes-yellow)] py-4">
+      <div className="aes-marquee-track gap-10 px-4">
         {items.map((word, i) => (
           <span
             key={`${word}-${i}`}
-            className="aes-serif shrink-0 text-lg italic text-[var(--aes-sand)]/80 sm:text-xl"
+            className="flex shrink-0 items-center gap-10 text-sm font-bold uppercase tracking-wider text-[var(--aes-ink)]"
           >
             {word}
-            <span className="mx-10 text-[var(--aes-gold-soft)]">·</span>
+            <span className="text-[var(--aes-pink)]">✦</span>
           </span>
         ))}
       </div>

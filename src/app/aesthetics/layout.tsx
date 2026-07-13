@@ -1,42 +1,42 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Jost } from "next/font/google";
+import { Bebas_Neue, DM_Sans } from "next/font/google";
 import "@/design-system/theme.css";
 import { CartProvider } from "@/components/aesthetics/providers/cart-provider";
 
-const body = Jost({
+const body = DM_Sans({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const display = Cormorant_Garamond({
+const display = Bebas_Neue({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400"],
 });
 
-const serif = Cormorant_Garamond({
+const serif = DM_Sans({
   subsets: ["latin"],
   variable: "--font-serif",
-  weight: ["300", "400", "500"],
+  weight: ["400", "500"],
   style: ["normal", "italic"],
 });
 
-const mono = Jost({
+const mono = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["600", "700"],
   variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
   title: { default: "Aesthetics", template: "%s · Aesthetics" },
   description:
-    "A luxury wellness marketplace. Unwind, restore, and reconnect with curated objects for mindful living.",
+    "Curated design objects for joyful living. Shop editorially or swipe through Discover mode — AI learns your taste.",
   applicationName: "Aesthetics",
   openGraph: {
-    title: "Aesthetics — Luxury Wellness Marketplace",
+    title: "Aesthetics — Curated Design Marketplace",
     description:
-      "A luxury wellness marketplace. Unwind, restore, and reconnect with curated objects for mindful living.",
+      "Objects as beautiful as they are meaningful. Shop curated wellness & design from independent makers.",
     siteName: "Aesthetics",
     type: "website",
   },

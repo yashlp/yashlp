@@ -1,55 +1,62 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 
 export function ConsumerFooter() {
   return (
-    <footer className="bg-[var(--aes-forest-deep)] text-[var(--aes-sand)]">
-      <div className="border-b border-[var(--aes-border-light)] px-6 py-20 sm:px-8">
+    <footer className="bg-[var(--aes-ink)] text-white">
+      <div className="border-b border-white/10 px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-7xl text-center">
-          <p className="aes-serif text-2xl italic text-[var(--aes-sand)]/80 sm:text-3xl">
-            &ldquo;The world can wait — take a day to breathe.&rdquo;
+          <p className="aes-display text-4xl sm:text-5xl">Join the joy</p>
+          <p className="mx-auto mt-4 max-w-md text-sm text-white/70">
+            Get curated drops, discover mode tips, and exclusive offers from independent makers.
           </p>
-          <Link
-            href="/aesthetics/discover"
-            className="mt-10 inline-flex items-center gap-2 border border-[var(--aes-sand)]/40 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-[var(--aes-sand)] transition hover:bg-[var(--aes-sand)] hover:text-[var(--aes-forest-deep)]"
-          >
-            Start discovering
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <form className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row" onSubmit={(e) => e.preventDefault()}>
+            <input
+              type="email"
+              placeholder="Your email"
+              className="flex-1 rounded-full border-0 bg-white/10 px-5 py-3 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--aes-pink)]"
+            />
+            <button
+              type="submit"
+              className="rounded-full bg-[var(--aes-pink)] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white"
+            >
+              Subscribe
+            </button>
+          </form>
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 sm:grid-cols-2 lg:grid-cols-4 sm:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4 sm:px-6">
         <div>
-          <p className="aes-display text-2xl text-[var(--aes-sand)]">Aesthetics</p>
-          <p className="mt-4 text-sm leading-relaxed text-[var(--aes-sand)]/60">
-            A luxury wellness marketplace — curated objects for mindful living, delivered with care.
+          <p className="aes-display text-3xl">Aesthetics</p>
+          <p className="mt-3 text-sm text-white/60">
+            Curated design marketplace — joyfully bold, effortlessly stylish.
           </p>
         </div>
         <div>
-          <p className="aes-label mb-4 text-[var(--aes-gold-soft)]">Shop</p>
-          <ul className="space-y-2.5 text-sm text-[var(--aes-sand)]/70">
-            <li><Link href="/aesthetics/shop" className="hover:text-[var(--aes-sand)]">All products</Link></li>
-            <li><Link href="/aesthetics/collections" className="hover:text-[var(--aes-sand)]">Collections</Link></li>
-            <li><Link href="/aesthetics/discover" className="hover:text-[var(--aes-sand)]">Discover mode</Link></li>
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--aes-pink)]">Shop</p>
+          <ul className="space-y-2 text-sm text-white/70">
+            <li><Link href="/aesthetics/shop" className="hover:text-white">All products</Link></li>
+            <li><Link href="/aesthetics/collections" className="hover:text-white">Collections</Link></li>
+            <li><Link href="/aesthetics/discover" className="hover:text-white">Discover mode</Link></li>
           </ul>
         </div>
         <div>
-          <p className="aes-label mb-4 text-[var(--aes-gold-soft)]">Sell</p>
-          <ul className="space-y-2.5 text-sm text-[var(--aes-sand)]/70">
-            <li><Link href="/seller" className="hover:text-[var(--aes-sand)]">Seller dashboard</Link></li>
-            <li><Link href="/platform-admin/login" className="hover:text-[var(--aes-sand)]">Admin</Link></li>
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--aes-pink)]">Sell</p>
+          <ul className="space-y-2 text-sm text-white/70">
+            <li><Link href="/seller" className="hover:text-white">Seller dashboard</Link></li>
+            <li><Link href="/platform-admin/login" className="hover:text-white">Admin</Link></li>
           </ul>
         </div>
         <div>
-          <p className="aes-label mb-4 text-[var(--aes-gold-soft)]">Reach us</p>
-          <p className="text-sm text-[var(--aes-sand)]/70">
-            hello@aesthetics.app
-          </p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--aes-pink)]">Contact</p>
+          <p className="text-sm text-white/70">hello@aesthetics.app</p>
         </div>
       </div>
-      <div className="border-t border-[var(--aes-border-light)] py-6 text-center text-xs text-[var(--aes-sand)]/40">
-        © {new Date().getFullYear()} Aesthetics — Luxury wellness marketplace
+
+      <div className="border-t border-white/10 py-6 text-center text-xs text-white/40">
+        © {new Date().getFullYear()} Aesthetics — Curated design marketplace
       </div>
     </footer>
   );
