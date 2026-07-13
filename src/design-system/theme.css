@@ -1,42 +1,42 @@
 /**
  * Aesthetics — Joy Rush–inspired DTC Design System
- * Bold · Playful · Curated · Commerce-first
+ * Warm cream · horizontal product rows · pedestal cards
  */
 
 .aesthetics-root {
-  /* Base */
-  --aes-cream: #fff8eb;
-  --aes-cream-deep: #ffefd0;
-  --aes-sand: #fff8eb;
-  --aes-sand-deep: #ffefd0;
+  --aes-cream: #fff6e8;
+  --aes-cream-deep: #ffecd0;
+  --aes-sand: #fff6e8;
+  --aes-sand-deep: #ffecd0;
   --aes-white: #ffffff;
-  --aes-ink: #111111;
-  --aes-ink-muted: #4a4a4a;
-  --aes-ink-soft: #7a7a7a;
+  --aes-ink: #1a1a1a;
+  --aes-ink-muted: #5c5c5c;
+  --aes-ink-soft: #8a8a8a;
 
-  /* Joy palette */
-  --aes-pink: #ff4d6d;
-  --aes-pink-soft: #ff8fa3;
-  --aes-orange: #ff8c42;
+  --aes-pink: #ff2d6b;
+  --aes-pink-soft: #ff6b95;
+  --aes-orange: #ff8a3d;
   --aes-orange-soft: #ffb366;
-  --aes-yellow: #ffd166;
-  --aes-lavender: #b388ff;
-  --aes-lavender-soft: #d4b5ff;
-  --aes-mint: #4ecdc4;
-  --aes-mint-soft: #8ee4de;
+  --aes-yellow: #ffe566;
+  --aes-yellow-deep: #ffd23f;
+  --aes-lavender: #c9a0ff;
+  --aes-lavender-soft: #e4ccff;
+  --aes-mint: #5ee0c7;
+  --aes-mint-soft: #9ef0df;
+  --aes-sky: #8ecfff;
   --aes-coral: var(--aes-pink);
   --aes-coral-soft: var(--aes-pink-soft);
 
   /* Legacy aliases */
   --aes-forest: var(--aes-pink);
-  --aes-forest-deep: #e8385a;
+  --aes-forest-deep: #e8184f;
   --aes-forest-light: var(--aes-pink-soft);
   --aes-moss: var(--aes-mint);
   --aes-sage: var(--aes-mint);
   --aes-sage-soft: var(--aes-mint-soft);
   --aes-stone: var(--aes-ink-muted);
   --aes-gold: var(--aes-yellow);
-  --aes-gold-soft: #ffe9a8;
+  --aes-gold-soft: #fff0b3;
   --aes-cobalt: var(--aes-lavender);
   --aes-cobalt-bright: var(--aes-lavender);
   --aes-cobalt-glow: var(--aes-lavender-soft);
@@ -47,21 +47,25 @@
   --aes-royal-dark: var(--aes-forest-deep);
   --aes-royal-light: var(--aes-pink-soft);
   --aes-dusty: var(--aes-ink-soft);
-  --aes-dusty-light: #b0b0b0;
+  --aes-dusty-light: #b8b8b8;
   --aes-ivory: var(--aes-cream);
   --aes-ivory-deep: var(--aes-cream-deep);
   --aes-charcoal: var(--aes-ink);
   --aes-charcoal-muted: var(--aes-ink-muted);
-  --aes-cream-deep: var(--aes-cream-deep);
 
-  --aes-gradient-hero: linear-gradient(135deg, #fff8eb 0%, #ffe4f0 40%, #e8f4ff 100%);
+  --aes-pedestal-1: #ffd6e8;
+  --aes-pedestal-2: #ffe4c4;
+  --aes-pedestal-3: #e8d4ff;
+  --aes-pedestal-4: #d4f5ed;
+  --aes-pedestal-5: #fff0b8;
+
+  --aes-gradient-hero: linear-gradient(180deg, #fff6e8 0%, #fff0f5 50%, #fff6e8 100%);
   --aes-gradient-brand: linear-gradient(120deg, var(--aes-pink), var(--aes-orange), var(--aes-lavender));
-  --aes-gradient-card: linear-gradient(160deg, rgba(255, 77, 109, 0.06), rgba(179, 136, 255, 0.06));
 
-  --aes-border: rgba(17, 17, 17, 0.08);
+  --aes-border: rgba(26, 26, 26, 0.1);
   --aes-border-light: rgba(255, 255, 255, 0.2);
-  --aes-shadow: 0 4px 20px rgba(17, 17, 17, 0.06);
-  --aes-shadow-hover: 0 12px 40px rgba(255, 77, 109, 0.15);
+  --aes-shadow: 0 2px 12px rgba(26, 26, 26, 0.06);
+  --aes-shadow-hover: 0 8px 28px rgba(255, 45, 107, 0.12);
   --aes-radius: 1rem;
   --aes-radius-lg: 1.25rem;
   --aes-radius-xl: 1.5rem;
@@ -78,9 +82,36 @@
 
 .aes-display {
   font-family: var(--font-display), system-ui, sans-serif;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+}
+
+.aes-joy-title {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
   line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: lowercase;
+}
+
+.aes-joy-title-upper {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.75rem, 4.5vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.aes-joy-title-lower {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
 }
 
 .aes-serif {
@@ -94,19 +125,8 @@
 }
 
 .aes-mesh-bg {
-  background: var(--aes-gradient-hero);
+  background: var(--aes-cream);
   position: relative;
-}
-
-.aes-mesh-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(ellipse 60% 50% at 0% 0%, rgba(255, 77, 109, 0.12), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 20%, rgba(179, 136, 255, 0.1), transparent 50%),
-    radial-gradient(ellipse 40% 50% at 50% 100%, rgba(255, 209, 102, 0.15), transparent 50%);
-  pointer-events: none;
 }
 
 .aes-dark-section {
@@ -133,19 +153,6 @@
   box-shadow: var(--aes-shadow-hover);
 }
 
-.aes-card-editorial {
-  background: var(--aes-white);
-  border-radius: var(--aes-radius-xl);
-  overflow: hidden;
-  box-shadow: var(--aes-shadow);
-  transition: transform 0.35s var(--aes-ease), box-shadow 0.35s var(--aes-ease);
-}
-
-.aes-card-editorial:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: var(--aes-shadow-hover);
-}
-
 .aes-btn {
   display: inline-flex;
   align-items: center;
@@ -153,9 +160,9 @@
   gap: 0.5rem;
   border-radius: 9999px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   transition: transform 0.2s var(--aes-ease), filter 0.2s var(--aes-ease), box-shadow 0.2s var(--aes-ease);
 }
 
@@ -166,12 +173,10 @@
 .aes-btn-primary {
   background: var(--aes-ink);
   color: var(--aes-white);
-  box-shadow: 0 4px 16px rgba(17, 17, 17, 0.2);
 }
 
 .aes-btn-primary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.25);
+  filter: brightness(1.15);
 }
 
 .aes-btn-secondary {
@@ -197,7 +202,6 @@
 .aes-btn-light {
   background: var(--aes-white);
   color: var(--aes-ink);
-  box-shadow: 0 4px 20px rgba(17, 17, 17, 0.1);
 }
 
 .aes-btn-light:hover {
@@ -226,7 +230,7 @@
 .aes-input:focus {
   outline: none;
   border-color: var(--aes-pink);
-  box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.12);
+  box-shadow: 0 0 0 4px rgba(255, 45, 107, 0.12);
 }
 
 .aes-chip {
@@ -240,10 +244,10 @@
   text-transform: uppercase;
 }
 
-.aes-chip-cobalt { background: rgba(179, 136, 255, 0.2); color: #7c4dff; }
-.aes-chip-coral { background: rgba(255, 77, 109, 0.15); color: var(--aes-pink); }
-.aes-chip-sage { background: rgba(78, 205, 196, 0.2); color: #2a9d8f; }
-.aes-chip-lavender { background: rgba(179, 136, 255, 0.15); color: var(--aes-lavender); }
+.aes-chip-cobalt { background: rgba(201, 160, 255, 0.25); color: #8b5cf6; }
+.aes-chip-coral { background: rgba(255, 45, 107, 0.12); color: var(--aes-pink); }
+.aes-chip-sage { background: rgba(94, 224, 199, 0.25); color: #0d9488; }
+.aes-chip-lavender { background: rgba(201, 160, 255, 0.2); color: var(--aes-lavender); }
 
 @keyframes aes-marquee {
   from { transform: translateX(0); }
@@ -253,7 +257,7 @@
 .aes-marquee-track {
   display: flex;
   width: max-content;
-  animation: aes-marquee 35s linear infinite;
+  animation: aes-marquee 40s linear infinite;
 }
 
 .aes-marquee-track:hover {
@@ -261,27 +265,13 @@
 }
 
 @keyframes aes-fade-up {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes aes-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(2deg); }
-}
-
-@keyframes aes-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }
 
 .aes-animate-fade-up {
   animation: aes-fade-up 0.6s var(--aes-ease) forwards;
   opacity: 0;
-}
-
-.aes-animate-float {
-  animation: aes-float 5s ease-in-out infinite;
 }
 
 .aes-skeleton {
@@ -291,32 +281,104 @@
   border-radius: var(--aes-radius-xl);
 }
 
+@keyframes aes-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .aes-label {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--aes-pink);
+  color: var(--aes-ink-muted);
 }
 
 .aes-section-title {
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 0.95;
+  font-weight: 900;
+  font-size: clamp(1.75rem, 4.5vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Joy Rush horizontal product scroll */
+.aes-joy-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0.5rem;
+}
+
+.aes-joy-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.aes-joy-scroll > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Pedestal product card */
+.aes-joy-pedestal {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  border-radius: 50% 50% 12% 12% / 30% 30% 8% 8%;
+  overflow: hidden;
+}
+
+.aes-joy-pedestal img {
+  object-fit: contain;
+  max-height: 85%;
+  width: auto;
+  padding: 1.25rem 1rem 0;
+  transition: transform 0.4s var(--aes-ease);
+}
+
+.aes-joy-pedestal:hover img {
+  transform: scale(1.05) translateY(-4px);
+}
+
+.aes-joy-quickadd {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  background: var(--aes-ink);
+  color: var(--aes-white);
+  padding: 0.625rem 1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  transition: background 0.2s var(--aes-ease);
+}
+
+.aes-joy-quickadd:hover {
+  background: var(--aes-pink);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aes-card:hover,
-  .aes-card-editorial:hover {
+  .aes-card:hover {
     transform: none;
   }
   .aes-marquee-track,
   .aes-animate-fade-up,
-  .aes-animate-float,
   .aes-skeleton {
     animation: none;
     opacity: 1;
+  }
+  .aes-joy-pedestal:hover img {
+    transform: none;
   }
 }

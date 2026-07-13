@@ -1,58 +1,62 @@
-import Link from "next/link";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import type { Product } from "@/lib/aesthetics/types";
 
 type ProductRowProps = {
   title: string;
-  subtitle?: string;
+  titleLine2?: string;
+  titleStyle?: "upper" | "lower";
   products: Product[];
-  href?: string;
-  quickAdd?: boolean;
   bg?: "white" | "cream" | "pink";
+  quickAdd?: boolean;
 };
 
 const BG = {
   white: "bg-white",
   cream: "bg-[var(--aes-cream)]",
-  pink: "bg-gradient-to-b from-pink-50 to-[var(--aes-cream)]",
+  pink: "bg-[var(--aes-cream)]",
 };
 
 export function ProductRow({
   title,
-  subtitle,
+  titleLine2,
+  titleStyle = "upper",
   products,
-  href,
-  quickAdd = true,
   bg = "cream",
+  quickAdd = true,
 }: ProductRowProps) {
+  if (!products.length) return null;
+
   return (
-    <section className={`px-4 py-16 sm:px-6 sm:py-20 ${products.length ? "" : "hidden"} ${BG[bg]}`}>
+    <section className={`px-4 py-14 sm:px-6 sm:py-20 ${BG[bg]}`}>
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 text-center">
-          <h2 className="aes-section-title text-[var(--aes-ink)]">{title}</h2>
-          {subtitle && (
-            <p className="mx-auto mt-4 max-w-xl text-sm text-[var(--aes-ink-muted)] sm:text-base">
-              {subtitle}
-            </p>
+          {titleStyle === "upper" ? (
+            <h2 className="aes-joy-title-upper text-[var(--aes-ink)]">
+              {title}
+              {titleLine2 && (
+                <>
+                  <br />
+                  {titleLine2}
+                </>
+              )}
+            </h2>
+          ) : (
+            <h2 className="aes-joy-title-lower text-[var(--aes-ink)]">{title}</h2>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="aes-joy-scroll -mx-4 px-4 sm:-mx-6 sm:px-6">
           {products.map((p, i) => (
-            <ProductCard key={p.id} product={p} priority={i < 4} index={i} quickAdd={quickAdd} />
+            <ProductCard
+              key={p.id}
+              product={p}
+              priority={i < 4}
+              index={i}
+              quickAdd={quickAdd}
+              variant="joy"
+            />
           ))}
         </div>
-
-        {href && (
-          <div className="mt-10 text-center">
-            <Link
-              href={href}
-              className="aes-btn aes-btn-secondary inline-flex px-8 py-3"
-            >
-              View all
-            </Link>
-          </div>
-        )}
       </div>
     </section>
   );

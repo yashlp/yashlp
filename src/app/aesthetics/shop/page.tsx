@@ -57,13 +57,10 @@ export default function ShopPage() {
       <ConsumerNav cartCount={cartCount} />
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
         <div className="py-10 text-center">
-          <h1 className="aes-section-title text-[var(--aes-ink)]">Shop the entire collection</h1>
-          <p className="mx-auto mt-4 max-w-lg text-sm text-[var(--aes-ink-muted)]">
-            Browse curated wellness objects, artisan design, and independent maker favorites.
-          </p>
+          <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">shop the entire collection</h1>
         </div>
 
-        <div className="mb-8 flex flex-wrap justify-center gap-2">
+        <div className="mb-10 flex flex-wrap justify-center gap-2">
           {categories.map(({ id, label }) => (
             <button
               key={id}
@@ -73,7 +70,7 @@ export default function ShopPage() {
                 "rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all",
                 category === id
                   ? "bg-[var(--aes-ink)] text-white"
-                  : "border-2 border-[var(--aes-ink)] text-[var(--aes-ink)] hover:bg-[var(--aes-ink)] hover:text-white"
+                  : "border border-[var(--aes-ink)] text-[var(--aes-ink)] hover:bg-[var(--aes-ink)] hover:text-white"
               )}
             >
               {label}
@@ -82,26 +79,32 @@ export default function ShopPage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="aes-skeleton aspect-[3/4] rounded-2xl" />
             ))}
           </div>
         ) : sorted.length === 0 ? (
           <p className="py-20 text-center text-[var(--aes-charcoal-muted)]">
-            No products available right now. Check back soon or try{" "}
-            <Link href="/aesthetics/shop" className="text-[var(--aes-pink)] underline">
-              the shop
-            </Link>
-            .
+            No products available right now. Check back soon.
           </p>
         ) : (
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {sorted.map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i < 4} index={i} quickAdd />
+              <ProductCard key={p.id} product={p} priority={i < 4} index={i} quickAdd variant="grid" />
             ))}
           </div>
         )}
+
+        <section className="mt-20 text-center">
+          <h2 className="aes-section-title text-[var(--aes-ink)]">Bundle &amp; SAVE</h2>
+          <p className="mx-auto mt-4 max-w-md text-sm text-[var(--aes-ink-muted)]">
+            Why pick one? Build your cart with a little something for every feeling.
+          </p>
+          <Link href="/aesthetics/cart" className="aes-btn aes-btn-primary mt-8 inline-flex px-10 py-4">
+            View cart
+          </Link>
+        </section>
       </main>
       <ConsumerFooter />
     </>

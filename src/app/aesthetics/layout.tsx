@@ -1,30 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Bebas_Neue, DM_Sans } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "@/design-system/theme.css";
 import { CartProvider } from "@/components/aesthetics/providers/cart-provider";
 
-const body = DM_Sans({
+const body = Outfit({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const display = Bebas_Neue({
+const display = Outfit({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400"],
+  weight: ["800", "900"],
 });
 
-const serif = DM_Sans({
+const serif = Outfit({
   subsets: ["latin"],
   variable: "--font-serif",
   weight: ["400", "500"],
-  style: ["normal", "italic"],
 });
 
-const mono = DM_Sans({
+const mono = Outfit({
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["700", "800"],
   variable: "--font-mono",
 });
 

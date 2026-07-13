@@ -1,23 +1,19 @@
 const PILLARS = [
   {
-    title: "Browse & Delight",
-    body: "Explore editorial collections from independent makers. Every object tells a story worth keeping.",
-    color: "var(--aes-pink)",
-  },
-  {
-    title: "Curate & Collect",
-    body: "Browse editorial collections from independent makers. Every object tells a story worth keeping.",
-    color: "var(--aes-lavender)",
-  },
-  {
     title: "Unwind & Reset",
-    body: "Wellness essentials and calm objects for slow mornings, cozy nights, and quiet rooms.",
-    color: "var(--aes-mint)",
+    body: "Take a breath and let the day melt off. Made for slow mornings, cozy nights in, and quiet moments when you finally get to come back to yourself.",
+  },
+  {
+    title: "Gather & Connect",
+    body: "Good company, easy laughter, and spaces that linger. Perfect for dinner parties, creative studios, and everyday moments that feel special together.",
   },
   {
     title: "Celebrate & Spark",
-    body: "Sculptural pieces and bold design for dinner parties, creative spaces, and joyful living.",
-    color: "var(--aes-orange)",
+    body: "Bring a little extra glow to the occasion. From housewarmings to spontaneous plans, these are the objects made to feel lively, light, and unforgettable.",
+  },
+  {
+    title: "Play & Indulge",
+    body: "Say yes to the fun part. Think weekend markets, studio visits, and carefree afternoons where the mood is sunny, social, and full of joy.",
   },
 ];
 
@@ -26,24 +22,21 @@ export function LifestyleSection() {
     <section className="bg-[var(--aes-cream)] px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center">
-          <h2 className="aes-section-title text-[var(--aes-ink)]">Life is a lot. Joy should be too.</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-[var(--aes-ink-muted)]">
-            Aesthetics is crafted to turn hectic days into moments of beauty — curated objects that
-            bring harmony to your space and spirit.
+          <h2 className="aes-section-title text-[var(--aes-ink)]">
+            Life is a Lot.
+            <br />
+            Joy Should be Too.
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base">
+            Aesthetics is crafted to turn those hectic moments and busy days into joyful harmony
+            and total balance.
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-8 sm:grid-cols-2">
           {PILLARS.map((pillar) => (
-            <article
-              key={pillar.title}
-              className="rounded-3xl bg-white p-8 shadow-md transition hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div
-                className="mb-4 h-1 w-12 rounded-full"
-                style={{ background: pillar.color }}
-              />
-              <h3 className="text-lg font-bold text-[var(--aes-ink)]">{pillar.title}</h3>
+            <article key={pillar.title} className="text-center sm:text-left">
+              <h3 className="text-base font-bold text-[var(--aes-ink)] sm:text-lg">{pillar.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-[var(--aes-ink-muted)]">{pillar.body}</p>
             </article>
           ))}
