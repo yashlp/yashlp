@@ -1,0 +1,15 @@
+/**
+ * Only Aesthetics admin — fully isolated from CivicLens styling.
+ */
+body.only-aesthetics-admin {
+  background: var(--aes-ivory, #fff5e1) !important;
+  color: var(--aes-charcoal, #121212) !important;
+}
+
+.only-aesthetics-admin {
+  font-family: var(--font-inter), "Neue Montreal", system-ui, sans-serif;
+}
+
+.only-aesthetics-admin a {
+  text-decoration: none;
+}

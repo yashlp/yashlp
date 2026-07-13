@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/aesthetics/ui/card";
+import { ADMIN_QUICK_START } from "@/lib/commerce/admin-nav";
 
 type DashboardStats = {
   sales: { today: number; week: number; month: number; year: number };
@@ -52,6 +53,23 @@ export default function AdminDashboardPage() {
     <div>
       <h1 className="aes-display text-3xl font-semibold italic text-[var(--aes-charcoal)]">Dashboard</h1>
       <p className="mt-1 text-[var(--aes-charcoal-muted)]">Only Aesthetics — direct-to-consumer operations</p>
+
+      <Card hover={false} className="mt-8 border-[var(--aes-royal)]/20 bg-[var(--aes-cream)]">
+        <h2 className="font-semibold text-[var(--aes-charcoal)]">Quick start after login</h2>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          {ADMIN_QUICK_START.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="block rounded-xl border border-[var(--aes-border)] bg-white px-4 py-3 transition hover:border-[var(--aes-royal)] hover:shadow-sm"
+              >
+                <span className="font-medium text-[var(--aes-royal)]">{item.label}</span>
+                <span className="mt-0.5 block text-sm text-[var(--aes-charcoal-muted)]">— {item.hint}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Card>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[

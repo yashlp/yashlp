@@ -22,6 +22,7 @@ export default function PlatformAdminLoginPage() {
       const res = await fetch("/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
@@ -48,6 +49,7 @@ export default function PlatformAdminLoginPage() {
       const res = await fetch("/api/admin/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ adminId, code: otp }),
       });
       const data = await res.json();

@@ -17,7 +17,7 @@ export default function PlatformAdminAuthLayout({ children }: { children: React.
       setAdmin(null);
       return;
     }
-    fetch("/api/admin/auth/me")
+    fetch("/api/admin/auth/me", { credentials: "include" })
       .then((r) => r.json())
       .then((d) => {
         if (!d.admin) {
@@ -33,12 +33,19 @@ export default function PlatformAdminAuthLayout({ children }: { children: React.
   if (isLogin) return <>{children}</>;
   if (admin === undefined) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-[var(--aes-ivory)]">
-        <div className="aes-skeleton h-8 w-32 rounded-lg" />
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-[var(--aes-ivory)]">
+        <div className="aes-skeleton h-10 w-48 rounded-lg" />
+        <p className="text-sm text-[var(--aes-charcoal-muted)]">Loading Only Aesthetics admin…</p>
       </div>
     );
   }
-  if (!admin) return null;
+  if (!admin) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-[var(--aes-ivory)]">
+        <p className="text-sm text-[var(--aes-charcoal-muted)]">Redirecting to sign in…</p>
+      </div>
+    );
+  }
 
   return <PlatformAdminShell admin={admin}>{children}</PlatformAdminShell>;
 }

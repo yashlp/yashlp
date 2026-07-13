@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import { RootShell } from "@/components/root-shell";
+import { isCommercePlatformPath } from "@/lib/commerce-platform-routes";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://yashlp.vercel.app";
 
-export const metadata: Metadata = {
+const civicMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "CivicLens — Community Intelligence",
@@ -33,6 +35,25 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
+
+const aestheticsMetadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Only Aesthetics",
+    template: "%s · Only Aesthetics",
+  },
+  description: "Only Aesthetics — premium direct-to-consumer beauty & lifestyle.",
+  applicationName: "Only Aesthetics",
+  robots: { index: true, follow: true },
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  if (isCommercePlatformPath(pathname)) {
+    return aestheticsMetadata;
+  }
+  return civicMetadata;
+}
 
 export const viewport: Viewport = {
   width: "device-width",
