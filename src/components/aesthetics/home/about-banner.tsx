@@ -1,29 +1,44 @@
 import Link from "next/link";
-import { Star } from "lucide-react";
+
+const VALUES = [
+  { title: "Details matter", body: "Every object is chosen for craft, material honesty, and the small details that elevate a room." },
+  { title: "Small-batch makers", body: "We partner with independent studios — not mass-market factories — so each piece feels personal." },
+  { title: "Maker-vetted", body: "Our team reviews makers for quality, ethics, and consistency before anything reaches the shop." },
+  { title: "Mood-first edits", body: "Collections are built around how a space should feel — calm, cozy, focused, or romantic." },
+  { title: "Ships with care", body: "Pan-India delivery with protective packaging. Free shipping on orders above ₹999." },
+];
 
 export function AboutBanner() {
   return (
     <section className="aes-bg-peach px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="text-xl font-black leading-snug text-[var(--aes-ink)] sm:text-2xl md:text-3xl">
-          Beautiful, intentional, feel-good objects that turn everyday rooms into rituals
+          Beautiful, intentional objects for everyday rituals
         </h2>
-
-        <div className="mt-6 flex items-center justify-center gap-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} className="h-4 w-4 fill-[var(--aes-yellow-deep)] text-[var(--aes-yellow-deep)]" />
-          ))}
-          <span className="ml-2 text-sm font-bold text-[var(--aes-ink)]">Loved by design people</span>
-        </div>
-
-        <h4 className="mt-8 text-base font-medium leading-relaxed text-[var(--aes-ink)] sm:text-lg">
-          Only Aesthetics isn&apos;t another store. It&apos;s a shortcut to taste — a cultural shift in how
-          we discover makers, style our spaces, and celebrate the objects we keep.
-        </h4>
-
+        <p className="mt-6 text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base">
+          A curated Indian store for design-led home, wellness, and lifestyle objects — shipped with care.
+        </p>
         <Link href="/aesthetics/shop" className="aes-btn aes-btn-secondary mt-8 inline-flex px-8 py-3.5">
-          About us
+          Shop now
         </Link>
+      </div>
+    </section>
+  );
+}
+
+export function AboutValuesSection() {
+  return (
+    <section className="aes-bg-sand px-4 py-16 sm:px-6 sm:py-20">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="aes-joy-title-lower text-center text-[var(--aes-ink)]">what we stand for</h2>
+        <ul className="mt-10 grid gap-6 sm:grid-cols-2">
+          {VALUES.map((v) => (
+            <li key={v.title} className="aes-panel p-6">
+              <h3 className="font-bold text-[var(--aes-ink)]">{v.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--aes-ink-muted)]">{v.body}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

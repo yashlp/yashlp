@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
+import { ProductSearchBar } from "@/components/aesthetics/shop/product-search-bar";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { scoreProduct } from "@/lib/aesthetics/preferences";
 import type { Product, ProductCategory } from "@/lib/aesthetics/types";
@@ -56,6 +57,9 @@ export default function ShopPage() {
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
         <div className="py-10 text-center">
           <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">shop the entire collection</h1>
+          <div className="mx-auto mt-8 flex justify-center px-2">
+            <ProductSearchBar />
+          </div>
         </div>
 
         <div className="mb-10 flex flex-wrap justify-center gap-2">

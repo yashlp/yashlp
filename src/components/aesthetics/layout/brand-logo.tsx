@@ -28,8 +28,8 @@ export function BrandLogo({ variant = "nav", className, href = "/aesthetics" }: 
         </span>
       </div>
       {isHero && (
-        <p className="aes-brand-tagline mt-8 max-w-md text-sm sm:text-base">
-          Because Details Matter.
+        <p className="aes-brand-tagline mt-6 text-[11px] tracking-wide sm:text-xs">
+          Details matter · Small-batch makers · Maker-vetted · Mood-first edits · Ships with care
         </p>
       )}
     </div>

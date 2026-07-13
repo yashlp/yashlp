@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@/design-system/theme.css";
 import { CartProvider } from "@/components/aesthetics/providers/cart-provider";
+import { StorefrontProviders } from "@/components/aesthetics/providers/storefront-providers";
 import { BrandLoader } from "@/components/aesthetics/layout/brand-loader";
 
 export const metadata: Metadata = {
@@ -27,7 +28,9 @@ export default function AestheticsLayout({ children }: { children: React.ReactNo
   return (
     <div className="aesthetics-root aes-site-bg min-h-dvh">
       <BrandLoader />
-      <CartProvider>{children}</CartProvider>
+      <CartProvider>
+        <StorefrontProviders>{children}</StorefrontProviders>
+      </CartProvider>
     </div>
   );
 }

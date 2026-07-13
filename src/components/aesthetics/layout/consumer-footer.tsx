@@ -9,8 +9,8 @@ export function ConsumerFooter() {
       <div className="border-b border-white/10 px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl text-center">
           <BrandLogo variant="footer" href="/aesthetics" />
-          <p className="mx-auto mt-6 max-w-md text-sm text-white/60">
-            Because Details Matter. Curated drops from independent makers.
+          <p className="mx-auto mt-6 max-w-md text-[11px] tracking-wide text-white/50">
+            Details matter · Small-batch makers · Maker-vetted · Mood-first edits · Ships with care
           </p>
           <form
             className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
@@ -48,6 +48,21 @@ export function ConsumerFooter() {
             <li>
               <Link href="/aesthetics/collections" className="hover:text-white">
                 Collections
+              </Link>
+            </li>
+            <li>
+              <Link href="/aesthetics/about" className="hover:text-white">
+                About us
+              </Link>
+            </li>
+            <li>
+              <Link href="/aesthetics/wishlist" className="hover:text-white">
+                Favourites
+              </Link>
+            </li>
+            <li>
+              <Link href="/aesthetics/account" className="hover:text-white">
+                My account
               </Link>
             </li>
           </ul>

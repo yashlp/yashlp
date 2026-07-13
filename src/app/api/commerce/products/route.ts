@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { productService } from "@/lib/commerce/services/product.service";
+import { searchProducts } from "@/lib/commerce/product-search";
 import { commerceApiError } from "@/lib/commerce/api-utils";
 
 export async function GET(req: NextRequest) {
@@ -11,15 +12,9 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("q") || undefined;
 
     if (search) {
-      const all = await productService.listPublished({ limit: 100 });
-      const q = search.toLowerCase();
-      const filtered = all.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.includes(q))
-      );
-      return NextResponse.json({ products: filtered.slice(0, limit || 50) });
+      const all = await productService.listPublished({ limit: 200 });
+      const filtered = searchProducts(all, search, limit || 50);
+      return NextResponse.json({ products: filtered });
     }
 
     const products = await productService.listPublished({

@@ -5,7 +5,7 @@ import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { Badge } from "@/components/aesthetics/ui/badge";
 import { productService } from "@/lib/commerce/services/product.service";
-import { catalogService } from "@/lib/commerce/services/catalog.service";
+import { formatInr } from "@/lib/aesthetics/format-inr";
 import { ProductActions } from "./product-actions";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -15,7 +15,6 @@ export default async function ProductPage({ params }: Props) {
   const product = await productService.getBySlug(slug);
   if (!product) notFound();
 
-  const brand = product.brand ?? (await catalogService.getBrandById(product.brandId));
   const related = await productService.getRelated(product.id, product.category, product.tags);
 
   return (
@@ -56,9 +55,6 @@ export default async function ProductPage({ params }: Props) {
                 <Badge key={t} variant="muted">{t}</Badge>
               ))}
             </div>
-            <p className="mt-4 text-xs font-bold uppercase tracking-wider text-[var(--aes-ink-soft)]">
-              {brand?.name}
-            </p>
             <h1 className="aes-joy-title-lower mt-2 text-[var(--aes-ink)]">{product.name}</h1>
             <div className="mt-3 flex items-center gap-3">
               <div className="flex items-center gap-1 text-sm text-[var(--aes-ink-muted)]">
@@ -67,10 +63,10 @@ export default async function ProductPage({ params }: Props) {
               </div>
             </div>
             <div className="mt-6 flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-[var(--aes-ink)]">${product.price}</span>
+              <span className="text-3xl font-bold text-[var(--aes-ink)]">{formatInr(product.price)}</span>
               {product.compareAtPrice && (
                 <span className="text-lg text-[var(--aes-ink-muted)] line-through">
-                  ${product.compareAtPrice}
+                  {formatInr(product.compareAtPrice)}
                 </span>
               )}
             </div>
@@ -82,8 +78,8 @@ export default async function ProductPage({ params }: Props) {
               <div className="flex items-start gap-3 text-sm text-[var(--aes-ink-muted)]">
                 <Truck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--aes-pink)]" />
                 <div>
-                  <p className="font-bold text-[var(--aes-ink)]">Free delivery over $75</p>
-                  <p>Estimated 3–5 business days</p>
+                  <p className="font-bold text-[var(--aes-ink)]">Free delivery over ₹999</p>
+                  <p>Ships across India · 3–7 business days</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">

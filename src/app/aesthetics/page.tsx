@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { HeroSection } from "@/components/aesthetics/home/hero-section";
-import { MarqueeBand } from "@/components/aesthetics/home/marquee-band";
 import { ProductRow } from "@/components/aesthetics/home/product-row";
 import { AboutBanner } from "@/components/aesthetics/home/about-banner";
 import { LifestyleSection } from "@/components/aesthetics/home/lifestyle-section";
@@ -28,7 +27,6 @@ export default async function AestheticsHomePage() {
       <ConsumerNav />
       <main className="relative">
         <HeroSection products={featured} />
-        <MarqueeBand />
         <ProductRow
           title="Pieces as stunning"
           titleLine2="as they are intentional"

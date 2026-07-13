@@ -10,7 +10,7 @@ export const checkoutSchema = z.object({
   state: z.string().max(100).optional(),
   postalCode: z.string().min(1).max(20),
   country: z.string().default("IN"),
-  paymentMethod: z.enum(["cod", "razorpay", "demo"]).default("cod"),
+  paymentMethod: z.enum(["razorpay", "demo"]).default("razorpay"),
   items: z
     .array(
       z.object({
@@ -34,7 +34,7 @@ export const customerRegisterSchema = z.object({
     city: z.string().min(1),
     state: z.string().optional(),
     postalCode: z.string().min(1),
-    country: z.string().default("US"),
+    country: z.string().default("IN"),
   }),
 });
 

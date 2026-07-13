@@ -58,7 +58,7 @@ export async function registerCustomer(input: {
       city: input.address.city,
       state: input.address.state,
       postalCode: input.address.postalCode,
-      country: input.address.country || "US",
+      country: input.address.country || "IN",
       phone,
       isDefault: true,
     },

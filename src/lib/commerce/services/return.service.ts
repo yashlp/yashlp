@@ -19,6 +19,16 @@ export const returnService = {
     });
   },
 
+  async listForCustomer(customerId: string) {
+    return prisma.commerceReturn.findMany({
+      where: { order: { customerId } },
+      include: {
+        order: { select: { orderNumber: true, total: true, status: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
   async createRequest(input: {
     orderId: string;
     reason: string;

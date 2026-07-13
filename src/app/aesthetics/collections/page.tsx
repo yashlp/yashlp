@@ -1,5 +1,6 @@
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { CollectionCard } from "@/components/aesthetics/home/collection-card";
+import { ProductSearchBar } from "@/components/aesthetics/shop/product-search-bar";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 
 export const metadata = { title: "Collections" };
@@ -19,6 +20,9 @@ export default async function CollectionsPage() {
         <p className="mt-3 max-w-lg text-sm text-[var(--aes-ink-muted)]">
           Curated edits for every mood — calm mornings, creative nights, and everything between.
         </p>
+        <div className="mt-8 flex justify-center">
+          <ProductSearchBar placeholder="Search collections & products…" />
+        </div>
         {collections.length === 0 ? (
           <p className="mt-12 text-[var(--aes-ink-muted)]">No collections published yet.</p>
         ) : (

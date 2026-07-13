@@ -331,7 +331,29 @@ const DEMO_COLLECTIONS = [
     title: "New This Week",
     slug: "new-this-week",
     description: "Fresh arrivals at Only Aesthetics",
+    imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80",
     productSlugs: ["cloud-vessel", "pearl-drop-earrings", "lavender-room-mist", "moss-journal"],
+  },
+  {
+    title: "Minimal Living",
+    slug: "minimal-living",
+    description: "Clean lines and calm objects for uncluttered spaces",
+    imageUrl: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200&q=80",
+    productSlugs: ["cloud-vessel", "arc-floor-lamp", "brass-desk-tray", "cobalt-table-vase"],
+  },
+  {
+    title: "Trending Collections",
+    slug: "trending-collections",
+    description: "What shoppers are loving right now",
+    imageUrl: "https://images.unsplash.com/photo-1602874801006-4f8a22944a3a?w=1200&q=80",
+    productSlugs: ["pearl-drop-earrings", "weighted-silk-eye-mask", "midnight-taper-set", "linen-throw-blanket"],
+  },
+  {
+    title: "Editor's Picks",
+    slug: "editors-picks",
+    description: "Hand-selected favourites from our curation team",
+    imageUrl: "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=1200&q=80",
+    productSlugs: ["cloud-vessel", "pearl-drop-earrings", "ceramic-pour-over-set", "lavender-room-mist"],
   },
 ];
 
@@ -521,18 +543,26 @@ async function main() {
     await linkCollectionProducts(col.slug, col.productSlugs);
   }
 
+  const customerPasswordHash = DEMO_ADMIN_PASSWORD_HASH;
+
   const customer = await prisma.commerceCustomer.upsert({
     where: { email: "demo@customer.com" },
-    update: { name: "Demo Customer", status: "ACTIVE" },
-    create: { email: "demo@customer.com", name: "Demo Customer", status: "ACTIVE", phone: "+91 90000 12345" },
+    update: { name: "Demo Customer", status: "ACTIVE", passwordHash: customerPasswordHash, phone: "+919000012345" },
+    create: {
+      email: "demo@customer.com",
+      name: "Demo Customer",
+      status: "ACTIVE",
+      phone: "+919000012345",
+      passwordHash: customerPasswordHash,
+    },
   });
 
   const demoOrders = [
-    { orderNumber: "AES-DEMO-DELIVERED", status: "DELIVERED", productSlug: "cloud-vessel", payment: "cod" },
+    { orderNumber: "AES-DEMO-DELIVERED", status: "DELIVERED", productSlug: "cloud-vessel", payment: "razorpay" },
     { orderNumber: "AES-DEMO-CONFIRMED", status: "CONFIRMED", productSlug: "moss-journal", payment: "razorpay" },
     { orderNumber: "AES-DEMO-PACKED", status: "PACKED", productSlug: "pearl-drop-earrings", payment: "razorpay" },
-    { orderNumber: "AES-DEMO-SHIPPED", status: "SHIPPED", productSlug: "weighted-silk-eye-mask", payment: "cod" },
-    { orderNumber: "AES-DEMO-PENDING", status: "CONFIRMED", productSlug: "lavender-room-mist", payment: "cod" },
+    { orderNumber: "AES-DEMO-SHIPPED", status: "SHIPPED", productSlug: "weighted-silk-eye-mask", payment: "demo" },
+    { orderNumber: "AES-DEMO-PENDING", status: "CONFIRMED", productSlug: "lavender-room-mist", payment: "demo" },
   ] as const;
 
   for (const o of demoOrders) {
@@ -545,7 +575,7 @@ async function main() {
 
     await prisma.commerceOrder.upsert({
       where: { orderNumber: o.orderNumber },
-      update: { status: o.status, subtotal, total, tax: gst, shipping: subtotal >= 999 ? 0 : 49 },
+      update: { status: o.status, subtotal, total, tax: gst, shipping: subtotal >= 999 ? 0 : 49, customerId: customer.id },
       create: {
         orderNumber: o.orderNumber,
         customerId: customer.id,
@@ -729,7 +759,7 @@ async function main() {
   const productCount = await prisma.commerceProduct.count({ where: { status: "PUBLISHED" } });
   const orderCount = await prisma.commerceOrder.count();
   console.log(`Demo seed complete: ${productCount} products, ${orderCount} orders, ${DEMO_COLLECTIONS.length} collections.`);
-  console.log(`Admin: ${adminEmail} | Staff demo password: Chester@2604`);
+  console.log(`Admin: ${adminEmail} | Customer demo: demo@customer.com / Chester@2604`);
 }
 
 main()

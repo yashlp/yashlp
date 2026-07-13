@@ -35,7 +35,18 @@ export default function NewProductPage() {
 
   useEffect(() => {
     fetch("/api/admin/categories").then((r) => r.json()).then((d) => setCategories(d.categories || []));
-    fetch("/api/admin/sellers").then((r) => r.json()).then((d) => setSellers(d.sellers || []));
+    fetch("/api/admin/sellers").then((r) => r.json()).then((d) => {
+      const list = d.sellers || [];
+      setSellers(list);
+      const first = list[0];
+      if (first) {
+        setForm((f) => ({
+          ...f,
+          sellerId: first.id,
+          brandId: first.brands?.[0]?.id || "",
+        }));
+      }
+    });
     fetch("/api/admin/suppliers").then((r) => r.json()).then((d) => setSuppliers(d.suppliers || []));
   }, []);
 
@@ -79,6 +90,12 @@ export default function NewProductPage() {
 
   const brands = sellers.find((s) => s.id === form.sellerId)?.brands || [];
 
+  useEffect(() => {
+    if (form.sellerId && !form.brandId && brands[0]) {
+      setForm((f) => ({ ...f, brandId: brands[0].id }));
+    }
+  }, [form.sellerId, form.brandId, brands]);
+
   return (
     <div className="max-w-2xl">
       <h1 className="aes-display text-3xl font-semibold italic">Add product</h1>
@@ -114,18 +131,8 @@ export default function NewProductPage() {
               <option key={s.id} value={s.id}>{s.brandName}</option>
             ))}
           </select>
-          <select className="aes-input" value={form.sellerId} onChange={(e) => setForm({ ...form, sellerId: e.target.value, brandId: "" })} required>
-            <option value="">Brand line (storefront display)</option>
-            {sellers.map((s) => (
-              <option key={s.id} value={s.id}>{s.businessName}</option>
-            ))}
-          </select>
-          <select className="aes-input" value={form.brandId} onChange={(e) => setForm({ ...form, brandId: e.target.value })} required>
-            <option value="">Brand name on site</option>
-            {brands.map((b) => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
+          <input type="hidden" value={form.sellerId} />
+          <input type="hidden" value={form.brandId} />
           <Input placeholder="Image URL" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
           <Input placeholder="Tags (comma-separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
           <Input placeholder="Mood" value={form.mood} onChange={(e) => setForm({ ...form, mood: e.target.value })} />

@@ -30,11 +30,10 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
         </div>
 
         <p
-          className="aes-animate-fade-up mx-auto mt-8 max-w-lg text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base"
-          style={{ animationDelay: "0.15s" }}
+          className="aes-animate-fade-up mx-auto mt-6 max-w-lg text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base"
+          style={{ animationDelay: "0.18s" }}
         >
-          A curated marketplace for independent makers — objects chosen with the same care you
-          bring to your space.
+          Curated objects for intentional living — shipped across India with care.
         </p>
 
         <div className="aes-animate-fade-up mt-10" style={{ animationDelay: "0.25s" }}>
@@ -48,18 +47,10 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
           style={{ animationDelay: "0.35s" }}
         >
           {heroItems.map((item, i) => (
-            <div
-              key={item.id}
-              className="flex-1"
-              style={{ marginTop: i % 2 === 0 ? "0" : "1.5rem" }}
-            >
+            <div key={item.id} className="flex-1" style={{ marginTop: i % 2 === 0 ? "0" : "1.5rem" }}>
               <div className="mx-auto aspect-[3/4] w-full max-w-[140px] overflow-hidden rounded-2xl sm:max-w-[180px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.images[0]}
-                  alt={item.name}
-                  className="h-full w-full object-cover"
-                />
+                <img src={item.images[0]} alt={item.name} className="h-full w-full object-cover" />
               </div>
             </div>
           ))}

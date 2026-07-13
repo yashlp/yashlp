@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { formatInr } from "@/lib/aesthetics/format-inr";
 
 export default function CartPage() {
   const { cart, cartTotal, removeFromCart, cartCount } = useCart();
@@ -29,16 +30,13 @@ export default function CartPage() {
                     <img src={item.images[0]} alt={item.name} className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--aes-ink-soft)]">
-                      {item.brand?.name ?? "Independent"}
-                    </p>
                     <Link
                       href={`/aesthetics/product/${item.slug}`}
                       className="font-bold text-[var(--aes-ink)] hover:text-[var(--aes-pink)]"
                     >
                       {item.name}
                     </Link>
-                    <p className="mt-1 text-lg font-bold text-[var(--aes-ink)]">${item.price}</p>
+                    <p className="mt-1 text-lg font-bold text-[var(--aes-ink)]">{formatInr(item.price)}</p>
                   </div>
                   <button
                     type="button"
@@ -53,10 +51,10 @@ export default function CartPage() {
             <div className="aes-panel-warm mt-10 p-6">
               <div className="flex justify-between text-lg">
                 <span className="text-[var(--aes-ink-muted)]">Subtotal</span>
-                <span className="font-bold text-[var(--aes-ink)]">${cartTotal}</span>
+                <span className="font-bold text-[var(--aes-ink)]">{formatInr(cartTotal)}</span>
               </div>
               <Link href="/aesthetics/checkout" className="mt-6 block">
-                <Button className="w-full py-4">Proceed to checkout — ${cartTotal}</Button>
+                <Button className="w-full py-4">Proceed to checkout — {formatInr(cartTotal)}</Button>
               </Link>
             </div>
           </>

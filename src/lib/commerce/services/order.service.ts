@@ -32,6 +32,19 @@ export const orderService = {
     });
   },
 
+  async listForCustomer(customerId: string) {
+    return prisma.commerceOrder.findMany({
+      where: { customerId },
+      include: {
+        items: { include: { product: { select: { name: true, slug: true } } } },
+        payments: true,
+        returns: true,
+        refunds: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
   async createGuestOrder(input: {
     items: { productId: string; quantity: number; unitPrice: number }[];
     subtotal: number;
