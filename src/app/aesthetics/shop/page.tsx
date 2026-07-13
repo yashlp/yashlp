@@ -94,15 +94,6 @@ export default function ShopPage() {
           </div>
         )}
 
-        <section className="aes-bg-bundle mt-20 rounded-3xl px-6 py-14 text-center">
-          <h2 className="aes-section-title text-[var(--aes-ink)]">Bundle &amp; SAVE</h2>
-          <p className="mx-auto mt-4 max-w-md text-sm text-[var(--aes-ink-muted)]">
-            Why pick one? Build your cart with a little something for every feeling.
-          </p>
-          <Link href="/aesthetics/cart" className="aes-btn aes-btn-primary mt-8 inline-flex px-10 py-4">
-            View cart
-          </Link>
-        </section>
       </main>
     </ConsumerPage>
   );

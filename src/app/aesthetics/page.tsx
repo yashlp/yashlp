@@ -8,7 +8,6 @@ import { AboutBanner } from "@/components/aesthetics/home/about-banner";
 import { LifestyleSection } from "@/components/aesthetics/home/lifestyle-section";
 import { FunctionFunSection } from "@/components/aesthetics/home/function-fun-section";
 import { TestimonialsSection } from "@/components/aesthetics/home/testimonials-section";
-import { BundleSection } from "@/components/aesthetics/home/bundle-section";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { productService } from "@/lib/commerce/services/product.service";
 
@@ -49,7 +48,6 @@ export default async function AestheticsHomePage() {
         <LifestyleSection />
         <FunctionFunSection />
         <TestimonialsSection />
-        <BundleSection />
         {!featured.length && (
           <section className="aes-bg-sand px-4 py-20 text-center sm:px-6">
             <p className="text-lg font-medium text-[var(--aes-ink-muted)]">
