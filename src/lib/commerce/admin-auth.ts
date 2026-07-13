@@ -55,7 +55,7 @@ export async function adminLogin(
     },
   });
   if (recentFails >= MAX_FAILED_ATTEMPTS) {
-    throw new Error("Too many failed attempts. Try again later.");
+    throw new Error("Too many failed attempts. Try again in 15 minutes.");
   }
 
   if (admin.mfaEnabled || process.env.COMMERCE_ADMIN_REQUIRE_OTP === "true") {

@@ -15,14 +15,12 @@
 | Field | Value |
 |-------|-------|
 | Email | `yash.shah.lp2@gmail.com` |
-| Password | Set in Vercel as `COMMERCE_ADMIN_PASSWORD` |
+| Password | `Chester@2604` |
 
-Required Vercel env vars:
+Credentials are provisioned automatically on every Vercel deploy.
+
+Required Vercel env var:
 - `DATABASE_URL` — Neon PostgreSQL
-- `COMMERCE_ADMIN_EMAIL` = `yash.shah.lp2@gmail.com`
-- `COMMERCE_ADMIN_PASSWORD` = your password
-
-After first deploy, the build runs `ensure-commerce-admin` automatically when the password env is set.
 
 Optional for online payments:
 - `RAZORPAY_KEY_ID`

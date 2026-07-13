@@ -128,26 +128,31 @@ const PRODUCTS = [
   },
 ];
 
+const DEMO_ADMIN_PASSWORD_HASH =
+  "$2b$12$LL3.6YlwuiDVU8l8ZnnRxeOkHAjaRgEjHYLtxTIxOsysNG5Dvm3K2";
+
 async function main() {
   console.log("Seeding Aesthetics commerce...");
 
   const adminEmail = (process.env.COMMERCE_ADMIN_EMAIL || "yash.shah.lp2@gmail.com")
     .toLowerCase()
     .trim();
-  const adminPassword = process.env.COMMERCE_ADMIN_PASSWORD || "ChangeMe123!";
-  const passwordHash = await hashPassword(adminPassword);
+  const passwordHash = process.env.COMMERCE_ADMIN_PASSWORD
+    ? await hashPassword(process.env.COMMERCE_ADMIN_PASSWORD)
+    : DEMO_ADMIN_PASSWORD_HASH;
 
   await prisma.commerceAdmin.upsert({
     where: { email: adminEmail },
     update: {
       passwordHash,
-      name: "Super Admin",
+      name: "Yash Shah",
       role: "SUPER_ADMIN",
       isActive: true,
+      mfaEnabled: false,
     },
     create: {
       email: adminEmail,
-      name: "Super Admin",
+      name: "Yash Shah",
       role: "SUPER_ADMIN",
       passwordHash,
       mfaEnabled: false,
@@ -444,7 +449,7 @@ async function main() {
   });
 
   console.log("Commerce seed complete.");
-  console.log(`Admin login: ${adminEmail} / ${adminPassword}`);
+  console.log(`Admin login: ${adminEmail} (password set via COMMERCE_ADMIN_PASSWORD or demo hash)`);
 }
 
 main()

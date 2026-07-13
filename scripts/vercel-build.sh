@@ -28,12 +28,8 @@ npx prisma generate
 echo "→ prisma db push"
 npx prisma db push --skip-generate
 
-if [ -n "${COMMERCE_ADMIN_PASSWORD:-}" ]; then
-  echo "→ ensure commerce admin"
-  npx tsx scripts/ensure-commerce-admin.ts
-else
-  echo "→ commerce admin setup skipped (set COMMERCE_ADMIN_PASSWORD on Vercel to enable)"
-fi
+echo "→ ensure commerce admin"
+npx tsx scripts/ensure-commerce-admin.ts
 
 echo "→ next build"
 npx next build
