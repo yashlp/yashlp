@@ -32,6 +32,14 @@ export const metadata: Metadata = {
   title: { default: "Aesthetics", template: "%s · Aesthetics" },
   description:
     "A luxury wellness marketplace. Unwind, restore, and reconnect with curated objects for mindful living.",
+  applicationName: "Aesthetics",
+  openGraph: {
+    title: "Aesthetics — Luxury Wellness Marketplace",
+    description:
+      "A luxury wellness marketplace. Unwind, restore, and reconnect with curated objects for mindful living.",
+    siteName: "Aesthetics",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

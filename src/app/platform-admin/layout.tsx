@@ -6,6 +6,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: { default: "Platform Admin", template: "%s · Admin · Aesthetics" },
+  applicationName: "Aesthetics",
 };
 
 export default function PlatformAdminRootLayout({ children }: { children: React.ReactNode }) {

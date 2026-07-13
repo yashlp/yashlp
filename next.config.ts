@@ -25,6 +25,20 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "**" },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/aesthetic-demo",
+        destination: "/aesthetics",
+        permanent: true,
+      },
+      {
+        source: "/aesthetic-demo/:path*",
+        destination: "/aesthetics",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

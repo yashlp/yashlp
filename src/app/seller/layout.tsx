@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import "@/design-system/theme.css";
 import { SellerShell } from "@/components/aesthetics/seller/seller-shell";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: { default: "Seller Dashboard", template: "%s · Seller · Aesthetics" },
+  applicationName: "Aesthetics",
 };
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
