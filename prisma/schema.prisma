@@ -273,3 +273,430 @@ model ReportPurchase {
   @@index([userId, productId])
   @@index([status])
 }
+
+// =============================================================================
+// Aesthetics Commerce Platform
+// =============================================================================
+
+model CommerceAdmin {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String
+  passwordHash    String
+  role            String   @default("ADMIN")
+  mfaEnabled      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  lastLoginAt     DateTime?
+  lastLoginIp     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sessions        CommerceAdminSession[]
+  otps            CommerceAdminOtp[]
+  auditLogs       CommerceAuditLog[]
+  loginAttempts   CommerceLoginAttempt[]
+}
+
+model CommerceAdminSession {
+  id          String   @id @default(cuid())
+  adminId     String
+  tokenHash   String   @unique
+  userAgent   String?
+  ipAddress   String?
+  deviceLabel String?
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  admin CommerceAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model CommerceAdminOtp {
+  id        String   @id @default(cuid())
+  adminId   String
+  code      String
+  purpose   String   @default("login")
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  admin CommerceAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+}
+
+model CommerceLoginAttempt {
+  id        String   @id @default(cuid())
+  adminId   String?
+  email     String
+  success   Boolean
+  ipAddress String?
+  userAgent String?
+  reason    String?
+  createdAt DateTime @default(now())
+
+  admin CommerceAdmin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model CommerceAuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  entityType String
+  entityId   String?
+  metadata   String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  admin CommerceAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model CommerceSeller {
+  id                 String   @id @default(cuid())
+  businessName       String
+  slug               String   @unique
+  email              String   @unique
+  phone              String?
+  tagline            String?
+  instagram          String?
+  logoUrl            String?
+  status             String   @default("PENDING")
+  verified           Boolean  @default(false)
+  kycStatus          String   @default("PENDING")
+  gstNumber          String?
+  commissionPercent  Float    @default(15)
+  rating             Float    @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  brands   CommerceBrand[]
+  products CommerceProduct[]
+  orders   CommerceOrder[]
+
+  @@index([status])
+}
+
+model CommerceBrand {
+  id        String   @id @default(cuid())
+  sellerId  String
+  name      String
+  slug      String   @unique
+  tagline   String?
+  logoUrl   String?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  seller   CommerceSeller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  products CommerceProduct[]
+
+  @@index([sellerId])
+}
+
+model CommerceCategory {
+  id          String   @id @default(cuid())
+  parentId    String?
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  isFeatured  Boolean  @default(false)
+  isHidden    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent   CommerceCategory?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children CommerceCategory[] @relation("CategoryTree")
+  products CommerceProduct[]
+
+  @@index([parentId])
+  @@index([sortOrder])
+}
+
+model CommerceProduct {
+  id               String   @id @default(cuid())
+  sellerId         String
+  brandId          String
+  categoryId       String
+  name             String
+  slug             String   @unique
+  sku              String?  @unique
+  barcode          String?
+  shortDescription String?
+  description      String
+  price            Float
+  compareAtPrice   Float?
+  mrp              Float?
+  taxRate          Float    @default(0)
+  gstRate          Float    @default(0)
+  stock            Int      @default(0)
+  minStock         Int      @default(0)
+  maxStock         Int?
+  materials        String?
+  dimensions       String?
+  weight           String?
+  countryOfOrigin  String?
+  warranty         String?
+  returnEligible   Boolean  @default(true)
+  specifications   String?
+  tags             String?
+  mood             String?
+  colors           String?
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String?
+  status           String   @default("DRAFT")
+  approvalStatus   String   @default("PENDING")
+  isFeatured       Boolean  @default(false)
+  isTrending       Boolean  @default(false)
+  isNewArrival     Boolean  @default(false)
+  isRecommended    Boolean  @default(false)
+  rating           Float    @default(0)
+  reviewCount      Int      @default(0)
+  publishedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  seller       CommerceSeller         @relation(fields: [sellerId], references: [id])
+  brand        CommerceBrand          @relation(fields: [brandId], references: [id])
+  category     CommerceCategory       @relation(fields: [categoryId], references: [id])
+  media        CommerceProductMedia[]
+  variants     CommerceProductVariant[]
+  orderItems   CommerceOrderItem[]
+  reviews      CommerceReview[]
+  collectionItems CommerceCollectionProduct[]
+
+  @@index([sellerId])
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([status, approvalStatus])
+  @@index([slug])
+}
+
+model CommerceProductMedia {
+  id        String   @id @default(cuid())
+  productId String
+  type      String   @default("IMAGE")
+  url       String
+  altText   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product CommerceProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model CommerceProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  name      String
+  sku       String?
+  price     Float?
+  stock     Int      @default(0)
+  color     String?
+  size      String?
+  style     String?
+  material  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product CommerceProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model CommerceCollection {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products CommerceCollectionProduct[]
+
+  @@index([isFeatured])
+}
+
+model CommerceCollectionProduct {
+  id           String @id @default(cuid())
+  collectionId String
+  productId    String
+  sortOrder    Int    @default(0)
+
+  collection CommerceCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product    CommerceProduct    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, productId])
+}
+
+model CommerceCustomer {
+  id            String   @id @default(cuid())
+  email         String?  @unique
+  phone         String?  @unique
+  name          String?
+  status        String   @default("ACTIVE")
+  loyaltyPoints Int      @default(0)
+  loyaltyLevel  String   @default("STANDARD")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orders   CommerceOrder[]
+  reviews  CommerceReview[]
+}
+
+model CommerceOrder {
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique
+  customerId      String?
+  sellerId        String?
+  status          String   @default("PENDING")
+  subtotal        Float
+  tax             Float    @default(0)
+  shipping        Float    @default(0)
+  discount        Float    @default(0)
+  total           Float
+  currency        String   @default("USD")
+  customerNotes   String?
+  internalNotes   String?
+  shippingAddress String?
+  trackingNumber  String?
+  courier         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  customer CommerceCustomer? @relation(fields: [customerId], references: [id])
+  seller   CommerceSeller?   @relation(fields: [sellerId], references: [id])
+  items    CommerceOrderItem[]
+  payments CommercePayment[]
+  refunds  CommerceRefund[]
+
+  @@index([status])
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+model CommerceOrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  unitPrice Float
+  total     Float
+  variantId String?
+
+  order   CommerceOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product CommerceProduct @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+model CommercePayment {
+  id                String   @id @default(cuid())
+  orderId           String
+  amount            Float
+  currency          String   @default("USD")
+  status            String   @default("PENDING")
+  provider          String   @default("stripe")
+  providerPaymentId String?
+  metadata          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  order CommerceOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model CommerceRefund {
+  id        String   @id @default(cuid())
+  orderId   String
+  amount    Float
+  status    String   @default("PENDING")
+  reason    String?
+  type      String   @default("FULL")
+  timeline  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order CommerceOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model CommerceReview {
+  id               String   @id @default(cuid())
+  productId        String
+  customerId       String?
+  rating           Int
+  title            String?
+  body             String?
+  status           String   @default("PENDING")
+  verifiedPurchase Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  product  CommerceProduct   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer CommerceCustomer? @relation(fields: [customerId], references: [id])
+
+  @@index([productId])
+  @@index([status])
+}
+
+model CommerceCoupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  description   String?
+  discountType  String    @default("PERCENT")
+  discountValue Float
+  minOrderValue Float?
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  isActive      Boolean   @default(true)
+  startsAt      DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model CommerceContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  type      String   @default("PAGE")
+  title     String?
+  body      String?
+  imageUrl  String?
+  metadata  String?
+  isPublished Boolean @default(true)
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+model CommerceSetting {
+  key       String   @id
+  value     String
+  group     String   @default("general")
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+

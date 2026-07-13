@@ -1,31 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { Input } from "@/components/aesthetics/ui/input";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
-import { PRODUCTS } from "@/lib/aesthetics/products";
-import { getBrand } from "@/lib/aesthetics/brands";
+import type { Product } from "@/lib/aesthetics/types";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Product[]>([]);
   const { cartCount } = useCart();
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return PRODUCTS.filter((p) => {
-      const brand = getBrand(p.brandId);
-      return (
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.includes(q)) ||
-        brand?.name.toLowerCase().includes(q)
-      );
-    });
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetch(`/api/commerce/products?q=${encodeURIComponent(query)}`)
+        .then((r) => r.json())
+        .then((d) => setResults(d.products || []))
+        .catch(() => setResults([]));
+    }, 300);
+    return () => clearTimeout(t);
   }, [query]);
 
   return (
@@ -53,11 +53,6 @@ export default function SearchPage() {
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
-        {query && results.length === 0 && (
-          <p className="mt-12 text-center text-[var(--aes-charcoal-muted)]">
-            No matches. Try &ldquo;ceramic&rdquo;, &ldquo;calm&rdquo;, or a brand name.
-          </p>
-        )}
       </main>
       <ConsumerFooter />
     </>

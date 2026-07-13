@@ -5,19 +5,19 @@ import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { Badge } from "@/components/aesthetics/ui/badge";
-import { getBrand } from "@/lib/aesthetics/brands";
-import { getProduct, getRelatedProducts } from "@/lib/aesthetics/products";
+import { productService } from "@/lib/commerce/services/product.service";
+import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { ProductActions } from "./product-actions";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await productService.getBySlug(slug);
   if (!product) notFound();
 
-  const brand = getBrand(product.brandId);
-  const related = getRelatedProducts(product);
+  const brand = product.brand ?? (await catalogService.getBrandById(product.brandId));
+  const related = await productService.getRelated(product.id, product.category, product.tags);
 
   return (
     <>
@@ -31,7 +31,6 @@ export default async function ProductPage({ params }: Props) {
         </Link>
 
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-          {/* Gallery */}
           <div className="space-y-4">
             <div className="aspect-[4/5] overflow-hidden rounded-3xl bg-[var(--aes-ivory-deep)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -53,7 +52,6 @@ export default async function ProductPage({ params }: Props) {
             )}
           </div>
 
-          {/* Details */}
           <div>
             <div className="flex flex-wrap gap-2">
               {product.tags.map((t) => (

@@ -5,31 +5,63 @@ import Link from "next/link";
 import { ArrowLeft, LayoutGrid, ShoppingBag, Sparkles } from "lucide-react";
 import { DiscoverCard } from "./discover-card";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
-import { PRODUCTS, FILTER_OPTIONS } from "@/lib/aesthetics/products";
 import { getAestheticProfile, rankProducts } from "@/lib/aesthetics/preferences";
-import type { Product } from "@/lib/aesthetics/types";
+import type { Product, ProductCategory } from "@/lib/aesthetics/types";
 import { cn } from "@/lib/utils";
 
 export function DiscoverFeed() {
   const { prefs, cartCount } = useCart();
-  const [category, setCategory] = useState<Product["category"] | "all">("all");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<{ id: ProductCategory | "all"; label: string }[]>([
+    { id: "all", label: "All" },
+  ]);
+  const [category, setCategory] = useState<ProductCategory | "all">("all");
   const [index, setIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    fetch("/api/commerce/categories")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.categories?.length) {
+          setCategories([
+            { id: "all", label: "All" },
+            ...d.categories.map((c: { slug: string; name: string }) => ({
+              id: c.slug as ProductCategory,
+              label: c.name,
+            })),
+          ]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (category !== "all") params.set("category", category);
+    fetch(`/api/commerce/products?${params}`)
+      .then((r) => r.json())
+      .then((d) => setProducts(d.products || []))
+      .catch(() => setProducts([]));
+  }, [category]);
+
   const feed = useMemo(
-    () => rankProducts(PRODUCTS, prefs, category === "all" ? undefined : category),
-    [prefs, category]
+    () => rankProducts(products, prefs, category === "all" ? undefined : category),
+    [products, prefs, category]
   );
 
   const { topTags, matchPercent } = getAestheticProfile(prefs);
 
-  const scrollToIndex = useCallback((i: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const clamped = Math.max(0, Math.min(i, feed.length - 1));
-    el.scrollTo({ top: clamped * el.clientHeight, behavior: "smooth" });
-    setIndex(clamped);
-  }, [feed.length]);
+  const scrollToIndex = useCallback(
+    (i: number) => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const clamped = Math.max(0, Math.min(i, feed.length - 1));
+      el.scrollTo({ top: clamped * el.clientHeight, behavior: "smooth" });
+      setIndex(clamped);
+    },
+    [feed.length]
+  );
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -46,7 +78,6 @@ export function DiscoverFeed() {
 
   return (
     <div className="relative h-dvh overflow-hidden bg-[var(--aes-ivory)]">
-      {/* Header */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 pt-[max(0.75rem,var(--aes-safe-top))]">
         <div className="pointer-events-auto flex items-center justify-between px-4">
           <Link href="/aesthetics" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-md">
@@ -61,7 +92,7 @@ export function DiscoverFeed() {
             )}
           </div>
           <div className="flex gap-2">
-            <Link href="/aesthetics/shop" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-md" aria-label="Shop view">
+            <Link href="/aesthetics/shop" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-md">
               <LayoutGrid className="h-5 w-5 text-[var(--aes-charcoal)]" />
             </Link>
             <Link href="/aesthetics/cart" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-md">
@@ -76,7 +107,7 @@ export function DiscoverFeed() {
         </div>
 
         <div className="pointer-events-auto mt-3 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {FILTER_OPTIONS.map(({ id, label }) => (
+          {categories.map(({ id, label }) => (
             <button
               key={id}
               type="button"
@@ -101,12 +132,12 @@ export function DiscoverFeed() {
         {feed.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-8 text-center">
             <Sparkles className="mb-4 h-10 w-10 text-[var(--aes-royal)]" />
-            <h2 className="aes-display text-2xl font-semibold italic">Your feed is complete</h2>
+            <h2 className="aes-display text-2xl font-semibold italic">No products to discover</h2>
             <p className="mt-2 text-sm text-[var(--aes-charcoal-muted)]">
-              We learned your aesthetic. Browse the shop for more.
+              Publish products from the admin panel to populate this feed.
             </p>
-            <Link href="/aesthetics/shop" className="aes-btn aes-btn-primary mt-6 px-6 py-3 text-sm">
-              Browse shop
+            <Link href="/platform-admin/login" className="aes-btn aes-btn-primary mt-6 px-6 py-3 text-sm">
+              Admin login
             </Link>
           </div>
         ) : (

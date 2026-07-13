@@ -3,19 +3,16 @@ import { notFound } from "next/navigation";
 import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
-import { getCollection } from "@/lib/aesthetics/collections";
-import { PRODUCTS } from "@/lib/aesthetics/products";
+import { catalogService } from "@/lib/commerce/services/catalog.service";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function CollectionDetailPage({ params }: Props) {
   const { slug } = await params;
-  const collection = getCollection(slug);
+  const collection = await catalogService.getCollectionBySlug(slug);
   if (!collection) notFound();
 
-  const products = collection.productIds
-    .map((id) => PRODUCTS.find((p) => p.id === id))
-    .filter(Boolean);
+  const products = collection.products || [];
 
   return (
     <>
@@ -32,7 +29,9 @@ export default async function CollectionDetailPage({ params }: Props) {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {products.map((p) => p && <ProductCard key={p.id} product={p} />)}
+          {products.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
         </div>
         <div className="mt-12 text-center">
           <Link href="/aesthetics/collections" className="aes-mono text-xs uppercase tracking-wider text-[var(--aes-royal)]">

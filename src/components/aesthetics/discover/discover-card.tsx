@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
-import { getBrand } from "@/lib/aesthetics/brands";
 import type { Product } from "@/lib/aesthetics/types";
 
 const SWIPE_THRESHOLD = 72;
@@ -34,7 +33,7 @@ export function DiscoverCard({ product, isActive, onNext, onPrev }: DiscoverCard
   const start = useRef({ x: 0, y: 0 });
   const lock = useRef<"x" | "y" | null>(null);
   const viewStart = useRef<number | null>(null);
-  const brand = getBrand(product.brandId);
+  const brand = product.brand;
 
   useEffect(() => {
     if (isActive) {

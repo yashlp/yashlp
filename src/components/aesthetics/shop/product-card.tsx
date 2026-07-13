@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { Badge } from "@/components/aesthetics/ui/badge";
-import { getBrand } from "@/lib/aesthetics/brands";
 import type { Product } from "@/lib/aesthetics/types";
 
 type ProductCardProps = {
@@ -12,7 +11,7 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, priority }: ProductCardProps) {
-  const brand = getBrand(product.brandId);
+  const brandName = product.brand?.name ?? "Independent";
 
   return (
     <Link href={`/aesthetics/product/${product.slug}`} className="group block">
@@ -47,7 +46,7 @@ export function ProductCard({ product, priority }: ProductCardProps) {
         </div>
         <div className="p-4">
           <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
-            {brand?.name}
+            {brandName}
           </p>
           <h3 className="mt-1 font-medium leading-snug text-[var(--aes-charcoal)] group-hover:text-[var(--aes-royal)]">
             {product.name}

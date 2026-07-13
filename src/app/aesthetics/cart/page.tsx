@@ -5,7 +5,6 @@ import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { Button } from "@/components/aesthetics/ui/button";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
-import { getBrand } from "@/lib/aesthetics/brands";
 
 export default function CartPage() {
   const { cart, cartTotal, removeFromCart, cartCount } = useCart();
@@ -25,16 +24,16 @@ export default function CartPage() {
         ) : (
           <>
             <ul className="mt-10 space-y-6">
-              {cart.map((item) => {
-                const brand = getBrand(item.brandId);
-                return (
+              {cart.map((item) => (
                   <li key={item.id} className="aes-card flex gap-4 p-4">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={item.images[0]} alt={item.name} className="h-full w-full object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="aes-mono text-[9px] uppercase tracking-wider text-[var(--aes-dusty)]">{brand?.name}</p>
+                      <p className="aes-mono text-[9px] uppercase tracking-wider text-[var(--aes-dusty)]">
+                      {item.brand?.name ?? "Independent"}
+                    </p>
                       <Link href={`/aesthetics/product/${item.slug}`} className="font-medium hover:text-[var(--aes-royal)]">
                         {item.name}
                       </Link>
@@ -48,8 +47,7 @@ export default function CartPage() {
                       Remove
                     </button>
                   </li>
-                );
-              })}
+              ))}
             </ul>
             <div className="mt-10 border-t border-[var(--aes-border)] pt-8">
               <div className="flex justify-between text-lg">

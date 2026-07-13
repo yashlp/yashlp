@@ -1,34 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
   CreditCard,
+  FileText,
+  FolderTree,
   LayoutDashboard,
+  LogOut,
   Package,
   Shield,
   Store,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import "@/design-system/theme.css";
 
 const NAV = [
   { href: "/platform-admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/platform-admin/sellers", label: "Sellers", icon: Store },
   { href: "/platform-admin/products", label: "Products", icon: Package },
+  { href: "/platform-admin/categories", label: "Categories", icon: FolderTree },
   { href: "/platform-admin/orders", label: "Orders", icon: CreditCard },
+  { href: "/platform-admin/sellers", label: "Sellers", icon: Store },
   { href: "/platform-admin/users", label: "Users", icon: Users },
   { href: "/platform-admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/platform-admin/audit-logs", label: "Audit Logs", icon: FileText },
   { href: "/platform-admin/support", label: "Support", icon: Shield },
 ];
 
-export function PlatformAdminShell({ children }: { children: React.ReactNode }) {
+type Props = {
+  admin: { name: string; email: string; role: string };
+  children: React.ReactNode;
+};
+
+export function PlatformAdminShell({ admin, children }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function logout() {
+    await fetch("/api/platform-admin/auth/logout", { method: "POST" });
+    router.push("/platform-admin/login");
+    router.refresh();
+  }
 
   return (
-    <div className="aesthetics-root flex min-h-dvh bg-[var(--aes-ivory)]">
+    <div className="flex min-h-dvh bg-[var(--aes-ivory)]">
       <aside className="hidden w-64 shrink-0 border-r border-[var(--aes-border)] bg-[var(--aes-charcoal)] text-white lg:block">
         <div className="p-6">
           <p className="aes-display text-xl font-semibold italic">Aesthetics</p>
@@ -51,6 +67,17 @@ export function PlatformAdminShell({ children }: { children: React.ReactNode }) 
             </Link>
           ))}
         </nav>
+        <div className="border-t border-white/10 p-4">
+          <p className="truncate text-sm text-white/80">{admin.name}</p>
+          <p className="aes-mono truncate text-[10px] text-white/40">{admin.role}</p>
+          <button
+            type="button"
+            onClick={logout}
+            className="mt-3 flex items-center gap-2 text-xs text-white/60 hover:text-white"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sign out
+          </button>
+        </div>
       </aside>
       <main className="flex-1 p-6 lg:p-10">{children}</main>
     </div>

@@ -45,6 +45,7 @@ export type Product = {
   name: string;
   slug: string;
   brandId: string;
+  brand?: Brand;
   price: number;
   compareAtPrice?: number;
   category: ProductCategory;
