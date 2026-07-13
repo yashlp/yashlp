@@ -2,53 +2,58 @@
 
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 type Props = {
   placeholder?: string;
   className?: string;
+  /** Controlled value — pair with onChange for live search */
+  value?: string;
+  onChange?: (query: string) => void;
   initialQuery?: string;
+  id?: string;
 };
 
 export function ProductSearchBar({
   placeholder = "Search products… e.g. scent, journal, cozy",
   className = "",
+  value: controlledValue,
+  onChange,
   initialQuery = "",
+  id = "product-search",
 }: Props) {
-  const router = useRouter();
-  const [query, setQuery] = useState(initialQuery);
+  const [internalQuery, setInternalQuery] = useState(initialQuery);
+  const isControlled = controlledValue !== undefined;
+  const query = isControlled ? controlledValue : internalQuery;
 
   useEffect(() => {
-    setQuery(initialQuery);
-  }, [initialQuery]);
+    if (!isControlled) setInternalQuery(initialQuery);
+  }, [initialQuery, isControlled]);
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const q = query.trim();
-    if (!q) return;
-    router.push(`/aesthetics/search?q=${encodeURIComponent(q)}`);
+  function handleChange(next: string) {
+    if (!isControlled) setInternalQuery(next);
+    onChange?.(next);
   }
 
   return (
-    <form onSubmit={submit} className={`relative w-full max-w-xl ${className}`}>
-      <label htmlFor="product-search" className="sr-only">
+    <div className={`relative w-full max-w-xl ${className}`}>
+      <label htmlFor={id} className="sr-only">
         Search products
       </label>
       <input
-        id="product-search"
+        id={id}
         type="search"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete="off"
         className="w-full rounded-full border border-[var(--aes-border)] bg-white py-3 pl-5 pr-12 text-sm text-[var(--aes-ink)] shadow-sm outline-none transition focus:border-[var(--aes-pink)] focus:ring-2 focus:ring-[var(--aes-pink)]/20"
       />
-      <button
-        type="submit"
-        aria-label="Search"
-        className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--aes-ink)] text-white transition hover:bg-[var(--aes-pink)]"
+      <span
+        className="pointer-events-none absolute right-4 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center text-[var(--aes-ink-muted)]"
+        aria-hidden
       >
         <Search className="h-4 w-4" />
-      </button>
-    </form>
+      </span>
+    </div>
   );
 }

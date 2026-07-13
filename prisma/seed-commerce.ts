@@ -187,7 +187,7 @@ const PRODUCTS: ProductSeed[] = [
     description: "Steam-distilled lavender with a hint of vetiver. One spritz, slower breath.",
     shortDescription: "evening unwind",
     image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1200&q=80",
-    tags: ["botanical", "calm"],
+    tags: ["botanical", "calm", "scent", "fragrance"],
     mood: "calm",
     materials: ["glass", "essential oils"],
     colors: ["lavender"],
