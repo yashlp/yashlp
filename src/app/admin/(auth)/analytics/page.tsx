@@ -1,13 +1,18 @@
-import { Card } from "@/components/aesthetics/ui/card";
+import { AdminModulePlaceholder } from "@/components/aesthetics/admin/admin-module-placeholder";
 
-export default function AdminAnalyticsPage() {
+export default function AnalyticsPage() {
   return (
-    <div>
-      <h1 className="aes-display text-3xl font-semibold italic">Analytics</h1>
-      <Card className="mt-8 p-8">
-        <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Platform metrics</p>
-        <p className="mt-4 text-[var(--aes-charcoal-muted)]">DORA metrics, conversion funnels, and seller performance reports will live here.</p>
-      </Card>
-    </div>
+    <AdminModulePlaceholder
+      title="Analytics"
+      description="Revenue, gross profit, inventory velocity, and customer behavior for your D2C store."
+      features={[
+        "Revenue and gross profit",
+        "Best-selling and slow-moving products",
+        "Customer repeat rate",
+        "Cart abandonment",
+        "Average order value",
+        "Monthly growth charts",
+      ]}
+    />
   );
 }

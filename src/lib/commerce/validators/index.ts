@@ -39,6 +39,11 @@ export const productCreateSchema = z.object({
   isNewArrival: z.boolean().optional(),
   isRecommended: z.boolean().optional(),
   images: z.array(z.string().url()).optional(),
+  // D2C inventory
+  purchaseCost: z.number().min(0).optional(),
+  warehouseLocation: z.string().optional(),
+  supplierId: z.string().optional(),
+  purchaseDate: z.string().datetime().optional(),
 });
 
 export const productUpdateSchema = productCreateSchema.partial().omit({ sellerId: true });

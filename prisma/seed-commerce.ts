@@ -168,6 +168,7 @@ async function main() {
 
   const sellerMap: Record<string, string> = {};
   const brandMap: Record<string, string> = {};
+  const supplierMap: Record<string, string> = {};
 
   for (const s of SELLERS) {
     const seller = await prisma.commerceSeller.upsert({
@@ -195,16 +196,40 @@ async function main() {
       },
     });
     brandMap[s.businessName] = brand.id;
+
+    const supplier = await prisma.commerceSupplier.upsert({
+      where: { slug: s.slug },
+      update: { brandName: s.businessName, status: "ACTIVE" },
+      create: {
+        brandName: s.businessName,
+        slug: s.slug,
+        email: s.email,
+        contactPerson: "Procurement",
+        status: "ACTIVE",
+        productCategories: JSON.stringify(["home", "wellness"]),
+      },
+    });
+    supplierMap[s.slug] = supplier.id;
   }
 
   for (const p of PRODUCTS) {
     await prisma.commerceProduct.upsert({
       where: { slug: p.slug },
-      update: {},
+      update: {
+        purchaseCost: p.price * 0.45,
+        supplierId: supplierMap[p.sellerSlug],
+        minStock: 5,
+        warehouseLocation: "WH-A1",
+      },
       create: {
         sellerId: sellerMap[p.sellerSlug],
         brandId: brandMap[p.brandName],
         categoryId: categoryMap[p.categorySlug],
+        supplierId: supplierMap[p.sellerSlug],
+        purchaseCost: p.price * 0.45,
+        minStock: 5,
+        warehouseLocation: "WH-A1",
+        purchaseDate: new Date(),
         name: p.name,
         slug: p.slug,
         description: p.description,
@@ -294,8 +319,8 @@ async function main() {
 
   await prisma.commerceSetting.upsert({
     where: { key: "site_name" },
-    update: { value: "Aesthetics" },
-    create: { key: "site_name", value: "Aesthetics", group: "general" },
+    update: { value: "Only Aesthetics" },
+    create: { key: "site_name", value: "Only Aesthetics", group: "general" },
   });
 
   console.log("Commerce seed complete.");

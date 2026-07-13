@@ -10,15 +10,23 @@ export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [sellers, setSellers] = useState<{ id: string; businessName: string; brands: { id: string; name: string }[] }[]>([]);
+  const [suppliers, setSuppliers] = useState<{ id: string; brandName: string }[]>([]);
   const [form, setForm] = useState({
     name: "",
     slug: "",
+    sku: "",
+    barcode: "",
     description: "",
     price: "",
+    mrp: "",
+    purchaseCost: "",
     stock: "10",
+    minStock: "5",
+    warehouseLocation: "",
     categoryId: "",
     sellerId: "",
     brandId: "",
+    supplierId: "",
     imageUrl: "",
     tags: "",
     mood: "",
@@ -26,12 +34,9 @@ export default function NewProductPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/categories")
-      .then((r) => r.json())
-      .then((d) => setCategories(d.categories || []));
-    fetch("/api/admin/sellers")
-      .then((r) => r.json())
-      .then((d) => setSellers(d.sellers || []));
+    fetch("/api/admin/categories").then((r) => r.json()).then((d) => setCategories(d.categories || []));
+    fetch("/api/admin/sellers").then((r) => r.json()).then((d) => setSellers(d.sellers || []));
+    fetch("/api/admin/suppliers").then((r) => r.json()).then((d) => setSuppliers(d.suppliers || []));
   }, []);
 
   async function submit(e: React.FormEvent) {
@@ -43,9 +48,16 @@ export default function NewProductPage() {
       body: JSON.stringify({
         name: form.name,
         slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
+        sku: form.sku || undefined,
+        barcode: form.barcode || undefined,
         description: form.description,
         price: Number(form.price),
+        mrp: form.mrp ? Number(form.mrp) : undefined,
+        purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
         stock: Number(form.stock),
+        minStock: Number(form.minStock),
+        warehouseLocation: form.warehouseLocation || undefined,
+        supplierId: form.supplierId || undefined,
         categoryId: form.categoryId,
         sellerId: form.sellerId,
         brandId: form.brandId,
@@ -54,6 +66,7 @@ export default function NewProductPage() {
         mood: form.mood || undefined,
         status: "DRAFT",
         approvalStatus: "PENDING",
+        purchaseDate: new Date().toISOString(),
       }),
     });
     const data = await res.json();
@@ -61,7 +74,7 @@ export default function NewProductPage() {
       setError(data.error || "Failed to create product");
       return;
     }
-    router.push("/admin/products");
+    router.push("/admin/inventory");
   }
 
   const brands = sellers.find((s) => s.id === form.sellerId)?.brands || [];
@@ -69,38 +82,55 @@ export default function NewProductPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="aes-display text-3xl font-semibold italic">Add product</h1>
+      <p className="mt-1 text-sm text-[var(--aes-charcoal-muted)]">Inventory you own — add photos, cost, and stock after receiving goods.</p>
       <Card className="mt-8 space-y-4">
         <form onSubmit={submit} className="space-y-4">
           <Input placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input placeholder="SKU" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+            <Input placeholder="Barcode" value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
+          </div>
           <Input placeholder="URL slug (optional)" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
           <textarea className="aes-input min-h-24" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input type="number" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-            <Input type="number" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Input type="number" placeholder="Selling price (₹)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+            <Input type="number" placeholder="MRP (₹)" value={form.mrp} onChange={(e) => setForm({ ...form, mrp: e.target.value })} />
+            <Input type="number" placeholder="Purchase cost (₹)" value={form.purchaseCost} onChange={(e) => setForm({ ...form, purchaseCost: e.target.value })} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Input type="number" placeholder="Stock qty" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+            <Input type="number" placeholder="Reorder level" value={form.minStock} onChange={(e) => setForm({ ...form, minStock: e.target.value })} />
+            <Input placeholder="Warehouse location" value={form.warehouseLocation} onChange={(e) => setForm({ ...form, warehouseLocation: e.target.value })} />
           </div>
           <select className="aes-input" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} required>
-            <option value="">Select category</option>
+            <option value="">Category</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          <select className="aes-input" value={form.supplierId} onChange={(e) => setForm({ ...form, supplierId: e.target.value })}>
+            <option value="">Supplier (who you bought from)</option>
+            {suppliers.map((s) => (
+              <option key={s.id} value={s.id}>{s.brandName}</option>
+            ))}
+          </select>
           <select className="aes-input" value={form.sellerId} onChange={(e) => setForm({ ...form, sellerId: e.target.value, brandId: "" })} required>
-            <option value="">Select seller</option>
+            <option value="">Brand line (storefront display)</option>
             {sellers.map((s) => (
               <option key={s.id} value={s.id}>{s.businessName}</option>
             ))}
           </select>
           <select className="aes-input" value={form.brandId} onChange={(e) => setForm({ ...form, brandId: e.target.value })} required>
-            <option value="">Select brand</option>
+            <option value="">Brand name on site</option>
             {brands.map((b) => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>
           <Input placeholder="Image URL" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
-          <Input placeholder="Tags (comma-separated, e.g. ceramic, wellness, handmade)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
-          <Input placeholder="Mood (e.g. calm, celebratory, creative)" value={form.mood} onChange={(e) => setForm({ ...form, mood: e.target.value })} />
+          <Input placeholder="Tags (comma-separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+          <Input placeholder="Mood" value={form.mood} onChange={(e) => setForm({ ...form, mood: e.target.value })} />
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit">Create product</Button>
+          <Button type="submit">Add to inventory</Button>
         </form>
       </Card>
     </div>

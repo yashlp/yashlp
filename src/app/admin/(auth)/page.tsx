@@ -1,17 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card } from "@/components/aesthetics/ui/card";
 
 type DashboardStats = {
   sales: { today: number; week: number; month: number; year: number };
-  orders: { pending: number; delivered: number; cancelled: number };
+  orders: {
+    today: number;
+    pending: number;
+    toPack: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+  };
   refunds: { pending: number };
-  users: { customers: number; sellers: number };
-  alerts: { lowStock: number };
+  returns: { pending: number };
+  inventory: { value: number; lowStock: number };
+  users: { customers: number; suppliers: number };
+  topProducts: { id: string; name: string; slug: string; sold: number }[];
+  bestCategories: { name: string; revenue: number }[];
   chart: { date: string; revenue: number; orders: number }[];
   recentOrders: { id: string; orderNumber: string; total: number; status: string }[];
 };
+
+function formatInr(n: number) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+}
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -35,14 +50,14 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <h1 className="aes-display text-3xl font-semibold italic text-[var(--aes-charcoal)]">Dashboard</h1>
-      <p className="mt-1 text-[var(--aes-charcoal-muted)]">Commerce management overview</p>
+      <p className="mt-1 text-[var(--aes-charcoal-muted)]">Only Aesthetics — direct-to-consumer operations</p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Today", value: `$${stats.sales.today.toFixed(0)}` },
-          { label: "This week", value: `$${stats.sales.week.toFixed(0)}` },
-          { label: "This month", value: `$${stats.sales.month.toFixed(0)}` },
-          { label: "This year", value: `$${stats.sales.year.toFixed(0)}` },
+          { label: "Today's revenue", value: formatInr(stats.sales.today) },
+          { label: "Today's orders", value: String(stats.orders.today) },
+          { label: "Pending orders", value: String(stats.orders.pending) },
+          { label: "Orders to pack", value: String(stats.orders.toPack) },
         ].map(({ label, value }) => (
           <Card key={label} hover={false}>
             <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">{label}</p>
@@ -51,39 +66,80 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Pending orders</p><p className="text-2xl font-semibold">{stats.orders.pending}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Delivered</p><p className="text-2xl font-semibold">{stats.orders.delivered}</p></Card>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Shipped</p><p className="text-2xl font-semibold">{stats.orders.shipped}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Returns</p><p className="text-2xl font-semibold">{stats.returns.pending}</p></Card>
         <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Refund requests</p><p className="text-2xl font-semibold">{stats.refunds.pending}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Low stock alerts</p><p className="text-2xl font-semibold">{stats.alerts.lowStock}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Low stock alerts</p><p className="text-2xl font-semibold">{stats.inventory.lowStock}</p></Card>
       </div>
 
-      <Card className="mt-8" hover={false}>
-        <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Revenue — last 7 days</p>
-        <div className="mt-6 flex h-36 items-end gap-2">
-          {stats.chart.map((d) => (
-            <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
-              <div
-                className="w-full rounded-t-lg bg-[var(--aes-royal)] opacity-85"
-                style={{ height: `${(d.revenue / maxRevenue) * 100}%`, minHeight: d.revenue > 0 ? 8 : 0 }}
-              />
-              <span className="aes-mono text-[8px] text-[var(--aes-dusty)]">{d.date.slice(5)}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Card hover={false}>
+          <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Inventory value (at cost)</p>
+          <p className="mt-2 text-2xl font-semibold">{formatInr(stats.inventory.value)}</p>
+        </Card>
+        <Card hover={false}>
+          <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Active suppliers</p>
+          <p className="mt-2 text-2xl font-semibold">{stats.users.suppliers}</p>
+        </Card>
+      </div>
 
-      <Card className="mt-8" hover={false}>
-        <h2 className="font-semibold">Recent orders</h2>
-        <ul className="mt-4 space-y-2 text-sm">
-          {stats.recentOrders.map((o) => (
-            <li key={o.id} className="flex justify-between border-b border-[var(--aes-border)] py-2">
-              <span>{o.orderNumber}</span>
-              <span className="text-[var(--aes-charcoal-muted)]">{o.status} · ${o.total}</span>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <Card hover={false}>
+          <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Revenue — last 7 days</p>
+          <div className="mt-6 flex h-36 items-end gap-2">
+            {stats.chart.map((d) => (
+              <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
+                <div
+                  className="w-full rounded-t-lg bg-[var(--aes-royal)] opacity-85"
+                  style={{ height: `${(d.revenue / maxRevenue) * 100}%`, minHeight: d.revenue > 0 ? 8 : 0 }}
+                />
+                <span className="aes-mono text-[8px] text-[var(--aes-dusty)]">{d.date.slice(5)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card hover={false}>
+          <h2 className="font-semibold">Top selling products</h2>
+          <ul className="mt-4 space-y-2 text-sm">
+            {stats.topProducts.length === 0 && <li className="text-[var(--aes-dusty)]">No sales yet</li>}
+            {stats.topProducts.map((p) => (
+              <li key={p.id} className="flex justify-between border-b border-[var(--aes-border)] py-2">
+                <Link href={`/admin/products`} className="hover:text-[var(--aes-royal)]">{p.name}</Link>
+                <span className="text-[var(--aes-charcoal-muted)]">{p.sold} sold</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card hover={false}>
+          <h2 className="font-semibold">Best performing categories</h2>
+          <ul className="mt-4 space-y-2 text-sm">
+            {stats.bestCategories.length === 0 && <li className="text-[var(--aes-dusty)]">No category data yet</li>}
+            {stats.bestCategories.map((c) => (
+              <li key={c.name} className="flex justify-between border-b border-[var(--aes-border)] py-2">
+                <span>{c.name}</span>
+                <span className="text-[var(--aes-charcoal-muted)]">{formatInr(c.revenue)}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+
+        <Card hover={false}>
+          <h2 className="font-semibold">Recent orders</h2>
+          <ul className="mt-4 space-y-2 text-sm">
+            {stats.recentOrders.map((o) => (
+              <li key={o.id} className="flex justify-between border-b border-[var(--aes-border)] py-2">
+                <Link href="/admin/orders" className="hover:text-[var(--aes-royal)]">{o.orderNumber}</Link>
+                <span className="text-[var(--aes-charcoal-muted)]">{o.status} · {formatInr(o.total)}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -86,10 +86,11 @@ export const productService = {
   },
 
   async create(data: ProductCreateInput) {
-    const { images, materials, tags, colors, specifications, ...rest } = data;
+    const { images, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
     const product = await prisma.commerceProduct.create({
       data: {
         ...rest,
+        purchaseDate: purchaseDate ? new Date(purchaseDate) : undefined,
         materials: toJsonArray(materials),
         tags: toJsonArray(tags),
         colors: toJsonArray(colors),
@@ -113,7 +114,7 @@ export const productService = {
   },
 
   async update(id: string, data: ProductUpdateInput) {
-    const { images, materials, tags, colors, specifications, ...rest } = data;
+    const { images, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
 
     if (images) {
       await prisma.commerceProductMedia.deleteMany({ where: { productId: id } });
@@ -136,6 +137,9 @@ export const productService = {
         ...(colors !== undefined && { colors: toJsonArray(colors) }),
         ...(specifications !== undefined && {
           specifications: JSON.stringify(specifications),
+        }),
+        ...(purchaseDate !== undefined && {
+          purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
         }),
         ...(rest.status === "PUBLISHED" && { publishedAt: new Date() }),
       },

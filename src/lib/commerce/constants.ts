@@ -5,7 +5,7 @@ export const ADMIN_ROLES = [
   "CUSTOMER_SUPPORT",
   "FINANCE",
   "CONTENT_MANAGER",
-  "SELLER_MANAGER",
+  "SUPPLIER_MANAGER",
 ] as const;
 
 export type AdminRole = (typeof ADMIN_ROLES)[number];
@@ -24,8 +24,14 @@ export const PERMISSIONS = [
   "payments:read",
   "customers:read",
   "customers:write",
-  "sellers:read",
-  "sellers:write",
+  "suppliers:read",
+  "suppliers:write",
+  "inventory:read",
+  "inventory:write",
+  "purchases:read",
+  "purchases:write",
+  "shipping:read",
+  "shipping:write",
   "content:read",
   "content:write",
   "marketing:read",
@@ -59,8 +65,13 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[] | ["*"]> = {
     "refunds:write",
     "payments:read",
     "customers:read",
-    "sellers:read",
-    "sellers:write",
+    "suppliers:read",
+    "suppliers:write",
+    "inventory:read",
+    "inventory:write",
+    "purchases:read",
+    "purchases:write",
+    "shipping:read",
     "content:read",
     "content:write",
     "marketing:read",
@@ -103,9 +114,13 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[] | ["*"]> = {
     "marketing:read",
     "marketing:write",
   ],
-  SELLER_MANAGER: [
-    "sellers:read",
-    "sellers:write",
+  SUPPLIER_MANAGER: [
+    "suppliers:read",
+    "suppliers:write",
+    "inventory:read",
+    "inventory:write",
+    "purchases:read",
+    "purchases:write",
     "products:read",
     "products:approve",
   ],
@@ -113,6 +128,10 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[] | ["*"]> = {
 
 export const PRODUCT_STATUSES = ["DRAFT", "PUBLISHED", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"] as const;
 export const APPROVAL_STATUSES = ["PENDING", "APPROVED", "REJECTED"] as const;
+export const PO_STATUSES = ["DRAFT", "ORDERED", "PARTIAL", "RECEIVED", "CANCELLED"] as const;
+export const PO_PAYMENT_STATUSES = ["PENDING", "PARTIAL", "PAID"] as const;
+export const RETURN_STATUSES = ["REQUESTED", "APPROVED", "REJECTED", "RECEIVED", "REFUNDED", "REPLACED"] as const;
+export const SUPPLIER_STATUSES = ["ACTIVE", "INACTIVE", "ON_HOLD"] as const;
 export const ORDER_STATUSES = [
   "PENDING",
   "CONFIRMED",

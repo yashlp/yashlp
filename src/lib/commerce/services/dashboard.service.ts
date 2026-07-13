@@ -9,6 +9,10 @@ function sumOrders(where: object) {
   });
 }
 
+function isLowStock(stock: number, minStock: number) {
+  return stock <= (minStock > 0 ? minStock : 5);
+}
+
 export const dashboardService = {
   async getStats() {
     const now = new Date();
@@ -23,27 +27,35 @@ export const dashboardService = {
       month,
       year,
       pendingOrders,
+      packedOrders,
+      shippedOrders,
       deliveredOrders,
       cancelledOrders,
       refundRequests,
+      returnRequests,
       activeCustomers,
-      activeSellers,
-      lowStock,
+      activeSuppliers,
+      products,
       topProducts,
       recentOrders,
+      topCategories,
     ] = await Promise.all([
       sumOrders({ createdAt: { gte: todayStart }, status: { not: "CANCELLED" } }),
       sumOrders({ createdAt: { gte: weekStart }, status: { not: "CANCELLED" } }),
       sumOrders({ createdAt: { gte: monthStart }, status: { not: "CANCELLED" } }),
       sumOrders({ createdAt: { gte: yearStart }, status: { not: "CANCELLED" } }),
-      prisma.commerceOrder.count({ where: { status: "PENDING" } }),
+      prisma.commerceOrder.count({ where: { status: { in: ["PENDING", "CONFIRMED"] } } }),
+      prisma.commerceOrder.count({ where: { status: "PACKED" } }),
+      prisma.commerceOrder.count({ where: { status: { in: ["SHIPPED", "OUT_FOR_DELIVERY"] } } }),
       prisma.commerceOrder.count({ where: { status: "DELIVERED" } }),
       prisma.commerceOrder.count({ where: { status: "CANCELLED" } }),
       prisma.commerceRefund.count({ where: { status: "PENDING" } }),
+      prisma.commerceReturn.count({ where: { status: "REQUESTED" } }),
       prisma.commerceCustomer.count({ where: { status: "ACTIVE" } }),
-      prisma.commerceSeller.count({ where: { status: "APPROVED" } }),
-      prisma.commerceProduct.count({
-        where: { stock: { lte: 5 }, status: "PUBLISHED" },
+      prisma.commerceSupplier.count({ where: { status: "ACTIVE" } }),
+      prisma.commerceProduct.findMany({
+        where: { status: { not: "ARCHIVED" } },
+        select: { stock: true, purchaseCost: true, minStock: true, status: true },
       }),
       prisma.commerceOrderItem.groupBy({
         by: ["productId"],
@@ -56,13 +68,42 @@ export const dashboardService = {
         orderBy: { createdAt: "desc" },
         include: { customer: true },
       }),
+      prisma.commerceOrderItem.groupBy({
+        by: ["productId"],
+        _sum: { total: true },
+        orderBy: { _sum: { total: "desc" } },
+        take: 20,
+      }),
     ]);
+
+    const published = products.filter((p) => p.status === "PUBLISHED");
+    const lowStock = published.filter((p) => isLowStock(p.stock, p.minStock)).length;
+    const inventoryValue = products.reduce(
+      (sum, p) => sum + (p.purchaseCost ? p.stock * p.purchaseCost : 0),
+      0
+    );
 
     const topProductIds = topProducts.map((t) => t.productId);
     const topProductDetails = await prisma.commerceProduct.findMany({
       where: { id: { in: topProductIds } },
       select: { id: true, name: true, slug: true },
     });
+
+    const categoryProducts = await prisma.commerceProduct.findMany({
+      where: { id: { in: topCategories.map((c) => c.productId) } },
+      select: { id: true, category: { select: { name: true, slug: true } } },
+    });
+    const categoryTotals = new Map<string, { name: string; revenue: number }>();
+    for (const row of topCategories) {
+      const cat = categoryProducts.find((p) => p.id === row.productId)?.category;
+      if (!cat) continue;
+      const existing = categoryTotals.get(cat.slug) || { name: cat.name, revenue: 0 };
+      existing.revenue += row._sum.total || 0;
+      categoryTotals.set(cat.slug, existing);
+    }
+    const bestCategories = [...categoryTotals.values()]
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
 
     const last7Days = await Promise.all(
       Array.from({ length: 7 }, (_, i) => {
@@ -91,16 +132,20 @@ export const dashboardService = {
         week: week._count,
         month: month._count,
         pending: pendingOrders,
+        toPack: packedOrders,
+        shipped: shippedOrders,
         delivered: deliveredOrders,
         cancelled: cancelledOrders,
       },
       refunds: { pending: refundRequests },
-      users: { customers: activeCustomers, sellers: activeSellers },
-      alerts: { lowStock },
+      returns: { pending: returnRequests },
+      inventory: { value: inventoryValue, lowStock },
+      users: { customers: activeCustomers, suppliers: activeSuppliers },
       topProducts: topProductDetails.map((p) => ({
         ...p,
         sold: topProducts.find((t) => t.productId === p.id)?._sum.quantity || 0,
       })),
+      bestCategories,
       chart: last7Days,
       recentOrders,
     };

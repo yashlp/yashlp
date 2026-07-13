@@ -466,12 +466,18 @@ model CommerceProduct {
   rating           Float    @default(0)
   reviewCount      Int      @default(0)
   publishedAt      DateTime?
+  // D2C inventory — Only Aesthetics owns stock
+  purchaseCost     Float?
+  warehouseLocation String?
+  supplierId       String?
+  purchaseDate     DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   seller       CommerceSeller         @relation(fields: [sellerId], references: [id])
   brand        CommerceBrand          @relation(fields: [brandId], references: [id])
   category     CommerceCategory       @relation(fields: [categoryId], references: [id])
+  supplier     CommerceSupplier?      @relation(fields: [supplierId], references: [id])
   media        CommerceProductMedia[]
   variants     CommerceProductVariant[]
   orderItems   CommerceOrderItem[]
@@ -481,6 +487,7 @@ model CommerceProduct {
   @@index([sellerId])
   @@index([brandId])
   @@index([categoryId])
+  @@index([supplierId])
   @@index([status, approvalStatus])
   @@index([slug])
 }
@@ -638,6 +645,7 @@ model CommerceOrder {
   items    CommerceOrderItem[]
   payments CommercePayment[]
   refunds  CommerceRefund[]
+  returns  CommerceReturn[]
 
   @@index([status])
   @@index([customerId])
@@ -748,5 +756,92 @@ model CommerceSetting {
   group     String   @default("general")
   updatedAt DateTime @updatedAt
   updatedBy String?
+}
+
+// ─── D2C Operations (Only Aesthetics owns inventory) ─────────────────────────
+
+model CommerceSupplier {
+  id               String   @id @default(cuid())
+  brandName        String
+  slug             String   @unique
+  contactPerson    String?
+  mobile           String?
+  email            String?
+  gstNumber        String?
+  panNumber        String?
+  bankDetails      String?  // JSON: account, ifsc, bank name
+  productCategories String? // JSON array of category slugs
+  documents        String?  // JSON array of document URLs
+  address          String?
+  notes            String?
+  status           String   @default("ACTIVE")
+  outstandingBalance Float @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  products       CommerceProduct[]
+  purchaseOrders CommercePurchaseOrder[]
+
+  @@index([status])
+}
+
+model CommercePurchaseOrder {
+  id               String   @id @default(cuid())
+  poNumber         String   @unique
+  supplierId       String
+  status           String   @default("DRAFT")
+  paymentStatus    String   @default("PENDING")
+  orderDate        DateTime @default(now())
+  expectedDelivery DateTime?
+  invoiceNumber    String?
+  invoiceUrl       String?
+  subtotal         Float    @default(0)
+  tax              Float    @default(0)
+  total            Float    @default(0)
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  supplier CommerceSupplier            @relation(fields: [supplierId], references: [id])
+  lines    CommercePurchaseOrderLine[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([orderDate])
+}
+
+model CommercePurchaseOrderLine {
+  id                String  @id @default(cuid())
+  purchaseOrderId   String
+  productId         String?
+  sku               String?
+  name              String
+  quantityOrdered   Int
+  quantityReceived  Int     @default(0)
+  quantityDamaged   Int     @default(0)
+  unitCost          Float
+  total             Float
+
+  purchaseOrder CommercePurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseOrderId])
+}
+
+model CommerceReturn {
+  id          String   @id @default(cuid())
+  orderId     String
+  status      String   @default("REQUESTED")
+  type        String   @default("REFUND")
+  reason      String?
+  condition   String?
+  refundAmount Float?
+  adminNotes  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  order CommerceOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
 }
 
