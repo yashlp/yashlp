@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
-import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
-import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
+import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { Input } from "@/components/aesthetics/ui/input";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
@@ -29,12 +28,11 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <>
-      <ConsumerNav cartCount={cartCount} />
+    <ConsumerPage cartCount={cartCount} tint="sand">
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <h1 className="aes-display text-4xl font-semibold italic text-[var(--aes-charcoal)]">Search</h1>
+        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">search</h1>
         <div className="relative mt-8 max-w-xl">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--aes-dusty)]" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--aes-ink-soft)]" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -44,17 +42,16 @@ export default function SearchPage() {
           />
         </div>
         {query && (
-          <p className="aes-mono mt-4 text-xs uppercase tracking-wider text-[var(--aes-dusty)]">
+          <p className="mt-4 text-xs font-bold uppercase tracking-wider text-[var(--aes-ink-muted)]">
             {results.length} result{results.length !== 1 ? "s" : ""}
           </p>
         )}
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {results.map((p) => (
-            <ProductCard key={p.id} product={p} />
+        <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          {results.map((p, i) => (
+            <ProductCard key={p.id} product={p} index={i} quickAdd variant="grid" />
           ))}
         </div>
       </main>
-      <ConsumerFooter />
-    </>
+    </ConsumerPage>
   );
 }

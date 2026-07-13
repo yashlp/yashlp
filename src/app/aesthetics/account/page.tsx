@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
-import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
+import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 
 type Customer = { id: string; name: string | null; email: string | null; phone: string | null };
@@ -32,25 +31,21 @@ export default function AccountPage() {
   }
 
   if (customer === undefined) {
-    return <div className="min-h-dvh bg-[var(--aes-cream)]" />;
+    return <div className="min-h-dvh aes-site-bg" />;
   }
 
   return (
-    <>
-      <ConsumerNav />
+    <ConsumerPage tint="warm">
       <main className="mx-auto max-w-lg px-4 py-16 sm:px-6">
-        <h1 className="aes-section-title text-[var(--aes-ink)]">My account</h1>
-        <div className="mt-8 rounded-3xl bg-white p-8 shadow-md">
+        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">my account</h1>
+        <div className="aes-panel-warm mt-8 p-8">
           <p className="text-sm text-[var(--aes-ink-muted)]">Signed in as</p>
           <p className="mt-1 text-xl font-bold text-[var(--aes-ink)]">{customer?.name || "Customer"}</p>
-          {customer?.email && <p className="mt-2 text-sm">{customer.email}</p>}
-          {customer?.phone && <p className="text-sm">{customer.phone}</p>}
+          {customer?.email && <p className="mt-2 text-sm text-[var(--aes-ink)]">{customer.email}</p>}
+          {customer?.phone && <p className="text-sm text-[var(--aes-ink)]">{customer.phone}</p>}
           <div className="mt-8 flex flex-col gap-3">
             <Link href="/aesthetics/shop">
               <Button className="w-full">Continue shopping</Button>
-            </Link>
-            <Link href="/aesthetics/shop">
-              <Button variant="secondary" className="w-full">Continue shopping</Button>
             </Link>
             <button type="button" onClick={logout} className="text-sm text-[var(--aes-ink-soft)] underline">
               Sign out
@@ -58,7 +53,6 @@ export default function AccountPage() {
           </div>
         </div>
       </main>
-      <ConsumerFooter />
-    </>
+    </ConsumerPage>
   );
 }

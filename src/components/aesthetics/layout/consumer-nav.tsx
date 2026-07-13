@@ -36,7 +36,7 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
     <header
       className={cn(
         "sticky top-0 z-[200] w-full transition-all duration-300",
-        scrolled ? "bg-[var(--aes-bg-base)]/95 shadow-sm backdrop-blur-md" : "bg-transparent"
+        scrolled ? "bg-[var(--aes-bg-base)]/90 shadow-sm backdrop-blur-md" : "bg-transparent"
       )}
     >
       <div className="mx-auto grid max-w-7xl grid-cols-3 items-center gap-2 px-4 py-4 sm:px-6">

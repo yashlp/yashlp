@@ -3,8 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
-import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
+import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
 
@@ -54,8 +53,7 @@ function SuccessContent() {
   }
 
   return (
-    <>
-      <ConsumerNav />
+    <ConsumerPage tint="lavender">
       <main className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
         <p className="aes-label">Order confirmed</p>
         <h1 className="aes-section-title mt-3 text-[var(--aes-ink)]">Thank you!</h1>
@@ -64,7 +62,7 @@ function SuccessContent() {
         </p>
 
         {showAccount && (
-          <div className="mt-12 rounded-3xl bg-white p-8 text-left shadow-md">
+          <div className="aes-panel-lavender mt-12 p-8 text-left">
             <h2 className="text-lg font-bold text-[var(--aes-ink)]">Save your details for next time</h2>
             <p className="mt-2 text-sm text-[var(--aes-ink-muted)]">
               Create a permanent account with your delivery details. Next time, sign in with your email
@@ -97,23 +95,19 @@ function SuccessContent() {
           </div>
         )}
 
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link href="/aesthetics/shop">
-            <Button variant="secondary">Continue shopping</Button>
-          </Link>
+        <div className="mt-10">
           <Link href="/aesthetics/shop">
             <Button>Continue shopping</Button>
           </Link>
         </div>
       </main>
-      <ConsumerFooter />
-    </>
+    </ConsumerPage>
   );
 }
 
 export default function CheckoutSuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-[var(--aes-cream)]" />}>
+    <Suspense fallback={<div className="min-h-dvh aes-site-bg" />}>
       <SuccessContent />
     </Suspense>
   );

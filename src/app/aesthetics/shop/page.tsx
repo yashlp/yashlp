@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
-import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
+import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { scoreProduct } from "@/lib/aesthetics/preferences";
@@ -53,9 +52,8 @@ export default function ShopPage() {
   }, [products, prefs]);
 
   return (
-    <>
-      <ConsumerNav cartCount={cartCount} />
-      <main className="mx-auto max-w-7xl bg-[var(--aes-bg-base)] px-4 pb-16 pt-6 sm:px-6">
+    <ConsumerPage cartCount={cartCount} tint="blush">
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
         <div className="py-10 text-center">
           <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">shop the entire collection</h1>
         </div>
@@ -70,7 +68,7 @@ export default function ShopPage() {
                 "rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all",
                 category === id
                   ? "bg-[var(--aes-ink)] text-white"
-                  : "border border-[var(--aes-ink)] text-[var(--aes-ink)] hover:bg-[var(--aes-ink)] hover:text-white"
+                  : "border border-[var(--aes-ink)]/20 bg-white/50 text-[var(--aes-ink)] hover:bg-[var(--aes-ink)] hover:text-white"
               )}
             >
               {label}
@@ -106,7 +104,6 @@ export default function ShopPage() {
           </Link>
         </section>
       </main>
-      <ConsumerFooter />
-    </>
+    </ConsumerPage>
   );
 }

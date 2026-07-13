@@ -50,7 +50,7 @@ export const viewport: Viewport = {
 export default function AestheticsLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`aesthetics-root aes-mesh-bg min-h-dvh ${body.variable} ${display.variable} ${serif.variable} ${mono.variable}`}
+      className={`aesthetics-root aes-site-bg min-h-dvh ${body.variable} ${display.variable} ${serif.variable} ${mono.variable}`}
     >
       <CartProvider>{children}</CartProvider>
     </div>

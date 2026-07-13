@@ -40,7 +40,7 @@ export function TestimonialsSection() {
           {REVIEWS.map((review) => (
             <blockquote
               key={review.name}
-              className="w-[280px] shrink-0 rounded-2xl bg-white/80 p-6 backdrop-blur-sm sm:w-[300px]"
+              className="w-[280px] shrink-0 rounded-2xl aes-panel p-6 sm:w-[300px]"
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (

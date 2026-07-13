@@ -24,7 +24,7 @@ export function BundleSection() {
           {TIERS.map((tier) => (
             <div
               key={tier.spend}
-              className="rounded-2xl bg-white/70 px-6 py-10 shadow-sm backdrop-blur-sm"
+              className="rounded-2xl aes-panel px-6 py-10"
             >
               <p className="text-xs font-bold lowercase text-[var(--aes-ink-muted)]">
                 spend {tier.spend}

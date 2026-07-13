@@ -1,5 +1,4 @@
-import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
-import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
+import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { CollectionCard } from "@/components/aesthetics/home/collection-card";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 
@@ -14,22 +13,22 @@ export default async function CollectionsPage() {
   }
 
   return (
-    <>
-      <ConsumerNav />
+    <ConsumerPage tint="sand">
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <p className="aes-mono text-[10px] uppercase tracking-[0.3em] text-[var(--aes-dusty)]">Explore</p>
-        <h1 className="aes-display mt-2 text-4xl font-semibold italic text-[var(--aes-charcoal)]">Collections</h1>
+        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">collections</h1>
+        <p className="mt-3 max-w-lg text-sm text-[var(--aes-ink-muted)]">
+          Curated edits for every mood — calm mornings, creative nights, and everything between.
+        </p>
         {collections.length === 0 ? (
-          <p className="mt-12 text-[var(--aes-charcoal-muted)]">No collections published yet.</p>
+          <p className="mt-12 text-[var(--aes-ink-muted)]">No collections published yet.</p>
         ) : (
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {collections.map((c) => (
-              <CollectionCard key={c.id} collection={c} />
+            {collections.map((c, i) => (
+              <CollectionCard key={c.id} collection={c} index={i} />
             ))}
           </div>
         )}
       </main>
-      <ConsumerFooter />
-    </>
+    </ConsumerPage>
   );
 }

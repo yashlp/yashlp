@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
-import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
+import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 
@@ -15,31 +14,32 @@ export default async function CollectionDetailPage({ params }: Props) {
   const products = collection.products || [];
 
   return (
-    <>
-      <ConsumerNav />
+    <ConsumerPage tint="lavender">
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="relative mb-12 aspect-[21/9] overflow-hidden rounded-3xl">
+        <div className="relative mb-12 aspect-[21/9] overflow-hidden rounded-3xl bg-[var(--aes-bg-lavender-deep)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={collection.image} alt={collection.title} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--aes-bg-dark)]/60 to-transparent" />
           <div className="absolute inset-0 flex flex-col justify-end p-8 text-white sm:p-12">
-            <p className="aes-mono text-[10px] uppercase tracking-[0.3em] text-white/70">Collection</p>
-            <h1 className="aes-display mt-2 text-4xl font-semibold italic sm:text-5xl">{collection.title}</h1>
-            <p className="mt-3 max-w-lg text-white/80">{collection.description}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/70">Collection</p>
+            <h1 className="aes-joy-title-lower mt-2 text-white">{collection.title}</h1>
+            <p className="mt-3 max-w-lg text-white/85">{collection.description}</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          {products.map((p, i) => (
+            <ProductCard key={p.id} product={p} index={i} quickAdd variant="grid" />
           ))}
         </div>
         <div className="mt-12 text-center">
-          <Link href="/aesthetics/collections" className="aes-mono text-xs uppercase tracking-wider text-[var(--aes-royal)]">
+          <Link
+            href="/aesthetics/collections"
+            className="text-xs font-bold uppercase tracking-wider text-[var(--aes-pink)] hover:underline"
+          >
             ← All collections
           </Link>
         </div>
       </main>
-      <ConsumerFooter />
-    </>
+    </ConsumerPage>
   );
 }

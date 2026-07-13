@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
-import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
+import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
 
@@ -84,15 +83,14 @@ export default function AccountLoginPage() {
   }
 
   return (
-    <>
-      <ConsumerNav />
+    <ConsumerPage tint="blush">
       <main className="mx-auto max-w-md px-4 py-16 sm:px-6">
-        <h1 className="aes-section-title text-center text-[var(--aes-ink)]">Sign in</h1>
+        <h1 className="aes-joy-title-lower text-center text-[var(--aes-ink)]">sign in</h1>
         <p className="mt-3 text-center text-sm text-[var(--aes-ink-muted)]">
           Use your email and password, or sign in with your phone number.
         </p>
 
-        <div className="mt-8 flex rounded-full bg-white p-1 shadow-sm">
+        <div className="aes-panel mt-8 flex p-1">
           <button
             type="button"
             onClick={() => { setMode("email"); setError(""); }}
@@ -110,7 +108,7 @@ export default function AccountLoginPage() {
         </div>
 
         {mode === "email" ? (
-          <form onSubmit={loginEmail} className="mt-6 space-y-4">
+          <form onSubmit={loginEmail} className="aes-panel mt-6 space-y-4 p-6">
             <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             {error && <p className="text-sm text-red-600">{error}</p>}
@@ -119,7 +117,7 @@ export default function AccountLoginPage() {
             </Button>
           </form>
         ) : !otpSent ? (
-          <form onSubmit={sendOtp} className="mt-6 space-y-4">
+          <form onSubmit={sendOtp} className="aes-panel mt-6 space-y-4 p-6">
             <Input type="tel" placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} required />
             {error && <p className="text-sm text-red-600">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
@@ -127,7 +125,7 @@ export default function AccountLoginPage() {
             </Button>
           </form>
         ) : (
-          <form onSubmit={verifyOtp} className="mt-6 space-y-4">
+          <form onSubmit={verifyOtp} className="aes-panel mt-6 space-y-4 p-6">
             <Input placeholder="6-digit code" value={code} onChange={(e) => setCode(e.target.value)} required maxLength={6} />
             {devCode && <p className="text-xs text-[var(--aes-ink-soft)]">Dev code: {devCode}</p>}
             {error && <p className="text-sm text-red-600">{error}</p>}
@@ -143,7 +141,6 @@ export default function AccountLoginPage() {
           </Link>
         </p>
       </main>
-      <ConsumerFooter />
-    </>
+    </ConsumerPage>
   );
 }
