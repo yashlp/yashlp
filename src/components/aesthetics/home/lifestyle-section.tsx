@@ -1,7 +1,7 @@
 const PILLARS = [
   {
-    title: "Discover & Delight",
-    body: "Swipe through full-screen reels. Swipe right to cart, left to pass — AI learns what moves you.",
+    title: "Browse & Delight",
+    body: "Explore editorial collections from independent makers. Every object tells a story worth keeping.",
     color: "var(--aes-pink)",
   },
   {

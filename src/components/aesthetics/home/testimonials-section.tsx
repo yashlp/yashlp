@@ -1,7 +1,7 @@
 const REVIEWS = [
   {
     name: "Tina A.",
-    text: "Discover mode completely changed how I shop. The AI actually gets my taste — every swipe feels personal.",
+    text: "The curation completely changed how I shop. Every collection feels personal and thoughtful.",
   },
   {
     name: "Sara M.",

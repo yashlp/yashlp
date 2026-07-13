@@ -3,7 +3,6 @@ const BENEFITS = [
   "Independent makers",
   "Curated daily",
   "AI taste learning",
-  "Discover mode",
   "Free returns",
 ];
 

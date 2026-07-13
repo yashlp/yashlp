@@ -31,7 +31,7 @@ const mono = DM_Sans({
 export const metadata: Metadata = {
   title: { default: "Aesthetics", template: "%s · Aesthetics" },
   description:
-    "Curated design objects for joyful living. Shop editorially or swipe through Discover mode — AI learns your taste.",
+    "Curated design objects for joyful living. Shop editorial collections from independent makers.",
   applicationName: "Aesthetics",
   openGraph: {
     title: "Aesthetics — Curated Design Marketplace",

@@ -53,11 +53,6 @@ export function HeroSection() {
                   Shop now
                 </Button>
               </Link>
-              <Link href="/aesthetics/discover">
-                <Button variant="secondary" size="lg" className="min-w-[180px]">
-                  Discover mode
-                </Button>
-              </Link>
             </div>
           </div>
 

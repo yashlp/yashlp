@@ -10,7 +10,7 @@ export function FunctionFunSection() {
             <h2 className="aes-section-title text-white">
               Where curation
               <br />
-              meets discovery
+              meets craft
             </h2>
           </div>
           <div>
@@ -18,8 +18,8 @@ export function FunctionFunSection() {
               We provide joy-enhancing alternatives to endless scrolling — a smarter way to find
               objects that match your better-for-you lifestyle choices.
             </p>
-            <Link href="/aesthetics/discover" className="mt-8 inline-block">
-              <Button variant="light">Learn more</Button>
+            <Link href="/aesthetics/collections" className="mt-8 inline-block">
+              <Button variant="light">View collections</Button>
             </Link>
           </div>
         </div>

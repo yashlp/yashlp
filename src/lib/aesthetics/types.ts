@@ -64,4 +64,4 @@ export type Product = {
   newArrival?: boolean;
 };
 
-export type ShopMode = "classic" | "discover";
+export type ShopMode = "classic";

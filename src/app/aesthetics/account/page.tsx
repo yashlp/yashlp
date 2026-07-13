@@ -46,8 +46,8 @@ export default function AccountPage() {
           {customer?.email && <p className="mt-2 text-sm">{customer.email}</p>}
           {customer?.phone && <p className="text-sm">{customer.phone}</p>}
           <div className="mt-8 flex flex-col gap-3">
-            <Link href="/aesthetics/discover">
-              <Button className="w-full">Open discover mode</Button>
+            <Link href="/aesthetics/shop">
+              <Button className="w-full">Continue shopping</Button>
             </Link>
             <Link href="/aesthetics/shop">
               <Button variant="secondary" className="w-full">Continue shopping</Button>

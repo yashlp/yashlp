@@ -38,6 +38,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/aesthetics/discover",
+        destination: "/aesthetics/shop",
+        permanent: true,
+      },
+      {
         source: "/platform-admin",
         destination: "/admin/login",
         permanent: true,

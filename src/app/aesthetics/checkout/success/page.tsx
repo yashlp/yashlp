@@ -98,8 +98,8 @@ function SuccessContent() {
         )}
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link href="/aesthetics/discover">
-            <Button variant="secondary">Back to discover</Button>
+          <Link href="/aesthetics/shop">
+            <Button variant="secondary">Continue shopping</Button>
           </Link>
           <Link href="/aesthetics/shop">
             <Button>Continue shopping</Button>

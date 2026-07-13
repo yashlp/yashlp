@@ -17,9 +17,9 @@ export default function WishlistPage() {
         <h1 className="aes-display text-4xl font-semibold italic text-[var(--aes-charcoal)]">Wishlist</h1>
         {wishlist.length === 0 ? (
           <div className="mt-16 text-center">
-            <p className="text-[var(--aes-charcoal-muted)]">Save pieces you love — double-tap in Discover mode.</p>
-            <Link href="/aesthetics/discover" className="mt-6 inline-block">
-              <Button variant="secondary">Open Discover</Button>
+            <p className="text-[var(--aes-charcoal-muted)]">Save pieces you love while you browse the shop.</p>
+            <Link href="/aesthetics/shop" className="mt-6 inline-block">
+              <Button variant="secondary">Browse shop</Button>
             </Link>
           </div>
         ) : (

@@ -90,8 +90,8 @@ export default function ShopPage() {
         ) : sorted.length === 0 ? (
           <p className="py-20 text-center text-[var(--aes-charcoal-muted)]">
             No products available right now. Check back soon or try{" "}
-            <Link href="/aesthetics/discover" className="text-[var(--aes-pink)] underline">
-              discover mode
+            <Link href="/aesthetics/shop" className="text-[var(--aes-pink)] underline">
+              the shop
             </Link>
             .
           </p>

@@ -63,8 +63,8 @@ export default async function AestheticsHomePage() {
             <p className="text-lg font-medium text-[var(--aes-ink-muted)]">
               New products are on the way — check back soon.
             </p>
-            <Link href="/aesthetics/discover" className="aes-btn aes-btn-primary mt-6 inline-flex px-8 py-4">
-              Try discover mode
+            <Link href="/aesthetics/shop" className="aes-btn aes-btn-primary mt-6 inline-flex px-8 py-4">
+              Browse shop
             </Link>
           </section>
         )}

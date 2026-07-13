@@ -9,7 +9,7 @@ export function ConsumerFooter() {
         <div className="mx-auto max-w-7xl text-center">
           <p className="aes-display text-4xl sm:text-5xl">Join the joy</p>
           <p className="mx-auto mt-4 max-w-md text-sm text-white/70">
-            Get curated drops, discover mode tips, and exclusive offers from independent makers.
+            Get curated drops and exclusive offers from independent makers.
           </p>
           <form className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row" onSubmit={(e) => e.preventDefault()}>
             <input
@@ -39,7 +39,6 @@ export function ConsumerFooter() {
           <ul className="space-y-2 text-sm text-white/70">
             <li><Link href="/aesthetics/shop" className="hover:text-white">All products</Link></li>
             <li><Link href="/aesthetics/collections" className="hover:text-white">Collections</Link></li>
-            <li><Link href="/aesthetics/discover" className="hover:text-white">Discover mode</Link></li>
           </ul>
         </div>
         <div>

@@ -10,10 +10,9 @@ export function BundleSection() {
   return (
     <section className="bg-white px-4 py-16 sm:px-6 sm:py-20">
       <div className="mx-auto max-w-7xl text-center">
-        <h2 className="aes-section-title text-[var(--aes-ink)]">Discover &amp; save</h2>
+        <h2 className="aes-section-title text-[var(--aes-ink)]">Shop &amp; save</h2>
         <p className="mx-auto mt-4 max-w-xl text-sm text-[var(--aes-ink-muted)]">
-          Why pick one? Explore collections, try Discover mode, or build your cart — a little
-          something for every feeling.
+          Why pick one? Explore collections or build your cart — a little something for every feeling.
         </p>
 
         <p className="mt-8 text-sm font-bold uppercase tracking-widest text-[var(--aes-pink)]">
@@ -38,8 +37,8 @@ export function BundleSection() {
           <Link href="/aesthetics/shop" className="aes-btn aes-btn-primary px-8 py-3">
             Shop now
           </Link>
-          <Link href="/aesthetics/discover" className="aes-btn aes-btn-secondary px-8 py-3">
-            Try discover mode
+          <Link href="/aesthetics/collections" className="aes-btn aes-btn-secondary px-8 py-3">
+            View collections
           </Link>
         </div>
       </div>

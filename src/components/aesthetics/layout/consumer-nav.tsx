@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/aesthetics/shop", label: "Shop" },
   { href: "/aesthetics/collections", label: "Collections" },
-  { href: "/aesthetics/discover", label: "Discover" },
 ];
 
 type ConsumerNavProps = {
