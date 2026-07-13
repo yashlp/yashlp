@@ -31,5 +31,8 @@ npx prisma db push --skip-generate
 echo "→ ensure commerce admin"
 npx tsx scripts/ensure-commerce-admin.ts
 
+echo "→ seed demo commerce catalog"
+npx tsx prisma/seed-commerce.ts
+
 echo "→ next build"
 npx next build

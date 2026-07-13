@@ -1,12 +1,15 @@
 # Only Aesthetics — Live Demo Guide
 
-## Preview URL (D2C branch)
+## Production URLs
 
-**Storefront:** https://yashlp-git-cursor-d2c-admin-foundation-306c-yashlp1.vercel.app/aesthetics
+| Area | URL |
+|------|-----|
+| **Storefront** | https://yashlp.vercel.app/aesthetics |
+| **Shop** | https://yashlp.vercel.app/aesthetics/shop |
+| **Collections** | https://yashlp.vercel.app/aesthetics/collections |
+| **Admin login** | https://yashlp.vercel.app/admin/login |
 
-**Admin:** https://yashlp-git-cursor-d2c-admin-foundation-306c-yashlp1.vercel.app/admin/login
-
-> If you see a Vercel login screen, go to **Vercel → Project → Settings → Deployment Protection** and disable it for Preview deployments, then redeploy.
+Demo catalog is seeded automatically on every Vercel deploy (`prisma/seed-commerce.ts`).
 
 ---
 
@@ -17,53 +20,65 @@
 | Email | `yash.shah.lp2@gmail.com` |
 | Password | `Chester@2604` |
 
-Credentials are provisioned automatically on every Vercel deploy.
+### Demo staff accounts (same password)
 
-Required Vercel env var:
-- `DATABASE_URL` — Neon PostgreSQL
-
-Optional for online payments:
-- `RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
+| Email | Role |
+|-------|------|
+| `inventory@onlyaesthetics.in` | Inventory Manager |
+| `orders@onlyaesthetics.in` | Order Fulfillment |
+| `support@onlyaesthetics.in` | Customer Support |
+| `marketing@onlyaesthetics.in` | Marketing |
 
 ---
 
-## Demo walkthrough
+## Demo products (12 items)
 
-### 1. Storefront (customer)
-1. Open `/aesthetics` — browse homepage, collections, shop
-2. Add products to cart → **Checkout**
-3. Choose **COD** (always works) or **Razorpay** (if keys configured)
-4. Order creates with GST + ₹49 shipping (free over ₹999)
+| Product | Price | Test |
+|---------|-------|------|
+| Cloud Vessel | ₹2,899 | Featured, home |
+| Midnight Taper Set | ₹799 | Gifts under ₹999 |
+| Moss Journal | ₹499 | Desk Goals collection |
+| Pearl Drop Earrings | ₹3,999 | Sale price, trending |
+| Weighted Silk Eye Mask | ₹1,299 | Wellness |
+| Arc Floor Lamp | ₹9,999 | High-ticket |
+| Lavender Room Mist | ₹699 | Fragrance, new arrival |
+| Brass Desk Tray | ₹1,499 | Stationery |
+| Linen Throw Blanket | ₹2,499 | Cozy Corners |
+| Silk Scrunchie Trio | ₹399 | **Low stock alert** (3 units) |
+| Ceramic Pour-Over Set | ₹899 | Slow Mornings |
+| Cobalt Table Vase | ₹1,799 | Blue Edit |
 
-### 2. Admin dashboard
-- `/admin` — today's revenue, orders to pack, low stock, top products
+## Demo coupons
 
-### 3. Inventory & suppliers
-- `/admin/inventory` — stock, cost, margin, reorder levels
-- `/admin/suppliers` — brands you buy from
-- `/admin/purchases/new` — create purchase order
-- `/admin/purchases` — receive goods (updates stock)
+- `WELCOME10` — 10% off (min ₹499)
+- `FLAT100` — ₹100 off (min ₹999)
+- `FREESHIP` — free shipping
 
-### 4. Order fulfillment
-- `/admin/orders` — filter by status
-- Click order → **Mark packed** → **Ready to ship** → **Generate label** → **Mark shipped** → **Delivered**
+## Demo orders
 
-### 5. Shipping
-- `/admin/shipping` — batch ship with Shiprocket/Delhivery (demo labels when API keys not set)
+- `AES-DEMO-DELIVERED` — returns workflow
+- `AES-DEMO-CONFIRMED` — pack queue
+- `AES-DEMO-PACKED` — ready to ship
+- `AES-DEMO-SHIPPED` — in transit
 
-### 6. Payments
-- `/admin/payments` — COD, Razorpay, daily revenue
+---
 
-### 7. Returns
-- `/admin/returns` — approve/reject return requests (demo return seeded)
+## Walkthrough
 
-### 8. Collections CMS
-- `/admin/collections` — Blue Edit, Desk Goals, Gifts Under ₹999, etc.
+### Storefront
+1. Browse `/aesthetics` → shop → add to cart
+2. Checkout with **COD** (always works)
+3. Orders over ₹999 get free shipping
 
-### 9. Content & settings
-- `/admin/content` — edit About, policies, FAQs
-- `/admin/settings` — GST, shipping rates, company details
+### Admin
+1. Dashboard → quick start cards
+2. Inventory → edit products, low stock on Scrunchie Trio
+3. Purchases → PO-DEMO-001 (open), PO-DEMO-002 (received)
+4. Orders → demo orders in each status
+5. Returns → pending return on delivered order
+6. Reviews → approve/hide pending reviews
+7. Marketing → demo coupons
+8. Staff → role-based team list
 
 ---
 
@@ -73,16 +88,7 @@ Optional for online payments:
 npm install
 # Set DATABASE_URL in .env
 npm run db:setup-commerce
-COMMERCE_ADMIN_EMAIL="yash.shah.lp2@gmail.com" \
-COMMERCE_ADMIN_PASSWORD="your-password" \
-npm run db:ensure-commerce-admin
 npm run dev
 ```
 
 Open http://localhost:3000/aesthetics and http://localhost:3000/admin/login
-
----
-
-## What's removed
-
-- `/seller/*` — legacy marketplace portal redirects to `/aesthetics`

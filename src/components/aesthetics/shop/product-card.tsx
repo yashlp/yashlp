@@ -96,7 +96,7 @@ export function ProductCard({
           </h3>
         </Link>
         <div className="flex flex-col items-center gap-2">
-          <span className="text-sm font-bold text-[var(--aes-ink)]">${product.price}</span>
+          <span className="text-sm font-bold text-[var(--aes-ink)]">₹{product.price.toLocaleString("en-IN")}</span>
           {quickAdd ? (
             <button
               type="button"
