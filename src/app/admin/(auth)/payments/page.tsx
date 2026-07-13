@@ -20,25 +20,37 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [daily, setDaily] = useState({ revenue: 0, count: 0 });
 
+  const [gstCollected, setGstCollected] = useState(0);
+
   useEffect(() => {
     fetch("/api/admin/payments").then((r) => r.json()).then((d) => {
       setPayments(d.payments || []);
       setDaily(d.daily || { revenue: 0, count: 0 });
+      setGstCollected(d.gstCollected || 0);
     });
   }, []);
 
   const successful = payments.filter((p) => p.status === "SUCCESS");
-  const failed = payments.filter((p) => p.status === "FAILED" || p.status === "PENDING");
+  const failed = payments.filter((p) => p.status === "FAILED");
+  const pending = payments.filter((p) => p.status === "PENDING");
+  const cod = payments.filter((p) => p.provider === "cod");
+  const online = payments.filter((p) => p.provider === "razorpay" || p.provider === "demo");
 
   return (
     <div>
       <h1 className="aes-display text-3xl font-semibold italic">Payments</h1>
       <p className="mt-1 text-[var(--aes-charcoal-muted)]">UPI, cards, net banking, and COD</p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Today&apos;s revenue</p><p className="text-2xl font-semibold">{formatInr(daily.revenue)}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">GST collected</p><p className="text-2xl font-semibold">{formatInr(gstCollected)}</p></Card>
         <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Successful</p><p className="text-2xl font-semibold">{successful.length}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Pending / failed</p><p className="text-2xl font-semibold">{failed.length}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Failed / pending</p><p className="text-2xl font-semibold">{failed.length + pending.length}</p></Card>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">COD payments</p><p className="text-2xl font-semibold">{cod.length}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">UPI / Card / Net Banking</p><p className="text-2xl font-semibold">{online.length}</p></Card>
       </div>
 
       <div className="mt-8 overflow-x-auto rounded-2xl border bg-white">

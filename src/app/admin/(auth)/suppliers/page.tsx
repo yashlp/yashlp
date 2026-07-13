@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Card } from "@/components/aesthetics/ui/card";
 import { Input } from "@/components/aesthetics/ui/input";
@@ -92,6 +93,7 @@ export default function SuppliersPage() {
               <th className="px-4 py-3">Products</th>
               <th className="px-4 py-3">POs</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -105,6 +107,9 @@ export default function SuppliersPage() {
                 <td className="px-4 py-3">{s._count.products}</td>
                 <td className="px-4 py-3">{s._count.purchaseOrders}</td>
                 <td className="px-4 py-3">{s.status}</td>
+                <td className="px-4 py-3">
+                  <Link href={`/admin/suppliers/${s.id}`} className="text-xs text-[var(--aes-royal)]">View</Link>
+                </td>
               </tr>
             ))}
           </tbody>

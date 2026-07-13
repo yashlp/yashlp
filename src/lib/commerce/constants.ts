@@ -1,14 +1,32 @@
 export const ADMIN_ROLES = [
   "SUPER_ADMIN",
   "ADMIN",
-  "MODERATOR",
+  "INVENTORY_MANAGER",
+  "ORDER_FULFILLMENT",
   "CUSTOMER_SUPPORT",
+  "MARKETING",
+  "ACCOUNTANT",
+  "MODERATOR",
   "FINANCE",
   "CONTENT_MANAGER",
   "SUPPLIER_MANAGER",
 ] as const;
 
 export type AdminRole = (typeof ADMIN_ROLES)[number];
+
+export const ADMIN_ROLE_LABELS: Record<AdminRole, string> = {
+  SUPER_ADMIN: "Super Admin",
+  ADMIN: "Admin",
+  INVENTORY_MANAGER: "Inventory Manager",
+  ORDER_FULFILLMENT: "Order Fulfillment",
+  CUSTOMER_SUPPORT: "Customer Support",
+  MARKETING: "Marketing",
+  ACCOUNTANT: "Accountant",
+  MODERATOR: "Moderator",
+  FINANCE: "Finance",
+  CONTENT_MANAGER: "Content Manager",
+  SUPPLIER_MANAGER: "Supplier Manager",
+};
 
 export const PERMISSIONS = [
   "dashboard:read",
@@ -123,6 +141,40 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[] | ["*"]> = {
     "purchases:write",
     "products:read",
     "products:approve",
+  ],
+  INVENTORY_MANAGER: [
+    "dashboard:read",
+    "inventory:read",
+    "inventory:write",
+    "products:read",
+    "products:write",
+    "suppliers:read",
+    "purchases:read",
+    "purchases:write",
+  ],
+  ORDER_FULFILLMENT: [
+    "dashboard:read",
+    "orders:read",
+    "orders:write",
+    "shipping:read",
+    "shipping:write",
+  ],
+  MARKETING: [
+    "dashboard:read",
+    "marketing:read",
+    "marketing:write",
+    "content:read",
+    "content:write",
+    "reviews:read",
+    "analytics:read",
+  ],
+  ACCOUNTANT: [
+    "dashboard:read",
+    "payments:read",
+    "refunds:read",
+    "refunds:write",
+    "analytics:read",
+    "settings:read",
   ],
 };
 

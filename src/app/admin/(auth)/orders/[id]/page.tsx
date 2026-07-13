@@ -101,7 +101,11 @@ export default function OrderDetailPage() {
               {actions.map((a) => (
                 <Button key={a.status} onClick={() => updateStatus(a.status)}>{a.label}</Button>
               ))}
-              <Button variant="secondary" onClick={generateLabel}>Generate label</Button>
+              <Button variant="secondary" onClick={generateLabel}>Shipping label</Button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 text-sm">
+              <Link href={`/admin/orders/${id}/invoice`} className="text-[var(--aes-royal)]" target="_blank">Invoice</Link>
+              <Link href={`/admin/orders/${id}/packing-slip`} className="text-[var(--aes-royal)]" target="_blank">Packing slip</Link>
             </div>
           </div>
           {order.shippingAddress && (

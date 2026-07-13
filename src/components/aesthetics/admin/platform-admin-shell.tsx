@@ -12,6 +12,7 @@ import {
   Package,
   RotateCcw,
   Settings,
+  Shield,
   ShoppingCart,
   Star,
   Truck,
@@ -54,6 +55,7 @@ const NAV_SECTIONS = [
   {
     label: "System",
     items: [
+      { href: "/admin/staff", label: "Admin & Staff", icon: Shield },
       { href: "/admin/settings", label: "Settings", icon: Settings },
       { href: "/admin/audit-logs", label: "Audit Logs", icon: FileText },
     ],

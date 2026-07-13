@@ -711,6 +711,8 @@ model CommerceReview {
   body             String?
   status           String   @default("PENDING")
   verifiedPurchase Boolean  @default(false)
+  adminReply       String?
+  isFeatured       Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

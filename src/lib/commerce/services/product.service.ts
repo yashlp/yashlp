@@ -113,19 +113,36 @@ export const productService = {
     return mapProduct(product);
   },
 
-  async update(id: string, data: ProductUpdateInput) {
-    const { images, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
+  async getAdminById(id: string) {
+    return prisma.commerceProduct.findUnique({
+      where: { id },
+      include: {
+        brand: true,
+        category: true,
+        seller: true,
+        supplier: true,
+        media: { orderBy: { sortOrder: "asc" } },
+      },
+    });
+  },
 
-    if (images) {
+  async update(id: string, data: ProductUpdateInput) {
+    const { images, videos, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
+
+    if (images || videos) {
       await prisma.commerceProductMedia.deleteMany({ where: { productId: id } });
-      await prisma.commerceProductMedia.createMany({
-        data: images.map((url, i) => ({
+      const mediaRows = [
+        ...(images?.map((url, i) => ({ productId: id, type: "IMAGE" as const, url, sortOrder: i })) || []),
+        ...(videos?.map((url, i) => ({
           productId: id,
-          type: "IMAGE",
+          type: "VIDEO" as const,
           url,
-          sortOrder: i,
-        })),
-      });
+          sortOrder: (images?.length || 0) + i,
+        })) || []),
+      ];
+      if (mediaRows.length) {
+        await prisma.commerceProductMedia.createMany({ data: mediaRows });
+      }
     }
 
     const product = await prisma.commerceProduct.update({

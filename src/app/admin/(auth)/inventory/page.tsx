@@ -100,6 +100,7 @@ export default function InventoryPage() {
               <th className="px-4 py-3">Margin</th>
               <th className="px-4 py-3">Supplier</th>
               <th className="px-4 py-3">Location</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -117,6 +118,9 @@ export default function InventoryPage() {
                 <td className="px-4 py-3">{item.profitMargin != null ? `${item.profitMargin}%` : "—"}</td>
                 <td className="px-4 py-3">{item.supplier?.brandName || "—"}</td>
                 <td className="px-4 py-3">{item.warehouseLocation || "—"}</td>
+                <td className="px-4 py-3">
+                  <Link href={`/admin/products/${item.id}/edit`} className="text-xs text-[var(--aes-royal)]">Edit</Link>
+                </td>
               </tr>
             ))}
           </tbody>

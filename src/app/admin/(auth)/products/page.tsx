@@ -82,7 +82,7 @@ export default function AdminProductsPage() {
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{p.name}</p>
                 <p className="text-sm text-[var(--aes-charcoal-muted)]">
-                  {p.brand.name} · {p.category.name} · ${p.price} · Stock {p.stock}
+                  {p.brand.name} · {p.category.name} · ₹{p.price} · Stock {p.stock}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -90,6 +90,9 @@ export default function AdminProductsPage() {
                 <Badge variant="muted">{p.status}</Badge>
               </div>
               <div className="flex gap-2">
+                <Link href={`/admin/products/${p.id}/edit`}>
+                  <Button variant="secondary" size="sm">Edit</Button>
+                </Link>
                 {p.approvalStatus === "PENDING" && (
                   <Button size="sm" onClick={() => action(p.id, "approve")}>Approve</Button>
                 )}

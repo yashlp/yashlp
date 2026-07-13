@@ -10,6 +10,7 @@ type DashboardStats = {
     today: number;
     pending: number;
     toPack: number;
+    packed: number;
     shipped: number;
     delivered: number;
     cancelled: number;
@@ -67,21 +68,19 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Shipped</p><p className="text-2xl font-semibold">{stats.orders.shipped}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Orders shipped</p><p className="text-2xl font-semibold">{stats.orders.shipped}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Packed</p><p className="text-2xl font-semibold">{stats.orders.packed}</p></Card>
         <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Returns</p><p className="text-2xl font-semibold">{stats.returns.pending}</p></Card>
         <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Refund requests</p><p className="text-2xl font-semibold">{stats.refunds.pending}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Low stock alerts</p><p className="text-2xl font-semibold">{stats.inventory.lowStock}</p></Card>
       </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Low stock alerts</p><p className="text-2xl font-semibold text-red-600">{stats.inventory.lowStock}</p></Card>
         <Card hover={false}>
           <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Inventory value (at cost)</p>
           <p className="mt-2 text-2xl font-semibold">{formatInr(stats.inventory.value)}</p>
         </Card>
-        <Card hover={false}>
-          <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Active suppliers</p>
-          <p className="mt-2 text-2xl font-semibold">{stats.users.suppliers}</p>
-        </Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Delivered orders</p><p className="text-2xl font-semibold">{stats.orders.delivered}</p></Card>
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -106,7 +105,7 @@ export default function AdminDashboardPage() {
             {stats.topProducts.length === 0 && <li className="text-[var(--aes-dusty)]">No sales yet</li>}
             {stats.topProducts.map((p) => (
               <li key={p.id} className="flex justify-between border-b border-[var(--aes-border)] py-2">
-                <Link href={`/admin/products`} className="hover:text-[var(--aes-royal)]">{p.name}</Link>
+                <Link href={`/admin/products/${p.id}/edit`} className="hover:text-[var(--aes-royal)]">{p.name}</Link>
                 <span className="text-[var(--aes-charcoal-muted)]">{p.sold} sold</span>
               </li>
             ))}

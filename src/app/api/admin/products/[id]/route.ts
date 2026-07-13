@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
     const product = await withAdminAuth("products:read", async () => {
-      return productService.getById(id);
+      return productService.getAdminById(id);
     });
     if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ product });
