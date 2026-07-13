@@ -54,21 +54,15 @@ export default function ShopPage() {
   return (
     <>
       <ConsumerNav cartCount={cartCount} />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
-        <div className="relative overflow-hidden rounded-3xl border border-[var(--aes-border)] bg-gradient-to-br from-blue-50 via-white to-rose-50 p-8 sm:p-12">
-          <div className="relative z-10">
-            <p className="aes-mono text-[10px] font-medium uppercase tracking-[0.3em] text-[var(--aes-coral)]">
-              Classic shopping
-            </p>
-            <h1 className="aes-display mt-3 text-4xl font-extrabold tracking-tight text-[var(--aes-ink)] sm:text-5xl">
-              The shop
-            </h1>
-            <p className="aes-serif mt-3 max-w-lg text-lg italic text-[var(--aes-ink-muted)]">
-              Browse our full catalogue of curated art, design, and objects.
-            </p>
-          </div>
-          <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-violet-200/50 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-rose-200/50 blur-3xl" />
+      <main className="mx-auto max-w-7xl px-6 pb-16 pt-28 sm:px-8 sm:pt-32">
+        <div className="border-b border-[var(--aes-border)] pb-12">
+          <p className="aes-label">Classic shopping</p>
+          <h1 className="aes-display mt-3 text-4xl text-[var(--aes-ink)] sm:text-5xl">
+            The shop
+          </h1>
+          <p className="aes-serif mt-4 max-w-lg text-lg italic text-[var(--aes-ink-muted)]">
+            Browse our full catalogue of curated wellness objects and artisan design.
+          </p>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-2">
@@ -78,10 +72,10 @@ export default function ShopPage() {
               type="button"
               onClick={() => setCategory(id)}
               className={cn(
-                "rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all",
+                "px-4 py-2 text-[10px] font-medium uppercase tracking-[0.2em] transition-all",
                 category === id
-                  ? "bg-[var(--aes-ink)] text-white shadow-lg"
-                  : "border border-[var(--aes-border)] bg-white text-[var(--aes-ink-muted)] hover:border-violet-300 hover:text-[var(--aes-ink)]"
+                  ? "bg-[var(--aes-forest)] text-[var(--aes-sand)]"
+                  : "border border-[var(--aes-border)] text-[var(--aes-ink-muted)] hover:border-[var(--aes-forest)] hover:text-[var(--aes-forest)]"
               )}
             >
               {label}

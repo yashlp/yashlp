@@ -2,9 +2,12 @@ import Link from "next/link";
 import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { HeroSection } from "@/components/aesthetics/home/hero-section";
+import { PhilosophySection } from "@/components/aesthetics/home/philosophy-section";
 import { MarqueeBand } from "@/components/aesthetics/home/marquee-band";
 import { CollectionRow } from "@/components/aesthetics/home/collection-row";
 import { ProductRow } from "@/components/aesthetics/home/product-row";
+import { TranquilitySection } from "@/components/aesthetics/home/tranquility-section";
+import { PromoSection } from "@/components/aesthetics/home/promo-section";
 import { BrandStrip } from "@/components/aesthetics/home/brand-strip";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { productService } from "@/lib/commerce/services/product.service";
@@ -32,15 +35,17 @@ export default async function AestheticsHomePage() {
       <ConsumerNav />
       <main className="relative">
         <HeroSection />
+        <PhilosophySection />
         <MarqueeBand />
         <CollectionRow collections={collections.filter((c) => c.featured)} />
         <ProductRow
-          title="Curated for you"
-          subtitle="Pieces chosen for modern, colourful living"
+          title="Aesthetics menu"
+          subtitle="Choose from our wide range of curated objects — from sculptural ceramics to wellness essentials and artisan lighting."
           products={featured}
           href="/aesthetics/shop"
-          accent="lavender"
+          accent="sage"
         />
+        <TranquilitySection />
         <ProductRow
           title="New arrivals"
           subtitle="Fresh from independent studios"
@@ -48,22 +53,23 @@ export default async function AestheticsHomePage() {
           href="/aesthetics/shop?sort=new"
           accent="coral"
         />
+        <PromoSection />
         <BrandStrip brands={brands} />
         <ProductRow
           title="Continue discovering"
           subtitle="Immerse yourself in full-screen mode"
           products={curated}
           href="/aesthetics/discover"
-          accent="sage"
+          accent="lavender"
         />
         {!featured.length && (
-          <section className="px-4 py-20 text-center sm:px-6">
+          <section className="px-6 py-24 text-center sm:px-8">
             <p className="aes-serif text-2xl italic text-[var(--aes-ink-muted)]">
-              Your gallery is waiting — add products from the admin panel.
+              Your sanctuary is waiting — add products from the admin panel.
             </p>
             <Link
               href="/platform-admin/login"
-              className="aes-btn aes-btn-primary mt-6 inline-flex px-8 py-4 text-sm"
+              className="aes-btn aes-btn-primary mt-8 inline-flex px-8 py-4"
             >
               Open admin
             </Link>

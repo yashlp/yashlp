@@ -8,18 +8,18 @@ export function Badge({
   className?: string;
 }) {
   const styles: Record<string, string> = {
-    default: "bg-[var(--aes-cream-deep)] text-[var(--aes-ink-muted)]",
-    cobalt: "bg-blue-100 text-blue-800 font-semibold",
-    coral: "bg-rose-100 text-rose-700 font-semibold",
-    sage: "bg-emerald-100 text-emerald-800 font-semibold",
-    lavender: "bg-violet-100 text-violet-800 font-semibold",
-    royal: "bg-blue-100 text-blue-800 font-semibold",
+    default: "bg-[var(--aes-sand-deep)] text-[var(--aes-ink-muted)]",
+    cobalt: "bg-[var(--aes-forest)]/10 text-[var(--aes-forest)]",
+    coral: "bg-[var(--aes-gold)]/15 text-[var(--aes-gold)]",
+    sage: "bg-[var(--aes-moss)]/15 text-[var(--aes-forest)]",
+    lavender: "bg-[var(--aes-stone)]/15 text-[var(--aes-stone)]",
+    royal: "bg-[var(--aes-forest)]/10 text-[var(--aes-forest)]",
     muted: "border border-[var(--aes-border)] text-[var(--aes-ink-muted)]",
   };
 
   return (
     <span
-      className={`aes-mono inline-flex items-center rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wider ${styles[variant]} ${className}`}
+      className={`inline-flex items-center px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.15em] ${styles[variant]} ${className}`}
     >
       {children}
     </span>

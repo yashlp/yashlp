@@ -6,25 +6,23 @@ export function CollectionRow({ collections }: { collections: Collection[] }) {
   if (!collections.length) return null;
 
   return (
-    <section className="px-4 py-14 sm:px-6">
+    <section className="bg-[var(--aes-sand)] px-6 py-24 sm:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="aes-mono text-[10px] font-medium uppercase tracking-[0.3em] text-[var(--aes-coral)]">
-              Editor&apos;s picks
-            </p>
-            <h2 className="aes-display mt-2 text-4xl font-extrabold tracking-tight text-[var(--aes-ink)]">
-              Trending collections
+            <p className="aes-label">Treatments</p>
+            <h2 className="aes-display mt-3 text-4xl text-[var(--aes-ink)] sm:text-5xl">
+              Curated collections
             </h2>
           </div>
           <Link
             href="/aesthetics/collections"
-            className="aes-serif text-lg italic text-[var(--aes-ink-muted)] hover:text-[var(--aes-cobalt-bright)]"
+            className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--aes-ink-muted)] transition hover:text-[var(--aes-forest)]"
           >
-            View all collections →
+            View all →
           </Link>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {collections.map((c, i) => (
             <CollectionCard key={c.id} collection={c} index={i} />
           ))}

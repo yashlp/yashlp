@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "light";
 type Size = "sm" | "md" | "lg";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -10,9 +10,9 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const sizes: Record<Size, string> = {
-  sm: "px-4 py-2 text-sm",
-  md: "px-6 py-3 text-sm",
-  lg: "px-8 py-4 text-base",
+  sm: "px-5 py-2.5",
+  md: "px-6 py-3",
+  lg: "px-8 py-4",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -20,10 +20,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        "aes-btn font-medium",
+        "aes-btn",
         variant === "primary" && "aes-btn-primary",
         variant === "secondary" && "aes-btn-secondary",
         variant === "ghost" && "aes-btn-ghost",
+        variant === "light" && "aes-btn-light",
         sizes[size],
         className
       )}

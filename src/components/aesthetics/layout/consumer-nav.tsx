@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Compass, Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -21,34 +21,38 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const isHome = pathname === "/aesthetics";
+  const lightNav = isHome && !scrolled;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 80);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <header className="sticky top-0 z-[200] px-4 pt-4 sm:px-6">
-      <div
-        className={cn(
-          "mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-2xl border px-4 py-2.5 transition-all duration-500 sm:px-6",
-          scrolled
-            ? "border-[var(--aes-border)] bg-white/85 shadow-lg shadow-[rgba(30,58,138,0.08)] backdrop-blur-xl"
-            : "border-transparent bg-white/50 backdrop-blur-md"
-        )}
-      >
-        <Link href="/aesthetics" className="group flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--aes-gradient-brand)] text-sm font-bold text-white shadow-md">
-            Æ
-          </span>
-          <span className="aes-display hidden text-xl font-bold tracking-tight text-[var(--aes-ink)] sm:block">
+    <header
+      className={cn(
+        "fixed top-0 z-[200] w-full transition-all duration-500",
+        scrolled
+          ? "border-b border-[var(--aes-border)] bg-[var(--aes-sand)]/95 backdrop-blur-md"
+          : "bg-transparent"
+      )}
+    >
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5 sm:px-8">
+        <Link href="/aesthetics" className="group flex items-center gap-3">
+          <span
+            className={cn(
+              "aes-display text-2xl font-medium tracking-wide transition-colors",
+              lightNav ? "text-[var(--aes-sand)]" : "text-[var(--aes-ink)]"
+            )}
+          >
             Aesthetics
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 md:flex">
+        <nav className="hidden items-center gap-8 md:flex">
           {NAV.map(({ href, label }) => {
             const active = pathname === href || (href !== "/aesthetics" && pathname.startsWith(href));
             return (
@@ -56,10 +60,14 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
                 key={href}
                 href={href}
                 className={cn(
-                  "rounded-xl px-4 py-2 text-sm font-semibold transition-all",
+                  "text-xs font-medium uppercase tracking-[0.2em] transition-colors",
                   active
-                    ? "bg-[var(--aes-ink)] text-white shadow-md"
-                    : "text-[var(--aes-ink-muted)] hover:bg-white hover:text-[var(--aes-ink)]"
+                    ? lightNav
+                      ? "text-[var(--aes-gold-soft)]"
+                      : "text-[var(--aes-forest)]"
+                    : lightNav
+                      ? "text-[var(--aes-sand)]/70 hover:text-[var(--aes-sand)]"
+                      : "text-[var(--aes-ink-muted)] hover:text-[var(--aes-ink)]"
                 )}
               >
                 {label}
@@ -77,22 +85,30 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
               key={href}
               href={href}
               className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-xl text-[var(--aes-ink-muted)] transition hover:bg-white hover:text-[var(--aes-ink)] hover:shadow-sm",
+                "flex h-10 w-10 items-center justify-center transition-colors",
+                lightNav
+                  ? "text-[var(--aes-sand)]/70 hover:text-[var(--aes-sand)]"
+                  : "text-[var(--aes-ink-muted)] hover:text-[var(--aes-ink)]",
                 hideMobile && "hidden sm:flex"
               )}
               aria-label={label}
             >
-              <Icon className="h-[18px] w-[18px]" />
+              <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
             </Link>
           ))}
           <Link
             href="/aesthetics/cart"
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-[var(--aes-ink-muted)] transition hover:bg-white hover:text-[var(--aes-ink)] hover:shadow-sm"
+            className={cn(
+              "relative flex h-10 w-10 items-center justify-center transition-colors",
+              lightNav
+                ? "text-[var(--aes-sand)]/70 hover:text-[var(--aes-sand)]"
+                : "text-[var(--aes-ink-muted)] hover:text-[var(--aes-ink)]"
+            )}
             aria-label="Cart"
           >
-            <ShoppingBag className="h-[18px] w-[18px]" />
+            <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
             {cartCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--aes-coral)] px-1 text-[9px] font-bold text-white shadow-sm">
+              <span className="absolute -right-0.5 -top-0.5 flex h-[16px] min-w-[16px] items-center justify-center bg-[var(--aes-gold)] px-1 text-[8px] font-medium text-[var(--aes-forest-deep)]">
                 {cartCount}
               </span>
             )}
@@ -100,28 +116,26 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--aes-ink-muted)] md:hidden"
+            className={cn(
+              "flex h-10 w-10 items-center justify-center md:hidden",
+              lightNav ? "text-[var(--aes-sand)]" : "text-[var(--aes-ink)]"
+            )}
             aria-label="Menu"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {open ? <X className="h-5 w-5" strokeWidth={1.5} /> : <Menu className="h-5 w-5" strokeWidth={1.5} />}
           </button>
         </div>
       </div>
 
       {open && (
-        <nav className="mx-auto mt-2 max-w-7xl rounded-2xl border border-[var(--aes-border)] bg-white/95 p-3 shadow-xl backdrop-blur-xl md:hidden">
+        <nav className="border-t border-[var(--aes-border)] bg-[var(--aes-sand)] px-6 py-4 md:hidden">
           {NAV.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-base font-semibold text-[var(--aes-ink)]"
+              className="block py-3 text-xs font-medium uppercase tracking-[0.2em] text-[var(--aes-ink)]"
             >
-              {href.includes("discover") ? (
-                <Compass className="h-5 w-5 text-[var(--aes-lavender)]" />
-              ) : (
-                <span className="h-2 w-2 rounded-full bg-[var(--aes-cobalt-bright)]" />
-              )}
               {label}
             </Link>
           ))}

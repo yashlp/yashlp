@@ -1,33 +1,37 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Mono, Instrument_Serif, Plus_Jakarta_Sans, Syne } from "next/font/google";
+import { Cormorant_Garamond, Jost } from "next/font/google";
 import "@/design-system/theme.css";
 import { CartProvider } from "@/components/aesthetics/providers/cart-provider";
 
-const body = Plus_Jakarta_Sans({
+const body = Jost({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600"],
 });
 
-const display = Syne({
+const display = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["500", "600", "700", "800"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const serif = Instrument_Serif({
+const serif = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-serif",
-  weight: ["400"],
+  weight: ["300", "400", "500"],
   style: ["normal", "italic"],
 });
 
-const mono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
+const mono = Jost({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
   title: { default: "Aesthetics", template: "%s · Aesthetics" },
   description:
-    "A curated art & design marketplace. Discover beautiful objects from independent makers — shop editorially or immerse in Discover mode.",
+    "A luxury wellness marketplace. Unwind, restore, and reconnect with curated objects for mindful living.",
 };
 
 export const viewport: Viewport = {
