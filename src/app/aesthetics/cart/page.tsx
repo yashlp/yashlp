@@ -24,7 +24,7 @@ export default function CartPage() {
             <ul className="mt-10 space-y-6">
               {cart.map((item) => (
                 <li key={item.id} className="aes-card flex gap-4 p-4">
-                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--aes-bg-peach)]">
+                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.images[0]} alt={item.name} className="h-full w-full object-cover" />
                   </div>

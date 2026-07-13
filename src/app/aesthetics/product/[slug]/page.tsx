@@ -30,18 +30,18 @@ export default async function ProductPage({ params }: Props) {
 
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="space-y-4">
-            <div className="aspect-[4/5] overflow-hidden rounded-3xl bg-[var(--aes-bg-blush)]">
+            <div className="aspect-[4/5] overflow-hidden rounded-3xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={product.images[0]}
                 alt={product.name}
-                className="h-full w-full object-contain p-8"
+                className="h-full w-full object-cover"
               />
             </div>
             {product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
                 {product.images.map((img, i) => (
-                  <div key={i} className="aspect-square overflow-hidden rounded-xl bg-[var(--aes-bg-lavender)]">
+                  <div key={i} className="aspect-square overflow-hidden rounded-xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img} alt="" className="h-full w-full object-cover" />
                   </div>

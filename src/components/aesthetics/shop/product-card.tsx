@@ -6,22 +6,6 @@ import { Badge } from "@/components/aesthetics/ui/badge";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import type { Product } from "@/lib/aesthetics/types";
 
-const PEDESTAL_COLORS = [
-  "var(--aes-pedestal-1)",
-  "var(--aes-pedestal-2)",
-  "var(--aes-pedestal-3)",
-  "var(--aes-pedestal-4)",
-  "var(--aes-pedestal-5)",
-];
-
-const CARD_BG = [
-  "bg-[var(--aes-pedestal-1)]",
-  "bg-[var(--aes-pedestal-2)]",
-  "bg-[var(--aes-pedestal-3)]",
-  "bg-[var(--aes-pedestal-4)]",
-  "bg-[var(--aes-pedestal-5)]",
-];
-
 type ProductCardProps = {
   product: Product;
   priority?: boolean;
@@ -30,43 +14,52 @@ type ProductCardProps = {
   variant?: "joy" | "grid";
 };
 
+function ProductImage({
+  product,
+  priority,
+  className = "aspect-[4/5]",
+}: {
+  product: Product;
+  priority?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={`relative overflow-hidden rounded-2xl ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={product.images[0]}
+        alt={product.name}
+        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+        loading={priority ? "eager" : "lazy"}
+        draggable={false}
+      />
+      {product.compareAtPrice && (
+        <Badge variant="coral" className="absolute left-3 top-3">
+          Sale
+        </Badge>
+      )}
+      {product.newArrival && !product.compareAtPrice && (
+        <Badge variant="sage" className="absolute left-3 top-3">
+          New
+        </Badge>
+      )}
+    </div>
+  );
+}
+
 export function ProductCard({
   product,
   priority,
-  index = 0,
   quickAdd = false,
   variant = "joy",
 }: ProductCardProps) {
   const { addToCart } = useCart();
-  const pedestalColor = PEDESTAL_COLORS[index % PEDESTAL_COLORS.length];
-  const bg = CARD_BG[index % CARD_BG.length];
 
   if (variant === "joy") {
     return (
       <article className="group w-[200px] sm:w-[220px]">
         <Link href={`/aesthetics/product/${product.slug}`} className="block">
-          <div
-            className="aes-joy-pedestal"
-            style={{ background: pedestalColor }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              loading={priority ? "eager" : "lazy"}
-              draggable={false}
-            />
-            {product.compareAtPrice && (
-              <Badge variant="coral" className="absolute left-3 top-3">
-                Sale
-              </Badge>
-            )}
-            {product.newArrival && !product.compareAtPrice && (
-              <Badge variant="sage" className="absolute left-3 top-3">
-                New
-              </Badge>
-            )}
-          </div>
+          <ProductImage product={product} priority={priority} />
         </Link>
 
         <div className="mt-4 text-center">
@@ -93,26 +86,7 @@ export function ProductCard({
   return (
     <article className="group flex flex-col">
       <Link href={`/aesthetics/product/${product.slug}`} className="block">
-        <div className={`relative aspect-[4/5] overflow-hidden rounded-3xl ${bg}`}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="h-full w-full object-contain p-6 transition duration-500 group-hover:scale-105"
-            loading={priority ? "eager" : "lazy"}
-            draggable={false}
-          />
-          {product.compareAtPrice && (
-            <Badge variant="coral" className="absolute left-4 top-4">
-              Sale
-            </Badge>
-          )}
-          {product.newArrival && !product.compareAtPrice && (
-            <Badge variant="sage" className="absolute left-4 top-4">
-              New
-            </Badge>
-          )}
-        </div>
+        <ProductImage product={product} priority={priority} />
       </Link>
 
       <div className="mt-4 flex flex-col gap-2 text-center">

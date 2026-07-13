@@ -114,7 +114,7 @@ export default function CheckoutPage() {
             <ul className="mt-4 space-y-4">
               {cart.map((item) => (
                 <li key={item.id} className="flex gap-3">
-                  <div className="h-16 w-16 overflow-hidden rounded-xl bg-[var(--aes-bg-blush)]">
+                  <div className="h-16 w-16 overflow-hidden rounded-xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.images[0]} alt={item.name} className="h-full w-full object-cover" />
                   </div>

@@ -1,14 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/lib/aesthetics/types";
 
-const PEDESTAL_COLORS = [
-  "var(--aes-pedestal-1)",
-  "var(--aes-pedestal-2)",
-  "var(--aes-pedestal-3)",
-  "var(--aes-pedestal-4)",
-  "var(--aes-pedestal-5)",
-];
-
 const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=500&q=80",
   "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=80",
@@ -70,12 +62,13 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
               className="flex-1"
               style={{ marginTop: i % 2 === 0 ? "0" : "1.5rem" }}
             >
-              <div
-                className="aes-joy-pedestal mx-auto w-full max-w-[140px] sm:max-w-[180px]"
-                style={{ background: PEDESTAL_COLORS[i % PEDESTAL_COLORS.length] }}
-              >
+              <div className="mx-auto aspect-[3/4] w-full max-w-[140px] overflow-hidden rounded-2xl sm:max-w-[180px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.images[0]} alt={item.name} />
+                <img
+                  src={item.images[0]}
+                  alt={item.name}
+                  className="h-full w-full object-cover"
+                />
               </div>
             </div>
           ))}
