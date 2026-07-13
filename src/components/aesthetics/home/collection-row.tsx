@@ -3,29 +3,31 @@ import { CollectionCard } from "./collection-card";
 import type { Collection } from "@/lib/aesthetics/types";
 
 export function CollectionRow({ collections }: { collections: Collection[] }) {
+  if (!collections.length) return null;
+
   return (
-    <section className="bg-[var(--aes-white)] px-4 py-16 sm:px-6">
+    <section className="px-4 py-14 sm:px-6">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-10 text-center">
-          <p className="aes-mono text-[10px] uppercase tracking-[0.3em] text-[var(--aes-dusty)]">
-            Curated
-          </p>
-          <h2 className="aes-display mt-2 text-3xl font-semibold italic text-[var(--aes-charcoal)] sm:text-4xl">
-            Trending Collections
-          </h2>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {collections.map((c) => (
-            <CollectionCard key={c.id} collection={c} />
-          ))}
-        </div>
-        <div className="mt-10 text-center">
+        <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="aes-mono text-[10px] font-medium uppercase tracking-[0.3em] text-[var(--aes-coral)]">
+              Editor&apos;s picks
+            </p>
+            <h2 className="aes-display mt-2 text-4xl font-extrabold tracking-tight text-[var(--aes-ink)]">
+              Trending collections
+            </h2>
+          </div>
           <Link
             href="/aesthetics/collections"
-            className="aes-mono text-xs uppercase tracking-wider text-[var(--aes-royal)] hover:underline"
+            className="aes-serif text-lg italic text-[var(--aes-ink-muted)] hover:text-[var(--aes-cobalt-bright)]"
           >
-            All collections →
+            View all collections →
           </Link>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {collections.map((c, i) => (
+            <CollectionCard key={c.id} collection={c} index={i} />
+          ))}
         </div>
       </div>
     </section>

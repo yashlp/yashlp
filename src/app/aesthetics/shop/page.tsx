@@ -54,27 +54,34 @@ export default function ShopPage() {
   return (
     <>
       <ConsumerNav cartCount={cartCount} />
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="mb-10">
-          <p className="aes-mono text-[10px] uppercase tracking-[0.3em] text-[var(--aes-dusty)]">
-            Classic shopping
-          </p>
-          <h1 className="aes-display mt-2 text-4xl font-semibold italic text-[var(--aes-charcoal)]">
-            Shop
-          </h1>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--aes-border)] bg-gradient-to-br from-blue-50 via-white to-rose-50 p-8 sm:p-12">
+          <div className="relative z-10">
+            <p className="aes-mono text-[10px] font-medium uppercase tracking-[0.3em] text-[var(--aes-coral)]">
+              Classic shopping
+            </p>
+            <h1 className="aes-display mt-3 text-4xl font-extrabold tracking-tight text-[var(--aes-ink)] sm:text-5xl">
+              The shop
+            </h1>
+            <p className="aes-serif mt-3 max-w-lg text-lg italic text-[var(--aes-ink-muted)]">
+              Browse our full catalogue of curated art, design, and objects.
+            </p>
+          </div>
+          <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-violet-200/50 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-rose-200/50 blur-3xl" />
         </div>
 
-        <div className="mb-8 flex flex-wrap gap-2">
+        <div className="mt-8 flex flex-wrap gap-2">
           {categories.map(({ id, label }) => (
             <button
               key={id}
               type="button"
               onClick={() => setCategory(id)}
               className={cn(
-                "aes-mono rounded-full px-4 py-2 text-[11px] uppercase tracking-wider transition",
+                "rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all",
                 category === id
-                  ? "bg-[var(--aes-royal)] text-white"
-                  : "border border-[var(--aes-border)] text-[var(--aes-charcoal-muted)] hover:border-[var(--aes-royal)]/20"
+                  ? "bg-[var(--aes-ink)] text-white shadow-lg"
+                  : "border border-[var(--aes-border)] bg-white text-[var(--aes-ink-muted)] hover:border-violet-300 hover:text-[var(--aes-ink)]"
               )}
             >
               {label}
@@ -97,9 +104,9 @@ export default function ShopPage() {
             .
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {sorted.map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i < 4} />
+              <ProductCard key={p.id} product={p} priority={i < 4} index={i} />
             ))}
           </div>
         )}

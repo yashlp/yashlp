@@ -1,21 +1,25 @@
-import { cn } from "@/lib/utils";
-
-type BadgeProps = {
+export function Badge({
+  children,
+  variant = "default",
+  className = "",
+}: {
   children: React.ReactNode;
-  variant?: "default" | "royal" | "muted";
+  variant?: "default" | "cobalt" | "coral" | "sage" | "lavender" | "royal" | "muted";
   className?: string;
-};
+}) {
+  const styles: Record<string, string> = {
+    default: "bg-[var(--aes-cream-deep)] text-[var(--aes-ink-muted)]",
+    cobalt: "bg-blue-100 text-blue-800 font-semibold",
+    coral: "bg-rose-100 text-rose-700 font-semibold",
+    sage: "bg-emerald-100 text-emerald-800 font-semibold",
+    lavender: "bg-violet-100 text-violet-800 font-semibold",
+    royal: "bg-blue-100 text-blue-800 font-semibold",
+    muted: "border border-[var(--aes-border)] text-[var(--aes-ink-muted)]",
+  };
 
-export function Badge({ children, variant = "default", className }: BadgeProps) {
   return (
     <span
-      className={cn(
-        "aes-mono inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider",
-        variant === "default" && "bg-[var(--aes-ivory-deep)] text-[var(--aes-charcoal-muted)]",
-        variant === "royal" && "bg-[rgba(27,79,156,0.08)] text-[var(--aes-royal)]",
-        variant === "muted" && "border border-[var(--aes-border)] text-[var(--aes-charcoal-muted)]",
-        className
-      )}
+      className={`aes-mono inline-flex items-center rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wider ${styles[variant]} ${className}`}
     >
       {children}
     </span>

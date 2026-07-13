@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import type { Product } from "@/lib/aesthetics/types";
 
@@ -8,33 +8,44 @@ type ProductRowProps = {
   subtitle?: string;
   products: Product[];
   href?: string;
+  accent?: "cobalt" | "coral" | "lavender" | "sage";
 };
 
-export function ProductRow({ title, subtitle, products, href }: ProductRowProps) {
+const ACCENT_STYLES = {
+  cobalt: "from-blue-600/10 to-transparent border-blue-200/50",
+  coral: "from-rose-500/10 to-transparent border-rose-200/50",
+  lavender: "from-violet-500/10 to-transparent border-violet-200/50",
+  sage: "from-emerald-500/10 to-transparent border-emerald-200/50",
+};
+
+export function ProductRow({ title, subtitle, products, href, accent = "cobalt" }: ProductRowProps) {
+  const style = ACCENT_STYLES[accent];
+
   return (
-    <section className="px-4 py-12 sm:px-6">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex items-end justify-between gap-4">
+    <section className={`px-4 py-14 sm:px-6 ${products.length ? "" : "hidden"}`}>
+      <div className={`mx-auto max-w-7xl rounded-3xl border bg-gradient-to-b p-6 sm:p-10 ${style}`}>
+        <div className="mb-10 flex items-end justify-between gap-4">
           <div>
-            <h2 className="aes-display text-3xl font-semibold italic text-[var(--aes-charcoal)] sm:text-4xl">
+            <h2 className="aes-display text-3xl font-extrabold tracking-tight text-[var(--aes-ink)] sm:text-4xl">
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-2 text-[var(--aes-charcoal-muted)]">{subtitle}</p>
+              <p className="aes-serif mt-2 text-lg italic text-[var(--aes-ink-muted)]">{subtitle}</p>
             )}
           </div>
           {href && (
             <Link
               href={href}
-              className="aes-mono hidden items-center gap-1 text-xs uppercase tracking-wider text-[var(--aes-royal)] sm:flex"
+              className="group hidden items-center gap-2 rounded-full bg-[var(--aes-ink)] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:scale-105 sm:flex"
             >
-              View all <ArrowRight className="h-3.5 w-3.5" />
+              View all
+              <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           )}
         </div>
         <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
           {products.map((p, i) => (
-            <ProductCard key={p.id} product={p} priority={i < 2} />
+            <ProductCard key={p.id} product={p} priority={i < 2} index={i} />
           ))}
         </div>
       </div>
