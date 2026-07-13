@@ -1,19 +1,6 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "@/design-system/theme.css";
-import { SellerShell } from "@/components/aesthetics/seller/seller-shell";
+import { redirect } from "next/navigation";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-
-export const metadata: Metadata = {
-  title: { default: "Seller Dashboard", template: "%s · Seller · Aesthetics" },
-  applicationName: "Aesthetics",
-};
-
-export default function SellerLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={inter.variable}>
-      <SellerShell>{children}</SellerShell>
-    </div>
-  );
+/** Legacy marketplace seller portal — removed for D2C model */
+export default function SellerLayout() {
+  redirect("/aesthetics");
 }

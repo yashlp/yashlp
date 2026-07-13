@@ -268,6 +268,22 @@ async function main() {
     },
   });
 
+  const DEMO_COLLECTIONS = [
+    { title: "Blue Edit", slug: "blue-edit", description: "Royal blues and calm tones for your space", sortOrder: 1 },
+    { title: "Desk Goals", slug: "desk-goals", description: "Stationery and objects for focused work", sortOrder: 2 },
+    { title: "Cozy Corners", slug: "cozy-corners", description: "Warm textures for slow evenings", sortOrder: 3 },
+    { title: "Gifts Under ₹999", slug: "gifts-under-999", description: "Thoughtful picks that won't break the bank", sortOrder: 4 },
+    { title: "New This Week", slug: "new-this-week", description: "Fresh arrivals at Only Aesthetics", sortOrder: 5 },
+  ];
+
+  for (const col of DEMO_COLLECTIONS) {
+    await prisma.commerceCollection.upsert({
+      where: { slug: col.slug },
+      update: col,
+      create: { ...col, isFeatured: true, isPublished: true },
+    });
+  }
+
   const collection = await prisma.commerceCollection.findUnique({ where: { slug: "slow-mornings" } });
   const wellnessProduct = await prisma.commerceProduct.findUnique({ where: { slug: "weighted-silk-eye-mask" } });
   if (collection && wellnessProduct) {
@@ -297,6 +313,7 @@ async function main() {
           status: "DELIVERED",
           subtotal: product.price,
           total: product.price,
+          currency: "INR",
           items: {
             create: [{
               productId: product.id,
@@ -309,12 +326,115 @@ async function main() {
             create: {
               amount: product.price,
               status: "SUCCESS",
-              provider: "stripe",
+              provider: "cod",
+              currency: "INR",
             },
           },
         },
       });
+
+      // Demo orders in various workflow states
+      const products = await prisma.commerceProduct.findMany({ take: 3 });
+      const statuses = ["CONFIRMED", "PACKED", "SHIPPED"] as const;
+      for (let i = 0; i < statuses.length && products[i]; i++) {
+        const p = products[i];
+        await prisma.commerceOrder.create({
+          data: {
+            orderNumber: `AES-DEMO-${statuses[i]}`,
+            customerId: customer.id,
+            status: statuses[i],
+            subtotal: p.price,
+            total: p.price,
+            currency: "INR",
+            shippingAddress: "Demo Customer\nMumbai, MH 400001",
+            items: {
+              create: [{ productId: p.id, quantity: 1, unitPrice: p.price, total: p.price }],
+            },
+            payments: {
+              create: { amount: p.price, status: "SUCCESS", provider: "cod", currency: "INR" },
+            },
+          },
+        });
+      }
     }
+  }
+
+  // Demo purchase order
+  const firstSupplier = await prisma.commerceSupplier.findFirst();
+  const firstProduct = await prisma.commerceProduct.findFirst();
+  if (firstSupplier && firstProduct) {
+    const existingPo = await prisma.commercePurchaseOrder.findFirst();
+    if (!existingPo) {
+      await prisma.commercePurchaseOrder.create({
+        data: {
+          poNumber: "PO-DEMO-001",
+          supplierId: firstSupplier.id,
+          status: "ORDERED",
+          paymentStatus: "PENDING",
+          subtotal: 5000,
+          total: 5000,
+          lines: {
+            create: [{
+              productId: firstProduct.id,
+              name: firstProduct.name,
+              sku: firstProduct.sku,
+              quantityOrdered: 20,
+              unitCost: 250,
+              total: 5000,
+            }],
+          },
+        },
+      });
+    }
+  }
+
+  // Demo return request
+  const returnOrder = await prisma.commerceOrder.findFirst({ where: { status: "DELIVERED" } });
+  if (returnOrder) {
+    const existingReturn = await prisma.commerceReturn.findFirst();
+    if (!existingReturn) {
+      await prisma.commerceReturn.create({
+        data: {
+          orderId: returnOrder.id,
+          reason: "Product not as described",
+          status: "REQUESTED",
+          type: "REFUND",
+        },
+      });
+    }
+  }
+
+  const CONTENT_PAGES = [
+    { key: "homepage_tagline", type: "TEXT", title: "Tagline", body: "Curated objects for intentional living" },
+    { key: "about", type: "PAGE", title: "About Only Aesthetics", body: "We source beautiful objects from small makers and bring them to you — one curated store, shipped with care." },
+    { key: "shipping_policy", type: "PAGE", title: "Shipping Policy", body: "Free shipping on orders above ₹999. Standard delivery 3–7 business days across India." },
+    { key: "refund_policy", type: "PAGE", title: "Refund Policy", body: "Returns accepted within 7 days for unused items in original packaging." },
+  ];
+
+  for (const page of CONTENT_PAGES) {
+    await prisma.commerceContent.upsert({
+      where: { key: page.key },
+      update: page,
+      create: { ...page, isPublished: true },
+    });
+  }
+
+  const SETTINGS = [
+    { key: "company_name", value: "Only Aesthetics", group: "company" },
+    { key: "company_gst", value: "27AAAAA0000A1Z5", group: "tax" },
+    { key: "shipping_flat_rate", value: "49", group: "shipping" },
+    { key: "free_shipping_threshold", value: "999", group: "shipping" },
+    { key: "gst_rate", value: "18", group: "tax" },
+    { key: "cod_enabled", value: "true", group: "payments" },
+    { key: "support_email", value: "hello@onlyaesthetics.in", group: "contact" },
+  ];
+
+  for (const s of SETTINGS) {
+    await prisma.commerceSetting.upsert({
+      where: { key: s.key },
+      update: { value: s.value, group: s.group },
+      create: s,
+    });
   }
 
   await prisma.commerceSetting.upsert({

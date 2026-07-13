@@ -20,6 +20,13 @@ export const purchaseService = {
     });
   },
 
+  async getById(id: string) {
+    return prisma.commercePurchaseOrder.findUnique({
+      where: { id },
+      include: { supplier: true, lines: true },
+    });
+  },
+
   async create(data: PurchaseOrderInput) {
     const subtotal = data.lines.reduce((sum, l) => sum + l.quantityOrdered * l.unitCost, 0);
     const tax = 0;
@@ -29,7 +36,7 @@ export const purchaseService = {
       data: {
         poNumber: nextPoNumber(),
         supplierId: data.supplierId,
-        status: data.status || "DRAFT",
+        status: data.status || "ORDERED",
         paymentStatus: data.paymentStatus || "PENDING",
         expectedDelivery: data.expectedDelivery ? new Date(data.expectedDelivery) : undefined,
         invoiceNumber: data.invoiceNumber,
@@ -53,6 +60,14 @@ export const purchaseService = {
     });
   },
 
+  async updatePaymentStatus(id: string, paymentStatus: string) {
+    return prisma.commercePurchaseOrder.update({
+      where: { id },
+      data: { paymentStatus },
+      include: { supplier: true, lines: true },
+    });
+  },
+
   async receiveLine(lineId: string, received: number, damaged = 0) {
     const line = await prisma.commercePurchaseOrderLine.findUniqueOrThrow({
       where: { id: lineId },
@@ -61,30 +76,31 @@ export const purchaseService = {
 
     await prisma.commercePurchaseOrderLine.update({
       where: { id: lineId },
-      data: {
-        quantityReceived: received,
-        quantityDamaged: damaged,
-      },
+      data: { quantityReceived: received, quantityDamaged: damaged },
     });
 
     if (line.productId && received > 0) {
       await prisma.commerceProduct.update({
         where: { id: line.productId },
-        data: { stock: { increment: received - damaged } },
+        data: {
+          stock: { increment: received - damaged },
+          purchaseCost: line.unitCost,
+        },
       });
     }
 
     const allLines = await prisma.commercePurchaseOrderLine.findMany({
       where: { purchaseOrderId: line.purchaseOrderId },
     });
-    const fullyReceived = allLines.every((l) => l.id === lineId ? received >= l.quantityOrdered : l.quantityReceived >= l.quantityOrdered);
+    const fullyReceived = allLines.every((l) =>
+      l.id === lineId ? received >= l.quantityOrdered : l.quantityReceived >= l.quantityOrdered
+    );
     const partial = allLines.some((l) => (l.id === lineId ? received : l.quantityReceived) > 0);
 
-    await prisma.commercePurchaseOrder.update({
+    return prisma.commercePurchaseOrder.update({
       where: { id: line.purchaseOrderId },
-      data: {
-        status: fullyReceived ? "RECEIVED" : partial ? "PARTIAL" : undefined,
-      },
+      data: { status: fullyReceived ? "RECEIVED" : partial ? "PARTIAL" : undefined },
+      include: { supplier: true, lines: true },
     });
   },
 };
