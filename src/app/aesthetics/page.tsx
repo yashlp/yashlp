@@ -61,13 +61,10 @@ export default async function AestheticsHomePage() {
         {!featured.length && (
           <section className="px-4 py-20 text-center sm:px-6">
             <p className="text-lg font-medium text-[var(--aes-ink-muted)]">
-              Your shop is waiting — add products from the admin panel.
+              New products are on the way — check back soon.
             </p>
-            <Link
-              href="/platform-admin/login"
-              className="aes-btn aes-btn-primary mt-6 inline-flex px-8 py-4"
-            >
-              Open admin
+            <Link href="/aesthetics/discover" className="aes-btn aes-btn-primary mt-6 inline-flex px-8 py-4">
+              Try discover mode
             </Link>
           </section>
         )}

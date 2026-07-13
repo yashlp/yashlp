@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
@@ -88,10 +89,10 @@ export default function ShopPage() {
           </div>
         ) : sorted.length === 0 ? (
           <p className="py-20 text-center text-[var(--aes-charcoal-muted)]">
-            No products yet. Add catalog items from the{" "}
-            <a href="/platform-admin/login" className="text-[var(--aes-royal)] underline">
-              admin panel
-            </a>
+            No products available right now. Check back soon or try{" "}
+            <Link href="/aesthetics/discover" className="text-[var(--aes-pink)] underline">
+              discover mode
+            </Link>
             .
           </p>
         ) : (

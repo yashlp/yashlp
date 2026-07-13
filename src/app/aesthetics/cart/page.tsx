@@ -54,7 +54,9 @@ export default function CartPage() {
                 <span className="text-[var(--aes-charcoal-muted)]">Subtotal</span>
                 <span className="font-semibold">${cartTotal}</span>
               </div>
-              <Button className="mt-6 w-full py-4">Checkout — demo</Button>
+            <Link href="/aesthetics/checkout" className="mt-6 block">
+              <Button className="w-full py-4">Proceed to checkout — ${cartTotal}</Button>
+            </Link>
             </div>
           </>
         )}

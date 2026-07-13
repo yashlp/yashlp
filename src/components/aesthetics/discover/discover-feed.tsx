@@ -134,10 +134,10 @@ export function DiscoverFeed() {
             <Sparkles className="mb-4 h-10 w-10 text-[var(--aes-royal)]" />
             <h2 className="aes-display text-2xl font-semibold italic">No products to discover</h2>
             <p className="mt-2 text-sm text-[var(--aes-charcoal-muted)]">
-              Publish products from the admin panel to populate this feed.
+              New products are coming soon. Browse the shop or check back later.
             </p>
-            <Link href="/platform-admin/login" className="aes-btn aes-btn-primary mt-6 px-6 py-3 text-sm">
-              Admin login
+            <Link href="/aesthetics/shop" className="aes-btn aes-btn-primary mt-6 px-6 py-3 text-sm">
+              Browse shop
             </Link>
           </div>
         ) : (

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
-import { clearAdminUnlockSession } from "@/lib/admin-password";
+import { adminLogout } from "@/lib/commerce/admin-auth";
+import { commerceApiError } from "@/lib/commerce/api-utils";
 
 export async function POST() {
-  await clearAdminUnlockSession();
-  return NextResponse.json({ ok: true });
+  try {
+    await adminLogout();
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return commerceApiError(error);
+  }
 }
-

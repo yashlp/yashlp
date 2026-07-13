@@ -17,15 +17,15 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/platform-admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/platform-admin/products", label: "Products", icon: Package },
-  { href: "/platform-admin/categories", label: "Categories", icon: FolderTree },
-  { href: "/platform-admin/orders", label: "Orders", icon: CreditCard },
-  { href: "/platform-admin/sellers", label: "Sellers", icon: Store },
-  { href: "/platform-admin/users", label: "Users", icon: Users },
-  { href: "/platform-admin/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/platform-admin/audit-logs", label: "Audit Logs", icon: FileText },
-  { href: "/platform-admin/support", label: "Support", icon: Shield },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/categories", label: "Categories", icon: FolderTree },
+  { href: "/admin/orders", label: "Orders", icon: CreditCard },
+  { href: "/admin/sellers", label: "Sellers", icon: Store },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/audit-logs", label: "Audit Logs", icon: FileText },
+  { href: "/admin/support", label: "Support", icon: Shield },
 ];
 
 type Props = {
@@ -38,8 +38,8 @@ export function PlatformAdminShell({ admin, children }: Props) {
   const router = useRouter();
 
   async function logout() {
-    await fetch("/api/platform-admin/auth/logout", { method: "POST" });
-    router.push("/platform-admin/login");
+    await fetch("/api/admin/auth/logout", { method: "POST" });
+    router.push("/admin/login");
     router.refresh();
   }
 

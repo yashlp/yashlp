@@ -37,6 +37,16 @@ const nextConfig: NextConfig = {
         destination: "/aesthetics",
         permanent: true,
       },
+      {
+        source: "/platform-admin",
+        destination: "/admin/login",
+        permanent: true,
+      },
+      {
+        source: "/platform-admin/:path*",
+        destination: "/admin/:path*",
+        permanent: true,
+      },
     ];
   },
   async headers() {

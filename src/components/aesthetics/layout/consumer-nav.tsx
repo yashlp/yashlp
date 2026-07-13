@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -81,6 +81,13 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
             aria-label="Wishlist"
           >
             <Heart className="h-5 w-5" />
+          </Link>
+          <Link
+            href="/aesthetics/account/login"
+            className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-black/5 sm:flex"
+            aria-label="Account"
+          >
+            <User className="h-5 w-5" />
           </Link>
           <Link
             href="/aesthetics/cart"

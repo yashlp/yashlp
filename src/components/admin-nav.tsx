@@ -6,13 +6,13 @@ import { ImageIcon, LayoutDashboard, MapPin, MessageSquare, Rocket, Settings, Us
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/launch", label: "Launch", icon: Rocket },
-  { href: "/admin/incidents", label: "Pins", icon: MapPin },
-  { href: "/admin/comments", label: "Comments", icon: MessageSquare },
-  { href: "/admin/picture-approvals", label: "Picture Approval", icon: ImageIcon },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/settings", label: "Site settings", icon: Settings },
+  { href: "/civic-admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/civic-admin/launch", label: "Launch", icon: Rocket },
+  { href: "/civic-admin/incidents", label: "Pins", icon: MapPin },
+  { href: "/civic-admin/comments", label: "Comments", icon: MessageSquare },
+  { href: "/civic-admin/picture-approvals", label: "Picture Approval", icon: ImageIcon },
+  { href: "/civic-admin/users", label: "Users", icon: Users },
+  { href: "/civic-admin/settings", label: "Site settings", icon: Settings },
 ];
 
 export function AdminNav() {

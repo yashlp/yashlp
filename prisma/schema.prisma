@@ -551,6 +551,7 @@ model CommerceCustomer {
   id            String   @id @default(cuid())
   email         String?  @unique
   phone         String?  @unique
+  passwordHash  String?
   name          String?
   status        String   @default("ACTIVE")
   loyaltyPoints Int      @default(0)
@@ -559,8 +560,57 @@ model CommerceCustomer {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  orders   CommerceOrder[]
-  reviews  CommerceReview[]
+  addresses CommerceCustomerAddress[]
+  sessions  CommerceCustomerSession[]
+  orders    CommerceOrder[]
+  reviews   CommerceReview[]
+}
+
+model CommerceCustomerAddress {
+  id         String   @id @default(cuid())
+  customerId String
+  label      String?  @default("Home")
+  line1      String
+  line2      String?
+  city       String
+  state      String?
+  postalCode String
+  country    String   @default("US")
+  phone      String?
+  isDefault  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer CommerceCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+}
+
+model CommerceCustomerSession {
+  id         String    @id @default(cuid())
+  customerId String
+  tokenHash  String
+  userAgent  String?
+  ipAddress  String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  customer CommerceCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([customerId])
+}
+
+model CommerceCustomerPhoneOtp {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([phone])
 }
 
 model CommerceOrder {

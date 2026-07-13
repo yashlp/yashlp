@@ -10,7 +10,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<
     "loading" | "ok" | "denied" | "needs-password" | "set-password"
   >("loading");
-  const [deniedRedirect, setDeniedRedirect] = useState<"/admin/login" | "/">("/admin/login");
+  const [deniedRedirect, setDeniedRedirect] = useState<"/civic-admin/login" | "/">("/civic-admin/login");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,14 +22,14 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
       .then((r) => r.json())
       .then(async (d) => {
         if (d.user?.role !== "admin") {
-          setDeniedRedirect(d.user ? "/" : "/admin/login");
+          setDeniedRedirect(d.user ? "/" : "/civic-admin/login");
           setState("denied");
           return;
         }
-        const statusRes = await fetch("/api/admin/auth/status");
+        const statusRes = await fetch("/api/civic-admin/auth/status");
         const status = await statusRes.json();
         if (!statusRes.ok) {
-          setDeniedRedirect("/admin/login");
+          setDeniedRedirect("/civic-admin/login");
           setState("denied");
           return;
         }
@@ -44,7 +44,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
         setState("ok");
       })
       .catch(() => {
-        setDeniedRedirect("/admin/login");
+        setDeniedRedirect("/civic-admin/login");
         setState("denied");
       });
   }, []);
@@ -58,7 +58,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const verifyPassword = async () => {
     setSaving(true);
     setError("");
-    const res = await fetch("/api/admin/auth/verify", {
+    const res = await fetch("/api/civic-admin/auth/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
@@ -80,7 +80,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     }
     setSaving(true);
     setError("");
-    const res = await fetch("/api/admin/auth/password", {
+    const res = await fetch("/api/civic-admin/auth/password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -181,7 +181,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     <div className="mx-auto max-w-6xl px-4 py-6 pb-24">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <BrandLogo variant="header" href="/admin" />
+          <BrandLogo variant="header" href="/civic-admin" />
           <p className="mt-2 text-sm text-stone-500">Manage incidents, users, and live site settings</p>
         </div>
       </div>

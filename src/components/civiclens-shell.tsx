@@ -37,7 +37,7 @@ export function CivicLensShell({ children }: { children: React.ReactNode }) {
   const prevPath = useRef(pathname);
   const isLegalPage =
     pathname === "/terms" || pathname === "/privacy" || pathname === "/content-policy";
-  const isAdminPage = pathname.startsWith("/admin");
+  const isAdminPage = pathname.startsWith("/civic-admin");
   const isMapPage = pathname === "/";
 
   const refreshUser = () => {

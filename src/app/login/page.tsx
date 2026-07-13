@@ -47,7 +47,7 @@ export default function LoginPage() {
       .then((r) => r.json())
       .then((d) => {
         if (!d.user) return;
-        if (d.user.role === "admin") router.replace("/admin");
+        if (d.user.role === "admin") router.replace("/civic-admin");
         else if (nextPath?.startsWith("/")) router.replace(nextPath);
         else router.replace("/");
       })

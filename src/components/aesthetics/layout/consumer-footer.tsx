@@ -43,15 +43,10 @@ export function ConsumerFooter() {
           </ul>
         </div>
         <div>
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--aes-pink)]">Sell</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--aes-pink)]">Help</p>
           <ul className="space-y-2 text-sm text-white/70">
-            <li><Link href="/seller" className="hover:text-white">Seller dashboard</Link></li>
-            <li><Link href="/platform-admin/login" className="hover:text-white">Admin</Link></li>
+            <li><a href="mailto:hello@aesthetics.app" className="hover:text-white">hello@aesthetics.app</a></li>
           </ul>
-        </div>
-        <div>
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--aes-pink)]">Contact</p>
-          <p className="text-sm text-white/70">hello@aesthetics.app</p>
         </div>
       </div>
 

@@ -14,6 +14,7 @@ type CartContextValue = {
   prefs: PreferenceState;
   addToCart: (product: Product) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
   toggleWishlist: (product: Product) => void;
   recordPass: (product: Product) => void;
   recordView: (product: Product, seconds: number) => void;
@@ -35,6 +36,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = useCallback((id: string) => {
     setCart((c) => c.filter((p) => p.id !== id));
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setCart([]);
   }, []);
 
   const toggleWishlist = useCallback((product: Product) => {
@@ -63,13 +68,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       prefs,
       addToCart,
       removeFromCart,
+      clearCart,
       toggleWishlist,
       recordPass,
       recordView,
       cartTotal,
       cartCount: cart.length,
     }),
-    [cart, wishlist, prefs, addToCart, removeFromCart, toggleWishlist, recordPass, recordView, cartTotal]
+    [cart, wishlist, prefs, addToCart, removeFromCart, clearCart, toggleWishlist, recordPass, recordView, cartTotal]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
