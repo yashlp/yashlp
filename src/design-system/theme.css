@@ -12,43 +12,43 @@
   --aes-royal-deep: #152a45;
   --aes-royal-light: #2f4f73;
 
-  --aes-cream: #f7f9fc;
-  --aes-cream-deep: #e8edf4;
-  --aes-sand: #f5f7fa;
-  --aes-sand-deep: #e4eaf2;
+  --aes-cream: #fff5e1;
+  --aes-cream-deep: #ffe4b8;
+  --aes-sand: #fff9ee;
+  --aes-sand-deep: #ffe8c8;
   --aes-white: #ffffff;
-  --aes-ink: #1a2332;
-  --aes-ink-muted: #5c6b7a;
-  --aes-ink-soft: #7a8b9c;
+  --aes-ink: #121212;
+  --aes-ink-muted: #4a4a4a;
+  --aes-ink-soft: #767676;
 
-  /* Section washes — cool editorial blues & neutrals */
-  --aes-bg-base: #f7f9fc;
-  --aes-bg-blush: #eef2f7;
-  --aes-bg-blush-deep: #dde5ef;
-  --aes-bg-lavender: #e8edf5;
-  --aes-bg-lavender-deep: #d4dce8;
-  --aes-bg-peach: #f0f4f8;
-  --aes-bg-peach-deep: #e2e9f2;
-  --aes-bg-sand: #f5f7fa;
-  --aes-bg-warm: #ebf0f6;
-  --aes-bg-testimonial: #eef2f7;
-  --aes-bg-bundle: #e4ebf4;
-  --aes-bg-mint: #e8f2ef;
-  --aes-bg-dark: #1e3a5f;
+  /* Joy Rush–style section washes */
+  --aes-bg-base: #fff5e1;
+  --aes-bg-blush: #ffcfe0;
+  --aes-bg-blush-deep: #ff9ec4;
+  --aes-bg-lavender: #d4c4ff;
+  --aes-bg-lavender-deep: #b388ff;
+  --aes-bg-peach: #ffd9a8;
+  --aes-bg-peach-deep: #ffb347;
+  --aes-bg-sand: #fff3d6;
+  --aes-bg-warm: #ffe8b0;
+  --aes-bg-testimonial: #ffe8f2;
+  --aes-bg-bundle: #e4d4ff;
+  --aes-bg-mint: #c8f5e8;
+  --aes-bg-dark: #121212;
 
-  --aes-pink: var(--aes-royal);
-  --aes-pink-soft: var(--aes-royal-light);
-  --aes-orange: #3d5a80;
-  --aes-orange-soft: #5c7a9e;
-  --aes-yellow: #e8edf4;
-  --aes-yellow-deep: #c5d0de;
-  --aes-lavender: #8fa3bc;
-  --aes-lavender-soft: #b4c3d4;
+  --aes-pink: #ff2a5f;
+  --aes-pink-soft: #ff6b95;
+  --aes-orange: #ff7a2f;
+  --aes-orange-soft: #ffa366;
+  --aes-yellow: #ffe135;
+  --aes-yellow-deep: #ffc800;
+  --aes-lavender: #9b6dff;
+  --aes-lavender-soft: #c9a8ff;
   --aes-mint: #6b9080;
   --aes-mint-soft: #9bb5a8;
   --aes-sky: #5b8db8;
-  --aes-coral: var(--aes-royal);
-  --aes-coral-soft: var(--aes-royal-light);
+  --aes-coral: var(--aes-pink);
+  --aes-coral-soft: var(--aes-pink-soft);
 
   /* Legacy aliases */
   --aes-forest: var(--aes-pink);
@@ -75,22 +75,24 @@
   --aes-charcoal-muted: var(--aes-ink-muted);
 
   --aes-gradient-hero:
-    radial-gradient(ellipse 75% 60% at 90% 10%, rgba(30, 58, 95, 0.08), transparent 52%),
-    radial-gradient(ellipse 65% 55% at 8% 22%, rgba(122, 139, 156, 0.1), transparent 48%),
-    linear-gradient(180deg, #f7f9fc 0%, #eef2f7 45%, #f7f9fc 100%);
+    radial-gradient(ellipse 75% 60% at 90% 10%, rgba(255, 90, 140, 0.35), transparent 52%),
+    radial-gradient(ellipse 65% 55% at 8% 22%, rgba(155, 109, 255, 0.3), transparent 48%),
+    radial-gradient(ellipse 55% 50% at 50% 100%, rgba(255, 179, 71, 0.32), transparent 52%),
+    linear-gradient(180deg, #fff5e1 0%, #ffe8f2 42%, #fff5e1 100%);
   --aes-gradient-site:
-    radial-gradient(ellipse 85% 65% at 100% 0%, rgba(30, 58, 95, 0.06), transparent 52%),
-    radial-gradient(ellipse 70% 55% at 0% 18%, rgba(122, 139, 156, 0.08), transparent 48%),
+    radial-gradient(ellipse 85% 65% at 100% 0%, rgba(255, 90, 140, 0.28), transparent 52%),
+    radial-gradient(ellipse 70% 55% at 0% 18%, rgba(155, 109, 255, 0.24), transparent 48%),
+    radial-gradient(ellipse 55% 45% at 50% 100%, rgba(255, 179, 71, 0.26), transparent 52%),
     var(--aes-bg-base);
   --aes-gradient-peach: linear-gradient(180deg, var(--aes-bg-peach) 0%, var(--aes-bg-warm) 100%);
   --aes-gradient-lavender: linear-gradient(180deg, var(--aes-bg-lavender) 0%, var(--aes-bg-blush) 100%);
-  --aes-gradient-bundle: linear-gradient(135deg, #e4ebf4 0%, #eef2f7 50%, #f0f4f8 100%);
-  --aes-gradient-brand: linear-gradient(120deg, var(--aes-royal), var(--aes-royal-light), var(--aes-only));
+  --aes-gradient-bundle: linear-gradient(135deg, #e4d4ff 0%, #ffcfe0 45%, #ffd9a8 100%);
+  --aes-gradient-brand: linear-gradient(120deg, var(--aes-pink), var(--aes-orange), var(--aes-lavender));
 
   --aes-border: rgba(26, 26, 26, 0.1);
   --aes-border-light: rgba(255, 255, 255, 0.2);
   --aes-shadow: 0 2px 12px rgba(26, 26, 26, 0.06);
-  --aes-shadow-hover: 0 8px 28px rgba(30, 58, 95, 0.12);
+  --aes-shadow-hover: 0 8px 28px rgba(255, 45, 107, 0.12);
   --aes-radius: 1rem;
   --aes-radius-lg: 1.25rem;
   --aes-radius-xl: 1.5rem;
@@ -107,7 +109,57 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Only Aesthetics brand lockup */
+/* Only Aesthetics brand lockup — single line */
+.aes-brand-lockup {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
+  gap: 0.4em;
+  line-height: 1;
+}
+
+.aes-brand-lockup-hero .aes-brand-only {
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+}
+
+.aes-brand-lockup-hero .aes-brand-wordmark {
+  font-size: clamp(1.25rem, 4.5vw, 2.75rem);
+  letter-spacing: 0.18em;
+}
+
+@media (min-width: 640px) {
+  .aes-brand-lockup-hero .aes-brand-wordmark {
+    letter-spacing: 0.26em;
+  }
+}
+
+.aes-brand-lockup-nav .aes-brand-only {
+  font-size: 0.625rem;
+}
+
+.aes-brand-lockup-nav .aes-brand-wordmark {
+  font-size: clamp(0.7rem, 2.2vw, 1rem);
+  letter-spacing: 0.14em;
+}
+
+@media (min-width: 640px) {
+  .aes-brand-lockup-nav .aes-brand-wordmark {
+    letter-spacing: 0.2em;
+  }
+}
+
+.aes-brand-lockup-footer .aes-brand-only {
+  font-size: 0.75rem;
+}
+
+.aes-brand-lockup-footer .aes-brand-wordmark {
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+}
+
 .aes-brand-only {
   font-family: var(--aes-font-brand);
   font-weight: 400;
@@ -122,34 +174,7 @@
   font-weight: 500;
   text-transform: uppercase;
   color: var(--aes-royal);
-  line-height: 0.95;
-}
-
-.aes-brand-wordmark-hero {
-  font-size: clamp(2rem, 7vw, 4.5rem);
-  letter-spacing: 0.28em;
-}
-
-@media (min-width: 640px) {
-  .aes-brand-wordmark-hero {
-    letter-spacing: 0.32em;
-  }
-}
-
-.aes-brand-wordmark-nav {
-  font-size: clamp(0.95rem, 2.5vw, 1.35rem);
-  letter-spacing: 0.22em;
-}
-
-@media (min-width: 640px) {
-  .aes-brand-wordmark-nav {
-    letter-spacing: 0.28em;
-  }
-}
-
-.aes-brand-wordmark-footer {
-  font-size: 1.25rem;
-  letter-spacing: 0.24em;
+  line-height: 1;
 }
 
 .aes-brand-tagline {
@@ -182,7 +207,7 @@
   line-height: 1;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--aes-royal);
+  color: var(--aes-ink);
 }
 
 .aes-joy-title-lower {
@@ -192,7 +217,7 @@
   line-height: 1.1;
   letter-spacing: 0.08em;
   text-transform: lowercase;
-  color: var(--aes-royal);
+  color: var(--aes-ink);
 }
 
 .aes-serif {
@@ -294,7 +319,7 @@
 }
 
 .aes-btn-primary {
-  background: var(--aes-royal);
+  background: var(--aes-ink);
   color: var(--aes-white);
 }
 
@@ -304,12 +329,12 @@
 
 .aes-btn-secondary {
   background: var(--aes-white);
-  color: var(--aes-royal);
-  border: 2px solid var(--aes-royal);
+  color: var(--aes-ink);
+  border: 2px solid var(--aes-ink);
 }
 
 .aes-btn-secondary:hover {
-  background: var(--aes-royal);
+  background: var(--aes-ink);
   color: var(--aes-white);
 }
 
@@ -349,7 +374,7 @@
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--aes-royal);
+  color: var(--aes-pink);
 }
 
 .aes-tagline-band span::after {
@@ -366,7 +391,7 @@
 .aes-input {
   width: 100%;
   border-radius: 9999px;
-  border: 2px solid rgba(30, 58, 95, 0.15);
+  border: 2px solid rgba(255, 45, 107, 0.12);
   background: rgba(255, 255, 255, 0.85);
   padding: 0.875rem 1.25rem;
   font-size: 0.9375rem;
@@ -375,9 +400,9 @@
 
 .aes-input:focus {
   outline: none;
-  border-color: var(--aes-royal);
+  border-color: var(--aes-pink);
   background: var(--aes-white);
-  box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.1);
+  box-shadow: 0 0 0 4px rgba(255, 45, 107, 0.12);
 }
 
 .aes-panel {
@@ -424,7 +449,7 @@
 }
 
 .aes-chip-cobalt { background: rgba(201, 160, 255, 0.25); color: #8b5cf6; }
-.aes-chip-coral { background: rgba(30, 58, 95, 0.1); color: var(--aes-royal); }
+.aes-chip-coral { background: rgba(255, 45, 107, 0.12); color: var(--aes-pink); }
 .aes-chip-sage { background: rgba(94, 224, 199, 0.25); color: #0d9488; }
 .aes-chip-lavender { background: rgba(201, 160, 255, 0.2); color: var(--aes-lavender); }
 
@@ -480,7 +505,7 @@
   line-height: 1;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--aes-royal);
+  color: var(--aes-ink);
 }
 
 /* Joy Rush horizontal product scroll */
@@ -546,7 +571,7 @@
 }
 
 .aes-joy-quickadd:hover {
-  background: var(--aes-royal-light);
+  background: var(--aes-pink);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -5,7 +5,7 @@ import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 
 export function ConsumerFooter() {
   return (
-    <footer className="bg-[var(--aes-royal-deep)] text-white">
+    <footer className="bg-[var(--aes-bg-dark)] text-white">
       <div className="border-b border-white/10 px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl text-center">
           <BrandLogo variant="footer" href="/aesthetics" />
@@ -23,7 +23,7 @@ export function ConsumerFooter() {
             />
             <button
               type="submit"
-              className="rounded-full bg-white px-6 py-3 text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-royal)]"
+              className="rounded-full bg-white px-6 py-3 text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink)]"
             >
               Subscribe
             </button>

@@ -33,24 +33,25 @@ export function BrandLoader() {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[500] flex flex-col items-center justify-center bg-[var(--aes-bg-base)] transition-opacity duration-500",
+        "fixed inset-0 z-[500] flex items-center justify-center bg-[var(--aes-bg-base)] transition-opacity duration-500",
         visible ? "opacity-100" : "opacity-0"
       )}
       aria-hidden
     >
-      <span className="aes-brand-only mb-3 text-sm">only</span>
-      <div className="flex gap-[0.35em] sm:gap-[0.45em]">
-        {LETTERS.map((letter, i) => (
-          <span
-            key={`${letter}-${i}`}
-            className={cn(
-              "aes-brand-wordmark text-2xl sm:text-4xl transition-opacity duration-300",
-              i <= activeIndex ? "opacity-100" : "opacity-0"
-            )}
-          >
-            {letter}
-          </span>
-        ))}
+      <div className="aes-brand-lockup aes-brand-lockup-hero px-4">
+        <span className="aes-brand-only">only</span>
+        <span className="aes-brand-wordmark inline-flex">
+          {LETTERS.map((letter, i) => (
+            <span key={`${letter}-${i}`}>
+              {i > 0 ? "\u00a0" : ""}
+              <span
+                className={cn("transition-opacity duration-300", i <= activeIndex ? "opacity-100" : "opacity-0")}
+              >
+                {letter}
+              </span>
+            </span>
+          ))}
+        </span>
       </div>
     </div>
   );

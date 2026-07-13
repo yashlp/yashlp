@@ -67,7 +67,7 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
             <span className="relative">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aes-royal)] px-1 text-[9px] font-bold text-white">
+                <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aes-pink)] px-1 text-[9px] font-bold text-white">
                   {cartCount}
                 </span>
               )}
@@ -92,8 +92,8 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
                 className={cn(
                   "py-3 text-sm font-medium uppercase tracking-[0.15em] transition-colors",
                   pathname === href || pathname.startsWith(`${href}/`)
-                    ? "text-[var(--aes-royal)]"
-                    : "text-[var(--aes-ink-muted)] hover:text-[var(--aes-royal)]"
+                    ? "text-[var(--aes-pink)]"
+                    : "text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
                 )}
               >
                 {label}
