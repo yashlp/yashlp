@@ -65,9 +65,12 @@ export default function PlatformAdminLoginPage() {
     <div className="aesthetics-root flex min-h-dvh items-center justify-center bg-[var(--aes-ivory)] px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="aes-display text-3xl font-semibold italic text-[var(--aes-charcoal)]">Aesthetics</p>
+          <p className="aes-display text-lg font-semibold tracking-wide">
+            <span className="text-[var(--aes-charcoal-muted)]">only </span>
+            <span className="text-[var(--aes-royal)]">A E S T H E T I C S</span>
+          </p>
           <p className="aes-mono mt-2 text-[10px] uppercase tracking-[0.3em] text-[var(--aes-dusty)]">
-            Platform Admin
+            D2C Admin Portal
           </p>
         </div>
 
