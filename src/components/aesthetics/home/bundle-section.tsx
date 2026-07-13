@@ -8,7 +8,7 @@ const TIERS = [
 
 export function BundleSection() {
   return (
-    <section className="bg-[var(--aes-cream)] px-4 py-16 sm:px-6 sm:py-24">
+    <section className="aes-bg-bundle px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-7xl text-center">
         <h2 className="aes-section-title text-[var(--aes-ink)]">Bundle &amp; SAVE</h2>
         <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-[var(--aes-ink-muted)]">
@@ -24,7 +24,7 @@ export function BundleSection() {
           {TIERS.map((tier) => (
             <div
               key={tier.spend}
-              className="rounded-2xl bg-white px-6 py-10 shadow-sm"
+              className="rounded-2xl bg-white/70 px-6 py-10 shadow-sm backdrop-blur-sm"
             >
               <p className="text-xs font-bold lowercase text-[var(--aes-ink-muted)]">
                 spend {tier.spend}

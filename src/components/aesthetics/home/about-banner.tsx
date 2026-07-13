@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 
 export function AboutBanner() {
   return (
-    <section className="bg-white px-4 py-16 sm:px-6 sm:py-24">
+    <section className="aes-bg-peach px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="text-xl font-bold leading-snug text-[var(--aes-ink)] sm:text-2xl md:text-3xl">
           Clean, curated, feel-good objects that enhance joyful moments

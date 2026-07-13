@@ -4,21 +4,36 @@
  */
 
 .aesthetics-root {
-  --aes-cream: #fff6e8;
+  /* Base — Joy Rush warm cream */
+  --aes-cream: #fff8eb;
   --aes-cream-deep: #ffecd0;
-  --aes-sand: #fff6e8;
+  --aes-sand: #fff9f2;
   --aes-sand-deep: #ffecd0;
   --aes-white: #ffffff;
   --aes-ink: #1a1a1a;
   --aes-ink-muted: #5c5c5c;
   --aes-ink-soft: #8a8a8a;
 
+  /* Section background shades (Joy Rush alternating washes) */
+  --aes-bg-base: #fff8eb;
+  --aes-bg-blush: #fff0f4;
+  --aes-bg-blush-deep: #ffe4ec;
+  --aes-bg-lavender: #f3ecff;
+  --aes-bg-lavender-deep: #e8dcff;
+  --aes-bg-peach: #fff4e8;
+  --aes-bg-peach-deep: #ffe8d4;
+  --aes-bg-sand: #fff9f2;
+  --aes-bg-warm: #fff2de;
+  --aes-bg-testimonial: #fff6fa;
+  --aes-bg-bundle: #f6efff;
+  --aes-bg-dark: #1c1c1c;
+
   --aes-pink: #ff2d6b;
   --aes-pink-soft: #ff6b95;
   --aes-orange: #ff8a3d;
   --aes-orange-soft: #ffb366;
-  --aes-yellow: #ffe566;
-  --aes-yellow-deep: #ffd23f;
+  --aes-yellow: #ffeb66;
+  --aes-yellow-deep: #ffd93d;
   --aes-lavender: #c9a0ff;
   --aes-lavender-soft: #e4ccff;
   --aes-mint: #5ee0c7;
@@ -59,7 +74,14 @@
   --aes-pedestal-4: #d4f5ed;
   --aes-pedestal-5: #fff0b8;
 
-  --aes-gradient-hero: linear-gradient(180deg, #fff6e8 0%, #fff0f5 50%, #fff6e8 100%);
+  --aes-gradient-hero:
+    radial-gradient(ellipse 70% 55% at 85% 15%, rgba(255, 182, 210, 0.45), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 10% 25%, rgba(201, 160, 255, 0.35), transparent 50%),
+    radial-gradient(ellipse 55% 45% at 50% 95%, rgba(255, 214, 150, 0.4), transparent 55%),
+    linear-gradient(180deg, #fff8eb 0%, #fff5f0 45%, #fff8eb 100%);
+  --aes-gradient-peach: linear-gradient(180deg, var(--aes-bg-peach) 0%, var(--aes-bg-warm) 100%);
+  --aes-gradient-lavender: linear-gradient(180deg, var(--aes-bg-lavender) 0%, var(--aes-bg-blush) 100%);
+  --aes-gradient-bundle: linear-gradient(135deg, #f6efff 0%, #fff0f5 50%, #fff4e8 100%);
   --aes-gradient-brand: linear-gradient(120deg, var(--aes-pink), var(--aes-orange), var(--aes-lavender));
 
   --aes-border: rgba(26, 26, 26, 0.1);
@@ -75,7 +97,7 @@
   --aes-safe-bottom: env(safe-area-inset-bottom, 0px);
 
   font-family: var(--font-body), system-ui, sans-serif;
-  background: var(--aes-cream);
+  background: var(--aes-bg-base);
   color: var(--aes-ink);
   -webkit-font-smoothing: antialiased;
 }
@@ -125,12 +147,45 @@
 }
 
 .aes-mesh-bg {
-  background: var(--aes-cream);
+  background: var(--aes-bg-base);
   position: relative;
 }
 
+/* Joy Rush section background utilities */
+.aes-bg-hero {
+  background: var(--aes-gradient-hero);
+}
+
+.aes-bg-blush {
+  background: var(--aes-bg-blush);
+}
+
+.aes-bg-lavender {
+  background: var(--aes-gradient-lavender);
+}
+
+.aes-bg-peach {
+  background: var(--aes-gradient-peach);
+}
+
+.aes-bg-sand {
+  background: var(--aes-bg-sand);
+}
+
+.aes-bg-warm {
+  background: var(--aes-bg-warm);
+}
+
+.aes-bg-testimonial {
+  background: var(--aes-bg-testimonial);
+}
+
+.aes-bg-bundle {
+  background: var(--aes-gradient-bundle);
+}
+
 .aes-dark-section {
-  background: var(--aes-ink);
+  background: var(--aes-bg-dark);
   color: var(--aes-white);
 }
 

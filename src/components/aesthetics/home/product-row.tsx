@@ -6,14 +6,16 @@ type ProductRowProps = {
   titleLine2?: string;
   titleStyle?: "upper" | "lower";
   products: Product[];
-  bg?: "white" | "cream" | "pink";
+  bg?: "blush" | "lavender" | "peach" | "sand" | "warm";
   quickAdd?: boolean;
 };
 
 const BG = {
-  white: "bg-white",
-  cream: "bg-[var(--aes-cream)]",
-  pink: "bg-[var(--aes-cream)]",
+  blush: "aes-bg-blush",
+  lavender: "aes-bg-lavender",
+  peach: "aes-bg-peach",
+  sand: "aes-bg-sand",
+  warm: "aes-bg-warm",
 };
 
 export function ProductRow({
@@ -21,7 +23,7 @@ export function ProductRow({
   titleLine2,
   titleStyle = "upper",
   products,
-  bg = "cream",
+  bg = "blush",
   quickAdd = true,
 }: ProductRowProps) {
   if (!products.length) return null;

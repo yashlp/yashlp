@@ -55,7 +55,7 @@ export default function ShopPage() {
   return (
     <>
       <ConsumerNav cartCount={cartCount} />
-      <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
+      <main className="mx-auto max-w-7xl bg-[var(--aes-bg-base)] px-4 pb-16 pt-6 sm:px-6">
         <div className="py-10 text-center">
           <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">shop the entire collection</h1>
         </div>
@@ -96,7 +96,7 @@ export default function ShopPage() {
           </div>
         )}
 
-        <section className="mt-20 text-center">
+        <section className="aes-bg-bundle mt-20 rounded-3xl px-6 py-14 text-center">
           <h2 className="aes-section-title text-[var(--aes-ink)]">Bundle &amp; SAVE</h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-[var(--aes-ink-muted)]">
             Why pick one? Build your cart with a little something for every feeling.

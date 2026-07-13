@@ -30,7 +30,7 @@ const REVIEWS = [
 
 export function TestimonialsSection() {
   return (
-    <section className="bg-white px-4 py-16 sm:px-6 sm:py-20">
+    <section className="aes-bg-testimonial px-4 py-16 sm:px-6 sm:py-20">
       <div className="mx-auto max-w-7xl">
         <h2 className="aes-section-title text-center text-[var(--aes-ink)]">
           Don&apos;t take our word for it
@@ -40,7 +40,7 @@ export function TestimonialsSection() {
           {REVIEWS.map((review) => (
             <blockquote
               key={review.name}
-              className="w-[280px] shrink-0 rounded-2xl bg-[var(--aes-cream)] p-6 sm:w-[300px]"
+              className="w-[280px] shrink-0 rounded-2xl bg-white/80 p-6 backdrop-blur-sm sm:w-[300px]"
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (

@@ -35,14 +35,14 @@ export default async function AestheticsHomePage() {
           titleLine2="as they are meaningful"
           titleStyle="upper"
           products={featured.slice(0, 5)}
-          bg="cream"
+          bg="blush"
           quickAdd
         />
         <ProductRow
           title="curated to match your mood"
           titleStyle="lower"
           products={newArrivals.slice(0, 5)}
-          bg="white"
+          bg="lavender"
           quickAdd
         />
         <AboutBanner />
@@ -51,7 +51,7 @@ export default async function AestheticsHomePage() {
         <TestimonialsSection />
         <BundleSection />
         {!featured.length && (
-          <section className="px-4 py-20 text-center sm:px-6">
+          <section className="aes-bg-sand px-4 py-20 text-center sm:px-6">
             <p className="text-lg font-medium text-[var(--aes-ink-muted)]">
               New products are on the way — check back soon.
             </p>

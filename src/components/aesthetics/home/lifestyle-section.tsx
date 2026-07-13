@@ -19,7 +19,7 @@ const PILLARS = [
 
 export function LifestyleSection() {
   return (
-    <section className="bg-[var(--aes-cream)] px-4 py-16 sm:px-6 sm:py-24">
+    <section className="aes-bg-warm px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center">
           <h2 className="aes-section-title text-[var(--aes-ink)]">

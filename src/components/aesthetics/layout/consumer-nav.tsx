@@ -36,7 +36,7 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
     <header
       className={cn(
         "sticky top-0 z-[200] w-full transition-all duration-300",
-        scrolled ? "bg-[var(--aes-cream)]/95 shadow-sm backdrop-blur-md" : "bg-[var(--aes-cream)]"
+        scrolled ? "bg-[var(--aes-bg-base)]/95 shadow-sm backdrop-blur-md" : "bg-transparent"
       )}
     >
       <div className="mx-auto grid max-w-7xl grid-cols-3 items-center gap-2 px-4 py-4 sm:px-6">
@@ -82,7 +82,7 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
       </div>
 
       {open && (
-        <nav className="border-t border-[var(--aes-border)] bg-[var(--aes-cream)] px-4 py-6 sm:px-6">
+        <nav className="border-t border-[var(--aes-border)] bg-[var(--aes-bg-base)] px-4 py-6 sm:px-6">
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
             <Link
               href="/aesthetics"

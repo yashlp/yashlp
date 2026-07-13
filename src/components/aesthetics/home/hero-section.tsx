@@ -30,7 +30,7 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
         }));
 
   return (
-    <section className="px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
+    <section className="aes-bg-hero px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
       <div className="mx-auto max-w-5xl text-center">
         <h1 className="aes-joy-title aes-animate-fade-up text-[var(--aes-ink)]">
           curated design
