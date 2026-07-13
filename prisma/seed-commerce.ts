@@ -86,7 +86,7 @@ const PRODUCTS: ProductSeed[] = [
     description: "Indigo-dipped beeswax tapers that burn like a memory you can't place.",
     shortDescription: "candlelit nostalgia",
     image: "https://images.unsplash.com/photo-1602874801006-4f8a22944a3a?w=1200&q=80",
-    tags: ["vintage", "dreamy", "cozy"],
+    tags: ["vintage", "dreamy", "cozy", "scent", "candle"],
     mood: "romantic",
     materials: ["beeswax"],
     colors: ["royal blue"],

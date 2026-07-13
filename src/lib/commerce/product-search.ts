@@ -3,7 +3,7 @@
  * e.g. "good smell" → lavender room mist, midnight taper set
  */
 const SYNONYM_GROUPS: string[][] = [
-  ["scent", "smell", "fragrance", "aroma", "perfume", "mist", "lavender"],
+  ["scent", "smell", "fragrance", "aroma", "perfume", "mist", "lavender", "good"],
   ["candle", "taper", "lighting", "midnight", "beeswax"],
   ["journal", "notebook", "stationery", "paper", "writing"],
   ["ceramic", "vessel", "vase", "pottery", "cloud"],
@@ -76,6 +76,7 @@ export function scoreProductSearch(product: SearchableProduct, query: string): n
   for (const term of expanded) {
     if (term.length < 3) continue;
     if (product.name.toLowerCase().includes(term)) score += 25;
+    if (product.category.toLowerCase().includes(term)) score += 20;
     if (haystack.includes(term)) score += 12;
     for (const tag of product.tags) {
       if (tag.toLowerCase().includes(term)) score += 18;
