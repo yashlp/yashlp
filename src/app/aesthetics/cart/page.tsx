@@ -10,12 +10,13 @@ export default function CartPage() {
   const { cart, cartTotal, removeFromCart, cartCount } = useCart();
 
   return (
-    <ConsumerPage cartCount={cartCount} tint="blush">
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">your cart</h1>
+    <ConsumerPage cartCount={cartCount} room="calm">
+      <main className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+        <p className="aes-gallery-eyebrow">Checkout prep</p>
+        <h1 className="aes-gallery-title mt-3">Your cart</h1>
         {cart.length === 0 ? (
-          <div className="aes-panel mt-16 p-10 text-center">
-            <p className="text-[var(--aes-ink-muted)]">Your cart is empty.</p>
+          <div className="aes-panel mt-12 p-10 text-center">
+            <p className="text-[var(--gallery-muted,#6f6a63)]">Your cart is empty.</p>
             <Link href="/aesthetics/shop" className="mt-6 inline-block">
               <Button>Continue shopping</Button>
             </Link>
@@ -36,22 +37,22 @@ export default function CartPage() {
                     >
                       {item.name}
                     </Link>
-                    <p className="mt-1 text-lg font-bold text-[var(--aes-ink)]">{formatInr(item.price)}</p>
+                    <p className="mt-1 text-lg font-semibold text-[var(--gallery-ink,#1e1e1c)]">{formatInr(item.price)}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => removeFromCart(item.id)}
-                    className="self-start text-sm text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
+                    className="self-start text-sm text-[var(--gallery-muted,#6f6a63)] hover:text-[var(--gallery-blue,#2c5aa0)]"
                   >
                     Remove
                   </button>
                 </li>
               ))}
             </ul>
-            <div className="aes-panel-warm mt-10 p-6">
+            <div className="aes-panel mt-10 p-6">
               <div className="flex justify-between text-lg">
-                <span className="text-[var(--aes-ink-muted)]">Subtotal</span>
-                <span className="font-bold text-[var(--aes-ink)]">{formatInr(cartTotal)}</span>
+                <span className="text-[var(--gallery-muted,#6f6a63)]">Subtotal</span>
+                <span className="font-semibold text-[var(--gallery-ink,#1e1e1c)]">{formatInr(cartTotal)}</span>
               </div>
               <Link href="/aesthetics/checkout" className="mt-6 block">
                 <Button className="w-full py-4">Proceed to checkout — {formatInr(cartTotal)}</Button>

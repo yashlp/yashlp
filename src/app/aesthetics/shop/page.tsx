@@ -59,32 +59,36 @@ export default function ShopPage() {
   const showLoading = isSearching ? searchLoading : loading;
 
   return (
-    <ConsumerPage cartCount={cartCount} tint="blush">
-      <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
-        <div className="py-10 text-center">
-          <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">shop the entire collection</h1>
-          <div className="mx-auto mt-8 flex justify-center px-2">
+    <ConsumerPage cartCount={cartCount} room="ivory">
+      <main className="mx-auto max-w-7xl px-4 pb-20 pt-10 sm:px-6">
+        <div className="max-w-2xl">
+          <p className="aes-gallery-eyebrow">The shop</p>
+          <h1 className="aes-gallery-title mt-3">Shop the entire collection</h1>
+          <p className="aes-gallery-lead mt-4">
+            Premium objects with generous space to breathe — browse by mood, or search for a feeling.
+          </p>
+          <div className="mt-8">
             <ProductSearchBar value={searchQuery} onChange={setSearchQuery} id="shop-search" />
           </div>
           {isSearching && (
-            <p className="mt-4 text-xs font-bold uppercase tracking-wider text-[var(--aes-ink-muted)]">
+            <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-[var(--gallery-muted,#6f6a63)]">
               {searchLoading ? "Searching…" : `${displayProducts.length} matching product${displayProducts.length === 1 ? "" : "s"}`}
             </p>
           )}
         </div>
 
         {!isSearching && (
-          <div className="mb-10 flex flex-wrap justify-center gap-2">
+          <div className="mb-12 mt-10 flex flex-wrap gap-2">
             {categories.map(({ id, label }) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => setCategory(id)}
                 className={cn(
-                  "rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all",
+                  "rounded-full px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.14em] transition-all duration-300",
                   category === id
-                    ? "bg-[var(--aes-ink)] text-white"
-                    : "border border-[var(--aes-ink)]/20 bg-white/50 text-[var(--aes-ink)] hover:bg-[var(--aes-ink)] hover:text-white"
+                    ? "bg-[var(--gallery-ink,#1e1e1c)] text-white"
+                    : "border border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-card,#fcfbf8)] text-[var(--gallery-muted,#6f6a63)] hover:border-[var(--gallery-blue,#2c5aa0)] hover:text-[var(--gallery-blue,#2c5aa0)]"
                 )}
               >
                 {label}
@@ -94,19 +98,19 @@ export default function ShopPage() {
         )}
 
         {showLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="aes-skeleton aspect-[3/4] rounded-2xl" />
             ))}
           </div>
         ) : displayProducts.length === 0 ? (
-          <p className="py-20 text-center text-[var(--aes-charcoal-muted)]">
+          <p className="py-20 text-[var(--gallery-muted,#6f6a63)]">
             {isSearching
               ? `No products match "${searchQuery.trim()}". Try scent, journal, or cozy.`
               : "No products available right now. Check back soon."}
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className={`${isSearching ? "mt-10" : ""} grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4`}>
             {displayProducts.map((p, i) => (
               <ProductCard key={p.id} product={p} priority={i < 4} index={i} quickAdd variant="grid" />
             ))}

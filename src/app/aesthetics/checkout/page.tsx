@@ -161,9 +161,9 @@ export default function CheckoutPage() {
 
   if (!cart.length) {
     return (
-      <ConsumerPage cartCount={cartCount} tint="peach">
+      <ConsumerPage cartCount={cartCount} room="calm">
         <main className="mx-auto max-w-lg px-4 py-20 text-center">
-          <p className="text-[var(--aes-ink-muted)]">Your cart is empty.</p>
+          <p className="text-[var(--gallery-muted,#6f6a63)]">Your cart is empty.</p>
           <Link href="/aesthetics/shop" className="mt-6 inline-block">
             <Button>Continue shopping</Button>
           </Link>
@@ -173,10 +173,11 @@ export default function CheckoutPage() {
   }
 
   return (
-    <ConsumerPage cartCount={cartCount} tint="peach">
+    <ConsumerPage cartCount={cartCount} room="calm">
       {razorpayEnabled && <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />}
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">checkout</h1>
+      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+        <p className="aes-gallery-eyebrow">Secure payment</p>
+        <h1 className="aes-gallery-title mt-3">Checkout</h1>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-2">
           <form onSubmit={submit} className="aes-panel space-y-4 p-6 sm:p-8">
@@ -216,8 +217,8 @@ export default function CheckoutPage() {
             </Button>
           </form>
 
-          <div className="aes-panel-lavender p-6 sm:p-8">
-            <h2 className="font-bold text-[var(--aes-ink)]">Order summary</h2>
+          <div className="aes-panel p-6 sm:p-8">
+            <h2 className="font-semibold text-[var(--gallery-ink,#1e1e1c)]">Order summary</h2>
             <ul className="mt-4 space-y-4">
               {cart.map((item) => (
                 <li key={item.id} className="flex gap-3">

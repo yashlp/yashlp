@@ -20,9 +20,10 @@ export default function SearchPageClient() {
   }, [initial]);
 
   return (
-    <ConsumerPage cartCount={cartCount} tint="sand">
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">search</h1>
+    <ConsumerPage cartCount={cartCount} room="ivory">
+      <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <p className="aes-gallery-eyebrow">Find a piece</p>
+        <h1 className="aes-gallery-title mt-3">Search</h1>
         <div className="mt-8 flex justify-center">
           <ProductSearchBar value={query} onChange={setQuery} className="max-w-2xl" id="search-page-input" />
         </div>

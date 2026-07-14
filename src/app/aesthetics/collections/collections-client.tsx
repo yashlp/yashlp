@@ -27,14 +27,17 @@ export function CollectionsClient({ collections }: Props) {
     );
   }, [collections, searchQuery]);
 
+  const visibleCollections = isSearching ? filteredCollections : collections;
+
   return (
-    <ConsumerPage tint="sand">
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">collections</h1>
-        <p className="mt-3 max-w-lg text-sm text-[var(--aes-ink-muted)]">
-          Curated edits for every mood — calm mornings, creative nights, and everything between.
+    <ConsumerPage room="warm">
+      <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16">
+        <p className="aes-gallery-eyebrow">Mood-based browsing</p>
+        <h1 className="aes-gallery-title mt-3">Collections</h1>
+        <p className="aes-gallery-lead mt-4">
+          Curated rooms for every mood — calm mornings, creative nights, and everything between.
         </p>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-10 flex justify-start">
           <ProductSearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -44,7 +47,7 @@ export function CollectionsClient({ collections }: Props) {
         </div>
 
         {isSearching && (
-          <p className="mt-4 text-center text-xs font-bold uppercase tracking-wider text-[var(--aes-ink-muted)]">
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--gallery-muted,#6f6a63)]">
             {searchLoading
               ? "Searching…"
               : `${filteredCollections.length} collection${filteredCollections.length === 1 ? "" : "s"}, ${productResults.length} product${productResults.length === 1 ? "" : "s"}`}
@@ -52,25 +55,25 @@ export function CollectionsClient({ collections }: Props) {
         )}
 
         {!isSearching && collections.length === 0 ? (
-          <p className="mt-12 text-[var(--aes-ink-muted)]">No collections published yet.</p>
+          <p className="mt-12 text-[var(--gallery-muted,#6f6a63)]">No collections published yet.</p>
         ) : isSearching && filteredCollections.length === 0 && productResults.length === 0 && !searchLoading ? (
-          <p className="mt-12 text-center text-[var(--aes-ink-muted)]">
+          <p className="mt-12 text-[var(--gallery-muted,#6f6a63)]">
             No matches for &ldquo;{searchQuery.trim()}&rdquo;.
           </p>
         ) : (
           <>
-            {(!isSearching || filteredCollections.length > 0) && (
-              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {(isSearching ? filteredCollections : collections).map((c, i) => (
-                  <CollectionCard key={c.id} collection={c} index={i} />
+            {visibleCollections.length > 0 && (
+              <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {visibleCollections.map((c, i) => (
+                  <CollectionCard key={c.id} collection={c} index={isSearching ? i + 1 : i} />
                 ))}
               </div>
             )}
 
             {isSearching && productResults.length > 0 && (
-              <section className="mt-14">
-                <h2 className="aes-joy-title-lower mb-6 text-lg text-[var(--aes-ink)]">matching products</h2>
-                <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+              <section className="mt-16">
+                <p className="aes-gallery-eyebrow">Matching products</p>
+                <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
                   {productResults.map((p, i) => (
                     <ProductCard key={p.id} product={p} index={i} quickAdd variant="grid" />
                   ))}

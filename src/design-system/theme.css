@@ -579,6 +579,284 @@
   background: var(--aes-pink);
 }
 
+/**
+ * Gallery rooms — complementary palette for ALL pages except homepage.
+ * Homepage must NOT use .aes-gallery-room so its identity stays untouched.
+ */
+.aes-gallery-room {
+  --gallery-bg: #f7f4ee;
+  --gallery-bg-secondary: #ece8e1;
+  --gallery-card: #fcfbf8;
+  --gallery-ink: #1e1e1c;
+  --gallery-muted: #6f6a63;
+  --gallery-border: #ddd7cf;
+  --gallery-blue: #2c5aa0;
+  --gallery-blue-hover: #1e3e73;
+  --gallery-luxury: #b58e4a;
+  --gallery-shadow: 0 2px 16px rgba(30, 30, 28, 0.05);
+  --gallery-shadow-hover: 0 10px 32px rgba(30, 30, 28, 0.08);
+
+  background: var(--gallery-bg);
+  color: var(--gallery-ink);
+}
+
+.aes-gallery-room--warm {
+  background: linear-gradient(180deg, #f7f4ee 0%, #ece8e1 100%);
+}
+
+.aes-gallery-room--ivory {
+  background: #f7f4ee;
+}
+
+.aes-gallery-room--editorial {
+  background:
+    radial-gradient(ellipse 70% 45% at 100% 0%, rgba(44, 90, 160, 0.06), transparent 55%),
+    linear-gradient(180deg, #f7f4ee 0%, #ece8e1 100%);
+}
+
+.aes-gallery-room .aes-panel,
+.aes-gallery-room .aes-panel-warm,
+.aes-gallery-room .aes-panel-lavender,
+.aes-gallery-room .aes-panel-peach,
+.aes-gallery-room .aes-card {
+  background: var(--gallery-card);
+  border: 1px solid var(--gallery-border);
+  box-shadow: var(--gallery-shadow);
+  backdrop-filter: none;
+}
+
+.aes-gallery-room .aes-card:hover,
+.aes-gallery-room .aes-gallery-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--gallery-shadow-hover);
+}
+
+.aes-gallery-room .aes-input {
+  border: 1px solid var(--gallery-border);
+  background: var(--gallery-card);
+  border-radius: 9999px;
+}
+
+.aes-gallery-room .aes-input:focus {
+  border-color: var(--gallery-blue);
+  box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.12);
+}
+
+.aes-gallery-room .aes-btn-primary {
+  background: var(--gallery-ink);
+  color: #fff;
+}
+
+.aes-gallery-room .aes-btn-primary:hover {
+  background: var(--gallery-blue-hover);
+  filter: none;
+}
+
+.aes-gallery-room .aes-btn-secondary {
+  border-color: var(--gallery-border);
+  background: var(--gallery-card);
+  color: var(--gallery-ink);
+}
+
+.aes-gallery-room .aes-btn-secondary:hover {
+  border-color: var(--gallery-blue);
+  background: var(--gallery-blue);
+  color: #fff;
+}
+
+.aes-gallery-room .aes-joy-quickadd:hover {
+  background: var(--gallery-blue);
+}
+
+.aes-gallery-room a[class*="text-[var(--aes-pink)]"],
+.aes-gallery-room .text-\[var\(--aes-pink\)\] {
+  color: var(--gallery-blue);
+}
+
+.aes-gallery-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gallery-blue);
+}
+
+.aes-gallery-title {
+  font-family: var(--aes-font-brand);
+  font-weight: 500;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  color: var(--gallery-ink);
+}
+
+.aes-gallery-lead {
+  max-width: 32rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--gallery-muted);
+}
+
+.aes-gallery-product-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.25rem;
+  background: var(--gallery-card);
+  border: 1px solid var(--gallery-border);
+  box-shadow: var(--gallery-shadow);
+  overflow: hidden;
+  transition: transform 0.35s var(--aes-spring), box-shadow 0.35s var(--aes-ease);
+}
+
+.aes-gallery-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--gallery-shadow-hover);
+}
+
+.aes-gallery-product-card img {
+  transition: transform 0.45s var(--aes-ease);
+}
+
+.aes-gallery-product-card:hover img {
+  transform: scale(1.03);
+}
+
+.aes-gallery-collection-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: var(--gallery-card);
+  border: 1px solid var(--gallery-border);
+  box-shadow: var(--gallery-shadow);
+  transition: transform 0.4s var(--aes-spring), box-shadow 0.4s var(--aes-ease);
+}
+
+.aes-gallery-collection-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--gallery-shadow-hover);
+}
+
+.aes-gallery-collection-card img {
+  transition: transform 0.5s var(--aes-ease);
+}
+
+.aes-gallery-collection-card:hover img {
+  transform: scale(1.04);
+}
+
+/* Brass pendant lamp — About page, once per visit */
+.aes-lamp-stage {
+  position: relative;
+  min-height: 11rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 4.5rem;
+}
+
+.aes-lamp-fixture {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform-origin: top center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.aes-lamp-fixture.is-idle {
+  opacity: 0;
+  transform: translateX(-50%) rotate(-18deg) translateY(-24px);
+}
+
+.aes-lamp-fixture.is-swing {
+  opacity: 1;
+  animation: aes-lamp-swing 1.4s var(--aes-ease) forwards;
+}
+
+.aes-lamp-fixture.is-on {
+  opacity: 1;
+  transform: translateX(-50%) rotate(0deg);
+}
+
+.aes-lamp-cord {
+  width: 2px;
+  height: 52px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #8a7a5c, #b58e4a);
+}
+
+.aes-lamp-shade {
+  width: 54px;
+  height: 42px;
+  margin: 0 auto;
+  border-radius: 50% 50% 8% 8% / 55% 55% 20% 20%;
+  background: linear-gradient(145deg, #d4b070 0%, #b58e4a 45%, #8a6a32 100%);
+  box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.aes-lamp-bulb {
+  width: 10px;
+  height: 10px;
+  margin: -2px auto 0;
+  border-radius: 50%;
+  background: #f0e6c8;
+  opacity: 0.35;
+  transition: opacity 0.5s var(--aes-ease), box-shadow 0.5s var(--aes-ease);
+}
+
+.aes-lamp-fixture.is-on .aes-lamp-bulb {
+  opacity: 1;
+  background: #fff6d6;
+  box-shadow: 0 0 14px 4px rgba(255, 230, 160, 0.75);
+}
+
+.aes-lamp-spotlight {
+  position: absolute;
+  left: 50%;
+  bottom: 0.5rem;
+  width: min(22rem, 90vw);
+  height: 7rem;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 236, 190, 0.55) 0%, rgba(255, 236, 190, 0.12) 42%, transparent 72%);
+  transition: opacity 0.7s var(--aes-ease);
+}
+
+.aes-lamp-spotlight.is-on {
+  opacity: 1;
+}
+
+.aes-lamp-heading {
+  position: relative;
+  z-index: 1;
+  transition: color 0.6s var(--aes-ease), text-shadow 0.6s var(--aes-ease);
+}
+
+.aes-lamp-heading.is-lit {
+  color: var(--gallery-ink);
+  text-shadow: 0 0 28px rgba(255, 230, 170, 0.55);
+}
+
+@keyframes aes-lamp-swing {
+  0% {
+    opacity: 0.2;
+    transform: translateX(-50%) rotate(-18deg) translateY(-20px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateX(-50%) rotate(8deg) translateY(0);
+  }
+  78% {
+    transform: translateX(-50%) rotate(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) rotate(0deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aes-card:hover {
     transform: none;
@@ -591,5 +869,15 @@
   }
   .aes-joy-pedestal:hover img {
     transform: none;
+  }
+  .aes-gallery-product-card:hover,
+  .aes-gallery-collection-card:hover,
+  .aes-gallery-room .aes-card:hover {
+    transform: none;
+  }
+  .aes-lamp-fixture.is-swing {
+    animation: none;
+    opacity: 1;
+    transform: translateX(-50%) rotate(0);
   }
 }

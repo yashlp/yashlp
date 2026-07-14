@@ -1,42 +1,57 @@
+import Link from "next/link";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
-import { AboutValuesSection } from "@/components/aesthetics/home/about-banner";
-import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
+import { AboutLampHeading } from "@/components/aesthetics/about/about-lamp-heading";
 
 export const metadata = { title: "About us" };
 
-const DETAILS = [
-  "Details matter",
-  "Small-batch makers",
-  "Maker-vetted",
-  "Mood-first edits",
-  "Ships with care",
+const VALUES = [
+  { title: "Details matter", body: "Every object is chosen for craft, material honesty, and the small details that elevate a room." },
+  { title: "Small-batch makers", body: "We partner with independent studios — not mass-market factories — so each piece feels personal." },
+  { title: "Maker-vetted", body: "Our team reviews makers for quality, ethics, and consistency before anything reaches the shop." },
+  { title: "Mood-first edits", body: "Collections are built around how a space should feel — calm, cozy, focused, or romantic." },
+  { title: "Ships with care", body: "Pan-India delivery with protective packaging. Free shipping on orders above ₹999." },
 ];
 
 export default function AboutPage() {
   return (
-    <ConsumerPage tint="warm">
-      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-        <div className="text-center">
-          <BrandLogo variant="hero" />
-          <p className="mx-auto mt-5 max-w-xl text-[11px] tracking-wide text-[var(--aes-ink-muted)] sm:text-xs">
-            {DETAILS.join(" · ")}
-          </p>
-        </div>
+    <ConsumerPage room="editorial">
+      <main className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
+        <AboutLampHeading>About us</AboutLampHeading>
 
-        <div className="aes-panel mt-12 p-8 sm:p-10">
-          <p className="text-base leading-relaxed text-[var(--aes-ink-muted)] sm:text-lg">
+        <p className="aes-gallery-lead mx-auto mt-6 text-center">
+          Details matter · Small-batch makers · Maker-vetted · Mood-first edits · Ships with care
+        </p>
+
+        <div className="aes-panel mt-14 space-y-6 p-8 sm:p-10">
+          <p className="text-base leading-relaxed text-[var(--gallery-muted,#6f6a63)] sm:text-lg">
             We are a direct-to-consumer brand based in India, curating objects from independent makers
             for homes that value intention over excess. Every product is selected for material quality,
             thoughtful design, and the mood it brings to your space.
           </p>
-          <p className="mt-6 text-base leading-relaxed text-[var(--aes-ink-muted)]">
+          <p className="text-base leading-relaxed text-[var(--gallery-muted,#6f6a63)]">
             From slow mornings with pour-over ceramics to evening wind-down with lavender room mist —
             our edits help you build rituals, not clutter. All prices are in Indian Rupees (₹) and we
             ship pan-India.
           </p>
         </div>
 
-        <AboutValuesSection />
+        <section className="mt-16">
+          <p className="aes-gallery-eyebrow text-center">What we stand for</p>
+          <ul className="mt-8 grid gap-5 sm:grid-cols-2">
+            {VALUES.map((v) => (
+              <li key={v.title} className="aes-panel aes-gallery-lift p-6 transition">
+                <h3 className="font-semibold tracking-wide text-[var(--gallery-ink,#1e1e1c)]">{v.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--gallery-muted,#6f6a63)]">{v.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div className="mt-14 text-center">
+          <Link href="/aesthetics/shop" className="aes-btn aes-btn-primary px-10 py-4">
+            Shop now
+          </Link>
+        </div>
       </main>
     </ConsumerPage>
   );

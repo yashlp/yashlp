@@ -102,10 +102,11 @@ export default function AccountPage() {
   ];
 
   return (
-    <ConsumerPage tint="warm">
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-        <h1 className="aes-joy-title-lower text-[var(--aes-ink)]">my account</h1>
-        <p className="mt-2 text-sm text-[var(--aes-ink-muted)]">
+    <ConsumerPage room="editorial">
+      <main className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+        <p className="aes-gallery-eyebrow">Member space</p>
+        <h1 className="aes-gallery-title mt-3">My account</h1>
+        <p className="mt-2 text-sm text-[var(--gallery-muted,#6f6a63)]">
           {customer.name || "Customer"} · {customer.email || customer.phone}
         </p>
 

@@ -114,24 +114,25 @@ export function ProductCard({
 
   return (
     <>
-      <article className="group flex flex-col">
+      <article className="aes-gallery-product-card group">
         <Link href={`/aesthetics/product/${product.slug}`} className="block">
           <ProductImage
             product={product}
             priority={priority}
+            className="aspect-[4/5] rounded-none"
             onWishlist={() => handleWishlist(product)}
             wishlisted={wishlisted}
           />
         </Link>
 
-        <div className="mt-4 flex flex-col gap-2 text-center">
+        <div className="flex flex-col gap-2 px-4 py-4 text-center">
           <Link href={`/aesthetics/product/${product.slug}`}>
-            <h3 className="text-sm font-bold text-[var(--aes-ink)] transition group-hover:text-[var(--aes-pink)]">
+            <h3 className="text-sm font-medium tracking-wide text-[var(--gallery-ink,#1e1e1c)] transition group-hover:text-[var(--gallery-blue,#2c5aa0)]">
               {product.name}
             </h3>
           </Link>
           <div className="flex flex-col items-center gap-2">
-            <span className="text-sm font-bold text-[var(--aes-ink)]">{formatInr(product.price)}</span>
+            <span className="text-sm font-semibold text-[var(--gallery-ink,#1e1e1c)]">{formatInr(product.price)}</span>
             {quickAdd ? (
               <button type="button" onClick={onAddToCart} className="aes-joy-quickadd max-w-[200px]">
                 <Plus className="h-3 w-3" />
@@ -140,7 +141,7 @@ export function ProductCard({
             ) : (
               <Link
                 href={`/aesthetics/product/${product.slug}`}
-                className="text-[10px] font-bold uppercase tracking-wider text-[var(--aes-pink)] hover:underline"
+                className="text-[10px] font-bold uppercase tracking-wider text-[var(--gallery-blue,#2c5aa0)] hover:underline"
               >
                 View
               </Link>

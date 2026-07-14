@@ -46,7 +46,7 @@ export function ProductSearchBar({
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
         autoComplete="off"
-        className="w-full rounded-full border border-[var(--aes-border)] bg-white py-3 pl-5 pr-12 text-sm text-[var(--aes-ink)] shadow-sm outline-none transition focus:border-[var(--aes-pink)] focus:ring-2 focus:ring-[var(--aes-pink)]/20"
+        className="aes-input w-full !rounded-full py-3 pl-5 pr-12 text-sm shadow-sm"
       />
       <span
         className="pointer-events-none absolute right-4 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center text-[var(--aes-ink-muted)]"
