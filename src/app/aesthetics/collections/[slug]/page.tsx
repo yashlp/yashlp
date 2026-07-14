@@ -16,7 +16,7 @@ export default async function CollectionDetailPage({ params }: Props) {
   return (
     <ConsumerPage room="warm">
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="relative mb-14 aspect-[21/9] overflow-hidden rounded-[1.75rem] border border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-bg-secondary,#ece8e1)] shadow-[var(--gallery-shadow,0_2px_16px_rgba(30,30,28,0.05))]">
+        <div className="relative mb-14 aspect-[21/9] overflow-hidden rounded-[1.75rem] border border-[var(--aes-border)] bg-[var(--aes-bg-sand)] shadow-[var(--aes-shadow)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={collection.image} alt={collection.title} className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-[rgba(30,30,28,0.7)] via-[rgba(30,30,28,0.35)] to-transparent" />
@@ -34,7 +34,7 @@ export default async function CollectionDetailPage({ params }: Props) {
         <div className="mt-14 text-center">
           <Link
             href="/aesthetics/collections"
-            className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--gallery-blue,#2c5aa0)] hover:underline"
+            className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--aes-pink)] hover:underline"
           >
             ← All collections
           </Link>

@@ -28,16 +28,16 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="aesthetics-root aes-gallery-room aes-gallery-room--editorial flex min-h-dvh">
-      <aside className="hidden w-64 shrink-0 border-r border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-card,#fcfbf8)] lg:block">
+    <div className="aesthetics-root aes-site-bg flex min-h-dvh">
+      <aside className="hidden w-64 shrink-0 border-r border-[var(--aes-border)] bg-white/70 backdrop-blur-md lg:block">
         <div className="p-6">
-          <Link href="/aesthetics" className="aes-gallery-title text-xl">
+          <Link href="/aesthetics" className="aes-display text-xl font-semibold italic text-[var(--aes-ink)]">
             Only Aesthetics
           </Link>
-          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--gallery-blue,#2c5aa0)]">
+          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--aes-pink)]">
             Maker studio
           </p>
-          <p className="mt-3 text-xs leading-relaxed text-[var(--gallery-muted,#6f6a63)]">
+          <p className="mt-3 text-xs leading-relaxed text-[var(--aes-ink-muted)]">
             Portrait · brand story · products · reviews
           </p>
         </div>
@@ -49,8 +49,8 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
               className={cn(
                 "mb-1 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition duration-300",
                 pathname === href
-                  ? "bg-[rgba(44,90,160,0.1)] text-[var(--gallery-blue,#2c5aa0)]"
-                  : "text-[var(--gallery-muted,#6f6a63)] hover:bg-[var(--gallery-bg,#f7f4ee)] hover:text-[var(--gallery-ink,#1e1e1c)]"
+                  ? "bg-[rgba(255,42,95,0.1)] text-[var(--aes-pink)]"
+                  : "text-[var(--aes-ink-muted)] hover:bg-white/80 hover:text-[var(--aes-ink)]"
               )}
             >
               <Icon className="h-4 w-4" />
@@ -60,8 +60,8 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
         </nav>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-card,#fcfbf8)] px-6 lg:hidden">
-          <p className="text-sm font-semibold tracking-wide">Maker studio</p>
+        <header className="flex h-16 items-center justify-between border-b border-[var(--aes-border)] bg-white/70 px-6 backdrop-blur-md lg:hidden">
+          <p className="text-sm font-semibold tracking-wide text-[var(--aes-ink)]">Maker studio</p>
         </header>
         <main className="flex-1 p-6 lg:p-10">{children}</main>
       </div>

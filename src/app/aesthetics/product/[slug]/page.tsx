@@ -22,14 +22,14 @@ export default async function ProductPage({ params }: Props) {
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
         <Link
           href="/aesthetics/shop"
-          className="mb-10 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--gallery-muted,#6f6a63)] transition hover:text-[var(--gallery-blue,#2c5aa0)]"
+          className="mb-10 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--aes-ink-muted)] transition hover:text-[var(--aes-pink)]"
         >
           <ArrowLeft className="h-4 w-4" /> Back to shop
         </Link>
 
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="space-y-4">
-            <div className="aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-card,#fcfbf8)] shadow-[var(--gallery-shadow,0_2px_16px_rgba(30,30,28,0.05))]">
+            <div className="aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-[var(--aes-border)] bg-[rgba(255,255,255,0.78)] shadow-[var(--aes-shadow)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={product.images[0]}
@@ -42,7 +42,7 @@ export default async function ProductPage({ params }: Props) {
                 {product.images.map((img, i) => (
                   <div
                     key={i}
-                    className="aspect-square overflow-hidden rounded-xl border border-[var(--gallery-border,#ddd7cf)]"
+                    className="aspect-square overflow-hidden rounded-xl border border-[var(--aes-border)]"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img} alt="" className="h-full w-full object-cover" />
@@ -60,39 +60,39 @@ export default async function ProductPage({ params }: Props) {
             </div>
             <h1 className="aes-gallery-title mt-5">{product.name}</h1>
             <div className="mt-3 flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm text-[var(--gallery-muted,#6f6a63)]">
-                <Star className="h-4 w-4 fill-[var(--gallery-luxury,#b58e4a)] text-[var(--gallery-luxury,#b58e4a)]" />
+              <div className="flex items-center gap-1 text-sm text-[var(--aes-ink-muted)]">
+                <Star className="h-4 w-4 fill-[var(--aes-yellow-deep)] text-[var(--aes-yellow-deep)]" />
                 {product.rating} ({product.reviewCount} reviews)
               </div>
             </div>
             <div className="mt-6 flex items-baseline gap-3">
-              <span className="text-3xl font-semibold text-[var(--gallery-ink,#1e1e1c)]">{formatInr(product.price)}</span>
+              <span className="text-3xl font-semibold text-[var(--aes-ink)]">{formatInr(product.price)}</span>
               {product.compareAtPrice && (
-                <span className="text-lg text-[var(--gallery-muted,#6f6a63)] line-through">
+                <span className="text-lg text-[var(--aes-ink-muted)] line-through">
                   {formatInr(product.compareAtPrice)}
                 </span>
               )}
             </div>
-            <p className="mt-6 leading-relaxed text-[var(--gallery-muted,#6f6a63)]">{product.description}</p>
+            <p className="mt-6 leading-relaxed text-[var(--aes-ink-muted)]">{product.description}</p>
 
             <ProductActions product={product} />
 
-            <div className="mt-10 space-y-4 border-t border-[var(--gallery-border,#ddd7cf)] pt-8">
-              <div className="flex items-start gap-3 text-sm text-[var(--gallery-muted,#6f6a63)]">
-                <Truck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--gallery-blue,#2c5aa0)]" />
+            <div className="mt-10 space-y-4 border-t border-[var(--aes-border)] pt-8">
+              <div className="flex items-start gap-3 text-sm text-[var(--aes-ink-muted)]">
+                <Truck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--aes-pink)]" />
                 <div>
-                  <p className="font-semibold text-[var(--gallery-ink,#1e1e1c)]">Free delivery over ₹999</p>
+                  <p className="font-semibold text-[var(--aes-ink)]">Free delivery over ₹999</p>
                   <p>Ships across India · 3–7 business days</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--gallery-muted,#6f6a63)]">Materials</p>
-                  <p className="mt-1 text-[var(--gallery-ink,#1e1e1c)]">{product.materials.join(", ")}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aes-ink-muted)]">Materials</p>
+                  <p className="mt-1 text-[var(--aes-ink)]">{product.materials.join(", ")}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--gallery-muted,#6f6a63)]">Mood</p>
-                  <p className="mt-1 capitalize text-[var(--gallery-ink,#1e1e1c)]">{product.mood}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aes-ink-muted)]">Mood</p>
+                  <p className="mt-1 capitalize text-[var(--aes-ink)]">{product.mood}</p>
                 </div>
               </div>
             </div>
@@ -100,7 +100,7 @@ export default async function ProductPage({ params }: Props) {
         </div>
 
         {related.length > 0 && (
-          <section className="mt-20 rounded-[2rem] border border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-bg-secondary,#ece8e1)] px-4 py-14 sm:px-8">
+          <section className="mt-20 rounded-[2rem] border border-[var(--aes-border)] bg-[var(--aes-bg-sand)] px-4 py-14 sm:px-8">
             <p className="aes-gallery-eyebrow">Complete the look</p>
             <h2 className="aes-gallery-title mt-3 text-2xl sm:text-3xl">Suggested pairings</h2>
             <p className="aes-gallery-lead mt-3">

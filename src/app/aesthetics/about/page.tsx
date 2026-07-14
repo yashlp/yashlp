@@ -23,12 +23,12 @@ export default function AboutPage() {
         </p>
 
         <div className="aes-panel mt-14 space-y-6 p-8 sm:p-10">
-          <p className="text-base leading-relaxed text-[var(--gallery-muted,#6f6a63)] sm:text-lg">
+          <p className="text-base leading-relaxed text-[var(--aes-ink-muted)] sm:text-lg">
             We are a direct-to-consumer brand based in India, curating objects from independent makers
             for homes that value intention over excess. Every product is selected for material quality,
             thoughtful design, and the mood it brings to your space.
           </p>
-          <p className="text-base leading-relaxed text-[var(--gallery-muted,#6f6a63)]">
+          <p className="text-base leading-relaxed text-[var(--aes-ink-muted)]">
             From slow mornings with pour-over ceramics to evening wind-down with lavender room mist —
             our edits help you build rituals, not clutter. All prices are in Indian Rupees (₹) and we
             ship pan-India.
@@ -40,8 +40,8 @@ export default function AboutPage() {
           <ul className="mt-8 grid gap-5 sm:grid-cols-2">
             {VALUES.map((v) => (
               <li key={v.title} className="aes-panel aes-gallery-lift p-6 transition">
-                <h3 className="font-semibold tracking-wide text-[var(--gallery-ink,#1e1e1c)]">{v.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--gallery-muted,#6f6a63)]">{v.body}</p>
+                <h3 className="font-semibold tracking-wide text-[var(--aes-ink)]">{v.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--aes-ink-muted)]">{v.body}</p>
               </li>
             ))}
           </ul>

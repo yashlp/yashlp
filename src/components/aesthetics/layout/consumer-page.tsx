@@ -3,18 +3,10 @@ import { ConsumerNav } from "./consumer-nav";
 import { ConsumerFooter } from "./consumer-footer";
 
 /**
- * Gallery rooms — complementary ivory/warm surfaces that extend the homepage brand.
- * Homepage must NOT use ConsumerPage (it renders its own hero palette).
+ * Inner storefront pages — same colour palette as the homepage
+ * (cream site gradient + blush / lavender / peach / sand washes).
  */
-export type GalleryRoom =
-  | "ivory"
-  | "warm"
-  | "editorial"
-  | "calm";
-
-/** @deprecated Use GalleryRoom — kept for call-site compatibility */
 export type PageTint =
-  | GalleryRoom
   | "base"
   | "blush"
   | "lavender"
@@ -22,35 +14,40 @@ export type PageTint =
   | "sand"
   | "warm"
   | "testimonial"
-  | "bundle";
+  | "bundle"
+  | "ivory"
+  | "editorial"
+  | "calm";
 
-const ROOM_CLASS: Record<string, string> = {
-  ivory: "aes-gallery-room aes-gallery-room--ivory",
-  warm: "aes-gallery-room aes-gallery-room--warm",
-  editorial: "aes-gallery-room aes-gallery-room--editorial",
-  calm: "aes-gallery-room aes-gallery-room--ivory",
-  // legacy tints → map into gallery rooms (never reintroduce bright homepage washes on room pages)
-  base: "aes-gallery-room aes-gallery-room--ivory",
-  blush: "aes-gallery-room aes-gallery-room--ivory",
-  lavender: "aes-gallery-room aes-gallery-room--editorial",
-  peach: "aes-gallery-room aes-gallery-room--warm",
-  sand: "aes-gallery-room aes-gallery-room--warm",
-  testimonial: "aes-gallery-room aes-gallery-room--warm",
-  bundle: "aes-gallery-room aes-gallery-room--editorial",
+/** Alias for call sites that still pass `room=` */
+export type GalleryRoom = PageTint;
+
+const TINT_CLASS: Record<string, string> = {
+  base: "aes-site-bg",
+  ivory: "aes-site-bg",
+  calm: "aes-site-bg",
+  blush: "aes-bg-blush",
+  lavender: "aes-bg-lavender",
+  editorial: "aes-bg-lavender",
+  peach: "aes-bg-peach",
+  warm: "aes-bg-warm",
+  sand: "aes-bg-sand",
+  testimonial: "aes-bg-testimonial",
+  bundle: "aes-bg-bundle",
 };
 
 type ConsumerPageProps = {
   children: React.ReactNode;
   cartCount?: number;
   tint?: PageTint;
-  room?: GalleryRoom;
+  room?: PageTint;
   className?: string;
 };
 
 export function ConsumerPage({
   children,
   cartCount,
-  tint = "ivory",
+  tint = "base",
   room,
   className,
 }: ConsumerPageProps) {
@@ -58,7 +55,7 @@ export function ConsumerPage({
   return (
     <>
       <ConsumerNav cartCount={cartCount} />
-      <div className={cn("min-h-[50vh]", ROOM_CLASS[surface] || ROOM_CLASS.ivory, className)}>
+      <div className={cn("min-h-[50vh] text-[var(--aes-ink)]", TINT_CLASS[surface] || TINT_CLASS.base, className)}>
         {children}
       </div>
       <ConsumerFooter />

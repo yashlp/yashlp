@@ -31,7 +31,7 @@ export default function WishlistPage() {
         <h1 className="aes-gallery-title mt-3">Favourites</h1>
         {wishlist.length === 0 ? (
           <div className="aes-panel mt-12 p-10 text-center">
-            <p className="text-[var(--gallery-muted,#6f6a63)]">Tap the heart on any product to save it here.</p>
+            <p className="text-[var(--aes-ink-muted)]">Tap the heart on any product to save it here.</p>
             <Link href="/aesthetics/shop" className="mt-6 inline-block">
               <Button variant="secondary">Browse shop</Button>
             </Link>

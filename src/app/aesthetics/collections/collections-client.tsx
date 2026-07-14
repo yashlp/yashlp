@@ -47,7 +47,7 @@ export function CollectionsClient({ collections }: Props) {
         </div>
 
         {isSearching && (
-          <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--gallery-muted,#6f6a63)]">
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--aes-ink-muted)]">
             {searchLoading
               ? "Searching…"
               : `${filteredCollections.length} collection${filteredCollections.length === 1 ? "" : "s"}, ${productResults.length} product${productResults.length === 1 ? "" : "s"}`}
@@ -55,9 +55,9 @@ export function CollectionsClient({ collections }: Props) {
         )}
 
         {!isSearching && collections.length === 0 ? (
-          <p className="mt-12 text-[var(--gallery-muted,#6f6a63)]">No collections published yet.</p>
+          <p className="mt-12 text-[var(--aes-ink-muted)]">No collections published yet.</p>
         ) : isSearching && filteredCollections.length === 0 && productResults.length === 0 && !searchLoading ? (
-          <p className="mt-12 text-[var(--gallery-muted,#6f6a63)]">
+          <p className="mt-12 text-[var(--aes-ink-muted)]">
             No matches for &ldquo;{searchQuery.trim()}&rdquo;.
           </p>
         ) : (

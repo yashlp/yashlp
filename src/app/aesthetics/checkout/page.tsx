@@ -163,7 +163,7 @@ export default function CheckoutPage() {
     return (
       <ConsumerPage cartCount={cartCount} room="calm">
         <main className="mx-auto max-w-lg px-4 py-20 text-center">
-          <p className="text-[var(--gallery-muted,#6f6a63)]">Your cart is empty.</p>
+          <p className="text-[var(--aes-ink-muted)]">Your cart is empty.</p>
           <Link href="/aesthetics/shop" className="mt-6 inline-block">
             <Button>Continue shopping</Button>
           </Link>
@@ -218,7 +218,7 @@ export default function CheckoutPage() {
           </form>
 
           <div className="aes-panel p-6 sm:p-8">
-            <h2 className="font-semibold text-[var(--gallery-ink,#1e1e1c)]">Order summary</h2>
+            <h2 className="font-semibold text-[var(--aes-ink)]">Order summary</h2>
             <ul className="mt-4 space-y-4">
               {cart.map((item) => (
                 <li key={item.id} className="flex gap-3">
