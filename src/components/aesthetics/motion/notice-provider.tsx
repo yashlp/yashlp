@@ -40,7 +40,7 @@ function PaperStack({
   onDismiss: (id: string) => void;
 }) {
   return (
-    <div className="pointer-events-none fixed right-4 top-[max(1rem,env(safe-area-inset-top))] z-[420] flex w-[min(100%,20rem)] flex-col gap-2 sm:right-6">
+    <div className="aes-notice-stack pointer-events-none fixed z-[420] flex w-full flex-col gap-2 sm:w-[min(100%,20rem)]">
       <AnimatePresence mode="popLayout">
         {notices.map((n) => {
           const Icon = ICONS[n.kind ?? "info"];
@@ -52,7 +52,7 @@ function PaperStack({
               initial="initial"
               animate="animate"
               exit="exit"
-              className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-[var(--aes-border)] bg-[var(--aes-notice-bg,#fffaf2)] px-4 py-3 shadow-[0_8px_28px_rgba(26,26,26,0.08)]"
+              className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-[var(--aes-border)] bg-[var(--aes-notice-bg,#fffaf2)] px-4 py-3 shadow-[0_8px_28px_rgba(26,26,26,0.08)] will-change-transform"
               role="status"
             >
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(181,142,74,0.12)] text-[var(--aes-luxury,#B58E4A)]">
@@ -62,7 +62,7 @@ function PaperStack({
               <button
                 type="button"
                 onClick={() => onDismiss(n.id)}
-                className="mt-0.5 text-xs text-[var(--aes-ink-soft)] hover:text-[var(--aes-ink)]"
+                className="aes-touch mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center text-xs text-[var(--aes-ink-soft)]"
                 aria-label="Dismiss"
               >
                 ✕

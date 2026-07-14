@@ -1,6 +1,7 @@
 /**
  * Only Aesthetics — Signature Motion System
- * Calm, gallery-like presets. Prefer 200–500ms. No playful bounce.
+ * Calm, gallery-like presets. Prefer 200–500ms.
+ * Prefer transform + opacity (GPU) — avoid filter/blur on touch devices.
  */
 
 export const AES_EASE = [0.22, 1, 0.36, 1] as const;
@@ -16,12 +17,33 @@ export const AES_DURATION = {
 /** Luxury accent for wishlist ribbon */
 export const AES_LUXURY = "#B58E4A";
 
+/** True when hover is reliable (desktop/trackpad), false for touch */
+export function canHover(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+export function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+export function hapticLight(): void {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    try {
+      navigator.vibrate(12);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/** GPU-safe: opacity + translateY only */
 export const fadeUp = {
-  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 14 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: { duration: AES_DURATION.slow, ease: AES_EASE },
   },
 };
@@ -31,12 +53,12 @@ export const fadeUpReduced = {
   visible: { opacity: 1, transition: { duration: 0.2 } },
 };
 
+/** Editorial — desktop may add slight blur via class; motion stays GPU-safe */
 export const editorialReveal = {
-  hidden: { opacity: 0, y: 18, filter: "blur(6px)" },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: { duration: AES_DURATION.slow, ease: AES_EASE_SOFT },
   },
 };
@@ -49,19 +71,18 @@ export const editorialStagger = {
 };
 
 export const cardHover = {
-  rest: { y: 0, boxShadow: "0 2px 12px rgba(26, 26, 26, 0.06)" },
+  rest: { y: 0 },
   hover: {
     y: -4,
-    boxShadow: "0 10px 28px rgba(26, 26, 26, 0.08)",
     transition: { type: "spring" as const, stiffness: 380, damping: 32, mass: 0.7 },
   },
 };
 
+/** Image scale only — brightness handled by CSS spotlight overlay */
 export const productLift = {
-  rest: { scale: 1, filter: "brightness(1)" },
+  rest: { scale: 1 },
   hover: {
     scale: 1.03,
-    filter: "brightness(1.06)",
     transition: { duration: AES_DURATION.slow, ease: AES_EASE },
   },
 };
@@ -132,19 +153,4 @@ export function getCurrentSeason(date = new Date()): Season {
   if (m >= 5 && m <= 7) return "summer";
   if (m >= 8 && m <= 10) return "autumn";
   return "winter";
-}
-
-export function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-export function hapticLight(): void {
-  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    try {
-      navigator.vibrate(12);
-    } catch {
-      // ignore
-    }
-  }
 }

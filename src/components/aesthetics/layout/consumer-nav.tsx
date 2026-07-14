@@ -72,7 +72,7 @@ export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)]"
+              className="aes-touch flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)]"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
             >
@@ -89,14 +89,14 @@ export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)] hover:text-[var(--aes-ink)]"
+              className="aes-touch flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
               aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
             >
-              {theme === "dark" ? <Sun className="h-4.5 w-4.5 h-[1.1rem] w-[1.1rem]" /> : <Moon className="h-[1.1rem] w-[1.1rem]" />}
+              {theme === "dark" ? <Sun className="h-[1.1rem] w-[1.1rem]" /> : <Moon className="h-[1.1rem] w-[1.1rem]" />}
             </button>
             <Link
               href="/aesthetics/wishlist"
-              className="flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
+              className="aes-touch flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
               aria-label="Favourites"
             >
               <Heart className="h-5 w-5" />
@@ -104,7 +104,7 @@ export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
             <Link
               href="/aesthetics/cart"
               data-aes-bag-target
-              className="relative flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
+              className="aes-touch relative flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
               aria-label="Shopping bag"
             >
               <motion.span

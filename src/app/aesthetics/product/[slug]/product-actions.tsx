@@ -35,13 +35,13 @@ export function ProductActions({ product }: { product: Product }) {
   return (
     <>
       <div className="mt-8 flex gap-3">
-        <Button ref={btnRef} className="flex-1 gap-2" onClick={onAdd} disabled={inCart}>
+        <Button ref={btnRef} className="min-h-12 flex-1 gap-2" onClick={onAdd} disabled={inCart}>
           <ShoppingBag className="h-4 w-4" />
           {inCart ? "In bag" : "Add to bag"}
         </Button>
         <Button
           variant="secondary"
-          className="px-4"
+          className="min-h-12 min-w-12 px-4"
           onClick={onWishlist}
           aria-label={wishlisted ? "Remove from favourites" : "Save to favourites"}
         >

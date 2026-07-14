@@ -9,6 +9,7 @@ import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { useWishlistAuth } from "@/components/aesthetics/shop/use-wishlist-auth";
 import { useAddToBagFly } from "@/components/aesthetics/motion/add-to-bag-fly";
 import { useNoticeOptional } from "@/components/aesthetics/motion/notice-provider";
+import { useInteractionMode } from "@/components/aesthetics/motion/use-interaction-mode";
 import {
   AES_LUXURY,
   bookmarkRibbon,
@@ -19,7 +20,6 @@ import {
 import { formatInr } from "@/lib/aesthetics/format-inr";
 import type { Product } from "@/lib/aesthetics/types";
 import { cn } from "@/lib/utils";
-import { useAesReducedMotion } from "@/components/aesthetics/motion/use-reduced-motion";
 
 type ProductCardProps = {
   product: Product;
@@ -44,7 +44,7 @@ function WishlistRibbon({
         e.stopPropagation();
         onToggle();
       }}
-      className="absolute right-3 top-0 z-10 flex h-11 w-9 items-start justify-center"
+      className="aes-touch absolute right-2 top-0 z-10 flex h-11 w-11 items-start justify-center pt-1"
       aria-label={wishlisted ? "Remove from favourites" : "Save to favourites"}
     >
       <AnimatePresence mode="wait" initial={false}>
@@ -78,33 +78,26 @@ function ProductImage({
   className = "aspect-[4/5]",
   onWishlist,
   wishlisted,
-  dimOnHover,
 }: {
   product: Product;
   priority?: boolean;
   className?: string;
   onWishlist: () => void;
   wishlisted: boolean;
-  dimOnHover?: boolean;
 }) {
-  const reduced = useAesReducedMotion();
+  const { enableHoverMotion } = useInteractionMode();
 
   return (
-    <div
-      className={cn(
-        "group/img relative overflow-hidden rounded-2xl",
-        dimOnHover && "aes-gallery-spotlight",
-        className
-      )}
-    >
+    <div className={cn("group/img relative overflow-hidden rounded-2xl aes-gallery-spotlight", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <motion.img
         src={product.images[0]}
         alt={product.name}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover will-change-transform"
         loading={priority ? "eager" : "lazy"}
+        decoding="async"
         draggable={false}
-        variants={reduced ? undefined : productLift}
+        variants={enableHoverMotion ? productLift : undefined}
       />
       <WishlistRibbon wishlisted={wishlisted} onToggle={onWishlist} />
       {product.compareAtPrice && (
@@ -132,7 +125,7 @@ export function ProductCard({
   const { flyToBag } = useAddToBagFly();
   const notice = useNoticeOptional();
   const cardRef = useRef<HTMLElement>(null);
-  const reduced = useAesReducedMotion();
+  const { enableHoverMotion, canHover: hoverCapable } = useInteractionMode();
   const wishlisted = isWishlisted(product.id);
 
   function onAddToCart(e?: React.MouseEvent) {
@@ -156,9 +149,9 @@ export function ProductCard({
       <>
         <motion.article
           ref={cardRef as React.RefObject<HTMLElement>}
-          className="group w-[200px] sm:w-[220px]"
+          className="group w-[min(200px,72vw)] shrink-0 sm:w-[220px]"
           initial="rest"
-          whileHover={reduced ? undefined : "hover"}
+          whileHover={enableHoverMotion ? "hover" : undefined}
           animate="rest"
         >
           <Link href={`/aesthetics/product/${product.slug}`} className="block">
@@ -167,19 +160,18 @@ export function ProductCard({
               priority={priority}
               onWishlist={onWishlist}
               wishlisted={wishlisted}
-              dimOnHover
             />
           </Link>
 
           <div className="mt-4 text-center">
             <Link href={`/aesthetics/product/${product.slug}`}>
-              <h3 className="text-sm font-bold text-[var(--aes-ink)] transition group-hover:text-[var(--aes-pink)]">
+              <h3 className="text-sm font-bold text-[var(--aes-ink)] transition aes-hover-ink">
                 {product.name}
               </h3>
             </Link>
             {quickAdd && (
-              <button type="button" onClick={onAddToCart} className="aes-joy-quickadd mt-3">
-                <Plus className="h-3 w-3" />
+              <button type="button" onClick={onAddToCart} className="aes-joy-quickadd aes-touch mt-3 min-h-11">
+                <Plus className="h-3.5 w-3.5" />
                 Quick add
               </button>
             )}
@@ -195,9 +187,9 @@ export function ProductCard({
       <motion.article
         ref={cardRef as React.RefObject<HTMLElement>}
         className="aes-gallery-product-card group"
-        variants={reduced ? undefined : cardHover}
+        variants={enableHoverMotion ? cardHover : undefined}
         initial="rest"
-        whileHover={reduced ? undefined : "hover"}
+        whileHover={enableHoverMotion ? "hover" : undefined}
         animate="rest"
       >
         <Link href={`/aesthetics/product/${product.slug}`} className="block">
@@ -207,13 +199,12 @@ export function ProductCard({
             className="aspect-[4/5] rounded-none"
             onWishlist={onWishlist}
             wishlisted={wishlisted}
-            dimOnHover
           />
         </Link>
 
         <div className="flex flex-col gap-2 px-4 py-4 text-center">
           <Link href={`/aesthetics/product/${product.slug}`}>
-            <h3 className="text-sm font-medium tracking-wide text-[var(--aes-ink)] transition group-hover:text-[var(--aes-pink)]">
+            <h3 className="text-sm font-medium tracking-wide text-[var(--aes-ink)] transition aes-hover-ink">
               {product.name}
             </h3>
           </Link>
@@ -223,16 +214,21 @@ export function ProductCard({
               <motion.button
                 type="button"
                 onClick={onAddToCart}
-                className="aes-joy-quickadd max-w-[200px] opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                variants={reduced ? undefined : quickAddReveal}
+                className={cn(
+                  "aes-joy-quickadd aes-touch min-h-11 max-w-[200px]",
+                  /* Always visible on touch; hover-reveal only on fine pointer */
+                  hoverCapable ? "aes-quickadd-hover-reveal" : "opacity-100"
+                )}
+                variants={enableHoverMotion ? quickAddReveal : undefined}
+                initial={enableHoverMotion ? "rest" : undefined}
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-3.5 w-3.5" />
                 Quick add
               </motion.button>
             ) : (
               <Link
                 href={`/aesthetics/product/${product.slug}`}
-                className="text-[10px] font-bold uppercase tracking-wider text-[var(--aes-pink)] hover:underline"
+                className="aes-touch inline-flex min-h-11 items-center text-[10px] font-bold uppercase tracking-wider text-[var(--aes-pink)]"
               >
                 View
               </Link>

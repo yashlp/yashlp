@@ -118,12 +118,34 @@
   min-height: 100dvh;
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-x: none;
 }
 
 .aesthetics-root img,
 .aesthetics-root video {
   max-width: 100%;
   height: auto;
+}
+
+/* Cross-platform touch / tap targets (Apple HIG ≥ 44×44) */
+.aesthetics-root .aes-touch,
+.aesthetics-root .aes-btn,
+.aesthetics-root .aes-joy-quickadd {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.aesthetics-root .aes-touch {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.aesthetics-root a,
+.aesthetics-root button {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Only Aesthetics brand lockup — single line */
@@ -306,20 +328,15 @@
 
 .aes-card {
   background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(212, 220, 232, 0.85);
+  border: 1px solid var(--aes-border);
   border-radius: var(--aes-radius-xl);
   box-shadow: var(--aes-shadow);
-  backdrop-filter: blur(10px);
   transition: transform 0.3s var(--aes-ease), box-shadow 0.3s var(--aes-ease);
-}
-
-.aes-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--aes-shadow-hover);
 }
 
 .aes-btn {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -340,19 +357,10 @@
   color: var(--aes-white);
 }
 
-.aes-btn-primary:hover {
-  filter: brightness(1.15);
-}
-
 .aes-btn-secondary {
   background: var(--aes-white);
   color: var(--aes-ink);
   border: 2px solid var(--aes-ink);
-}
-
-.aes-btn-secondary:hover {
-  background: var(--aes-ink);
-  color: var(--aes-white);
 }
 
 .aes-btn-ghost {
@@ -530,16 +538,19 @@
   color: var(--aes-ink);
 }
 
-/* Joy Rush horizontal product scroll */
+/* Joy Rush horizontal product scroll — native touch rails, no page horizontal scroll */
 .aes-joy-scroll {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
   scroll-padding-inline: 1rem;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   padding-bottom: 0.5rem;
+  max-width: 100%;
 }
 
 .aes-joy-scroll::-webkit-scrollbar {
@@ -571,10 +582,6 @@
   transition: transform 0.4s var(--aes-ease);
 }
 
-.aes-joy-pedestal:hover img {
-  transform: scale(1.05) translateY(-4px);
-}
-
 .aes-joy-quickadd {
   display: flex;
   width: 100%;
@@ -584,16 +591,19 @@
   border-radius: 9999px;
   background: var(--aes-ink);
   color: var(--aes-white);
-  padding: 0.625rem 1rem;
+  padding: 0.75rem 1rem;
+  min-height: 44px;
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  transition: background 0.2s var(--aes-ease);
+  transition: background 0.2s var(--aes-ease), opacity 0.3s var(--aes-ease), transform 0.3s var(--aes-ease);
 }
 
-.aes-joy-quickadd:hover {
-  background: var(--aes-pink);
+/* Hover-reveal Quick Add — desktop only; touch always shows via component class */
+.aes-quickadd-hover-reveal {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 /**
@@ -645,11 +655,7 @@
   backdrop-filter: none;
 }
 
-.aes-gallery-room .aes-card:hover,
-.aes-gallery-room .aes-gallery-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--gallery-shadow-hover);
-}
+/* Hover lifts gated below — see @media (hover: hover) */
 
 .aes-gallery-room .aes-input {
   border: 1px solid var(--gallery-border);
@@ -721,47 +727,33 @@
   display: flex;
   flex-direction: column;
   border-radius: 1.25rem;
-  background: var(--gallery-card);
-  border: 1px solid var(--gallery-border);
-  box-shadow: var(--gallery-shadow);
+  background: var(--gallery-card, rgba(255, 255, 255, 0.78));
+  border: 1px solid var(--gallery-border, var(--aes-border));
+  box-shadow: var(--gallery-shadow, var(--aes-shadow));
   overflow: hidden;
-  transition: transform 0.35s var(--aes-spring), box-shadow 0.35s var(--aes-ease);
-}
-
-.aes-gallery-product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--gallery-shadow-hover);
+  transition: transform 0.35s var(--aes-ease), box-shadow 0.35s var(--aes-ease);
+  will-change: transform;
 }
 
 .aes-gallery-product-card img {
   transition: transform 0.45s var(--aes-ease);
-}
-
-.aes-gallery-product-card:hover img {
-  transform: scale(1.03);
+  will-change: transform;
 }
 
 .aes-gallery-collection-card {
   position: relative;
   overflow: hidden;
   border-radius: 1.5rem;
-  background: var(--gallery-card);
-  border: 1px solid var(--gallery-border);
-  box-shadow: var(--gallery-shadow);
-  transition: transform 0.4s var(--aes-spring), box-shadow 0.4s var(--aes-ease);
-}
-
-.aes-gallery-collection-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--gallery-shadow-hover);
+  background: var(--gallery-card, rgba(255, 255, 255, 0.78));
+  border: 1px solid var(--gallery-border, var(--aes-border));
+  box-shadow: var(--gallery-shadow, var(--aes-shadow));
+  transition: transform 0.4s var(--aes-ease), box-shadow 0.4s var(--aes-ease);
+  will-change: transform;
 }
 
 .aes-gallery-collection-card img {
   transition: transform 0.5s var(--aes-ease);
-}
-
-.aes-gallery-collection-card:hover img {
-  transform: scale(1.04);
+  will-change: transform;
 }
 
 /* Brass pendant lamp — About page, once per visit */
@@ -926,11 +918,6 @@
   pointer-events: none;
 }
 
-.group:hover .aes-gallery-spotlight::after,
-.group\/img:hover.aes-gallery-spotlight::after {
-  background: rgba(18, 18, 18, 0.08);
-}
-
 .aes-footer-approach {
   background: linear-gradient(
     180deg,
@@ -1016,10 +1003,6 @@
   background: rgba(0, 0, 0, 0);
 }
 
-.aesthetics-root[data-aes-theme="dark"] .group:hover .aes-gallery-spotlight::after {
-  background: rgba(0, 0, 0, 0.22);
-}
-
 .aesthetics-root[data-aes-theme="dark"] .aes-wishlist-ribbon--idle {
   background: rgba(243, 236, 224, 0.28);
 }
@@ -1031,4 +1014,138 @@
     rgba(13, 18, 28, 0.35) 40%,
     rgba(13, 18, 28, 0.7) 100%
   );
+}
+
+/* ——— Cross-platform: hover only on fine pointers ——— */
+@media (hover: hover) and (pointer: fine) {
+  .aes-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--aes-shadow-hover);
+  }
+
+  .aes-btn-primary:hover {
+    background: var(--aes-pink);
+  }
+
+  .aes-btn-secondary:hover {
+    background: var(--aes-ink);
+    color: var(--aes-white);
+  }
+
+  .aes-joy-pedestal:hover img {
+    transform: scale(1.05) translateY(-4px);
+  }
+
+  .aes-joy-quickadd:hover {
+    background: var(--aes-pink);
+  }
+
+  .aes-gallery-room .aes-joy-quickadd:hover {
+    background: var(--gallery-blue, var(--aes-pink));
+  }
+
+  .aes-gallery-room .aes-card:hover,
+  .aes-gallery-room .aes-gallery-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--gallery-shadow-hover, var(--aes-shadow-hover));
+  }
+
+  .aes-gallery-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--gallery-shadow-hover, var(--aes-shadow-hover));
+  }
+
+  .aes-gallery-product-card:hover img {
+    transform: scale(1.03);
+  }
+
+  .aes-gallery-collection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--gallery-shadow-hover, var(--aes-shadow-hover));
+  }
+
+  .aes-gallery-collection-card:hover img {
+    transform: scale(1.04);
+  }
+
+  .group:hover .aes-gallery-spotlight::after,
+  .group\/img:hover.aes-gallery-spotlight::after {
+    background: rgba(18, 18, 18, 0.08);
+  }
+
+  .aesthetics-root[data-aes-theme="dark"] .group:hover .aes-gallery-spotlight::after {
+    background: rgba(0, 0, 0, 0.22);
+  }
+
+  .group:hover .aes-hover-ink {
+    color: var(--aes-pink);
+  }
+
+  .aes-quickadd-hover-reveal {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .group:hover .aes-quickadd-hover-reveal {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Coarse pointer / touch — keep controls visible, no hover-dependent UI */
+@media (hover: none), (pointer: coarse) {
+  .aes-quickadd-hover-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .aes-gallery-product-card,
+  .aes-gallery-collection-card,
+  .aes-card {
+    will-change: auto;
+  }
+
+  /* Skip expensive glass blur on touch for battery/FPS */
+  .aes-panel,
+  .aes-panel-peach,
+  .aes-panel-lavender,
+  .aes-panel-warm {
+    backdrop-filter: none;
+  }
+}
+
+/* Active press feedback on touch (replaces hover affordance) */
+@media (hover: none) {
+  .aes-joy-quickadd:active,
+  .aes-btn-primary:active {
+    background: var(--aes-pink);
+  }
+
+  .aes-btn-secondary:active {
+    background: var(--aes-ink);
+    color: var(--aes-white);
+  }
+}
+
+/* Prevent CLS on product images */
+.aes-gallery-product-card img,
+.aes-gallery-spotlight img,
+.group\/img img {
+  display: block;
+}
+
+/* Notices: respect home indicator on mobile */
+.aes-notice-stack {
+  top: max(0.75rem, env(safe-area-inset-top, 0px));
+  right: max(0.75rem, env(safe-area-inset-right, 0px));
+  left: auto;
+  max-width: min(20rem, calc(100vw - 1.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+}
+
+@media (max-width: 640px) {
+  .aes-notice-stack {
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    left: max(0.75rem, env(safe-area-inset-left, 0px));
+    max-width: none;
+  }
 }

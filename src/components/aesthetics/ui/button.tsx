@@ -10,9 +10,9 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const sizes: Record<Size, string> = {
-  sm: "px-5 py-2.5",
-  md: "px-6 py-3",
-  lg: "px-8 py-4",
+  sm: "min-h-11 px-5 py-2.5",
+  md: "min-h-11 px-6 py-3",
+  lg: "min-h-12 px-8 py-4",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -20,7 +20,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        "aes-btn",
+        "aes-btn aes-touch",
         variant === "primary" && "aes-btn-primary",
         variant === "secondary" && "aes-btn-secondary",
         variant === "ghost" && "aes-btn-ghost",

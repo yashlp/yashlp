@@ -61,7 +61,7 @@ export function AddToBagProvider({ children }: { children: React.ReactNode }) {
           return (
             <motion.div
               key={f.id}
-              className="pointer-events-none fixed z-[450] h-14 w-14 overflow-hidden rounded-xl border border-white/40 shadow-lg"
+              className="pointer-events-none fixed z-[450] h-14 w-14 overflow-hidden rounded-xl border border-white/40 shadow-lg will-change-transform"
               style={{ left: f.from.x - 28, top: f.from.y - 28 }}
               initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
               animate={{
@@ -71,7 +71,7 @@ export function AddToBagProvider({ children }: { children: React.ReactNode }) {
                 y: to.y - f.from.y,
               }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={f.image} alt="" className="h-full w-full object-cover" draggable={false} />
