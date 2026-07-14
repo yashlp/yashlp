@@ -53,6 +53,10 @@ export type Product = {
   mood: ProductMood;
   materials: string[];
   colors: string[];
+  room?: string;
+  style?: string;
+  dimensions?: string;
+  specifications?: Record<string, string>;
   vibe: string;
   description: string;
   images: string[];
@@ -62,6 +66,9 @@ export type Product = {
   reviewCount: number;
   featured?: boolean;
   newArrival?: boolean;
+  trending?: boolean;
+  recommended?: boolean;
+  isBestseller?: boolean;
 };
 
 export type ShopMode = "classic";

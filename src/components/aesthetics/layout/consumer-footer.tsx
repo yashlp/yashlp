@@ -6,6 +6,26 @@ import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { footerReveal } from "@/lib/aesthetics/motion";
 import { useAesReducedMotion } from "@/components/aesthetics/motion/use-reduced-motion";
 
+const SHOP_LINKS = [
+  { href: "/aesthetics/shop", label: "All products" },
+  { href: "/aesthetics/collections", label: "Collections" },
+  { href: "/aesthetics/about", label: "About us" },
+  { href: "/aesthetics/wishlist", label: "My Space" },
+  { href: "/aesthetics/account", label: "My account" },
+  { href: "/aesthetics/become-a-maker", label: "Become a Maker" },
+  { href: "/aesthetics/careers", label: "Careers" },
+];
+
+const HELP_LINKS = [
+  { href: "/aesthetics/shipping", label: "Shipping Policy" },
+  { href: "/aesthetics/returns", label: "Return Policy" },
+  { href: "/aesthetics/refund", label: "Refund Policy" },
+  { href: "/aesthetics/privacy", label: "Privacy Policy" },
+  { href: "/aesthetics/terms", label: "Terms" },
+  { href: "/aesthetics/faq", label: "FAQs" },
+  { href: "/aesthetics/track-order", label: "Track Order" },
+];
+
 export function ConsumerFooter() {
   const reduced = useAesReducedMotion();
 
@@ -49,40 +69,32 @@ export function ConsumerFooter() {
             <p className="text-sm text-white/50">
               A curated design marketplace — calm, intentional, gallery-like.
             </p>
+            <p className="mt-4 text-xs text-white/40">
+              Secure payments · Easy returns · Tracked shipping nationwide
+            </p>
           </div>
           <div>
             <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-white/70">Shop</p>
             <ul className="space-y-2 text-sm text-white/55">
-              <li>
-                <Link href="/aesthetics/shop" className="hover:text-white">
-                  All products
-                </Link>
-              </li>
-              <li>
-                <Link href="/aesthetics/collections" className="hover:text-white">
-                  Collections
-                </Link>
-              </li>
-              <li>
-                <Link href="/aesthetics/about" className="hover:text-white">
-                  About us
-                </Link>
-              </li>
-              <li>
-                <Link href="/aesthetics/wishlist" className="hover:text-white">
-                  Favourites
-                </Link>
-              </li>
-              <li>
-                <Link href="/aesthetics/account" className="hover:text-white">
-                  My account
-                </Link>
-              </li>
+              {SHOP_LINKS.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="hover:text-white">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
             <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-white/70">Help</p>
             <ul className="space-y-2 text-sm text-white/55">
+              {HELP_LINKS.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="hover:text-white">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <a href="mailto:hello@onlyaesthetics.app" className="hover:text-white">
                   hello@onlyaesthetics.app
