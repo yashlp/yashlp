@@ -90,10 +90,12 @@ Add every row below, then click **Redeploy**.
 
 ### Step 5 — Publish for customers (1 min)
 
-1. Go to **https://yashlp.vercel.app/admin/login**
+1. Go to **https://yashlp.vercel.app/civic-admin/login** (CivicLens only — not `/admin`)
 2. Admin OTP → set admin password if first time
-3. **Admin → Site settings → Publish for customers**
-4. Or **Admin → Launch** to see green checklist
+3. **CivicLens Admin → Site settings → Publish for customers**
+4. Or **CivicLens Admin → Launch** to see green checklist
+
+> **Important:** `/admin` is **Only Aesthetics** store admin. CivicLens admin is **`/civic-admin`**. Different cookies, different APIs, different UI — do not mix them.
 
 ---
 

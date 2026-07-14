@@ -12,12 +12,10 @@ function withPathHeader(request: NextRequest) {
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Legacy CivicLens admin → Only Aesthetics D2C admin
-  if (path === "/civic-admin" || path.startsWith("/civic-admin/")) {
-    const target = path.replace(/^\/civic-admin/, "/admin") || "/admin";
-    return NextResponse.redirect(new URL(target, request.url));
-  }
-
+  // Keep admins isolated:
+  // - /admin*           → Only Aesthetics commerce admin
+  // - /civic-admin*     → CivicLens community admin
+  // Never redirect one into the other — they use different cookies + APIs.
   const response = withPathHeader(request);
 
   // Never process Next.js static/runtime assets through app security middleware.

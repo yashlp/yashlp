@@ -77,6 +77,12 @@ export default function PlatformAdminLoginPage() {
           <p className="mt-3 text-xs text-[var(--aes-charcoal-muted)]">
             Inventory · Orders · Purchases · Analytics
           </p>
+          <p className="mt-2 text-[10px] text-[var(--aes-dusty)]">
+            This is Only Aesthetics store admin — not CivicLens. CivicLens admin:{" "}
+            <a href="/civic-admin/login" className="underline">
+              /civic-admin/login
+            </a>
+          </p>
         </div>
 
         <form
