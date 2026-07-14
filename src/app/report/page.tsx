@@ -82,10 +82,17 @@ export default function ReportPage() {
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
         setPinLocation(loc);
+        try {
+          const res = await fetch(`/api/geocode?lat=${loc.lat}&lng=${loc.lng}`);
+          const data = (await res.json()) as { place?: GeocodePlace };
+          if (data.place) setSelectedPlace(data.place);
+        } catch {
+          /* keep pin only */
+        }
       },
       () => {},
       { enableHighAccuracy: true, timeout: 10000 }
@@ -144,14 +151,43 @@ export default function ReportPage() {
     }
   };
 
-  const useMyLocation = () => {
-    if (userLocation) setPinLocation(userLocation);
-    else if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setUserLocation(loc);
-        setPinLocation(loc);
+  const useMyLocation = async () => {
+    if (!navigator.geolocation) {
+      setError("Location is not supported in this browser.");
+      return;
+    }
+    setError("");
+    try {
+      const coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve(pos.coords),
+          (err) => {
+            if (err.code === err.PERMISSION_DENIED) {
+              reject(new Error("Location permission denied. Allow location access and try again."));
+            } else {
+              reject(new Error("Could not get your location. Try again."));
+            }
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 60_000 }
+        );
       });
+      const loc = { lat: coords.latitude, lng: coords.longitude };
+      setUserLocation(loc);
+      setPinLocation(loc);
+
+      const res = await fetch(`/api/geocode?lat=${loc.lat}&lng=${loc.lng}`);
+      const data = (await res.json()) as { place?: GeocodePlace };
+      if (data.place) {
+        setSelectedPlace(data.place);
+      } else {
+        setSelectedPlace({
+          name: `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`,
+          lat: loc.lat,
+          lng: loc.lng,
+        });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not get your location.");
     }
   };
 
@@ -442,10 +478,12 @@ export default function ReportPage() {
             onSelect={(place) => {
               setSelectedPlace(place);
               setPinLocation({ lat: place.lat, lng: place.lng });
+              setUserLocation({ lat: place.lat, lng: place.lng });
             }}
             onClear={() => setSelectedPlace(null)}
+            showUseMyLocation
             label="Search location"
-            hint="Pick country first, then city, area, state, or pincode / postal code"
+            hint="Pick country, tap Use my location, or search city / area / pincode"
             className="mb-4"
           />
 
@@ -455,7 +493,7 @@ export default function ReportPage() {
               <button
                 type="button"
                 onClick={useMyLocation}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+                className="text-xs font-semibold text-orange-600 hover:text-orange-700"
               >
                 Use my location
               </button>

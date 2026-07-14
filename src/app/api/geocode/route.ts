@@ -37,14 +37,68 @@ function mapNominatimItem(item: NominatimItem): GeocodePlace {
   };
 }
 
+async function reverseGeocode(lat: number, lng: number): Promise<GeocodePlace | null> {
+  const url = new URL("https://nominatim.openstreetmap.org/reverse");
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lng));
+  url.searchParams.set("format", "json");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("zoom", "18");
+
+  const res = await fetch(url.toString(), {
+    headers: {
+      "User-Agent": "CivicLens/1.0 (community intelligence platform)",
+      Accept: "application/json",
+    },
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) return null;
+  const data = (await res.json()) as NominatimItem & { error?: string };
+  if (!data?.lat || !data?.lon || data.error) return null;
+  return mapNominatimItem(data);
+}
+
 /** Free worldwide geocoding via OpenStreetMap Nominatim (no API key required) */
 export async function GET(req: Request) {
   const limited = rateLimitResponse(req, "geocode", 60, 60 * 1000);
   if (limited) return limited;
 
   const { searchParams } = new URL(req.url);
+  const latParam = searchParams.get("lat");
+  const lngParam = searchParams.get("lng");
   const q = searchParams.get("q")?.trim();
   const country = searchParams.get("country")?.trim().toUpperCase();
+
+  // Reverse geocode: ?lat=&lng=
+  if (latParam != null && lngParam != null) {
+    const lat = parseFloat(latParam);
+    const lng = parseFloat(lngParam);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return NextResponse.json({ error: "Invalid coordinates" }, { status: 400 });
+    }
+    try {
+      const place = await reverseGeocode(lat, lng);
+      if (!place) {
+        return NextResponse.json({
+          place: {
+            name: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+            lat,
+            lng,
+          } satisfies GeocodePlace,
+        });
+      }
+      return NextResponse.json({ place });
+    } catch {
+      return NextResponse.json({
+        place: {
+          name: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+          lat,
+          lng,
+        } satisfies GeocodePlace,
+      });
+    }
+  }
 
   if (!q || q.length < 2) {
     return NextResponse.json({ results: [] as GeocodePlace[] });

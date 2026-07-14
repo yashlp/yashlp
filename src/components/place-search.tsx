@@ -1,18 +1,54 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ChevronDown, Globe, MapPin, X } from "lucide-react";
+import { ChevronDown, Crosshair, Globe, MapPin, X } from "lucide-react";
 import { countrySelectOptions, getCountryName } from "@/lib/countries";
 import type { GeocodePlace } from "@/lib/geocode";
 import { LEGAL_COUNTRY_KEY } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
 import { SearchInput } from "@/components/search-input";
 
+async function resolveDeviceLocation(): Promise<GeocodePlace> {
+  if (typeof navigator === "undefined" || !navigator.geolocation) {
+    throw new Error("Location is not supported in this browser.");
+  }
+
+  const coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve(pos.coords),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          reject(new Error("Location permission denied. Allow location access and try again."));
+        } else if (err.code === err.TIMEOUT) {
+          reject(new Error("Location timed out. Try again outdoors or with Wi‑Fi."));
+        } else {
+          reject(new Error("Could not get your location. Try again."));
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60_000 }
+    );
+  });
+
+  const lat = coords.latitude;
+  const lng = coords.longitude;
+
+  const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+  const data = (await res.json()) as { place?: GeocodePlace };
+  if (data.place) return data.place;
+
+  return {
+    name: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+    lat,
+    lng,
+  };
+}
+
 export function PlaceSearch({
   onSelect,
   selectedPlace,
   onClear,
   onCountryChange,
+  showUseMyLocation = false,
   label = "Where is this?",
   hint = "City, neighbourhood, state, or pincode / postal code",
   className,
@@ -21,6 +57,7 @@ export function PlaceSearch({
   selectedPlace?: GeocodePlace | null;
   onClear?: () => void;
   onCountryChange?: (countryCode: string) => void;
+  showUseMyLocation?: boolean;
   label?: string;
   hint?: string;
   className?: string;
@@ -30,6 +67,8 @@ export function PlaceSearch({
   const [results, setResults] = useState<GeocodePlace[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const debouncedQuery = useDebouncedValue(query, 400);
 
   useEffect(() => {
@@ -78,6 +117,29 @@ export function PlaceSearch({
     return () => controller.abort();
   }, [debouncedQuery, countryCode, search]);
 
+  const useMyLocation = async () => {
+    setLocationError("");
+    setLocating(true);
+    try {
+      const place = await resolveDeviceLocation();
+      if (place.countryCode) {
+        setCountryCode(place.countryCode);
+        try {
+          localStorage.setItem(LEGAL_COUNTRY_KEY, place.countryCode);
+        } catch {
+          /* ignore */
+        }
+      }
+      onSelect(place);
+      setQuery(place.name.split(",")[0] ?? place.name);
+      setOpen(false);
+    } catch (e) {
+      setLocationError(e instanceof Error ? e.message : "Could not get your location.");
+    } finally {
+      setLocating(false);
+    }
+  };
+
   const countries = countrySelectOptions();
 
   if (selectedPlace) {
@@ -99,6 +161,7 @@ export function PlaceSearch({
             onClick={() => {
               onClear?.();
               setQuery("");
+              setLocationError("");
             }}
             className="rounded-lg p-1.5 text-stone-400 hover:bg-white hover:text-stone-600"
             aria-label="Clear location"
@@ -106,6 +169,18 @@ export function PlaceSearch({
             <X className="h-4 w-4" />
           </button>
         </div>
+        {showUseMyLocation && (
+          <button
+            type="button"
+            onClick={useMyLocation}
+            disabled={locating}
+            className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-700 disabled:opacity-50"
+          >
+            <Crosshair className="h-3.5 w-3.5" />
+            {locating ? "Getting location…" : "Use my location instead"}
+          </button>
+        )}
+        {locationError && <p className="mt-1 text-xs text-rose-600">{locationError}</p>}
       </div>
     );
   }
@@ -115,7 +190,7 @@ export function PlaceSearch({
       <label className="text-sm font-medium text-stone-700">{label}</label>
       <p className="mt-0.5 text-xs text-stone-400">{hint}</p>
 
-      <div className="mt-2 flex items-stretch gap-2">
+      <div className="mt-2 flex flex-wrap items-stretch gap-2">
         <div
           className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-orange-200 bg-white px-2.5 py-2 shadow-sm sm:px-3"
           title={getCountryName(countryCode)}
@@ -138,7 +213,20 @@ export function PlaceSearch({
           </select>
           <ChevronDown className="pointer-events-none h-3.5 w-3.5 shrink-0 text-stone-400" aria-hidden />
         </div>
-        <div className="relative min-w-0 flex-1">
+
+        {showUseMyLocation && (
+          <button
+            type="button"
+            onClick={useMyLocation}
+            disabled={locating}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700 shadow-sm hover:bg-orange-100 disabled:opacity-50 sm:text-sm"
+          >
+            <Crosshair className={`h-4 w-4 ${locating ? "animate-pulse" : ""}`} />
+            {locating ? "Locating…" : "Use my location"}
+          </button>
+        )}
+
+        <div className="relative min-w-0 flex-1 basis-full sm:basis-0">
           <SearchInput
             value={query}
             onChange={(v) => {
@@ -190,6 +278,7 @@ export function PlaceSearch({
           )}
         </div>
       </div>
+      {locationError && <p className="mt-2 text-xs text-rose-600">{locationError}</p>}
     </div>
   );
 }
