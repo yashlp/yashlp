@@ -14,8 +14,16 @@ export function commerceApiError(error: unknown) {
     return NextResponse.json({ error: "Validation failed", details: error.flatten() }, { status: 400 });
   }
   if (error instanceof Error) {
-    if (error.message.includes("Invalid") || error.message.includes("Cannot")) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    const msg = error.message;
+    if (
+      msg.includes("Invalid") ||
+      msg.includes("Cannot") ||
+      msg.includes("Missing file") ||
+      msg.includes("Unsupported") ||
+      msg.includes("must be") ||
+      msg.includes("Upload")
+    ) {
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
   }
   console.error("[Commerce API]", error);

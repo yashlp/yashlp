@@ -1,5 +1,12 @@
 import { z } from "zod";
 import { APPROVAL_STATUSES, PRODUCT_STATUSES } from "../constants";
+import { isAllowedMediaUrl } from "../media-upload";
+
+/** Uploaded path, http(s) URL, or compressed data:image URL */
+const mediaUrlSchema = z
+  .string()
+  .min(1)
+  .refine(isAllowedMediaUrl, { message: "Invalid media URL" });
 
 export const productCreateSchema = z.object({
   name: z.string().min(1).max(200),
@@ -38,8 +45,10 @@ export const productCreateSchema = z.object({
   isTrending: z.boolean().optional(),
   isNewArrival: z.boolean().optional(),
   isRecommended: z.boolean().optional(),
-  images: z.array(z.string().url()).optional(),
-  videos: z.array(z.string().url()).optional(),
+  /** 2–4 product photos required */
+  images: z.array(mediaUrlSchema).min(2).max(4),
+  /** Optional single product video */
+  videos: z.array(mediaUrlSchema).max(1).optional(),
   // D2C inventory
   purchaseCost: z.number().min(0).optional(),
   warehouseLocation: z.string().optional(),
@@ -47,7 +56,13 @@ export const productCreateSchema = z.object({
   purchaseDate: z.string().datetime().optional(),
 });
 
-export const productUpdateSchema = productCreateSchema.partial().omit({ sellerId: true });
+export const productUpdateSchema = productCreateSchema
+  .partial()
+  .omit({ sellerId: true })
+  .extend({
+    images: z.array(mediaUrlSchema).min(2).max(4).optional(),
+    videos: z.array(mediaUrlSchema).max(1).optional(),
+  });
 
 export const categorySchema = z.object({
   name: z.string().min(1).max(100),

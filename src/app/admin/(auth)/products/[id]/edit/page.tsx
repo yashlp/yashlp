@@ -6,6 +6,10 @@ import Link from "next/link";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Card } from "@/components/aesthetics/ui/card";
 import { Input } from "@/components/aesthetics/ui/input";
+import {
+  ProductMediaUploader,
+  type ProductMediaValue,
+} from "@/components/aesthetics/admin/product-media-uploader";
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,10 +20,11 @@ export default function EditProductPage() {
     name: "", slug: "", sku: "", barcode: "", description: "", shortDescription: "",
     price: "", mrp: "", purchaseCost: "", stock: "", minStock: "", warehouseLocation: "",
     supplierId: "", categoryId: "", purchaseDate: "", status: "DRAFT",
-    imageUrls: "", videoUrls: "",
   });
+  const [media, setMedia] = useState<ProductMediaValue>({ images: [], videos: [] });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -46,9 +51,16 @@ export default function EditProductPage() {
         categoryId: p.categoryId || "",
         purchaseDate: p.purchaseDate ? p.purchaseDate.slice(0, 10) : "",
         status: p.status || "DRAFT",
-        imageUrls: (p.media || []).filter((m: { type: string }) => m.type === "IMAGE").map((m: { url: string }) => m.url).join("\n"),
-        videoUrls: (p.media || []).filter((m: { type: string }) => m.type === "VIDEO").map((m: { url: string }) => m.url).join("\n"),
       });
+      const images = (p.media || [])
+        .filter((m: { type: string }) => m.type === "IMAGE")
+        .map((m: { url: string }) => m.url)
+        .slice(0, 4);
+      const videos = (p.media || [])
+        .filter((m: { type: string }) => m.type === "VIDEO")
+        .map((m: { url: string }) => m.url)
+        .slice(0, 1);
+      setMedia({ images, videos });
       setCategories(cats.categories || []);
       setSuppliers(sups.suppliers || []);
       setLoading(false);
@@ -63,33 +75,45 @@ export default function EditProductPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const res = await fetch(`/api/admin/products/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        slug: form.slug,
-        sku: form.sku || undefined,
-        barcode: form.barcode || undefined,
-        description: form.description,
-        shortDescription: form.shortDescription || undefined,
-        price: Number(form.price),
-        mrp: form.mrp ? Number(form.mrp) : undefined,
-        purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
-        stock: Number(form.stock),
-        minStock: Number(form.minStock),
-        warehouseLocation: form.warehouseLocation || undefined,
-        supplierId: form.supplierId || undefined,
-        categoryId: form.categoryId,
-        status: form.status,
-        purchaseDate: form.purchaseDate ? new Date(form.purchaseDate).toISOString() : undefined,
-        images: form.imageUrls.split("\n").map((s) => s.trim()).filter(Boolean),
-        videos: form.videoUrls.split("\n").map((s) => s.trim()).filter(Boolean),
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) { setError(data.error || "Save failed"); return; }
-    router.push("/admin/inventory");
+    if (media.images.length < 2) {
+      setError("Upload at least 2 product photos.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          slug: form.slug,
+          sku: form.sku || undefined,
+          barcode: form.barcode || undefined,
+          description: form.description,
+          shortDescription: form.shortDescription || undefined,
+          price: Number(form.price),
+          mrp: form.mrp ? Number(form.mrp) : undefined,
+          purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
+          stock: Number(form.stock),
+          minStock: Number(form.minStock),
+          warehouseLocation: form.warehouseLocation || undefined,
+          supplierId: form.supplierId || undefined,
+          categoryId: form.categoryId,
+          status: form.status,
+          purchaseDate: form.purchaseDate ? new Date(form.purchaseDate).toISOString() : undefined,
+          images: media.images,
+          videos: media.videos,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Save failed");
+        return;
+      }
+      router.push("/admin/inventory");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function remove() {
@@ -153,10 +177,9 @@ export default function EditProductPage() {
             )}
           </section>
 
-          <section>
+          <section className="rounded-2xl border border-[var(--aes-border)] bg-[var(--aes-ivory)]/40 p-4">
             <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Media</p>
-            <textarea className="aes-input min-h-20 w-full" placeholder="Photo URLs (one per line)" value={form.imageUrls} onChange={(e) => setForm({ ...form, imageUrls: e.target.value })} />
-            <textarea className="aes-input mt-3 min-h-16 w-full" placeholder="Video URLs (one per line)" value={form.videoUrls} onChange={(e) => setForm({ ...form, videoUrls: e.target.value })} />
+            <ProductMediaUploader value={media} onChange={setMedia} disabled={saving} />
           </section>
 
           <select className="aes-input w-full" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}>
@@ -169,8 +192,10 @@ export default function EditProductPage() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex flex-wrap gap-3">
-            <Button type="submit">Save changes</Button>
-            <Button type="button" variant="secondary" onClick={remove}>Delete product</Button>
+            <Button type="submit" disabled={saving || media.images.length < 2}>
+              {saving ? "Saving…" : "Save changes"}
+            </Button>
+            <Button type="button" variant="secondary" onClick={remove} disabled={saving}>Delete product</Button>
           </div>
         </form>
       </Card>

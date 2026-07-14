@@ -86,7 +86,15 @@ export const productService = {
   },
 
   async create(data: ProductCreateInput) {
-    const { images, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
+    const { images, videos, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
+    const mediaCreate = [
+      ...images.map((url, i) => ({ type: "IMAGE" as const, url, sortOrder: i })),
+      ...(videos || []).map((url, i) => ({
+        type: "VIDEO" as const,
+        url,
+        sortOrder: images.length + i,
+      })),
+    ];
     const product = await prisma.commerceProduct.create({
       data: {
         ...rest,
@@ -98,15 +106,7 @@ export const productService = {
         approvalStatus: rest.approvalStatus || "PENDING",
         status: rest.status || "DRAFT",
         publishedAt: rest.status === "PUBLISHED" ? new Date() : undefined,
-        media: images?.length
-          ? {
-              create: images.map((url, i) => ({
-                type: "IMAGE",
-                url,
-                sortOrder: i,
-              })),
-            }
-          : undefined,
+        media: mediaCreate.length ? { create: mediaCreate } : undefined,
       },
       include: productInclude,
     });

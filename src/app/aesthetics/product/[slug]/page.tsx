@@ -50,6 +50,19 @@ export default async function ProductPage({ params }: Props) {
                 ))}
               </div>
             )}
+            {product.video && (
+              <div className="overflow-hidden rounded-[1.25rem] border border-[var(--gallery-border,#ddd7cf)] bg-black">
+                <video
+                  src={product.video}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="max-h-80 w-full"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            )}
           </div>
 
           <div className="aes-panel p-7 sm:p-10">

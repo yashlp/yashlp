@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Card } from "@/components/aesthetics/ui/card";
 import { Input } from "@/components/aesthetics/ui/input";
+import {
+  ProductMediaUploader,
+  type ProductMediaValue,
+} from "@/components/aesthetics/admin/product-media-uploader";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -27,11 +31,12 @@ export default function NewProductPage() {
     sellerId: "",
     brandId: "",
     supplierId: "",
-    imageUrl: "",
     tags: "",
     mood: "",
   });
+  const [media, setMedia] = useState<ProductMediaValue>({ images: [], videos: [] });
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/categories").then((r) => r.json()).then((d) => setCategories(d.categories || []));
@@ -53,39 +58,53 @@ export default function NewProductPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const res = await fetch("/api/admin/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
-        sku: form.sku || undefined,
-        barcode: form.barcode || undefined,
-        description: form.description,
-        price: Number(form.price),
-        mrp: form.mrp ? Number(form.mrp) : undefined,
-        purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
-        stock: Number(form.stock),
-        minStock: Number(form.minStock),
-        warehouseLocation: form.warehouseLocation || undefined,
-        supplierId: form.supplierId || undefined,
-        categoryId: form.categoryId,
-        sellerId: form.sellerId,
-        brandId: form.brandId,
-        images: form.imageUrl ? [form.imageUrl] : [],
-        tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-        mood: form.mood || undefined,
-        status: "DRAFT",
-        approvalStatus: "PENDING",
-        purchaseDate: new Date().toISOString(),
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || "Failed to create product");
+    if (media.images.length < 2) {
+      setError("Upload at least 2 product photos.");
       return;
     }
-    router.push("/admin/inventory");
+    if (media.images.length > 4) {
+      setError("Maximum 4 product photos.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
+          sku: form.sku || undefined,
+          barcode: form.barcode || undefined,
+          description: form.description,
+          price: Number(form.price),
+          mrp: form.mrp ? Number(form.mrp) : undefined,
+          purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
+          stock: Number(form.stock),
+          minStock: Number(form.minStock),
+          warehouseLocation: form.warehouseLocation || undefined,
+          supplierId: form.supplierId || undefined,
+          categoryId: form.categoryId,
+          sellerId: form.sellerId,
+          brandId: form.brandId,
+          images: media.images,
+          videos: media.videos,
+          tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          mood: form.mood || undefined,
+          status: "DRAFT",
+          approvalStatus: "PENDING",
+          purchaseDate: new Date().toISOString(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to create product");
+        return;
+      }
+      router.push("/admin/inventory");
+    } finally {
+      setSaving(false);
+    }
   }
 
   const brands = sellers.find((s) => s.id === form.sellerId)?.brands || [];
@@ -99,7 +118,9 @@ export default function NewProductPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="aes-display text-3xl font-semibold italic">Add product</h1>
-      <p className="mt-1 text-sm text-[var(--aes-charcoal-muted)]">Inventory you own — add photos, cost, and stock after receiving goods.</p>
+      <p className="mt-1 text-sm text-[var(--aes-charcoal-muted)]">
+        Inventory you own — upload 2–4 photos and an optional video after receiving goods.
+      </p>
       <Card className="mt-8 space-y-4">
         <form onSubmit={submit} className="space-y-4">
           <Input placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -133,11 +154,18 @@ export default function NewProductPage() {
           </select>
           <input type="hidden" value={form.sellerId} />
           <input type="hidden" value={form.brandId} />
-          <Input placeholder="Image URL" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+
+          <div className="rounded-2xl border border-[var(--aes-border)] bg-[var(--aes-ivory)]/50 p-4">
+            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Media</p>
+            <ProductMediaUploader value={media} onChange={setMedia} disabled={saving} />
+          </div>
+
           <Input placeholder="Tags (comma-separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
           <Input placeholder="Mood" value={form.mood} onChange={(e) => setForm({ ...form, mood: e.target.value })} />
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit">Add to inventory</Button>
+          <Button type="submit" disabled={saving || media.images.length < 2}>
+            {saving ? "Saving…" : "Add to inventory"}
+          </Button>
         </form>
       </Card>
     </div>
