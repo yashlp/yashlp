@@ -81,18 +81,12 @@ export default function ReportPage() {
 
   useEffect(() => {
     if (!navigator.geolocation) return;
+    // Pre-warm GPS for map pin only — do not auto-select place (that hides Use my location).
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+      (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
         setPinLocation(loc);
-        try {
-          const res = await fetch(`/api/geocode?lat=${loc.lat}&lng=${loc.lng}`);
-          const data = (await res.json()) as { place?: GeocodePlace };
-          if (data.place) setSelectedPlace(data.place);
-        } catch {
-          /* keep pin only */
-        }
       },
       () => {},
       { enableHighAccuracy: true, timeout: 10000 }
@@ -148,46 +142,6 @@ export default function ReportPage() {
       } catch {
         setError("Could not process one of the images. Try a different file.");
       }
-    }
-  };
-
-  const useMyLocation = async () => {
-    if (!navigator.geolocation) {
-      setError("Location is not supported in this browser.");
-      return;
-    }
-    setError("");
-    try {
-      const coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => resolve(pos.coords),
-          (err) => {
-            if (err.code === err.PERMISSION_DENIED) {
-              reject(new Error("Location permission denied. Allow location access and try again."));
-            } else {
-              reject(new Error("Could not get your location. Try again."));
-            }
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 60_000 }
-        );
-      });
-      const loc = { lat: coords.latitude, lng: coords.longitude };
-      setUserLocation(loc);
-      setPinLocation(loc);
-
-      const res = await fetch(`/api/geocode?lat=${loc.lat}&lng=${loc.lng}`);
-      const data = (await res.json()) as { place?: GeocodePlace };
-      if (data.place) {
-        setSelectedPlace(data.place);
-      } else {
-        setSelectedPlace({
-          name: `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`,
-          lat: loc.lat,
-          lng: loc.lng,
-        });
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not get your location.");
     }
   };
 
@@ -483,21 +437,11 @@ export default function ReportPage() {
             onClear={() => setSelectedPlace(null)}
             showUseMyLocation
             label="Search location"
-            hint="Pick country, tap Use my location, or search city / area / pincode"
+            hint="Tap Use my location, or pick a country and search"
             className="mb-4"
           />
 
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium text-stone-700">Fine-tune on map</label>
-              <button
-                type="button"
-                onClick={useMyLocation}
-                className="text-xs font-semibold text-orange-600 hover:text-orange-700"
-              >
-                Use my location
-              </button>
-            </div>
+          <div className="relative z-0">
             <LocationPicker
               userLocation={userLocation}
               pinLocation={pinLocation}

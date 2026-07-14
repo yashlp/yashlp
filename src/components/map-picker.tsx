@@ -48,12 +48,13 @@ export function LocationPicker({
   const center = userLocation ?? pinLocation;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-orange-200 shadow-inner">
+    <div className="relative z-0 overflow-hidden rounded-2xl border border-orange-200 shadow-inner [&_.leaflet-container]:z-0 [&_.leaflet-pane]:!z-[1] [&_.leaflet-control]:!z-[2]">
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={USER_LOCATION_ZOOM}
         className="h-56 w-full sm:h-64"
         zoomControl={false}
+        style={{ zIndex: 0 }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <ZoomControl position="topleft" />

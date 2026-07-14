@@ -25,16 +25,20 @@ async function resolveDeviceLocation(): Promise<GeocodePlace> {
           reject(new Error("Could not get your location. Try again."));
         }
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60_000 }
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
   });
 
   const lat = coords.latitude;
   const lng = coords.longitude;
 
-  const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
-  const data = (await res.json()) as { place?: GeocodePlace };
-  if (data.place) return data.place;
+  try {
+    const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+    const data = (await res.json()) as { place?: GeocodePlace };
+    if (data.place) return data.place;
+  } catch {
+    /* fall through */
+  }
 
   return {
     name: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
@@ -117,7 +121,10 @@ export function PlaceSearch({
     return () => controller.abort();
   }, [debouncedQuery, countryCode, search]);
 
-  const useMyLocation = async () => {
+  const useMyLocation = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (locating) return;
     setLocationError("");
     setLocating(true);
     try {
@@ -133,8 +140,8 @@ export function PlaceSearch({
       onSelect(place);
       setQuery(place.name.split(",")[0] ?? place.name);
       setOpen(false);
-    } catch (e) {
-      setLocationError(e instanceof Error ? e.message : "Could not get your location.");
+    } catch (err) {
+      setLocationError(err instanceof Error ? err.message : "Could not get your location.");
     } finally {
       setLocating(false);
     }
@@ -142,9 +149,21 @@ export function PlaceSearch({
 
   const countries = countrySelectOptions();
 
+  const locationButton = showUseMyLocation ? (
+    <button
+      type="button"
+      onClick={useMyLocation}
+      disabled={locating}
+      className="relative z-20 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border-2 border-orange-300 bg-orange-50 px-4 py-3 text-sm font-bold text-orange-800 shadow-sm hover:bg-orange-100 active:bg-orange-200 disabled:cursor-wait disabled:opacity-70"
+    >
+      <Crosshair className={`h-5 w-5 shrink-0 ${locating ? "animate-pulse" : ""}`} />
+      {locating ? "Getting your location…" : "Use my location"}
+    </button>
+  ) : null;
+
   if (selectedPlace) {
     return (
-      <div className={className}>
+      <div className={`relative z-20 ${className ?? ""}`}>
         <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
           <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
           <div className="min-w-0 flex-1">
@@ -174,23 +193,26 @@ export function PlaceSearch({
             type="button"
             onClick={useMyLocation}
             disabled={locating}
-            className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-700 disabled:opacity-50"
+            className="relative z-20 mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-semibold text-orange-700 hover:bg-orange-50 disabled:opacity-70"
           >
-            <Crosshair className="h-3.5 w-3.5" />
+            <Crosshair className="h-4 w-4" />
             {locating ? "Getting location…" : "Use my location instead"}
           </button>
         )}
-        {locationError && <p className="mt-1 text-xs text-rose-600">{locationError}</p>}
+        {locationError && <p className="mt-2 text-xs text-rose-600">{locationError}</p>}
       </div>
     );
   }
 
   return (
-    <div className={className}>
+    <div className={`relative z-20 ${className ?? ""}`}>
       <label className="text-sm font-medium text-stone-700">{label}</label>
       <p className="mt-0.5 text-xs text-stone-400">{hint}</p>
 
-      <div className="mt-2 flex flex-wrap items-stretch gap-2">
+      {locationButton && <div className="mt-3">{locationButton}</div>}
+      {locationError && <p className="mt-2 text-xs text-rose-600">{locationError}</p>}
+
+      <div className="mt-3 flex items-stretch gap-2">
         <div
           className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-orange-200 bg-white px-2.5 py-2 shadow-sm sm:px-3"
           title={getCountryName(countryCode)}
@@ -214,19 +236,7 @@ export function PlaceSearch({
           <ChevronDown className="pointer-events-none h-3.5 w-3.5 shrink-0 text-stone-400" aria-hidden />
         </div>
 
-        {showUseMyLocation && (
-          <button
-            type="button"
-            onClick={useMyLocation}
-            disabled={locating}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700 shadow-sm hover:bg-orange-100 disabled:opacity-50 sm:text-sm"
-          >
-            <Crosshair className={`h-4 w-4 ${locating ? "animate-pulse" : ""}`} />
-            {locating ? "Locating…" : "Use my location"}
-          </button>
-        )}
-
-        <div className="relative min-w-0 flex-1 basis-full sm:basis-0">
+        <div className="relative min-w-0 flex-1">
           <SearchInput
             value={query}
             onChange={(v) => {
@@ -278,7 +288,6 @@ export function PlaceSearch({
           )}
         </div>
       </div>
-      {locationError && <p className="mt-2 text-xs text-rose-600">{locationError}</p>}
     </div>
   );
 }
