@@ -37,9 +37,13 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
   }, [pathname]);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    if (!open) {
+      document.body.style.removeProperty("overflow");
+      return;
+    }
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.removeProperty("overflow");
     };
   }, [open]);
 
@@ -52,74 +56,88 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
           "sticky top-0 z-[200] w-full transition-all duration-300",
           scrolled || open ? "bg-[var(--aes-bg-base)]/95 shadow-sm backdrop-blur-md" : "bg-transparent"
         )}
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
-        <div className="mx-auto grid max-w-7xl grid-cols-3 items-center gap-2 px-4 py-4 sm:px-6">
+        <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-2 px-3 py-3 sm:grid-cols-3 sm:gap-2 sm:px-6 sm:py-4">
           <div className="flex items-center justify-start">
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)]"
-              aria-label="Menu"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)]"
+              aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
             >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               <span className="hidden sm:inline">Menu</span>
             </button>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex min-w-0 justify-center overflow-hidden px-1">
             <BrandLogo variant="nav" />
           </div>
 
-          <div className="flex items-center justify-end gap-4">
+          <div className="flex items-center justify-end gap-1 sm:gap-3">
             <Link
               href="/aesthetics/wishlist"
-              className="hidden text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)] sm:block"
+              className="flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
               aria-label="Favourites"
             >
               <Heart className="h-5 w-5" />
             </Link>
             <Link
               href="/aesthetics/cart"
-              className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)]"
+              className="relative flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
               aria-label="Cart"
             >
-              <span className="hidden sm:inline">Cart</span>
-              <span className="relative">
-                <ShoppingBag className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aes-pink)] px-1 text-[9px] font-bold text-white">
-                    {cartCount}
-                  </span>
-                )}
-              </span>
+              <ShoppingBag className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aes-pink)] px-1 text-[9px] font-bold text-white sm:right-0 sm:top-0.5">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-[190]">
+        <div className="fixed inset-0 z-[300]">
           <button
             type="button"
             className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
             onClick={() => setOpen(false)}
             aria-label="Close menu"
           />
-          <nav className="absolute left-0 top-0 h-full w-[min(100%,18rem)] overflow-y-auto bg-[var(--aes-bg-base)]/97 p-6 shadow-2xl backdrop-blur-md sm:w-72">
-            <div className="mb-8 pt-14">
+          <nav
+            className="absolute left-0 top-0 flex h-full w-[min(100%,20rem)] flex-col overflow-y-auto bg-[var(--aes-bg-base)] p-5 shadow-2xl sm:w-72"
+            style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}
+          >
+            <div className="mb-2 flex items-center justify-between">
               <BrandLogo variant="nav" href="/aesthetics" />
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-[var(--aes-ink-muted)]"
+                aria-label="Close menu"
+              >
+                <X className="h-6 w-6" />
+              </button>
             </div>
-            <div className="flex flex-col gap-1">
-              <Link href="/aesthetics" className="py-3 text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink)]">
+            <div className="mt-4 flex flex-col gap-0.5 pb-10">
+              <Link
+                href="/aesthetics"
+                onClick={() => setOpen(false)}
+                className="rounded-xl px-3 py-3.5 text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink)] active:bg-black/5"
+              >
                 Home
               </Link>
               {NAV.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
+                  onClick={() => setOpen(false)}
                   className={cn(
-                    "py-3 text-sm font-medium uppercase tracking-[0.15em] transition-colors",
+                    "rounded-xl px-3 py-3.5 text-sm font-medium uppercase tracking-[0.15em] transition-colors active:bg-black/5",
                     pathname === href || pathname.startsWith(`${href}/`)
                       ? "text-[var(--aes-pink)]"
                       : "text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
@@ -130,7 +148,8 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
               ))}
               <Link
                 href={accountHref}
-                className="py-3 text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
+                onClick={() => setOpen(false)}
+                className="rounded-xl px-3 py-3.5 text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)] active:bg-black/5"
               >
                 {customer ? "My account" : "Sign in"}
               </Link>

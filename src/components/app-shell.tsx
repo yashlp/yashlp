@@ -9,8 +9,9 @@ import { isCommercePlatformPath } from "@/lib/commerce-platform-routes";
  * CivicLens auth, banners, nav, and terms gate never mount on commerce routes.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
 
+  // Never mount CivicLens TermsGate over the storefront / admin / seller.
   if (isCommercePlatformPath(pathname)) {
     return <>{children}</>;
   }

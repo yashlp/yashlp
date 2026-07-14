@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+function withPathHeader(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const requestHeaders = new Headers(request.headers);
+  // Must be on the *request* so server components can read it via headers()
+  requestHeaders.set("x-pathname", path);
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
@@ -10,11 +18,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(target, request.url));
   }
 
-  const response = NextResponse.next();
-  response.headers.set("x-pathname", path);
+  const response = withPathHeader(request);
 
   // Never process Next.js static/runtime assets through app security middleware.
-  // This avoids bad-request responses for chunk/css fetches in production mode.
   if (path.startsWith("/_next/") || path === "/favicon.ico") {
     return response;
   }
@@ -39,11 +45,11 @@ export function middleware(request: NextRequest) {
     [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://js.stripe.com",
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://api.fontshare.com",
       "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.openstreetmap.org https://images.unsplash.com",
       "connect-src 'self' https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org https://api.razorpay.com https://checkout.razorpay.com https://api.stripe.com",
       "frame-src https://api.razorpay.com https://checkout.razorpay.com https://js.stripe.com https://hooks.stripe.com",
-      "font-src 'self'",
+      "font-src 'self' data: https://api.fontshare.com https://cdn.fontshare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
