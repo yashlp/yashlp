@@ -25,6 +25,11 @@ type OrderDetail = {
   courier: string | null;
   trackingNumber: string | null;
   shippingAddress: string | null;
+  customerNotes: string | null;
+  internalNotes: string | null;
+  giftWrap: boolean;
+  giftWrapFee: number;
+  giftMessage: string | null;
   items: { quantity: number; unitPrice: number; product: { name: string } }[];
 };
 
@@ -33,12 +38,14 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [courier, setCourier] = useState("");
   const [tracking, setTracking] = useState("");
+  const [internalNotes, setInternalNotes] = useState("");
 
   function load() {
     fetch(`/api/admin/orders/${id}`).then((r) => r.json()).then((d) => {
       setOrder(d.order);
       setCourier(d.order?.courier || "");
       setTracking(d.order?.trackingNumber || "");
+      setInternalNotes(d.order?.internalNotes || "");
     });
   }
 
@@ -48,7 +55,16 @@ export default function OrderDetailPage() {
     await fetch(`/api/admin/orders/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, courier, trackingNumber: tracking }),
+      body: JSON.stringify({ status, courier, trackingNumber: tracking, internalNotes }),
+    });
+    load();
+  }
+
+  async function saveNotes() {
+    await fetch(`/api/admin/orders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: order?.status, internalNotes }),
     });
     load();
   }
@@ -72,6 +88,14 @@ export default function OrderDetailPage() {
       <Link href="/admin/orders" className="text-sm text-[var(--aes-royal)]">← Orders</Link>
       <h1 className="aes-display mt-4 text-3xl font-semibold italic">{order.orderNumber}</h1>
       <p className="mt-1 text-[var(--aes-charcoal-muted)]">Status: {status}</p>
+
+      {order.giftWrap && (
+        <Card hover={false} className="mt-6 border-amber-300 bg-amber-50">
+          <p className="font-semibold text-amber-950">🎁 Gift wrap requested (+₹{order.giftWrapFee || 3})</p>
+          {order.giftMessage && <p className="mt-2 text-sm">Message: {order.giftMessage}</p>}
+          <p className="mt-1 text-xs text-amber-900/70">Shown as packing / internal note for fulfillment.</p>
+        </Card>
+      )}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <Card hover={false}>
@@ -111,6 +135,25 @@ export default function OrderDetailPage() {
           {order.shippingAddress && (
             <pre className="mt-4 whitespace-pre-wrap text-xs text-[var(--aes-charcoal-muted)]">{order.shippingAddress}</pre>
           )}
+        </Card>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card hover={false}>
+          <h2 className="font-semibold">Customer notes</h2>
+          <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--aes-charcoal-muted)]">
+            {order.customerNotes || "—"}
+          </p>
+        </Card>
+        <Card hover={false}>
+          <h2 className="font-semibold">Internal notes</h2>
+          <textarea
+            className="aes-input mt-3 min-h-24 w-full"
+            value={internalNotes}
+            onChange={(e) => setInternalNotes(e.target.value)}
+            placeholder="Packing notes, gift wrap reminders…"
+          />
+          <Button className="mt-3" size="sm" onClick={saveNotes}>Save notes</Button>
         </Card>
       </div>
     </div>

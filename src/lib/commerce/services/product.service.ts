@@ -163,7 +163,17 @@ export const productService = {
   },
 
   async update(id: string, data: ProductUpdateInput) {
-    const { images, videos, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
+    const {
+      images,
+      videos,
+      materials,
+      tags,
+      colors,
+      specifications,
+      purchaseDate,
+      scheduledAt,
+      ...rest
+    } = data;
 
     if (images || videos) {
       await prisma.commerceProductMedia.deleteMany({ where: { productId: id } });
@@ -193,6 +203,9 @@ export const productService = {
         }),
         ...(purchaseDate !== undefined && {
           purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
+        }),
+        ...(scheduledAt !== undefined && {
+          scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         }),
         ...(rest.status === "PUBLISHED" && { publishedAt: new Date() }),
       },

@@ -19,9 +19,11 @@ export default function EditProductPage() {
   const [form, setForm] = useState({
     name: "", slug: "", sku: "", barcode: "", description: "", shortDescription: "",
     price: "", mrp: "", purchaseCost: "", stock: "", minStock: "", warehouseLocation: "",
-    supplierId: "", categoryId: "", purchaseDate: "", status: "DRAFT",
+    supplierId: "", categoryId: "", purchaseDate: "", status: "DRAFT", scheduledAt: "",
     room: "", style: "",
-    isFeatured: false, isTrending: false, isNewArrival: false, isRecommended: false, isBestseller: false,
+    seoTitle: "", seoDescription: "", seoKeywords: "", seoCanonicalUrl: "", ogImageUrl: "",
+    isFeatured: false, isTrending: false, isNewArrival: false, isRecommended: false,
+    isBestseller: false, isLimitedEdition: false, isStaffPick: false,
   });
   const [media, setMedia] = useState<ProductMediaValue>({ images: [], videos: [] });
   const [error, setError] = useState("");
@@ -53,13 +55,21 @@ export default function EditProductPage() {
         categoryId: p.categoryId || "",
         purchaseDate: p.purchaseDate ? p.purchaseDate.slice(0, 10) : "",
         status: p.status || "DRAFT",
+        scheduledAt: p.scheduledAt ? p.scheduledAt.slice(0, 16) : "",
         room: p.room || "",
         style: p.style || "",
+        seoTitle: p.seoTitle || "",
+        seoDescription: p.seoDescription || "",
+        seoKeywords: p.seoKeywords || "",
+        seoCanonicalUrl: p.seoCanonicalUrl || "",
+        ogImageUrl: p.ogImageUrl || "",
         isFeatured: Boolean(p.isFeatured),
         isTrending: Boolean(p.isTrending),
         isNewArrival: Boolean(p.isNewArrival),
         isRecommended: Boolean(p.isRecommended),
         isBestseller: Boolean(p.isBestseller),
+        isLimitedEdition: Boolean(p.isLimitedEdition),
+        isStaffPick: Boolean(p.isStaffPick),
       });
       const images = (p.media || [])
         .filter((m: { type: string }) => m.type === "IMAGE")
@@ -114,11 +124,19 @@ export default function EditProductPage() {
           videos: media.videos,
           room: form.room || undefined,
           style: form.style || undefined,
+          seoTitle: form.seoTitle || undefined,
+          seoDescription: form.seoDescription || undefined,
+          seoKeywords: form.seoKeywords || undefined,
+          seoCanonicalUrl: form.seoCanonicalUrl || undefined,
+          ogImageUrl: form.ogImageUrl || undefined,
+          scheduledAt: form.scheduledAt ? new Date(form.scheduledAt).toISOString() : null,
           isFeatured: form.isFeatured,
           isTrending: form.isTrending,
           isNewArrival: form.isNewArrival,
           isRecommended: form.isRecommended,
           isBestseller: form.isBestseller,
+          isLimitedEdition: form.isLimitedEdition,
+          isStaffPick: form.isStaffPick,
         }),
       });
       const data = await res.json();
@@ -206,19 +224,45 @@ export default function EditProductPage() {
             <Input placeholder="Room (e.g. bedroom, workspace)" value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} />
             <Input placeholder="Style (e.g. Japandi, Minimal)" value={form.style} onChange={(e) => setForm({ ...form, style: e.target.value })} />
           </div>
-          <select className="aes-input w-full" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-            {["DRAFT", "PUBLISHED", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"].map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <section>
+            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Product status</p>
+            <select className="aes-input w-full" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+              {["DRAFT", "SCHEDULED", "PUBLISHED", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"].map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            {form.status === "SCHEDULED" && (
+              <Input
+                className="mt-3"
+                type="datetime-local"
+                value={form.scheduledAt}
+                onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
+              />
+            )}
+          </section>
 
           <section>
-            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Merchandising badges</p>
+            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">SEO</p>
+            <div className="space-y-3">
+              <Input placeholder="Meta title" value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} />
+              <textarea className="aes-input min-h-20 w-full" placeholder="Meta description" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
+              <Input placeholder="Canonical URL" value={form.seoCanonicalUrl} onChange={(e) => setForm({ ...form, seoCanonicalUrl: e.target.value })} />
+              <Input placeholder="OG image URL" value={form.ogImageUrl} onChange={(e) => setForm({ ...form, ogImageUrl: e.target.value })} />
+              <Input placeholder="SEO keywords" value={form.seoKeywords} onChange={(e) => setForm({ ...form, seoKeywords: e.target.value })} />
+            </div>
+          </section>
+
+          <section>
+            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Product labels</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {(
                 [
-                  ["isBestseller", "Bestseller ✓"],
-                  ["isFeatured", "Featured"],
+                  ["isBestseller", "Bestseller"],
+                  ["isNewArrival", "New Arrival"],
+                  ["isLimitedEdition", "Limited Edition"],
+                  ["isStaffPick", "Staff Pick"],
                   ["isTrending", "Trending"],
-                  ["isNewArrival", "New arrival"],
+                  ["isFeatured", "Featured"],
                   ["isRecommended", "Curated For You"],
                 ] as const
               ).map(([key, label]) => (

@@ -13,6 +13,7 @@ import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { useCustomer } from "@/components/aesthetics/providers/customer-provider";
 import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 import type { Product } from "@/lib/aesthetics/types";
+import { GIFT_WRAP_FEE } from "@/lib/aesthetics/gift-wrap";
 import { cn } from "@/lib/utils";
 
 declare global {
@@ -51,6 +52,8 @@ export default function CheckoutPage() {
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "demo">("razorpay");
   const [curated, setCurated] = useState<Product[]>([]);
+  const [giftWrap, setGiftWrap] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -75,6 +78,11 @@ export default function CheckoutPage() {
         setRazorpayEnabled(false);
         setPaymentMethod("demo");
       });
+    void fetch("/api/commerce/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "BEGIN_CHECKOUT", path: "/aesthetics/checkout" }),
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -96,7 +104,8 @@ export default function CheckoutPage() {
 
   const shipping = cartTotal >= FREE_SHIPPING ? 0 : SHIPPING_FEE;
   const tax = Math.round(cartTotal * GST_RATE * 100) / 100;
-  const total = cartTotal + shipping + tax;
+  const giftWrapFee = giftWrap ? GIFT_WRAP_FEE : 0;
+  const total = cartTotal + shipping + tax + giftWrapFee;
   const eta = useMemo(() => deliveryEstimate(), []);
 
   async function placeOrder() {
@@ -106,6 +115,8 @@ export default function CheckoutPage() {
       body: JSON.stringify({
         ...form,
         paymentMethod,
+        giftWrap,
+        giftMessage: giftWrap ? giftMessage || undefined : undefined,
         items: cart.map((p) => ({
           productId: p.id,
           quantity: 1,
@@ -296,6 +307,28 @@ export default function CheckoutPage() {
                     Shipping estimate · tracked · free over ₹999
                   </span>
                 </p>
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--aes-border)] px-4 py-3 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={giftWrap}
+                    onChange={(e) => setGiftWrap(e.target.checked)}
+                  />
+                  <span>
+                    <span className="font-semibold">Gift wrap</span>
+                    <span className="mt-0.5 block text-[var(--gallery-muted,#6f6a63)]">
+                      Add protective gift wrap for ₹{GIFT_WRAP_FEE} — packing team sees this as an internal note.
+                    </span>
+                  </span>
+                </label>
+                {giftWrap && (
+                  <Input
+                    placeholder="Gift message (optional)"
+                    value={giftMessage}
+                    onChange={(e) => setGiftMessage(e.target.value)}
+                    maxLength={200}
+                  />
+                )}
                 <div className="flex gap-2">
                   <Button type="button" variant="secondary" onClick={() => setStep(0)}>
                     Back
@@ -352,6 +385,12 @@ export default function CheckoutPage() {
                   <span>Shipping</span>
                   <span>{shipping === 0 ? "Free" : formatInr(shipping)}</span>
                 </div>
+                {giftWrap && (
+                  <div className="flex justify-between">
+                    <span>Gift wrap</span>
+                    <span>{formatInr(giftWrapFee)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-[var(--aes-border)] pt-3 text-base font-bold">
                   <span>Total</span>
                   <span>{formatInr(total)}</span>

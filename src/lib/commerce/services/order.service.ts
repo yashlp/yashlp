@@ -52,6 +52,10 @@ export const orderService = {
     shipping: number;
     total: number;
     paymentMethod: "cod" | "razorpay" | "demo";
+    giftWrap?: boolean;
+    giftWrapFee?: number;
+    giftMessage?: string;
+    customerNotes?: string;
     guest: {
       name: string;
       email: string;
@@ -67,6 +71,14 @@ export const orderService = {
     }
 
     const status = input.paymentMethod === "razorpay" ? "PENDING" : "CONFIRMED";
+    const giftWrap = Boolean(input.giftWrap);
+    const giftWrapFee = giftWrap ? input.giftWrapFee ?? 3 : 0;
+    const guestLine = `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`;
+    const notes = [guestLine, input.customerNotes?.trim()].filter(Boolean).join("\n");
+    const internalParts = [
+      giftWrap ? `GIFT WRAP (+₹${giftWrapFee})` : null,
+      input.giftMessage?.trim() ? `Gift message: ${input.giftMessage.trim()}` : null,
+    ].filter(Boolean);
 
     const order = await prisma.commerceOrder.create({
       data: {
@@ -79,7 +91,11 @@ export const orderService = {
         total: input.total,
         currency: "INR",
         shippingAddress: input.guest.shippingAddress,
-        customerNotes: `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`,
+        customerNotes: notes,
+        giftWrap,
+        giftWrapFee,
+        giftMessage: input.giftMessage?.trim() || null,
+        internalNotes: internalParts.length ? internalParts.join("\n") : null,
         items: {
           create: input.items.map((item) => ({
             productId: item.productId,

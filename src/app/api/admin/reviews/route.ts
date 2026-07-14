@@ -5,7 +5,12 @@ import { z } from "zod";
 
 export async function GET(req: NextRequest) {
   try {
-    const status = new URL(req.url).searchParams.get("status") || undefined;
+    const { searchParams } = new URL(req.url);
+    if (searchParams.get("analytics") === "true") {
+      const analytics = await withAdminAuth("reviews:read", () => reviewService.analytics());
+      return NextResponse.json({ analytics });
+    }
+    const status = searchParams.get("status") || undefined;
     const reviews = await withAdminAuth("reviews:read", () => reviewService.list({ status }));
     return NextResponse.json({ reviews });
   } catch (error) {
@@ -18,6 +23,8 @@ const updateSchema = z.object({
   status: z.enum(["PENDING", "APPROVED", "HIDDEN"]).optional(),
   adminReply: z.string().optional(),
   isFeatured: z.boolean().optional(),
+  isPinned: z.boolean().optional(),
+  imageUrl: z.string().optional(),
 });
 
 export async function PATCH(req: NextRequest) {

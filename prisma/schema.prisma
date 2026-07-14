@@ -285,6 +285,10 @@ model CommerceAdmin {
   passwordHash    String
   role            String   @default("ADMIN")
   mfaEnabled      Boolean  @default(false)
+  totpSecret      String?
+  backupCodesHash String?
+  ipWhitelist     String?
+  sessionTimeoutMins Int   @default(720)
   isActive        Boolean  @default(true)
   lastLoginAt     DateTime?
   lastLoginIp     String?
@@ -459,6 +463,8 @@ model CommerceProduct {
   seoTitle         String?
   seoDescription   String?
   seoKeywords      String?
+  seoCanonicalUrl  String?
+  ogImageUrl       String?
   status           String   @default("DRAFT")
   approvalStatus   String   @default("PENDING")
   isFeatured       Boolean  @default(false)
@@ -466,9 +472,12 @@ model CommerceProduct {
   isNewArrival     Boolean  @default(false)
   isRecommended    Boolean  @default(false)
   isBestseller     Boolean  @default(false)
+  isLimitedEdition Boolean  @default(false)
+  isStaffPick      Boolean  @default(false)
   rating           Float    @default(0)
   reviewCount      Int      @default(0)
   publishedAt      DateTime?
+  scheduledAt      DateTime?
   // D2C inventory — Only Aesthetics owns stock
   purchaseCost     Float?
   warehouseLocation String?
@@ -637,6 +646,9 @@ model CommerceOrder {
   currency        String   @default("USD")
   customerNotes   String?
   internalNotes   String?
+  giftWrap        Boolean  @default(false)
+  giftWrapFee     Float    @default(0)
+  giftMessage     String?
   shippingAddress String?
   trackingNumber  String?
   courier         String?
@@ -717,6 +729,7 @@ model CommerceReview {
   verifiedPurchase Boolean  @default(false)
   adminReply       String?
   isFeatured       Boolean  @default(false)
+  isPinned         Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -849,5 +862,65 @@ model CommerceReturn {
 
   @@index([orderId])
   @@index([status])
+}
+
+model CommerceCampaign {
+  id          String    @id @default(cuid())
+  name        String
+  channel     String    // EMAIL | SMS | WHATSAPP | PUSH
+  subject     String?
+  body        String?
+  status      String    @default("DRAFT") // DRAFT | SCHEDULED | ACTIVE | ENDED
+  audience    String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  statsJson   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([channel])
+  @@index([status])
+  @@index([endsAt])
+}
+
+model CommerceGiftCard {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  initialBalance Float
+  balance        Float
+  currency       String    @default("INR")
+  status         String    @default("ACTIVE")
+  customerId     String?
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status])
+}
+
+model CommerceReferralProgram {
+  id              String   @id @default(cuid())
+  name            String   @default("Friend referral")
+  referrerReward  Float    @default(100)
+  refereeReward   Float    @default(100)
+  isActive        Boolean  @default(true)
+  terms           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CommerceAnalyticsEvent {
+  id         String   @id @default(cuid())
+  type       String   // PAGE_VIEW | PRODUCT_VIEW | ADD_TO_CART | BEGIN_CHECKOUT | PURCHASE | WISHLIST
+  productId  String?
+  sessionId  String?
+  customerId String?
+  path       String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([productId])
+  @@index([sessionId])
 }
 

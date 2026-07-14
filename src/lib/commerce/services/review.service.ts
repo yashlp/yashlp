@@ -105,7 +105,10 @@ export const reviewService = {
     });
   },
 
-  async update(id: string, data: { status?: string; adminReply?: string; isFeatured?: boolean }) {
+  async update(
+    id: string,
+    data: { status?: string; adminReply?: string; isFeatured?: boolean; isPinned?: boolean; imageUrl?: string }
+  ) {
     const review = await prisma.commerceReview.update({
       where: { id },
       data,
@@ -115,6 +118,30 @@ export const reviewService = {
       await recalculateProductRating(review.productId);
     }
     return review;
+  },
+
+  async analytics() {
+    const [total, pending, approved, featured, pinned, withImages, avg] = await Promise.all([
+      prisma.commerceReview.count(),
+      prisma.commerceReview.count({ where: { status: "PENDING" } }),
+      prisma.commerceReview.count({ where: { status: "APPROVED" } }),
+      prisma.commerceReview.count({ where: { isFeatured: true } }),
+      prisma.commerceReview.count({ where: { isPinned: true } }),
+      prisma.commerceReview.count({ where: { imageUrl: { not: null } } }),
+      prisma.commerceReview.aggregate({
+        where: { status: "APPROVED" },
+        _avg: { rating: true },
+      }),
+    ]);
+    return {
+      total,
+      pending,
+      approved,
+      featured,
+      pinned,
+      withImages,
+      averageRating: Math.round((avg._avg.rating || 0) * 10) / 10,
+    };
   },
 
   async delete(id: string) {
