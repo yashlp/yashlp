@@ -36,8 +36,8 @@ export default async function AestheticsHomePage() {
           quickAdd
         />
         <ProductRow
-          title="edits built to match moods"
-          titleStyle="lower"
+          title="Edits built to match moods"
+          titleStyle="upper"
           products={newArrivals.slice(0, 5)}
           bg="lavender"
           quickAdd
