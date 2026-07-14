@@ -100,7 +100,7 @@ export default function AccountLoginClient() {
       <main className="mx-auto max-w-md px-4 py-16 sm:px-6">
         <p className="aes-gallery-eyebrow text-center">Welcome back</p>
         <h1 className="aes-gallery-title mt-3 text-center">Sign in</h1>
-        <p className="mt-3 text-center text-sm text-[var(--gallery-muted,#6f6a63)]">
+        <p className="mt-3 text-center text-sm text-[var(--aes-ink-muted)]">
           Sign in to save favourites, view orders, and request refunds.
         </p>
         <p className="mt-2 text-center text-xs text-[var(--aes-ink-soft)]">

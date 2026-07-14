@@ -106,7 +106,7 @@ export default function AccountPage() {
       <main className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
         <p className="aes-gallery-eyebrow">Member space</p>
         <h1 className="aes-gallery-title mt-3">My account</h1>
-        <p className="mt-2 text-sm text-[var(--gallery-muted,#6f6a63)]">
+        <p className="mt-2 text-sm text-[var(--aes-ink-muted)]">
           {customer.name || "Customer"} · {customer.email || customer.phone}
         </p>
 

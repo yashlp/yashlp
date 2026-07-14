@@ -71,7 +71,7 @@ export default function ShopPage() {
             <ProductSearchBar value={searchQuery} onChange={setSearchQuery} id="shop-search" />
           </div>
           {isSearching && (
-            <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-[var(--gallery-muted,#6f6a63)]">
+            <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-[var(--aes-ink-muted)]">
               {searchLoading ? "Searching…" : `${displayProducts.length} matching product${displayProducts.length === 1 ? "" : "s"}`}
             </p>
           )}
@@ -87,8 +87,8 @@ export default function ShopPage() {
                 className={cn(
                   "rounded-full px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.14em] transition-all duration-300",
                   category === id
-                    ? "bg-[var(--gallery-ink,#1e1e1c)] text-white"
-                    : "border border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-card,#fcfbf8)] text-[var(--gallery-muted,#6f6a63)] hover:border-[var(--gallery-blue,#2c5aa0)] hover:text-[var(--gallery-blue,#2c5aa0)]"
+                    ? "bg-[var(--aes-ink)] text-white"
+                    : "border border-[var(--aes-border)] bg-[rgba(255,255,255,0.78)] text-[var(--aes-ink-muted)] hover:border-[var(--aes-pink)] hover:text-[var(--aes-pink)]"
                 )}
               >
                 {label}
@@ -104,7 +104,7 @@ export default function ShopPage() {
             ))}
           </div>
         ) : displayProducts.length === 0 ? (
-          <p className="py-20 text-[var(--gallery-muted,#6f6a63)]">
+          <p className="py-20 text-[var(--aes-ink-muted)]">
             {isSearching
               ? `No products match "${searchQuery.trim()}". Try scent, journal, or cozy.`
               : "No products available right now. Check back soon."}
