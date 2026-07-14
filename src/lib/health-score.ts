@@ -13,7 +13,7 @@ type IncidentForScore = {
   confidenceScore: number;
   status: string;
   visibilityStage?: string;
-  category: { slug: string; name: string; type: string };
+  category: { slug: string; name: string; type: string; emoji?: string };
 };
 
 export function computeHealthScore(incidents: IncidentForScore[]) {
@@ -93,6 +93,83 @@ export async function getAreaHealthScore(
   );
 
   return computeHealthScore(nearby);
+}
+
+export type AreaHighlight = {
+  slug: string;
+  name: string;
+  emoji: string;
+  count: number;
+  blurb: string;
+};
+
+function concernBlurb(name: string, count: number): string {
+  if (count >= 8) return `${name} keeps showing up — one of the loudest community flags here.`;
+  if (count >= 3) return `${name} is among the most reported concerns nearby.`;
+  return `${name} has been called out by neighbours in this pocket.`;
+}
+
+function strengthBlurb(name: string, count: number): string {
+  if (count >= 8) return `${name} is a standout strength people keep celebrating here.`;
+  if (count >= 3) return `${name} is frequently praised in this area.`;
+  return `${name} is a bright spot residents have highlighted.`;
+}
+
+/** Top concerns and strengths for a radius — for Compare, Insights, map shortcuts */
+export async function getAreaHighlights(
+  latitude: number,
+  longitude: number,
+  radiusM = 800,
+  limit = 4
+): Promise<{ topConcerns: AreaHighlight[]; topStrengths: AreaHighlight[] }> {
+  const span = Math.max(radiusM / 111_000, 0.02);
+  const incidents = await prisma.incident.findMany({
+    where: {
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      underLegalReview: false,
+      visibilityStage: { in: ["verified", "seed"] },
+      latitude: { gte: latitude - span, lte: latitude + span },
+      longitude: { gte: longitude - span, lte: longitude + span },
+    },
+    include: { category: true },
+  });
+
+  const issueCounts = new Map<string, AreaHighlight>();
+  const positiveCounts = new Map<string, AreaHighlight>();
+
+  for (const inc of incidents) {
+    if (haversineDistance(latitude, longitude, inc.latitude, inc.longitude) > radiusM) continue;
+    const key = inc.category.slug;
+    const base = {
+      slug: key,
+      name: inc.category.name,
+      emoji: inc.category.emoji,
+      count: 0,
+      blurb: "",
+    };
+
+    if (inc.isPositive || inc.status === "positive_active") {
+      const cur = positiveCounts.get(key) ?? { ...base };
+      cur.count += 1;
+      positiveCounts.set(key, cur);
+    } else if (inc.status !== "resolved" && inc.status !== "disputed") {
+      const cur = issueCounts.get(key) ?? { ...base };
+      cur.count += 1;
+      issueCounts.set(key, cur);
+    }
+  }
+
+  const topConcerns = [...issueCounts.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((item) => ({ ...item, blurb: concernBlurb(item.name, item.count) }));
+
+  const topStrengths = [...positiveCounts.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((item) => ({ ...item, blurb: strengthBlurb(item.name, item.count) }));
+
+  return { topConcerns, topStrengths };
 }
 
 export async function getPopularCategoriesInArea(
@@ -231,12 +308,19 @@ export async function getCityInsights(latitude: number, longitude: number, days 
   const health = computeHealthScore(cityIncidents);
   const trends = buildTrendSeries(recentCityIncidents, days);
 
-  const issueCounts = new Map<string, { name: string; emoji: string; count: number }>();
-  const positiveCounts = new Map<string, { name: string; emoji: string; count: number }>();
+  const issueCounts = new Map<
+    string,
+    { slug: string; name: string; emoji: string; count: number }
+  >();
+  const positiveCounts = new Map<
+    string,
+    { slug: string; name: string; emoji: string; count: number }
+  >();
 
   for (const inc of cityIncidents) {
     const map = inc.isPositive ? positiveCounts : issueCounts;
     const entry = map.get(inc.category.slug) ?? {
+      slug: inc.category.slug,
       name: inc.category.name,
       emoji: inc.category.emoji,
       count: 0,
@@ -245,8 +329,14 @@ export async function getCityInsights(latitude: number, longitude: number, days 
     map.set(inc.category.slug, entry);
   }
 
-  const topIssues = [...issueCounts.values()].sort((a, b) => b.count - a.count).slice(0, 5);
-  const topPositive = [...positiveCounts.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+  const topIssues = [...issueCounts.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+    .map((item) => ({ ...item, blurb: concernBlurb(item.name, item.count) }));
+  const topPositive = [...positiveCounts.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+    .map((item) => ({ ...item, blurb: strengthBlurb(item.name, item.count) }));
 
   return {
     city: city.cityName,

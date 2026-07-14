@@ -76,3 +76,54 @@ export function filterMapIncidents<T extends MappableIncident>(
 
   return result;
 }
+
+/** Build map filter shortcuts from densest categories in the visible area */
+export function getAreaFilterShortcuts<
+  T extends { latitude: number; longitude: number; category: { slug: string; name: string; emoji: string } },
+>(
+  incidents: T[],
+  center: { lat: number; lng: number },
+  radiusM = 2500,
+  limit = 6
+): Array<MapCategoryFilter & { count: number }> {
+  const counts = new Map<string, { label: string; emoji: string; count: number }>();
+
+  for (const inc of incidents) {
+    if (
+      haversineDistance(center.lat, center.lng, inc.latitude, inc.longitude) > radiusM
+    ) {
+      continue;
+    }
+    const slug = inc.category.slug;
+    const cur = counts.get(slug) ?? {
+      label: shortFilterLabel(inc.category.name, inc.category.slug),
+      emoji: inc.category.emoji,
+      count: 0,
+    };
+    cur.count += 1;
+    counts.set(slug, cur);
+  }
+
+  // Prefer dense local categories; fill with curated defaults if sparse
+  const local = [...counts.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, limit)
+    .map(([slug, v]) => ({ slug, label: v.label, emoji: v.emoji, count: v.count }));
+
+  if (local.length >= 3) return local;
+
+  const used = new Set(local.map((l) => l.slug));
+  const fillers = MAP_CATEGORY_FILTERS.filter((f) => !used.has(f.slug)).map((f) => ({
+    ...f,
+    count: counts.get(f.slug)?.count ?? 0,
+  }));
+
+  return [...local, ...fillers].slice(0, limit);
+}
+
+function shortFilterLabel(name: string, slug: string): string {
+  const curated = MAP_CATEGORY_FILTERS.find((f) => f.slug === slug);
+  if (curated) return curated.label;
+  if (name.length <= 16) return name;
+  return name.slice(0, 14).trimEnd() + "…";
+}

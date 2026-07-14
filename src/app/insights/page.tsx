@@ -7,13 +7,15 @@ import {
   Crosshair,
   Globe,
   MapPin,
+  Sparkles,
+  TriangleAlert,
   Trophy,
 } from "lucide-react";
 import { GLOBAL_SAMPLE_PLACES } from "@/lib/constants";
 import { cn, scoreBg, scoreColor } from "@/lib/utils";
 
 type Trend = { date: string; reported: number; resolved: number; positive: number };
-type CategoryStat = { name: string; emoji: string; count: number };
+type CategoryStat = { name: string; emoji: string; count: number; slug?: string; blurb?: string };
 type CityInsights = {
   city: string;
   state?: string;
@@ -148,11 +150,75 @@ export default function InsightsPage() {
         </div>
       )}
 
+      {cityInsights && (cityInsights.topIssues.length > 0 || cityInsights.topPositive.length > 0) && (
+        <section className="mt-8">
+          <h2 className="text-lg font-semibold text-stone-900">What stands out in {cityInsights.city}</h2>
+          <p className="mt-1 text-sm text-stone-500">
+            Ranked by how often neighbours report each theme — not a ranking of people or businesses.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-rose-100 bg-white p-5">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-rose-700">
+                <TriangleAlert className="h-4 w-4" />
+                Needs attention most
+              </h3>
+              {cityInsights.topIssues.length === 0 ? (
+                <p className="mt-3 text-sm text-stone-400">No active issue themes yet.</p>
+              ) : (
+                <ul className="mt-3 space-y-3">
+                  {cityInsights.topIssues.map((item, idx) => (
+                    <li key={item.name} className="rounded-xl bg-rose-50/70 px-3 py-2.5">
+                      <div className="flex items-center justify-between gap-2 text-sm font-medium text-stone-800">
+                        <span>
+                          <span className="mr-1.5 text-xs font-bold text-rose-400">#{idx + 1}</span>
+                          {item.emoji} {item.name}
+                        </span>
+                        <span className="shrink-0 text-xs text-stone-500">{item.count} pins</span>
+                      </div>
+                      {item.blurb && (
+                        <p className="mt-1 text-xs leading-snug text-stone-500">{item.blurb}</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="rounded-2xl border border-emerald-100 bg-white p-5">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                <Sparkles className="h-4 w-4" />
+                Top community wins
+              </h3>
+              {cityInsights.topPositive.length === 0 ? (
+                <p className="mt-3 text-sm text-stone-400">No positive signals yet.</p>
+              ) : (
+                <ul className="mt-3 space-y-3">
+                  {cityInsights.topPositive.map((item, idx) => (
+                    <li key={item.name} className="rounded-xl bg-emerald-50/70 px-3 py-2.5">
+                      <div className="flex items-center justify-between gap-2 text-sm font-medium text-stone-800">
+                        <span>
+                          <span className="mr-1.5 text-xs font-bold text-emerald-500">#{idx + 1}</span>
+                          {item.emoji} {item.name}
+                        </span>
+                        <span className="shrink-0 text-xs text-stone-500">{item.count} pins</span>
+                      </div>
+                      {item.blurb && (
+                        <p className="mt-1 text-xs leading-snug text-stone-500">{item.blurb}</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="mt-8">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <BarChart3 className="h-5 w-5 text-orange-600" />
-          30-Day Trends in {cityInsights?.city ?? "your city"}
+          30-Day pulse in {cityInsights?.city ?? "your city"}
         </h2>
+        <p className="mt-1 text-sm text-stone-500">Daily volume of reports, resolutions, and positive pins.</p>
         <div className="mt-4 rounded-2xl border border-border bg-white p-6">
           {locating ? (
             <p className="text-sm text-muted">Loading city trends…</p>
@@ -201,41 +267,6 @@ export default function InsightsPage() {
           </div>
         </div>
       </section>
-
-      {cityInsights && (cityInsights.topIssues.length > 0 || cityInsights.topPositive.length > 0) && (
-        <section className="mt-8 grid gap-4 sm:grid-cols-2">
-          {cityInsights.topIssues.length > 0 && (
-            <div className="rounded-2xl border border-border bg-white p-5">
-              <h3 className="text-sm font-semibold text-stone-700">Top issues in {cityInsights.city}</h3>
-              <ul className="mt-3 space-y-2">
-                {cityInsights.topIssues.map((item) => (
-                  <li key={item.name} className="flex items-center justify-between text-sm">
-                    <span>
-                      {item.emoji} {item.name}
-                    </span>
-                    <span className="font-medium text-stone-500">{item.count}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {cityInsights.topPositive.length > 0 && (
-            <div className="rounded-2xl border border-border bg-white p-5">
-              <h3 className="text-sm font-semibold text-stone-700">Top positives in {cityInsights.city}</h3>
-              <ul className="mt-3 space-y-2">
-                {cityInsights.topPositive.map((item) => (
-                  <li key={item.name} className="flex items-center justify-between text-sm">
-                    <span>
-                      {item.emoji} {item.name}
-                    </span>
-                    <span className="font-medium text-stone-500">{item.count}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-      )}
 
       <section className="mt-8">
         <h2 className="flex items-center gap-2 text-lg font-semibold">

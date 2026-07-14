@@ -7,6 +7,7 @@ import { Activity, Crosshair, Minus, Plus, Shield, TrendingUp } from "lucide-rea
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, USER_LOCATION_ZOOM } from "@/lib/constants";
 import {
   filterMapIncidents,
+  getAreaFilterShortcuts,
   MAP_CATEGORY_FILTERS,
   NEAR_ME_RADIUS_M,
   WOMENS_SAFETY_FILTER_SLUG,
@@ -161,10 +162,16 @@ export default function HomePage() {
     [incidents, filter, categoryFilter, nearMeOnly, userLocation]
   );
 
+  const areaShortcuts = useMemo(
+    () => getAreaFilterShortcuts(incidents, healthCenter, healthScope.radiusM, 6),
+    [incidents, healthCenter, healthScope.radiusM]
+  );
+
   const activeCategoryLabel = categoryFilter
     ? categoryFilter === WOMENS_SAFETY_FILTER_SLUG
       ? "Women's safety"
-      : MAP_CATEGORY_FILTERS.find((c) => c.slug === categoryFilter)?.label
+      : areaShortcuts.find((c) => c.slug === categoryFilter)?.label ??
+        MAP_CATEGORY_FILTERS.find((c) => c.slug === categoryFilter)?.label
     : null;
 
   const toggleNearMe = () => {
@@ -264,7 +271,7 @@ export default function HomePage() {
             >
               All pins
             </button>
-            {MAP_CATEGORY_FILTERS.map((cat) => (
+            {areaShortcuts.map((cat) => (
               <button
                 key={cat.slug}
                 type="button"
@@ -278,11 +285,20 @@ export default function HomePage() {
                     ? "bg-stone-800 text-white"
                     : "glass-card text-stone-700 hover:bg-white"
                 )}
+                title={cat.count > 0 ? `${cat.count} pins in this view` : cat.label}
               >
                 {cat.emoji} {cat.label}
+                {cat.count > 0 ? (
+                  <span className="ml-1 opacity-70">{cat.count}</span>
+                ) : null}
               </button>
             ))}
           </div>
+          {areaShortcuts.some((c) => c.count > 0) && (
+            <p className="text-[10px] text-stone-400 sm:text-xs">
+              Shortcuts ranked by most common pins in this map area
+            </p>
+          )}
           {(categoryFilter || nearMeOnly) && (
             <p className="text-xs text-stone-500">
               Showing {filtered.length} pin{filtered.length === 1 ? "" : "s"}
