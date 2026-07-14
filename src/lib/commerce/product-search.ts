@@ -48,6 +48,9 @@ export type SearchableProduct = {
   mood?: string | null;
   materials?: string[];
   colors?: string[];
+  room?: string | null;
+  style?: string | null;
+  brand?: { name?: string } | null;
 };
 
 export function scoreProductSearch(product: SearchableProduct, query: string): number {
@@ -60,6 +63,9 @@ export function scoreProductSearch(product: SearchableProduct, query: string): n
     product.shortDescription ?? "",
     product.category,
     product.mood ?? "",
+    product.room ?? "",
+    product.style ?? "",
+    product.brand?.name ?? "",
     ...product.tags,
     ...(product.materials ?? []),
     ...(product.colors ?? []),

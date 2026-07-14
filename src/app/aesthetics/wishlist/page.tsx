@@ -27,7 +27,7 @@ export default function WishlistPage() {
     <ConsumerPage room="editorial">
       <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <p className="aes-gallery-eyebrow">Saved pieces</p>
-        <h1 className="aes-gallery-title mt-3">Favourites</h1>
+        <h1 className="aes-gallery-title mt-3">My Space</h1>
         {wishlist.length === 0 ? (
           <EmptyState
             {...EMPTY_COPY.wishlist}

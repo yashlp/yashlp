@@ -22,6 +22,10 @@ export function mapProduct(p: ProductWithRelations): Product {
     mood: (p.mood as ProductMood) || "calm",
     materials: parseJsonArray<string>(p.materials),
     colors: parseJsonArray<string>(p.colors),
+    room: p.room ?? undefined,
+    style: p.style ?? undefined,
+    dimensions: p.dimensions ?? undefined,
+    specifications: parseJsonRecord(p.specifications),
     vibe: p.shortDescription || "",
     description: p.description,
     images: p.media.filter((m) => m.type === "IMAGE").sort((a, b) => a.sortOrder - b.sortOrder).map((m) => m.url),
@@ -31,6 +35,9 @@ export function mapProduct(p: ProductWithRelations): Product {
     reviewCount: p.reviewCount,
     featured: p.isFeatured,
     newArrival: p.isNewArrival,
+    trending: p.isTrending,
+    recommended: p.isRecommended,
+    isBestseller: p.isBestseller,
   };
 }
 
@@ -84,6 +91,21 @@ function parseJsonArray<T>(raw: string | null | undefined): T[] {
   } catch {
     return raw.split(",").map((s) => s.trim()).filter(Boolean) as T[];
   }
+}
+
+function parseJsonRecord(raw: string | null | undefined): Record<string, string> | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return Object.fromEntries(
+        Object.entries(parsed).map(([k, v]) => [k, String(v)])
+      );
+    }
+  } catch {
+    /* plain text specs */
+  }
+  return undefined;
 }
 
 export function toJsonArray(values: string[] | undefined): string | undefined {
