@@ -454,6 +454,8 @@ model CommerceProduct {
   tags             String?
   mood             String?
   colors           String?
+  room             String?
+  style            String?
   seoTitle         String?
   seoDescription   String?
   seoKeywords      String?
@@ -463,6 +465,7 @@ model CommerceProduct {
   isTrending       Boolean  @default(false)
   isNewArrival     Boolean  @default(false)
   isRecommended    Boolean  @default(false)
+  isBestseller     Boolean  @default(false)
   rating           Float    @default(0)
   reviewCount      Int      @default(0)
   publishedAt      DateTime?
@@ -709,6 +712,7 @@ model CommerceReview {
   rating           Int
   title            String?
   body             String?
+  imageUrl         String?
   status           String   @default("PENDING")
   verifiedPurchase Boolean  @default(false)
   adminReply       String?

@@ -30,3 +30,15 @@ export async function PATCH(req: NextRequest) {
     return commerceApiError(error);
   }
 }
+
+const deleteSchema = z.object({ id: z.string() });
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = deleteSchema.parse(await req.json());
+    await withAdminAuth("reviews:write", () => reviewService.delete(body.id));
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return commerceApiError(error);
+  }
+}

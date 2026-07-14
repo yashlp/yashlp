@@ -14,14 +14,50 @@ const productInclude = {
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;
 
+export type ProductListFilters = {
+  categorySlug?: string;
+  featured?: boolean;
+  trending?: boolean;
+  bestseller?: boolean;
+  recommended?: boolean;
+  room?: string;
+  style?: string;
+  mood?: string;
+  brandSlug?: string;
+  color?: string;
+  material?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  inStock?: boolean;
+  limit?: number;
+};
+
 export const productService = {
-  async listPublished(filters?: { categorySlug?: string; featured?: boolean; limit?: number }) {
+  async listPublished(filters?: ProductListFilters) {
     const products = await prisma.commerceProduct.findMany({
       where: {
         status: "PUBLISHED",
         approvalStatus: "APPROVED",
         ...(filters?.categorySlug && { category: { slug: filters.categorySlug } }),
         ...(filters?.featured && { isFeatured: true }),
+        ...(filters?.trending && { isTrending: true }),
+        ...(filters?.bestseller && { isBestseller: true }),
+        ...(filters?.recommended && { isRecommended: true }),
+        ...(filters?.room && { room: { equals: filters.room, mode: "insensitive" } }),
+        ...(filters?.style && { style: { equals: filters.style, mode: "insensitive" } }),
+        ...(filters?.mood && { mood: { equals: filters.mood, mode: "insensitive" } }),
+        ...(filters?.brandSlug && { brand: { slug: filters.brandSlug } }),
+        ...(filters?.color && { colors: { contains: filters.color } }),
+        ...(filters?.material && { materials: { contains: filters.material } }),
+        ...(filters?.minRating != null && { rating: { gte: filters.minRating } }),
+        ...(filters?.inStock && { stock: { gt: 0 } }),
+        ...((filters?.minPrice != null || filters?.maxPrice != null) && {
+          price: {
+            ...(filters.minPrice != null && { gte: filters.minPrice }),
+            ...(filters.maxPrice != null && { lte: filters.maxPrice }),
+          },
+        }),
       },
       include: productInclude,
       orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],

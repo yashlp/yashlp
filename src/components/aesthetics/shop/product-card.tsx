@@ -45,7 +45,7 @@ function WishlistRibbon({
         onToggle();
       }}
       className="aes-touch absolute right-2 top-0 z-10 flex h-11 w-11 items-start justify-center pt-1"
-      aria-label={wishlisted ? "Remove from favourites" : "Save to favourites"}
+      aria-label={wishlisted ? "Remove from My Space" : "Save to My Space"}
     >
       <AnimatePresence mode="wait" initial={false}>
         {wishlisted ? (
@@ -100,16 +100,13 @@ function ProductImage({
         variants={enableHoverMotion ? productLift : undefined}
       />
       <WishlistRibbon wishlisted={wishlisted} onToggle={onWishlist} />
-      {product.compareAtPrice && (
-        <Badge variant="coral" className="absolute left-3 top-3">
-          Sale
-        </Badge>
-      )}
-      {product.newArrival && !product.compareAtPrice && (
-        <Badge variant="sage" className="absolute left-3 top-3">
-          New
-        </Badge>
-      )}
+      <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+        {product.isBestseller && <Badge variant="coral">Bestseller</Badge>}
+        {product.compareAtPrice && <Badge variant="coral">Sale</Badge>}
+        {product.newArrival && !product.compareAtPrice && !product.isBestseller && (
+          <Badge variant="sage">New</Badge>
+        )}
+      </div>
     </div>
   );
 }
