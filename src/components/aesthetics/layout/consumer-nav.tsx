@@ -4,12 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Menu, Moon, ShoppingBag, Sun, X } from "lucide-react";
+import { Heart, Menu, ShoppingBag, X } from "lucide-react";
 import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { useCustomer } from "@/components/aesthetics/providers/customer-provider";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { useAddToBagFly } from "@/components/aesthetics/motion/add-to-bag-fly";
-import { useAesTheme } from "@/components/aesthetics/motion/theme-provider";
 import { bagPulse } from "@/lib/aesthetics/motion";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +29,6 @@ export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
   const { cartCount: liveCount } = useCart();
   const cartCount = cartCountProp ?? liveCount;
   const { pulseBag } = useAddToBagFly();
-  const { theme, toggleTheme } = useAesTheme();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -86,14 +84,6 @@ export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
           </div>
 
           <div className="flex items-center justify-end gap-0.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="aes-touch flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
-              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-            >
-              {theme === "dark" ? <Sun className="h-[1.1rem] w-[1.1rem]" /> : <Moon className="h-[1.1rem] w-[1.1rem]" />}
-            </button>
             <Link
               href="/aesthetics/wishlist"
               className="aes-touch flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
@@ -179,16 +169,6 @@ export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
               >
                 {customer ? "My account" : "Sign in"}
               </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  toggleTheme();
-                  setOpen(false);
-                }}
-                className="mt-2 rounded-xl px-3 py-3.5 text-left text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
-              >
-                {theme === "dark" ? "Light mode" : "Dark mode"}
-              </button>
             </div>
           </nav>
         </div>
