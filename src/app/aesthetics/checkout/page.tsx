@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Script from "next/script";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 
 declare global {
   interface Window {
@@ -162,11 +162,12 @@ export default function CheckoutPage() {
   if (!cart.length) {
     return (
       <ConsumerPage cartCount={cartCount} room="calm">
-        <main className="mx-auto max-w-lg px-4 py-20 text-center">
-          <p className="text-[var(--gallery-muted,#6f6a63)]">Your cart is empty.</p>
-          <Link href="/aesthetics/shop" className="mt-6 inline-block">
-            <Button>Continue shopping</Button>
-          </Link>
+        <main className="mx-auto max-w-lg px-4 py-12">
+          <EmptyState
+            {...EMPTY_COPY.cart}
+            actionHref="/aesthetics/shop"
+            actionLabel="Continue shopping"
+          />
         </main>
       </ConsumerPage>
     );

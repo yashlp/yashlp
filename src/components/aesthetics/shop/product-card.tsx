@@ -1,13 +1,25 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { Heart, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Plus } from "lucide-react";
 import { Badge } from "@/components/aesthetics/ui/badge";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { useWishlistAuth } from "@/components/aesthetics/shop/use-wishlist-auth";
+import { useAddToBagFly } from "@/components/aesthetics/motion/add-to-bag-fly";
+import { useNoticeOptional } from "@/components/aesthetics/motion/notice-provider";
+import {
+  AES_LUXURY,
+  bookmarkRibbon,
+  cardHover,
+  productLift,
+  quickAddReveal,
+} from "@/lib/aesthetics/motion";
 import { formatInr } from "@/lib/aesthetics/format-inr";
 import type { Product } from "@/lib/aesthetics/types";
 import { cn } from "@/lib/utils";
+import { useAesReducedMotion } from "@/components/aesthetics/motion/use-reduced-motion";
 
 type ProductCardProps = {
   product: Product;
@@ -17,41 +29,84 @@ type ProductCardProps = {
   variant?: "joy" | "grid";
 };
 
+function WishlistRibbon({
+  wishlisted,
+  onToggle,
+}: {
+  wishlisted: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggle();
+      }}
+      className="absolute right-3 top-0 z-10 flex h-11 w-9 items-start justify-center"
+      aria-label={wishlisted ? "Remove from favourites" : "Save to favourites"}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {wishlisted ? (
+          <motion.span
+            key="on"
+            variants={bookmarkRibbon}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="aes-wishlist-ribbon"
+            style={{ background: AES_LUXURY }}
+          />
+        ) : (
+          <motion.span
+            key="off"
+            initial={{ opacity: 0.55 }}
+            animate={{ opacity: 0.55 }}
+            exit={{ opacity: 0 }}
+            className="aes-wishlist-ribbon aes-wishlist-ribbon--idle"
+          />
+        )}
+      </AnimatePresence>
+    </button>
+  );
+}
+
 function ProductImage({
   product,
   priority,
   className = "aspect-[4/5]",
   onWishlist,
   wishlisted,
+  dimOnHover,
 }: {
   product: Product;
   priority?: boolean;
   className?: string;
   onWishlist: () => void;
   wishlisted: boolean;
+  dimOnHover?: boolean;
 }) {
+  const reduced = useAesReducedMotion();
+
   return (
-    <div className={`group/img relative overflow-hidden rounded-2xl ${className}`}>
+    <div
+      className={cn(
+        "group/img relative overflow-hidden rounded-2xl",
+        dimOnHover && "aes-gallery-spotlight",
+        className
+      )}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <motion.img
         src={product.images[0]}
         alt={product.name}
-        className="h-full w-full object-cover transition duration-500 group-hover/img:scale-[1.03]"
+        className="h-full w-full object-cover"
         loading={priority ? "eager" : "lazy"}
         draggable={false}
+        variants={reduced ? undefined : productLift}
       />
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onWishlist();
-        }}
-        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[var(--aes-ink)] shadow-sm transition hover:scale-105 hover:bg-white"
-        aria-label={wishlisted ? "Remove from favourites" : "Add to favourites"}
-      >
-        <Heart className={cn("h-4 w-4", wishlisted && "fill-[var(--aes-pink)] text-[var(--aes-pink)]")} />
-      </button>
+      <WishlistRibbon wishlisted={wishlisted} onToggle={onWishlist} />
       {product.compareAtPrice && (
         <Badge variant="coral" className="absolute left-3 top-3">
           Sale
@@ -74,22 +129,45 @@ export function ProductCard({
 }: ProductCardProps) {
   const { addToCart } = useCart();
   const { handleWishlist, isWishlisted, authModal } = useWishlistAuth();
+  const { flyToBag } = useAddToBagFly();
+  const notice = useNoticeOptional();
+  const cardRef = useRef<HTMLElement>(null);
+  const reduced = useAesReducedMotion();
   const wishlisted = isWishlisted(product.id);
 
-  function onAddToCart() {
+  function onAddToCart(e?: React.MouseEvent) {
+    e?.preventDefault();
+    e?.stopPropagation();
+    const from =
+      (e?.currentTarget as HTMLElement | undefined) ??
+      (cardRef.current?.querySelector("img") as HTMLElement | null);
     addToCart(product);
+    flyToBag(product.images[0], from);
+    notice?.pushNotice("Added to Shopping Bag", "bag");
+  }
+
+  function onWishlist() {
+    const saved = handleWishlist(product);
+    if (saved) notice?.pushNotice("Saved to Wishlist", "wishlist");
   }
 
   if (variant === "joy") {
     return (
       <>
-        <article className="group w-[200px] sm:w-[220px]">
+        <motion.article
+          ref={cardRef as React.RefObject<HTMLElement>}
+          className="group w-[200px] sm:w-[220px]"
+          initial="rest"
+          whileHover={reduced ? undefined : "hover"}
+          animate="rest"
+        >
           <Link href={`/aesthetics/product/${product.slug}`} className="block">
             <ProductImage
               product={product}
               priority={priority}
-              onWishlist={() => handleWishlist(product)}
+              onWishlist={onWishlist}
               wishlisted={wishlisted}
+              dimOnHover
             />
           </Link>
 
@@ -106,7 +184,7 @@ export function ProductCard({
               </button>
             )}
           </div>
-        </article>
+        </motion.article>
         {authModal}
       </>
     );
@@ -114,41 +192,54 @@ export function ProductCard({
 
   return (
     <>
-      <article className="aes-gallery-product-card group">
+      <motion.article
+        ref={cardRef as React.RefObject<HTMLElement>}
+        className="aes-gallery-product-card group"
+        variants={reduced ? undefined : cardHover}
+        initial="rest"
+        whileHover={reduced ? undefined : "hover"}
+        animate="rest"
+      >
         <Link href={`/aesthetics/product/${product.slug}`} className="block">
           <ProductImage
             product={product}
             priority={priority}
             className="aspect-[4/5] rounded-none"
-            onWishlist={() => handleWishlist(product)}
+            onWishlist={onWishlist}
             wishlisted={wishlisted}
+            dimOnHover
           />
         </Link>
 
         <div className="flex flex-col gap-2 px-4 py-4 text-center">
           <Link href={`/aesthetics/product/${product.slug}`}>
-            <h3 className="text-sm font-medium tracking-wide text-[var(--gallery-ink,#1e1e1c)] transition group-hover:text-[var(--gallery-blue,#2c5aa0)]">
+            <h3 className="text-sm font-medium tracking-wide text-[var(--aes-ink)] transition group-hover:text-[var(--aes-pink)]">
               {product.name}
             </h3>
           </Link>
           <div className="flex flex-col items-center gap-2">
-            <span className="text-sm font-semibold text-[var(--gallery-ink,#1e1e1c)]">{formatInr(product.price)}</span>
+            <span className="text-sm font-semibold text-[var(--aes-ink)]">{formatInr(product.price)}</span>
             {quickAdd ? (
-              <button type="button" onClick={onAddToCart} className="aes-joy-quickadd max-w-[200px]">
+              <motion.button
+                type="button"
+                onClick={onAddToCart}
+                className="aes-joy-quickadd max-w-[200px] opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                variants={reduced ? undefined : quickAddReveal}
+              >
                 <Plus className="h-3 w-3" />
                 Quick add
-              </button>
+              </motion.button>
             ) : (
               <Link
                 href={`/aesthetics/product/${product.slug}`}
-                className="text-[10px] font-bold uppercase tracking-wider text-[var(--gallery-blue,#2c5aa0)] hover:underline"
+                className="text-[10px] font-bold uppercase tracking-wider text-[var(--aes-pink)] hover:underline"
               >
                 View
               </Link>
             )}
           </div>
         </div>
-      </article>
+      </motion.article>
       {authModal}
     </>
   );

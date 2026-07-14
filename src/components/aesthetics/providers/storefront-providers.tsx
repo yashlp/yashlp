@@ -1,19 +1,27 @@
 "use client";
 
-import { CartAddedToast } from "@/components/aesthetics/shop/cart-added-toast";
+import { Suspense } from "react";
 import { CustomerProvider } from "@/components/aesthetics/providers/customer-provider";
-import { useCart } from "@/components/aesthetics/providers/cart-provider";
-
-function CartToastHost() {
-  const { cartToast, clearCartToast } = useCart();
-  return <CartAddedToast message={cartToast} onClear={clearCartToast} />;
-}
+import {
+  NoticeProvider,
+  AddToBagProvider,
+  ThemeProvider,
+  RouteProgress,
+} from "@/components/aesthetics/motion";
 
 export function StorefrontProviders({ children }: { children: React.ReactNode }) {
   return (
-    <CustomerProvider>
-      {children}
-      <CartToastHost />
-    </CustomerProvider>
+    <ThemeProvider>
+      <CustomerProvider>
+        <NoticeProvider>
+          <AddToBagProvider>
+            <Suspense fallback={null}>
+              <RouteProgress />
+            </Suspense>
+            {children}
+          </AddToBagProvider>
+        </NoticeProvider>
+      </CustomerProvider>
+    </ThemeProvider>
   );
 }

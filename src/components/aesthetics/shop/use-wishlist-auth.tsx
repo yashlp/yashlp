@@ -11,13 +11,14 @@ export function useWishlistAuth(redirectTo = "/aesthetics/wishlist") {
   const { toggleWishlist, isWishlisted } = useCart();
   const [authOpen, setAuthOpen] = useState(false);
 
-  function handleWishlist(product: Product) {
-    if (loading) return;
+  /** @returns true when item was newly saved */
+  function handleWishlist(product: Product): boolean {
+    if (loading) return false;
     if (!customer) {
       setAuthOpen(true);
-      return;
+      return false;
     }
-    toggleWishlist(product);
+    return toggleWishlist(product);
   }
 
   const authModal = (

@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { ProductCard } from "@/components/aesthetics/shop/product-card";
-import { Button } from "@/components/aesthetics/ui/button";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { useCustomer } from "@/components/aesthetics/providers/customer-provider";
+import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -30,12 +29,12 @@ export default function WishlistPage() {
         <p className="aes-gallery-eyebrow">Saved pieces</p>
         <h1 className="aes-gallery-title mt-3">Favourites</h1>
         {wishlist.length === 0 ? (
-          <div className="aes-panel mt-12 p-10 text-center">
-            <p className="text-[var(--gallery-muted,#6f6a63)]">Tap the heart on any product to save it here.</p>
-            <Link href="/aesthetics/shop" className="mt-6 inline-block">
-              <Button variant="secondary">Browse shop</Button>
-            </Link>
-          </div>
+          <EmptyState
+            {...EMPTY_COPY.wishlist}
+            actionHref="/aesthetics/shop"
+            actionLabel="Browse shop"
+            className="mt-4"
+          />
         ) : (
           <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
             {wishlist.map((p, i) => (

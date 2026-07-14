@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Heart, Menu, ShoppingBag, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { Heart, Menu, Moon, ShoppingBag, Sun, X } from "lucide-react";
 import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { useCustomer } from "@/components/aesthetics/providers/customer-provider";
+import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { useAddToBagFly } from "@/components/aesthetics/motion/add-to-bag-fly";
+import { useAesTheme } from "@/components/aesthetics/motion/theme-provider";
+import { bagPulse } from "@/lib/aesthetics/motion";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -19,9 +24,13 @@ type ConsumerNavProps = {
   cartCount?: number;
 };
 
-export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
+export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
   const pathname = usePathname();
   const { customer } = useCustomer();
+  const { cartCount: liveCount } = useCart();
+  const cartCount = cartCountProp ?? liveCount;
+  const { pulseBag } = useAddToBagFly();
+  const { theme, toggleTheme } = useAesTheme();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -76,7 +85,15 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
             <BrandLogo variant="nav" />
           </div>
 
-          <div className="flex items-center justify-end gap-1 sm:gap-3">
+          <div className="flex items-center justify-end gap-0.5 sm:gap-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)] hover:text-[var(--aes-ink)]"
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            >
+              {theme === "dark" ? <Sun className="h-4.5 w-4.5 h-[1.1rem] w-[1.1rem]" /> : <Moon className="h-[1.1rem] w-[1.1rem]" />}
+            </button>
             <Link
               href="/aesthetics/wishlist"
               className="flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
@@ -86,10 +103,19 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
             </Link>
             <Link
               href="/aesthetics/cart"
+              data-aes-bag-target
               className="relative flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
-              aria-label="Cart"
+              aria-label="Shopping bag"
             >
-              <ShoppingBag className="h-5 w-5" />
+              <motion.span
+                key={pulseBag}
+                variants={bagPulse}
+                initial="rest"
+                animate={pulseBag > 0 ? "pulse" : "rest"}
+                className="inline-flex"
+              >
+                <ShoppingBag className="h-5 w-5" />
+              </motion.span>
               {cartCount > 0 && (
                 <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aes-pink)] px-1 text-[9px] font-bold text-white sm:right-0 sm:top-0.5">
                   {cartCount}
@@ -153,6 +179,16 @@ export function ConsumerNav({ cartCount = 0 }: ConsumerNavProps) {
               >
                 {customer ? "My account" : "Sign in"}
               </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  toggleTheme();
+                  setOpen(false);
+                }}
+                className="mt-2 rounded-xl px-3 py-3.5 text-left text-sm font-medium uppercase tracking-[0.15em] text-[var(--aes-ink-muted)] hover:text-[var(--aes-pink)]"
+              >
+                {theme === "dark" ? "Light mode" : "Dark mode"}
+              </button>
             </div>
           </nav>
         </div>

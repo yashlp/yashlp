@@ -101,6 +101,12 @@
   --aes-safe-top: env(safe-area-inset-top, 0px);
   --aes-safe-bottom: env(safe-area-inset-bottom, 0px);
 
+  --aes-luxury: #b58e4a;
+  --aes-notice-bg: #fffaf2;
+  --aes-footer-bg: #121212;
+  --aes-footer-ink: #ffffff;
+  --aes-card-elevate: rgba(255, 255, 255, 0.78);
+
   --aes-font-brand: "Neue Montreal", system-ui, sans-serif;
 
   font-family: var(--aes-font-brand), system-ui, sans-serif;
@@ -894,4 +900,135 @@
     opacity: 1;
     transform: translateX(-50%) rotate(0);
   }
+}
+
+/* ——— Signature motion helpers ——— */
+.aes-wishlist-ribbon {
+  display: block;
+  width: 0.9rem;
+  height: 1.55rem;
+  margin-top: 0.35rem;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  box-shadow: 0 2px 6px rgba(26, 26, 26, 0.12);
+  transition: transform 0.28s var(--aes-ease), opacity 0.28s var(--aes-ease);
+}
+
+.aes-wishlist-ribbon--idle {
+  background: rgba(26, 26, 26, 0.18);
+}
+
+.aes-gallery-spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 18, 18, 0);
+  transition: background 0.4s var(--aes-ease);
+  pointer-events: none;
+}
+
+.group:hover .aes-gallery-spotlight::after,
+.group\/img:hover.aes-gallery-spotlight::after {
+  background: rgba(18, 18, 18, 0.08);
+}
+
+.aes-footer-approach {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(40, 28, 22, 0.06) 35%,
+    rgba(28, 22, 18, 0.14) 70%,
+    transparent 100%
+  );
+  transition: background 0.5s var(--aes-ease);
+}
+
+.aes-footer-divider {
+  height: 1px;
+  margin: 0 auto;
+  max-width: 12rem;
+  background: linear-gradient(90deg, transparent, rgba(181, 142, 74, 0.55), transparent);
+}
+
+/* Luxury hotel night — dark theme (not inverted) */
+.aesthetics-root[data-aes-theme="dark"] {
+  --aes-cream: #1a2233;
+  --aes-cream-deep: #243044;
+  --aes-sand: #1e2738;
+  --aes-sand-deep: #2a3448;
+  --aes-white: #232d3f;
+  --aes-ink: #f3ece0;
+  --aes-ink-muted: #c4b9a8;
+  --aes-ink-soft: #9a9084;
+
+  --aes-bg-base: #141b28;
+  --aes-bg-blush: #2a2434;
+  --aes-bg-blush-deep: #3a2c3f;
+  --aes-bg-lavender: #25263a;
+  --aes-bg-lavender-deep: #32304a;
+  --aes-bg-peach: #2c2830;
+  --aes-bg-peach-deep: #3a322c;
+  --aes-bg-sand: #1e2534;
+  --aes-bg-warm: #262318;
+  --aes-bg-testimonial: #2a2434;
+  --aes-bg-bundle: #26263a;
+  --aes-bg-mint: #1e2c2a;
+  --aes-bg-dark: #0d121c;
+
+  --aes-pink: #e8a05a;
+  --aes-pink-soft: #f0b878;
+  --aes-orange: #d4a06a;
+  --aes-lavender: #7a9ec7;
+  --aes-lavender-soft: #a3bdd9;
+  --aes-sky: #6b8cae;
+
+  --aes-border: rgba(243, 236, 224, 0.12);
+  --aes-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --aes-shadow-hover: 0 10px 32px rgba(232, 160, 90, 0.14);
+
+  --aes-gradient-hero:
+    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(232, 160, 90, 0.18), transparent 52%),
+    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(122, 158, 199, 0.16), transparent 48%),
+    radial-gradient(ellipse 50% 45% at 50% 100%, rgba(181, 142, 74, 0.12), transparent 52%),
+    linear-gradient(180deg, #141b28 0%, #1a2233 42%, #141b28 100%);
+  --aes-gradient-site:
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(232, 160, 90, 0.12), transparent 52%),
+    radial-gradient(ellipse 65% 50% at 0% 18%, rgba(122, 158, 199, 0.1), transparent 48%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(181, 142, 74, 0.1), transparent 52%),
+    var(--aes-bg-base);
+
+  --aes-notice-bg: #1e2738;
+  --aes-footer-bg: #0d121c;
+  --aes-card-elevate: rgba(30, 39, 56, 0.88);
+
+  background: var(--aes-bg-base);
+  color: var(--aes-ink);
+}
+
+.aesthetics-root[data-aes-theme="dark"] .aes-card,
+.aesthetics-root[data-aes-theme="dark"] .aes-panel,
+.aesthetics-root[data-aes-theme="dark"] .aes-gallery-product-card,
+.aesthetics-root[data-aes-theme="dark"] .aes-gallery-collection-card {
+  background: var(--aes-card-elevate);
+  box-shadow: var(--aes-shadow);
+}
+
+.aesthetics-root[data-aes-theme="dark"] .aes-gallery-spotlight::after {
+  background: rgba(0, 0, 0, 0);
+}
+
+.aesthetics-root[data-aes-theme="dark"] .group:hover .aes-gallery-spotlight::after {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.aesthetics-root[data-aes-theme="dark"] .aes-wishlist-ribbon--idle {
+  background: rgba(243, 236, 224, 0.28);
+}
+
+.aesthetics-root[data-aes-theme="dark"] .aes-footer-approach {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(13, 18, 28, 0.35) 40%,
+    rgba(13, 18, 28, 0.7) 100%
+  );
 }

@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { ProductSearchBar } from "@/components/aesthetics/shop/product-search-bar";
 import { useLiveProductSearch } from "@/components/aesthetics/shop/use-live-product-search";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 
 export default function SearchPageClient() {
   const searchParams = useSearchParams();
@@ -43,9 +44,11 @@ export default function SearchPageClient() {
           ))}
         </div>
         {active && !loading && results.length === 0 && (
-          <p className="py-12 text-center text-[var(--aes-ink-muted)]">
-            No products match &ldquo;{query.trim()}&rdquo;. Try scent, candle, or journal.
-          </p>
+          <EmptyState
+            {...EMPTY_COPY.search}
+            actionHref="/aesthetics/shop"
+            actionLabel="Browse the shop"
+          />
         )}
       </main>
     </ConsumerPage>

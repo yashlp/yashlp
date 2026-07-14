@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/aesthetics/shop/product-card";
 import { ProductSearchBar } from "@/components/aesthetics/shop/product-search-bar";
 import { useLiveProductSearch } from "@/components/aesthetics/shop/use-live-product-search";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 import { scoreProduct } from "@/lib/aesthetics/preferences";
 import type { Product, ProductCategory } from "@/lib/aesthetics/types";
 import { cn } from "@/lib/utils";
@@ -104,11 +105,11 @@ export default function ShopPage() {
             ))}
           </div>
         ) : displayProducts.length === 0 ? (
-          <p className="py-20 text-[var(--gallery-muted,#6f6a63)]">
-            {isSearching
-              ? `No products match "${searchQuery.trim()}". Try scent, journal, or cozy.`
-              : "No products available right now. Check back soon."}
-          </p>
+          <EmptyState
+            {...(isSearching ? EMPTY_COPY.search : EMPTY_COPY.products)}
+            actionHref="/aesthetics/collections"
+            actionLabel="Browse collections"
+          />
         ) : (
           <div className={`${isSearching ? "mt-10" : ""} grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4`}>
             {displayProducts.map((p, i) => (

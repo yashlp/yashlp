@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 import { formatInr } from "@/lib/aesthetics/format-inr";
 
 export default function CartPage() {
@@ -15,12 +16,12 @@ export default function CartPage() {
         <p className="aes-gallery-eyebrow">Checkout prep</p>
         <h1 className="aes-gallery-title mt-3">Your cart</h1>
         {cart.length === 0 ? (
-          <div className="aes-panel mt-12 p-10 text-center">
-            <p className="text-[var(--gallery-muted,#6f6a63)]">Your cart is empty.</p>
-            <Link href="/aesthetics/shop" className="mt-6 inline-block">
-              <Button>Continue shopping</Button>
-            </Link>
-          </div>
+          <EmptyState
+            {...EMPTY_COPY.cart}
+            actionHref="/aesthetics/shop"
+            actionLabel="Continue shopping"
+            className="mt-4"
+          />
         ) : (
           <>
             <ul className="mt-10 space-y-6">

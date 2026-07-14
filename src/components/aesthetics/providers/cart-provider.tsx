@@ -7,13 +7,10 @@ import {
   recordInteraction,
   type PreferenceState,
 } from "@/lib/aesthetics/preferences";
-import { formatCartToast } from "@/components/aesthetics/shop/cart-added-toast";
-
 type CartContextValue = {
   cart: Product[];
   wishlist: Product[];
   prefs: PreferenceState;
-  cartToast: string | null;
   addToCart: (product: Product) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -21,7 +18,6 @@ type CartContextValue = {
   isWishlisted: (id: string) => boolean;
   recordPass: (product: Product) => void;
   recordView: (product: Product, seconds: number) => void;
-  clearCartToast: () => void;
   cartTotal: number;
   cartCount: number;
 };
@@ -32,12 +28,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [prefs, setPrefs] = useState<PreferenceState>(createPreferenceState);
-  const [cartToast, setCartToast] = useState<string | null>(null);
 
   const addToCart = useCallback((product: Product) => {
     setCart((c) => {
       if (c.some((p) => p.id === product.id)) return c;
-      setCartToast(formatCartToast(product.name, product.price));
       return [...c, product];
     });
     setPrefs((p) => recordInteraction(p, product, "cart"));
@@ -76,8 +70,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setPrefs((p) => recordInteraction(p, product, "view", seconds));
   }, []);
 
-  const clearCartToast = useCallback(() => setCartToast(null), []);
-
   const cartTotal = useMemo(() => cart.reduce((s, p) => s + p.price, 0), [cart]);
 
   const value = useMemo(
@@ -85,7 +77,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       cart,
       wishlist,
       prefs,
-      cartToast,
       addToCart,
       removeFromCart,
       clearCart,
@@ -93,7 +84,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       isWishlisted,
       recordPass,
       recordView,
-      clearCartToast,
       cartTotal,
       cartCount: cart.length,
     }),
@@ -101,7 +91,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       cart,
       wishlist,
       prefs,
-      cartToast,
       addToCart,
       removeFromCart,
       clearCart,
@@ -109,7 +98,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       isWishlisted,
       recordPass,
       recordView,
-      clearCartToast,
       cartTotal,
     ]
   );

@@ -1,15 +1,17 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
+import { useNoticeOptional } from "@/components/aesthetics/motion";
 
 function SuccessContent() {
   const router = useRouter();
   const params = useSearchParams();
+  const notice = useNoticeOptional();
   const [showAccount, setShowAccount] = useState(true);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,6 +19,11 @@ function SuccessContent() {
 
   const orderNumber = params.get("orderNumber");
   const orderId = params.get("orderId");
+
+  useEffect(() => {
+    notice?.pushNotice("Order Confirmed", "order");
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fire once on enter
+  }, []);
 
   async function createAccount(e: React.FormEvent) {
     e.preventDefault();
