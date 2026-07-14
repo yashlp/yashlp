@@ -36,6 +36,8 @@ export const productCreateSchema = z.object({
   tags: z.array(z.string()).optional(),
   mood: z.string().optional(),
   colors: z.array(z.string()).optional(),
+  room: z.string().optional(),
+  style: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   seoKeywords: z.string().optional(),
@@ -45,6 +47,7 @@ export const productCreateSchema = z.object({
   isTrending: z.boolean().optional(),
   isNewArrival: z.boolean().optional(),
   isRecommended: z.boolean().optional(),
+  isBestseller: z.boolean().optional(),
   /** 2–4 product photos required */
   images: z.array(mediaUrlSchema).min(2).max(4),
   /** Optional single product video */

@@ -16,7 +16,7 @@ const NAV = [
   { href: "/aesthetics/shop", label: "Shop" },
   { href: "/aesthetics/collections", label: "Collections" },
   { href: "/aesthetics/about", label: "About us" },
-  { href: "/aesthetics/wishlist", label: "Favourites" },
+  { href: "/aesthetics/wishlist", label: "My Space" },
 ];
 
 type ConsumerNavProps = {
@@ -87,7 +87,7 @@ export function ConsumerNav({ cartCount: cartCountProp }: ConsumerNavProps) {
             <Link
               href="/aesthetics/wishlist"
               className="aes-touch flex min-h-11 min-w-11 items-center justify-center text-[var(--aes-ink-muted)]"
-              aria-label="Favourites"
+              aria-label="My Space"
             >
               <Heart className="h-5 w-5" />
             </Link>

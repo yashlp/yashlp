@@ -20,7 +20,7 @@ export function AuthModal({
   open,
   onClose,
   title = "Sign in to continue",
-  subtitle = "Save favourites, track orders, and request refunds.",
+  subtitle = "Save to My Space, leave reviews, track orders, and request refunds.",
   redirectTo = "/aesthetics/account",
 }: Props) {
   const router = useRouter();

@@ -20,6 +20,8 @@ export default function EditProductPage() {
     name: "", slug: "", sku: "", barcode: "", description: "", shortDescription: "",
     price: "", mrp: "", purchaseCost: "", stock: "", minStock: "", warehouseLocation: "",
     supplierId: "", categoryId: "", purchaseDate: "", status: "DRAFT",
+    room: "", style: "",
+    isFeatured: false, isTrending: false, isNewArrival: false, isRecommended: false, isBestseller: false,
   });
   const [media, setMedia] = useState<ProductMediaValue>({ images: [], videos: [] });
   const [error, setError] = useState("");
@@ -51,6 +53,13 @@ export default function EditProductPage() {
         categoryId: p.categoryId || "",
         purchaseDate: p.purchaseDate ? p.purchaseDate.slice(0, 10) : "",
         status: p.status || "DRAFT",
+        room: p.room || "",
+        style: p.style || "",
+        isFeatured: Boolean(p.isFeatured),
+        isTrending: Boolean(p.isTrending),
+        isNewArrival: Boolean(p.isNewArrival),
+        isRecommended: Boolean(p.isRecommended),
+        isBestseller: Boolean(p.isBestseller),
       });
       const images = (p.media || [])
         .filter((m: { type: string }) => m.type === "IMAGE")
@@ -103,6 +112,13 @@ export default function EditProductPage() {
           purchaseDate: form.purchaseDate ? new Date(form.purchaseDate).toISOString() : undefined,
           images: media.images,
           videos: media.videos,
+          room: form.room || undefined,
+          style: form.style || undefined,
+          isFeatured: form.isFeatured,
+          isTrending: form.isTrending,
+          isNewArrival: form.isNewArrival,
+          isRecommended: form.isRecommended,
+          isBestseller: form.isBestseller,
         }),
       });
       const data = await res.json();
@@ -186,9 +202,37 @@ export default function EditProductPage() {
             <option value="">Category</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input placeholder="Room (e.g. bedroom, workspace)" value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} />
+            <Input placeholder="Style (e.g. Japandi, Minimal)" value={form.style} onChange={(e) => setForm({ ...form, style: e.target.value })} />
+          </div>
           <select className="aes-input w-full" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
             {["DRAFT", "PUBLISHED", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"].map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
+
+          <section>
+            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Merchandising badges</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {(
+                [
+                  ["isBestseller", "Bestseller ✓"],
+                  ["isFeatured", "Featured"],
+                  ["isTrending", "Trending"],
+                  ["isNewArrival", "New arrival"],
+                  ["isRecommended", "Curated For You"],
+                ] as const
+              ).map(([key, label]) => (
+                <label key={key} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form[key]}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </section>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex flex-wrap gap-3">

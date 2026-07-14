@@ -1,37 +1,74 @@
 import { prisma } from "@/lib/db";
 import { mapBrand, mapCollection, mapProduct } from "../mappers";
 
+const published = { status: "PUBLISHED" as const, approvalStatus: "APPROVED" as const };
+const productInclude = { brand: true, category: true, media: true } as const;
+
 export const catalogService = {
   async getHomepageData() {
-    const [featured, newArrivals, collections, brands] = await Promise.all([
-      prisma.commerceProduct.findMany({
-        where: { status: "PUBLISHED", approvalStatus: "APPROVED", isFeatured: true },
-        include: { brand: true, category: true, media: true },
-        take: 8,
-        orderBy: { updatedAt: "desc" },
-      }),
-      prisma.commerceProduct.findMany({
-        where: { status: "PUBLISHED", approvalStatus: "APPROVED", isNewArrival: true },
-        include: { brand: true, category: true, media: true },
-        take: 8,
-      }),
-      prisma.commerceCollection.findMany({
-        where: { isPublished: true, isFeatured: true },
-        orderBy: { sortOrder: "asc" },
-        take: 6,
-      }),
-      prisma.commerceBrand.findMany({
-        where: { verified: true },
-        take: 12,
-        orderBy: { name: "asc" },
-      }),
-    ]);
+    const [featured, trending, editorsPicks, completeSetups, collections, brands, customerPhotos] =
+      await Promise.all([
+        prisma.commerceProduct.findMany({
+          where: { ...published, isFeatured: true },
+          include: productInclude,
+          take: 8,
+          orderBy: { updatedAt: "desc" },
+        }),
+        prisma.commerceProduct.findMany({
+          where: { ...published, OR: [{ isTrending: true }, { isBestseller: true }] },
+          include: productInclude,
+          take: 8,
+          orderBy: { rating: "desc" },
+        }),
+        prisma.commerceProduct.findMany({
+          where: { ...published, isRecommended: true },
+          include: productInclude,
+          take: 8,
+          orderBy: { updatedAt: "desc" },
+        }),
+        prisma.commerceCollection.findMany({
+          where: { isPublished: true },
+          orderBy: { sortOrder: "asc" },
+          take: 4,
+          include: {
+            products: {
+              take: 1,
+              include: { product: { include: productInclude } },
+              orderBy: { sortOrder: "asc" },
+            },
+          },
+        }),
+        prisma.commerceCollection.findMany({
+          where: { isPublished: true, isFeatured: true },
+          orderBy: { sortOrder: "asc" },
+          take: 6,
+        }),
+        prisma.commerceBrand.findMany({
+          where: { verified: true },
+          take: 12,
+          orderBy: { name: "asc" },
+        }),
+        prisma.commerceReview.findMany({
+          where: { status: "APPROVED", imageUrl: { not: null } },
+          include: {
+            product: { select: { name: true, slug: true } },
+            customer: { select: { name: true } },
+          },
+          orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+          take: 8,
+        }),
+      ]);
 
     return {
       featured: featured.map(mapProduct),
-      newArrivals: newArrivals.map(mapProduct),
+      trending: trending.map(mapProduct),
+      editorsPicks: editorsPicks.map(mapProduct),
+      /** @deprecated use trending / editorsPicks */
+      newArrivals: trending.map(mapProduct),
+      completeSetups: completeSetups.map((c) => mapCollection(c)),
       collections: collections.map((c) => mapCollection(c)),
       brands: brands.map(mapBrand),
+      customerPhotos,
     };
   },
 
