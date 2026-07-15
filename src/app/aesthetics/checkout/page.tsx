@@ -231,7 +231,7 @@ export default function CheckoutPage() {
                     <p className="text-sm font-semibold text-[var(--aes-ink)]">{item.name}</p>
                     <p className="text-sm text-[var(--aes-ink-muted)]">{formatInr(item.price)}</p>
                   </div>
-                  <button type="button" onClick={() => removeFromCart(item.id)} className="text-xs text-[var(--aes-ink-soft)] hover:text-[var(--aes-pink)]">
+                  <button type="button" onClick={() => removeFromCart(item.id)} className="aes-touch px-2 text-xs text-[var(--aes-ink-soft)] hover:text-[var(--aes-pink)]">
                     Remove
                   </button>
                 </li>

@@ -114,7 +114,7 @@
   color: var(--aes-ink);
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
-  max-width: 100vw;
+  max-width: 100%;
   min-height: 100dvh;
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
@@ -272,9 +272,16 @@
 .aes-mesh-bg,
 .aes-site-bg {
   background: var(--aes-gradient-site);
-  background-attachment: fixed;
+  background-attachment: scroll;
   position: relative;
   min-height: 100dvh;
+}
+
+@media (hover: hover) and (min-width: 1024px) {
+  .aes-mesh-bg,
+  .aes-site-bg {
+    background-attachment: fixed;
+  }
 }
 
 /* Joy Rush section background utilities */
@@ -869,15 +876,295 @@
   }
 }
 
+/* ——— Hanging note board (homepage hero) ——— */
+/* Mobile: in-flow + centered so it is never clipped/hidden.
+   Desktop (md+): hangs from the top-right over the hero. */
+.aes-hero {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.aes-hanging-note {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto 0.35rem;
+  pointer-events: none;
+}
+
+.aes-hanging-note__pendulum {
+  pointer-events: auto;
+  transform-origin: top center;
+  animation: aes-hang-sway 5.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.aes-hanging-note__strings {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2.4rem;
+  height: 1.65rem;
+}
+
+.aes-hanging-note__string {
+  display: block;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(30, 58, 95, 0.05),
+    rgba(30, 58, 95, 0.4) 22%,
+    rgba(18, 18, 18, 0.55)
+  );
+}
+
+.aes-hanging-note__board {
+  display: block;
+  width: min(16.5rem, 86vw);
+  margin-top: -1px;
+  padding: 1.05rem 1.05rem 0.95rem;
+  text-align: left;
+  border: 1px solid rgba(30, 58, 95, 0.18);
+  border-radius: 2px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 42%),
+    linear-gradient(135deg, #fff8ea 0%, #f3e4c8 48%, #efe0c0 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 12px 28px rgba(18, 18, 18, 0.14);
+  color: var(--aes-ink);
+  cursor: pointer;
+  transition: transform 0.35s var(--aes-ease), box-shadow 0.35s var(--aes-ease);
+}
+
+.aes-hanging-note__board:hover,
+.aes-hanging-note__board:focus-visible {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.75) inset,
+    0 16px 32px rgba(18, 18, 18, 0.16);
+}
+
+.aes-hanging-note__board:focus-visible {
+  outline: 2px solid var(--aes-royal);
+  outline-offset: 3px;
+}
+
+.aes-hanging-note__eyebrow {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(0.78rem, 2.8vw, 0.88rem);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  color: var(--aes-royal);
+  text-transform: uppercase;
+}
+
+.aes-hanging-note__line {
+  margin-top: 0.55rem;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(0.86rem, 3.2vw, 0.95rem);
+  line-height: 1.4;
+  color: var(--aes-ink);
+}
+
+.aes-hanging-note__line--muted {
+  margin-top: 0.4rem;
+  font-size: clamp(0.78rem, 2.9vw, 0.86rem);
+  color: var(--aes-ink-muted);
+}
+
+.aes-hanging-note__hint {
+  display: block;
+  margin-top: 0.75rem;
+  font-family: var(--aes-font-brand), system-ui, sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--aes-ink-soft);
+}
+
+.aes-hanging-note__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 360;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+  background: rgba(18, 18, 18, 0.48);
+  backdrop-filter: blur(3px);
+  animation: aes-hang-overlay-in 0.28s var(--aes-ease) both;
+}
+
+.aes-hanging-note__dialog {
+  position: relative;
+  width: min(28rem, 100%);
+  max-height: min(85dvh, 40rem);
+  overflow-y: auto;
+  padding: 2rem 1.5rem 1.75rem;
+  border: 1px solid rgba(30, 58, 95, 0.12);
+  background:
+    linear-gradient(180deg, #fffaf0, #fff5e1 55%, #f7e8cc);
+  box-shadow: 0 24px 60px rgba(18, 18, 18, 0.22);
+  animation: aes-hang-dialog-in 0.4s var(--aes-ease) both;
+}
+
+.aes-hanging-note__close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--aes-ink-soft);
+  transition: color 0.2s ease;
+}
+
+.aes-hanging-note__close:hover {
+  color: var(--aes-ink);
+}
+
+.aes-hanging-note__dialog-eyebrow {
+  font-family: var(--aes-font-brand), system-ui, sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--aes-royal);
+  padding-right: 2.5rem;
+}
+
+.aes-hanging-note__dialog-title {
+  margin-top: 0.55rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.35rem, 5vw, 1.85rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.2;
+  color: var(--aes-ink);
+}
+
+.aes-hanging-note__dialog-body {
+  margin-top: 1.15rem;
+  display: grid;
+  gap: 0.85rem;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(0.9rem, 3.4vw, 0.98rem);
+  line-height: 1.55;
+  color: var(--aes-ink-muted);
+}
+
+.aes-hanging-note__dialog-signoff {
+  margin-top: 1.35rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--aes-royal);
+}
+
+@keyframes aes-hang-sway {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+
+@keyframes aes-hang-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes aes-hang-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) rotate(-1.2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Tablet + desktop: float to the top-right of the hero */
+@media (min-width: 768px) {
+  .aes-hanging-note {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 0;
+    justify-content: flex-end;
+    padding-right: 1.75rem;
+    margin: 0;
+  }
+
+  .aes-hanging-note__strings {
+    height: 2.75rem;
+    padding: 0 1.55rem;
+  }
+
+  .aes-hanging-note__board {
+    width: min(12rem, 28vw);
+    padding: 1rem 0.95rem 0.85rem;
+  }
+
+  .aes-hanging-note__eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .aes-hanging-note__line {
+    font-size: 0.8rem;
+  }
+
+  .aes-hanging-note__line--muted {
+    font-size: 0.74rem;
+  }
+
+  @keyframes aes-hang-sway {
+    0%,
+    100% {
+      transform: rotate(-2.4deg);
+    }
+    50% {
+      transform: rotate(2.4deg);
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .aes-hanging-note {
+    padding-right: 2.5rem;
+  }
+
+  .aes-hanging-note__board {
+    width: min(12.75rem, 22vw);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aes-card:hover {
     transform: none;
   }
   .aes-marquee-track,
   .aes-animate-fade-up,
-  .aes-skeleton {
+  .aes-skeleton,
+  .aes-hanging-note__pendulum,
+  .aes-hanging-note__overlay,
+  .aes-hanging-note__dialog {
     animation: none;
     opacity: 1;
+  }
+  .aes-hanging-note__pendulum {
+    transform: none;
   }
   .aes-joy-pedestal:hover img {
     transform: none;

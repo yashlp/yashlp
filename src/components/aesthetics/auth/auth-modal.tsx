@@ -98,7 +98,7 @@ export function AuthModal({
     <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
       <button type="button" className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={onClose} aria-label="Close" />
       <div className="relative z-10 w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
-        <button type="button" onClick={onClose} className="absolute right-4 top-4 text-[var(--aes-ink-soft)] hover:text-[var(--aes-ink)]" aria-label="Close dialog">
+        <button type="button" onClick={onClose} className="aes-touch absolute right-3 top-3 grid place-items-center text-[var(--aes-ink-soft)] hover:text-[var(--aes-ink)]" aria-label="Close dialog">
           <X className="h-5 w-5" />
         </button>
         <h2 className="aes-joy-title-lower text-xl text-[var(--aes-ink)]">{title}</h2>

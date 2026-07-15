@@ -90,7 +90,7 @@ export function CollectionsClient({ collections }: Props) {
             {isSearching && productResults.length > 0 && (
               <section className="mt-16">
                 <p className="aes-gallery-eyebrow">Matching products</p>
-                <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
                   {productResults.map((p, i) => (
                     <ProductCard key={p.id} product={p} index={i} quickAdd variant="grid" />
                   ))}

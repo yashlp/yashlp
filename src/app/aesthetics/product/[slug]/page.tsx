@@ -119,7 +119,7 @@ export default async function ProductPage({ params }: Props) {
             <p className="aes-gallery-lead mt-3">
               Pieces that sit naturally alongside this one — curated for mood and material harmony.
             </p>
-            <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
               {related.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} quickAdd variant="grid" />
               ))}

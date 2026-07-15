@@ -52,29 +52,29 @@ export function ConsumerFooter() {
           </div>
           <div>
             <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-white/70">Shop</p>
-            <ul className="space-y-2 text-sm text-white/55">
+            <ul className="space-y-1 text-sm text-white/55">
               <li>
-                <Link href="/aesthetics/shop" className="hover:text-white">
+                <Link href="/aesthetics/shop" className="inline-flex min-h-11 items-center hover:text-white">
                   All products
                 </Link>
               </li>
               <li>
-                <Link href="/aesthetics/collections" className="hover:text-white">
+                <Link href="/aesthetics/collections" className="inline-flex min-h-11 items-center hover:text-white">
                   Collections
                 </Link>
               </li>
               <li>
-                <Link href="/aesthetics/about" className="hover:text-white">
+                <Link href="/aesthetics/about" className="inline-flex min-h-11 items-center hover:text-white">
                   About us
                 </Link>
               </li>
               <li>
-                <Link href="/aesthetics/wishlist" className="hover:text-white">
+                <Link href="/aesthetics/wishlist" className="inline-flex min-h-11 items-center hover:text-white">
                   Favourites
                 </Link>
               </li>
               <li>
-                <Link href="/aesthetics/account" className="hover:text-white">
+                <Link href="/aesthetics/account" className="inline-flex min-h-11 items-center hover:text-white">
                   My account
                 </Link>
               </li>
