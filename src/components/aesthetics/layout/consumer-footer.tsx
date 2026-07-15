@@ -82,9 +82,29 @@ export function ConsumerFooter() {
           </div>
           <div>
             <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-white/70">Help</p>
-            <ul className="space-y-2 text-sm text-white/55">
+            <ul className="space-y-1 text-sm text-white/55">
               <li>
-                <a href="mailto:hello@onlyaesthetics.app" className="hover:text-white">
+                <Link href="/aesthetics/faq" className="inline-flex min-h-11 items-center hover:text-white">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/shipping" className="inline-flex min-h-11 items-center hover:text-white">
+                  Shipping &amp; Returns
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/privacy" className="inline-flex min-h-11 items-center hover:text-white">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/terms" className="inline-flex min-h-11 items-center hover:text-white">
+                  Terms
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:hello@onlyaesthetics.app" className="inline-flex min-h-11 items-center hover:text-white">
                   hello@onlyaesthetics.app
                 </a>
               </li>
@@ -92,8 +112,15 @@ export function ConsumerFooter() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 py-6 text-center text-xs text-white/35">
-          © {new Date().getFullYear()} Only Aesthetics
+        <div className="border-t border-white/10 px-4 py-6 text-center text-xs text-white/35">
+          © {new Date().getFullYear()} Only Aesthetics ·{" "}
+          <Link href="/aesthetics/privacy" className="hover:text-white/70">
+            Privacy
+          </Link>
+          {" · "}
+          <Link href="/aesthetics/shipping" className="hover:text-white/70">
+            Shipping &amp; Returns
+          </Link>
         </div>
       </motion.footer>
     </div>
