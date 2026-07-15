@@ -29,6 +29,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
+  const [demoAllowed, setDemoAllowed] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "demo">("razorpay");
   const [form, setForm] = useState({
     name: "",
@@ -47,12 +48,15 @@ export default function CheckoutPage() {
       .then((r) => r.json())
       .then((d) => {
         const enabled = Boolean(d.razorpay);
+        const demo = Boolean(d.demoPayments);
         setRazorpayEnabled(enabled);
-        if (!enabled) setPaymentMethod("demo");
+        setDemoAllowed(demo);
+        if (enabled) setPaymentMethod("razorpay");
+        else if (demo) setPaymentMethod("demo");
       })
       .catch(() => {
         setRazorpayEnabled(false);
-        setPaymentMethod("demo");
+        setDemoAllowed(false);
       });
   }, []);
 
@@ -128,6 +132,10 @@ export default function CheckoutPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!razorpayEnabled && !demoAllowed) {
+      setError("Online payments are not configured yet.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -197,23 +205,31 @@ export default function CheckoutPage() {
             </div>
 
             <div className="space-y-2 border-t border-[var(--aes-border)] pt-4">
-              <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment — online only (India)</p>
+              <p className="text-sm font-semibold text-[var(--aes-ink)]">Pay online</p>
               {razorpayEnabled ? (
                 <label className="flex cursor-pointer items-center gap-2 text-sm">
                   <input type="radio" name="pay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} />
                   UPI · Cards · Net Banking · Wallets (Razorpay)
                 </label>
-              ) : (
+              ) : demoAllowed ? (
                 <label className="flex cursor-pointer items-center gap-2 text-sm">
                   <input type="radio" name="pay" checked={paymentMethod === "demo"} onChange={() => setPaymentMethod("demo")} />
-                  Pay online (demo mode — UPI / Card / Net Banking)
+                  Online payment (local demo only)
                 </label>
+              ) : (
+                <p className="text-sm text-red-600">
+                  Online payments are not configured yet. Add Razorpay keys on the server to accept orders.
+                </p>
               )}
-              <p className="text-xs text-[var(--aes-ink-muted)]">Cash on delivery is not available. All prices in ₹ INR.</p>
+              <p className="text-xs text-[var(--aes-ink-muted)]">Online payments only. All prices in ₹ INR.</p>
             </div>
 
             {error && <p className="text-sm text-red-600">{error}</p>}
-            <Button type="submit" className="w-full py-4" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full py-4"
+              disabled={loading || (!razorpayEnabled && !demoAllowed)}
+            >
               {loading ? "Placing order…" : `Place order — ${formatInr(total)}`}
             </Button>
           </form>

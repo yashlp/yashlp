@@ -65,10 +65,16 @@ export async function registerCustomer(input: {
   });
 
   if (input.orderId) {
-    await prisma.commerceOrder.updateMany({
-      where: { id: input.orderId, customerId: null },
-      data: { customerId: customer.id },
-    });
+    const order = await prisma.commerceOrder.findUnique({ where: { id: input.orderId } });
+    if (order && !order.customerId) {
+      const haystack = `${order.customerNotes || ""}\n${order.shippingAddress || ""}`.toLowerCase();
+      if (haystack.includes(email)) {
+        await prisma.commerceOrder.update({
+          where: { id: order.id },
+          data: { customerId: customer.id },
+        });
+      }
+    }
   }
 
   await createCustomerSession(customer.id);

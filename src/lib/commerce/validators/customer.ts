@@ -15,18 +15,25 @@ export const checkoutSchema = z.object({
     .array(
       z.object({
         productId: z.string().min(1),
-        quantity: z.number().int().min(1).default(1),
-        unitPrice: z.number().positive(),
+        quantity: z.number().int().min(1).max(50).default(1),
+        /** Ignored server-side — catalog price is authoritative. */
+        unitPrice: z.number().positive().optional(),
       })
     )
-    .min(1),
+    .min(1)
+    .max(40),
 });
 
 export const customerRegisterSchema = z.object({
   name: z.string().min(1).max(120),
   email: z.string().email(),
   phone: z.string().min(10).max(20),
-  password: z.string().min(8).max(128),
+  password: z
+    .string()
+    .min(8)
+    .max(128)
+    .regex(/[A-Za-z]/, "Password must include a letter")
+    .regex(/[0-9]/, "Password must include a number"),
   orderId: z.string().optional(),
   address: z.object({
     line1: z.string().min(1),

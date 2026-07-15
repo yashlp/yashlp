@@ -2,20 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { orderService } from "@/lib/commerce/services/order.service";
 import { getCommerceCustomer } from "@/lib/commerce/customer-session";
 import { checkoutSchema } from "@/lib/commerce/validators/customer";
-
-const GST_RATE = 0.18;
-const FREE_SHIPPING_THRESHOLD = 999;
-const SHIPPING_FEE = 49;
+import { isDemoPaymentAllowed } from "@/lib/commerce/checkout-pricing";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const limited = rateLimit(`checkout:${ip}`, 20, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many checkout attempts. Please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(limited.retryAfterSec) } }
+    );
+  }
+
   try {
     const body = checkoutSchema.parse(await req.json());
     const customer = await getCommerceCustomer();
 
-    const subtotal = body.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-    const tax = Math.round(subtotal * GST_RATE * 100) / 100;
-    const total = subtotal + shipping + tax;
+    if (body.paymentMethod === "demo" && !isDemoPaymentAllowed()) {
+      return NextResponse.json(
+        { error: "Demo payments are disabled. Use Razorpay online payment." },
+        { status: 400 }
+      );
+    }
 
     const shippingAddress = [
       body.name,
@@ -30,11 +39,7 @@ export async function POST(req: NextRequest) {
       .join("\n");
 
     const order = await orderService.createGuestOrder({
-      items: body.items,
-      subtotal,
-      tax,
-      shipping,
-      total,
+      items: body.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       paymentMethod: body.paymentMethod,
       guest: {
         name: body.name,

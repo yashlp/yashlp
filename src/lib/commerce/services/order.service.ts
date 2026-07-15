@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { ORDER_STATUSES } from "../constants";
+import { isDemoPaymentAllowed, priceCheckoutItems } from "../checkout-pricing";
 
 function orderNumber() {
   return `AES-${Date.now().toString(36).toUpperCase()}`;
@@ -46,12 +47,8 @@ export const orderService = {
   },
 
   async createGuestOrder(input: {
-    items: { productId: string; quantity: number; unitPrice: number }[];
-    subtotal: number;
-    tax?: number;
-    shipping: number;
-    total: number;
-    paymentMethod: "cod" | "razorpay" | "demo";
+    items: { productId: string; quantity: number }[];
+    paymentMethod: "razorpay" | "demo";
     guest: {
       name: string;
       email: string;
@@ -60,92 +57,157 @@ export const orderService = {
     };
     customerId?: string;
   }) {
-    for (const item of input.items) {
-      const product = await prisma.commerceProduct.findUnique({ where: { id: item.productId } });
-      if (!product) throw new Error(`Product not found`);
-      if (product.stock < item.quantity) throw new Error(`Insufficient stock for ${product.name}`);
+    if (input.paymentMethod !== "razorpay" && input.paymentMethod !== "demo") {
+      throw new Error("Online payment required. Cash on delivery is not available.");
+    }
+    if (input.paymentMethod === "demo" && !isDemoPaymentAllowed()) {
+      throw new Error("Demo payments are disabled. Configure Razorpay for live checkout.");
     }
 
+    const priced = await priceCheckoutItems(input.items);
     const status = input.paymentMethod === "razorpay" ? "PENDING" : "CONFIRMED";
 
-    const order = await prisma.commerceOrder.create({
-      data: {
-        orderNumber: orderNumber(),
-        customerId: input.customerId,
-        status,
-        subtotal: input.subtotal,
-        tax: input.tax ?? 0,
-        shipping: input.shipping,
-        total: input.total,
-        currency: "INR",
-        shippingAddress: input.guest.shippingAddress,
-        customerNotes: `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`,
-        items: {
-          create: input.items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            total: item.unitPrice * item.quantity,
-          })),
-        },
-        payments: {
-          create: {
-            amount: input.total,
-            currency: "INR",
-            status: input.paymentMethod === "razorpay" ? "PENDING" : "SUCCESS",
-            provider: input.paymentMethod,
+    const order = await prisma.$transaction(async (tx) => {
+      for (const line of priced.lines) {
+        const product = await tx.commerceProduct.findUnique({ where: { id: line.productId } });
+        if (!product) throw new Error("Product not found");
+        if (product.stock < line.quantity) {
+          throw new Error(`Insufficient stock for ${product.name}`);
+        }
+        if (status === "CONFIRMED") {
+          const locked = await tx.commerceProduct.updateMany({
+            where: { id: line.productId, stock: { gte: line.quantity } },
+            data: { stock: { decrement: line.quantity } },
+          });
+          if (locked.count === 0) {
+            throw new Error(`Insufficient stock for ${product.name}`);
+          }
+        }
+      }
+
+      return tx.commerceOrder.create({
+        data: {
+          orderNumber: orderNumber(),
+          customerId: input.customerId,
+          status,
+          subtotal: priced.subtotal,
+          tax: priced.tax,
+          shipping: priced.shipping,
+          total: priced.total,
+          currency: "INR",
+          shippingAddress: input.guest.shippingAddress,
+          customerNotes: `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`,
+          items: {
+            create: priced.lines.map((line) => ({
+              productId: line.productId,
+              quantity: line.quantity,
+              unitPrice: line.unitPrice,
+              total: line.total,
+            })),
+          },
+          payments: {
+            create: {
+              amount: priced.total,
+              currency: "INR",
+              status: input.paymentMethod === "razorpay" ? "PENDING" : "SUCCESS",
+              provider: input.paymentMethod,
+            },
           },
         },
-      },
-      include: { items: true, payments: true },
+        include: { items: true, payments: true },
+      });
     });
-
-    if (status === "CONFIRMED") {
-      await this.decrementStock(order.id);
-    }
 
     return order;
   },
 
   async decrementStock(orderId: string) {
     const items = await prisma.commerceOrderItem.findMany({ where: { orderId } });
-    for (const item of items) {
-      await prisma.commerceProduct.update({
-        where: { id: item.productId },
-        data: { stock: { decrement: item.quantity } },
-      });
-    }
+    await prisma.$transaction(async (tx) => {
+      for (const item of items) {
+        const updated = await tx.commerceProduct.updateMany({
+          where: { id: item.productId, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        });
+        if (updated.count === 0) {
+          throw new Error("Insufficient stock while confirming payment");
+        }
+      }
+    });
   },
 
   async restock(orderId: string) {
     const items = await prisma.commerceOrderItem.findMany({ where: { orderId } });
-    for (const item of items) {
-      await prisma.commerceProduct.update({
-        where: { id: item.productId },
-        data: { stock: { increment: item.quantity } },
-      });
-    }
+    await prisma.$transaction(
+      items.map((item) =>
+        prisma.commerceProduct.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        })
+      )
+    );
   },
 
   async confirmPayment(orderId: string, providerPaymentId: string) {
-    const order = await prisma.commerceOrder.findUniqueOrThrow({
-      where: { id: orderId },
-      include: { payments: true },
-    });
-    if (order.status !== "PENDING") return order;
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.commerceOrder.findUniqueOrThrow({
+        where: { id: orderId },
+        include: { payments: true },
+      });
+      if (order.status !== "PENDING") {
+        return tx.commerceOrder.findUniqueOrThrow({
+          where: { id: orderId },
+          include: {
+            items: { include: { product: true } },
+            customer: true,
+            payments: true,
+            refunds: true,
+            returns: true,
+          },
+        });
+      }
 
-    await prisma.commercePayment.updateMany({
-      where: { orderId, status: "PENDING" },
-      data: { status: "SUCCESS", providerPaymentId },
-    });
+      const reused = await tx.commercePayment.findFirst({
+        where: {
+          providerPaymentId,
+          status: "SUCCESS",
+          NOT: { orderId },
+        },
+      });
+      if (reused) throw new Error("Payment already applied to another order");
 
-    await prisma.commerceOrder.update({
-      where: { id: orderId },
-      data: { status: "CONFIRMED" },
-    });
+      await tx.commercePayment.updateMany({
+        where: { orderId, status: "PENDING" },
+        data: { status: "SUCCESS", providerPaymentId },
+      });
 
-    await this.decrementStock(orderId);
-    return this.getById(orderId);
+      await tx.commerceOrder.update({
+        where: { id: orderId },
+        data: { status: "CONFIRMED" },
+      });
+
+      const items = await tx.commerceOrderItem.findMany({ where: { orderId } });
+      for (const item of items) {
+        const updated = await tx.commerceProduct.updateMany({
+          where: { id: item.productId, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        });
+        if (updated.count === 0) {
+          throw new Error("Insufficient stock while confirming payment");
+        }
+      }
+
+      return tx.commerceOrder.findUniqueOrThrow({
+        where: { id: orderId },
+        include: {
+          items: { include: { product: true } },
+          customer: true,
+          payments: true,
+          refunds: true,
+          returns: true,
+        },
+      });
+    });
   },
 
   async updateStatus(
