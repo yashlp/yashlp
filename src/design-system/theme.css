@@ -1129,14 +1129,18 @@
     font-size: 0.74rem;
   }
 
-  @keyframes aes-hang-sway {
-    0%,
-    100% {
-      transform: rotate(-2.4deg);
-    }
-    50% {
-      transform: rotate(2.4deg);
-    }
+  .aes-hanging-note__pendulum {
+    animation-name: aes-hang-sway-desktop;
+  }
+}
+
+@keyframes aes-hang-sway-desktop {
+  0%,
+  100% {
+    transform: rotate(-2.4deg);
+  }
+  50% {
+    transform: rotate(2.4deg);
   }
 }
 

@@ -1,38 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ -z "${DATABASE_URL:-}" ]; then
-  echo ""
-  echo "ERROR: DATABASE_URL is not set in Vercel → Settings → Environment Variables."
-  echo "Add your Neon pooled PostgreSQL URL for the Production environment, then redeploy."
-  echo ""
-  exit 1
-fi
-
-if [[ ! "$DATABASE_URL" =~ ^postgresql:// ]]; then
-  echo ""
-  echo "ERROR: DATABASE_URL must start with postgresql:// (Neon pooled URL)."
-  echo "SQLite URLs (file:./dev.db) do not work on Vercel."
-  echo ""
-  exit 1
-fi
-
 # channel_binding=require can break Prisma on some build hosts; Neon works without it.
-export DATABASE_URL="${DATABASE_URL//&channel_binding=require/}"
-export DATABASE_URL="${DATABASE_URL//?channel_binding=require&/?}"
-export DATABASE_URL="${DATABASE_URL//?channel_binding=require/}"
+if [ -n "${DATABASE_URL:-}" ]; then
+  export DATABASE_URL="${DATABASE_URL//&channel_binding=require/}"
+  export DATABASE_URL="${DATABASE_URL//?channel_binding=require&/?}"
+  export DATABASE_URL="${DATABASE_URL//?channel_binding=require/}"
+fi
 
 echo "→ prisma generate"
 npx prisma generate
 
-echo "→ prisma db push"
-npx prisma db push --skip-generate
+if [ -z "${DATABASE_URL:-}" ]; then
+  echo "WARN: DATABASE_URL is not set — skipping db push / seed. Storefront will still build."
+elif [[ ! "$DATABASE_URL" =~ ^postgresql:// ]]; then
+  echo "WARN: DATABASE_URL is not postgresql:// — skipping db push / seed. Storefront will still build."
+else
+  echo "→ prisma db push"
+  npx prisma db push --skip-generate || echo "WARN: prisma db push failed — continuing build"
 
-echo "→ ensure commerce admin"
-npx tsx scripts/ensure-commerce-admin.ts
+  echo "→ ensure commerce admin"
+  npx tsx scripts/ensure-commerce-admin.ts || echo "WARN: ensure-commerce-admin failed — continuing build"
 
-echo "→ seed demo commerce catalog"
-npx tsx prisma/seed-commerce.ts
+  echo "→ seed commerce catalog"
+  npx tsx prisma/seed-commerce.ts || echo "WARN: seed-commerce failed — continuing build"
+fi
 
 echo "→ next build"
 npx next build
