@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/lib/aesthetics/types";
 import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
+import { HangingNoteBoard } from "@/components/aesthetics/home/hanging-note-board";
 
 const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=500&q=80",
@@ -23,8 +24,9 @@ export function HeroSection({ products = [] }: HeroSectionProps) {
         }));
 
   return (
-    <section className="aes-bg-hero px-4 pb-12 pt-8 sm:px-6 sm:pb-16 sm:pt-12">
-      <div className="mx-auto max-w-5xl text-center">
+    <section className="aes-bg-hero relative overflow-x-clip px-4 pb-12 pt-8 sm:px-6 sm:pb-16 sm:pt-12">
+      <HangingNoteBoard />
+      <div className="relative z-10 mx-auto max-w-5xl text-center">
         <div className="aes-animate-fade-up">
           <BrandLogo variant="hero" />
         </div>
