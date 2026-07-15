@@ -22,7 +22,7 @@ export function BrandLogo({ variant = "nav", className, href = "/aesthetics" }: 
         )}
         aria-label="Only Aesthetics"
       >
-        <span className={cn("aes-brand-only", isFooter && "text-white/55")}>only</span>
+        <span className={cn("aes-brand-only", isFooter && "text-white")}>only</span>
         <span className={cn("aes-brand-wordmark", isFooter && "text-white")}>
           A E S T H E T I C S
         </span>

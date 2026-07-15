@@ -192,11 +192,26 @@
 
 .aes-brand-lockup-footer .aes-brand-only {
   font-size: 0.75rem;
+  color: #ffffff;
 }
 
 .aes-brand-lockup-footer .aes-brand-wordmark {
   font-size: 1rem;
   letter-spacing: 0.18em;
+  color: #ffffff;
+}
+
+/* Footer body copy — white for low-brightness readability */
+.aesthetics-root .aes-footer-content,
+.aesthetics-root .aes-footer-content a,
+.aesthetics-root .aes-footer-content p,
+.aesthetics-root .aes-footer-content li {
+  color: #ffffff;
+}
+
+.aesthetics-root .aes-footer-content a:hover {
+  color: #ffffff;
+  opacity: 0.88;
 }
 
 .aes-brand-only {
