@@ -342,7 +342,7 @@ export default function CheckoutPage() {
 
             {step === 2 && (
               <div className="space-y-4">
-                <p className="text-sm font-semibold text-[var(--aes-ink)]">Express payment options</p>
+                <p className="text-sm font-semibold text-[var(--aes-ink)]">Pay online</p>
                 {razorpayEnabled ? (
                   <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--aes-border)] px-4 py-3 text-sm">
                     <input type="radio" name="pay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} />
@@ -351,11 +351,13 @@ export default function CheckoutPage() {
                 ) : (
                   <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--aes-border)] px-4 py-3 text-sm">
                     <input type="radio" name="pay" checked={paymentMethod === "demo"} onChange={() => setPaymentMethod("demo")} />
-                    Pay online (demo mode — UPI / Card / Net Banking)
+                    Online payment (demo) — UPI · Cards · Net Banking
                   </label>
                 )}
                 <SecurePaymentRow />
-                <p className="text-xs text-[var(--aes-ink-muted)]">Cash on delivery is not available. All prices in ₹ INR.</p>
+                <p className="text-xs text-[var(--aes-ink-muted)]">
+                  Online payments only. All prices in ₹ INR.
+                </p>
                 {error && <p className="text-sm text-red-600">{error}</p>}
                 <div className="flex gap-2">
                   <Button type="button" variant="secondary" onClick={() => setStep(1)}>

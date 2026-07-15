@@ -5,7 +5,9 @@ import { isRazorpayConfigured } from "@/lib/payments/config";
 export async function GET() {
   return NextResponse.json({
     razorpay: isRazorpayConfigured(),
-    cod: true,
+    /** COD is permanently disabled — Only Aesthetics is online payments only. */
+    cod: false,
+    onlineOnly: true,
     currency: "INR",
   });
 }

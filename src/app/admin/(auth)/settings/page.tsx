@@ -15,7 +15,7 @@ const DEFAULTS = [
   { key: "free_shipping_threshold", label: "Free shipping above (₹)", group: "shipping" },
   { key: "gst_rate", label: "GST rate (%)", group: "tax" },
   { key: "razorpay_enabled", label: "Razorpay enabled (true/false)", group: "payments" },
-  { key: "cod_enabled", label: "COD enabled (true/false)", group: "payments" },
+  { key: "cod_enabled", label: "COD enabled — keep false (online payments only)", group: "payments" },
   { key: "bank_account_name", label: "Bank account name", group: "bank" },
   { key: "bank_account_number", label: "Bank account number", group: "bank" },
   { key: "bank_ifsc", label: "IFSC code", group: "bank" },

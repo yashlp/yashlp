@@ -51,7 +51,7 @@ export const orderService = {
     tax?: number;
     shipping: number;
     total: number;
-    paymentMethod: "cod" | "razorpay" | "demo";
+    paymentMethod: "razorpay" | "demo";
     giftWrap?: boolean;
     giftWrapFee?: number;
     giftMessage?: string;
@@ -68,6 +68,10 @@ export const orderService = {
       const product = await prisma.commerceProduct.findUnique({ where: { id: item.productId } });
       if (!product) throw new Error(`Product not found`);
       if (product.stock < item.quantity) throw new Error(`Insufficient stock for ${product.name}`);
+    }
+
+    if (input.paymentMethod !== "razorpay" && input.paymentMethod !== "demo") {
+      throw new Error("Online payment required. Cash on delivery is not available.");
     }
 
     const status = input.paymentMethod === "razorpay" ? "PENDING" : "CONFIRMED";

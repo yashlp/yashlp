@@ -53,7 +53,7 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
       { href: "/admin/suppliers", label: "Suppliers", icon: Users, description: "Vendor contacts & GST" },
       { href: "/admin/orders", label: "Orders", icon: Package, description: "Pack, ship, invoice" },
       { href: "/admin/shipping", label: "Shipping", icon: Truck, description: "Couriers & labels" },
-      { href: "/admin/payments", label: "Payments", icon: Wallet, description: "COD, Razorpay, GST" },
+      { href: "/admin/payments", label: "Payments", icon: Wallet, description: "Online payments & GST" },
       { href: "/admin/returns", label: "Returns & Refunds", icon: RotateCcw, description: "RMA & refunds" },
       { href: "/admin/customers", label: "Customers", icon: UserRound, description: "CRM & LTV" },
     ],
