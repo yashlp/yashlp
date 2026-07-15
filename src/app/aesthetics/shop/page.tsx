@@ -99,7 +99,7 @@ export default function ShopPage() {
         )}
 
         {showLoading ? (
-          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="aes-skeleton aspect-[3/4] rounded-2xl" />
             ))}
@@ -111,7 +111,7 @@ export default function ShopPage() {
             actionLabel="Browse collections"
           />
         ) : (
-          <div className={`${isSearching ? "mt-10" : ""} grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4`}>
+          <div className={`${isSearching ? "mt-10" : ""} grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-4`}>
             {displayProducts.map((p, i) => (
               <ProductCard key={p.id} product={p} priority={i < 4} index={i} quickAdd variant="grid" />
             ))}

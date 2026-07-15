@@ -43,7 +43,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => removeFromCart(item.id)}
-                    className="self-start text-sm text-[var(--gallery-muted,#6f6a63)] hover:text-[var(--gallery-blue,#2c5aa0)]"
+                    className="aes-touch self-start px-2 text-sm text-[var(--gallery-muted,#6f6a63)] hover:text-[var(--gallery-blue,#2c5aa0)]"
                   >
                     Remove
                   </button>

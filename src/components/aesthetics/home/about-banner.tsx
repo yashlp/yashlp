@@ -13,7 +13,7 @@ export function AboutBanner() {
     <section className="aes-bg-peach px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="text-xl font-black leading-snug text-[var(--aes-ink)] sm:text-2xl md:text-3xl">
-          Beautiful, intentional objects for everyday rituals
+          Beautiful objects from independent makers, chosen for the way you live.
         </h2>
         <p className="mt-6 text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base">
           A curated Indian store for design-led home, wellness, and lifestyle objects — shipped with care.

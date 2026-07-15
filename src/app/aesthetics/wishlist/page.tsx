@@ -36,7 +36,7 @@ export default function WishlistPage() {
             className="mt-4"
           />
         ) : (
-          <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
             {wishlist.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} quickAdd variant="grid" />
             ))}

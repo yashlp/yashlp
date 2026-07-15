@@ -38,7 +38,7 @@ export default function SearchPageClient() {
             Start typing to see matching products instantly.
           </p>
         )}
-        <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
           {results.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} quickAdd variant="grid" />
           ))}
