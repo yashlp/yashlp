@@ -11,6 +11,9 @@ export const checkoutSchema = z.object({
   postalCode: z.string().min(1).max(20),
   country: z.string().default("IN"),
   paymentMethod: z.enum(["razorpay", "demo"]).default("razorpay"),
+  giftWrap: z.boolean().optional().default(false),
+  giftMessage: z.string().max(200).optional(),
+  customerNotes: z.string().max(500).optional(),
   items: z
     .array(
       z.object({

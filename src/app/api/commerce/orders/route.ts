@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { orderService } from "@/lib/commerce/services/order.service";
 import { getCommerceCustomer } from "@/lib/commerce/customer-session";
 import { checkoutSchema } from "@/lib/commerce/validators/customer";
+import { GIFT_WRAP_FEE } from "@/lib/aesthetics/gift-wrap";
+import { prisma } from "@/lib/db";
 
 const GST_RATE = 0.18;
 const FREE_SHIPPING_THRESHOLD = 999;
@@ -14,8 +16,10 @@ export async function POST(req: NextRequest) {
 
     const subtotal = body.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
     const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    const giftWrap = Boolean(body.giftWrap);
+    const giftWrapFee = giftWrap ? GIFT_WRAP_FEE : 0;
     const tax = Math.round(subtotal * GST_RATE * 100) / 100;
-    const total = subtotal + shipping + tax;
+    const total = subtotal + shipping + tax + giftWrapFee;
 
     const shippingAddress = [
       body.name,
@@ -36,6 +40,10 @@ export async function POST(req: NextRequest) {
       shipping,
       total,
       paymentMethod: body.paymentMethod,
+      giftWrap,
+      giftWrapFee,
+      giftMessage: body.giftMessage,
+      customerNotes: body.customerNotes,
       guest: {
         name: body.name,
         email: body.email,
@@ -45,6 +53,18 @@ export async function POST(req: NextRequest) {
       customerId: customer?.id,
     });
 
+    try {
+      await prisma.commerceAnalyticsEvent.create({
+        data: {
+          type: "PURCHASE",
+          customerId: customer?.id,
+          metadata: JSON.stringify({ orderId: order.id, total }),
+        },
+      });
+    } catch {
+      /* analytics table may not be migrated yet */
+    }
+
     return NextResponse.json({
       order: {
         id: order.id,
@@ -52,6 +72,7 @@ export async function POST(req: NextRequest) {
         total: order.total,
         status: order.status,
         paymentMethod: body.paymentMethod,
+        giftWrap: order.giftWrap,
         guest: { name: body.name, email: body.email, phone: body.phone },
         address: {
           line1: body.line1,

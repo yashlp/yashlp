@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
+import Link from "next/link";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
+import { ProductCard } from "@/components/aesthetics/shop/product-card";
+import { SecurePaymentRow } from "@/components/aesthetics/trust/trust-badges";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { useCustomer } from "@/components/aesthetics/providers/customer-provider";
 import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
+import type { Product } from "@/lib/aesthetics/types";
+import { GIFT_WRAP_FEE } from "@/lib/aesthetics/gift-wrap";
+import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {
@@ -23,13 +30,30 @@ function formatInr(n: number) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 }
 
+function deliveryEstimate() {
+  const start = new Date();
+  start.setDate(start.getDate() + 3);
+  const end = new Date();
+  end.setDate(end.getDate() + 7);
+  const fmt = (d: Date) =>
+    d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+  return `${fmt(start)} – ${fmt(end)}`;
+}
+
+const STEPS = ["Bag", "Details", "Payment"] as const;
+
 export default function CheckoutPage() {
   const router = useRouter();
+  const { customer } = useCustomer();
   const { cart, cartTotal, cartCount, removeFromCart, clearCart } = useCart();
+  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "demo">("razorpay");
+  const [curated, setCurated] = useState<Product[]>([]);
+  const [giftWrap, setGiftWrap] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -54,11 +78,35 @@ export default function CheckoutPage() {
         setRazorpayEnabled(false);
         setPaymentMethod("demo");
       });
+    void fetch("/api/commerce/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "BEGIN_CHECKOUT", path: "/aesthetics/checkout" }),
+    }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetch("/api/commerce/products?recommended=true&limit=4")
+      .then((r) => r.json())
+      .then((d) => setCurated((d.products || []).slice(0, 4)))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!customer) return;
+    setForm((f) => ({
+      ...f,
+      name: f.name || customer.name || "",
+      email: f.email || customer.email || "",
+      phone: f.phone || customer.phone || "",
+    }));
+  }, [customer]);
 
   const shipping = cartTotal >= FREE_SHIPPING ? 0 : SHIPPING_FEE;
   const tax = Math.round(cartTotal * GST_RATE * 100) / 100;
-  const total = cartTotal + shipping + tax;
+  const giftWrapFee = giftWrap ? GIFT_WRAP_FEE : 0;
+  const total = cartTotal + shipping + tax + giftWrapFee;
+  const eta = useMemo(() => deliveryEstimate(), []);
 
   async function placeOrder() {
     const res = await fetch("/api/commerce/orders", {
@@ -67,6 +115,8 @@ export default function CheckoutPage() {
       body: JSON.stringify({
         ...form,
         paymentMethod,
+        giftWrap,
+        giftMessage: giftWrap ? giftMessage || undefined : undefined,
         items: cart.map((p) => ({
           productId: p.id,
           quantity: 1,
@@ -179,70 +229,192 @@ export default function CheckoutPage() {
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
         <p className="aes-gallery-eyebrow">Secure payment</p>
         <h1 className="aes-gallery-title mt-3">Checkout</h1>
+        <p className="mt-3 text-sm text-[var(--gallery-muted,#6f6a63)]">
+          {customer
+            ? "Signed in — we’ll prefill what we can."
+            : "Guest checkout welcome — no account required."}{" "}
+          <Link href="/aesthetics/account/login?redirect=/aesthetics/checkout" className="text-[var(--gallery-blue,#2c5aa0)]">
+            {customer ? "My account" : "Sign in for faster checkout"}
+          </Link>
+        </p>
+
+        <ol className="mt-8 flex gap-2">
+          {STEPS.map((label, i) => (
+            <li key={label} className="flex-1">
+              <button
+                type="button"
+                onClick={() => setStep(i)}
+                className={cn(
+                  "w-full rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em]",
+                  i === step
+                    ? "bg-[var(--gallery-ink,#1e1e1c)] text-white"
+                    : i < step
+                      ? "bg-[var(--gallery-blue,#2c5aa0)]/15 text-[var(--gallery-blue,#2c5aa0)]"
+                      : "bg-[var(--gallery-bg-secondary,#ece8e1)] text-[var(--gallery-muted,#6f6a63)]"
+                )}
+              >
+                {i + 1}. {label}
+              </button>
+            </li>
+          ))}
+        </ol>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-2">
           <form onSubmit={submit} className="aes-panel space-y-4 p-6 sm:p-8">
-            <Input placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-            <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-            <Input type="tel" placeholder="Mobile number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
-            <Input placeholder="Address line 1" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} required />
-            <Input placeholder="Address line 2 (optional)" value={form.line2} onChange={(e) => setForm({ ...form, line2: e.target.value })} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
-              <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input placeholder="PIN code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} required />
-              <Input placeholder="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-            </div>
+            {step === 0 && (
+              <div className="space-y-4">
+                <p className="text-sm font-semibold">Your bag</p>
+                <ul className="space-y-3">
+                  {cart.map((item) => (
+                    <li key={item.id} className="flex gap-3 text-sm">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={item.images[0]} alt="" className="h-14 w-14 rounded-lg object-cover" loading="lazy" />
+                      <div className="flex-1">
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-[var(--aes-ink-muted)]">{formatInr(item.price)}</p>
+                      </div>
+                      <button type="button" onClick={() => removeFromCart(item.id)} className="text-xs text-[var(--aes-ink-soft)]">
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <Button type="button" className="w-full" onClick={() => setStep(1)}>
+                  Continue to details
+                </Button>
+              </div>
+            )}
 
-            <div className="space-y-2 border-t border-[var(--aes-border)] pt-4">
-              <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment — online only (India)</p>
-              {razorpayEnabled ? (
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input type="radio" name="pay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} />
-                  UPI · Cards · Net Banking · Wallets (Razorpay)
+            {step === 1 && (
+              <div className="space-y-4">
+                <p className="text-sm font-semibold">Contact & shipping</p>
+                <Input placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                <Input type="tel" placeholder="Mobile number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
+                <Input placeholder="Address line 1" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} required />
+                <Input placeholder="Address line 2 (optional)" value={form.line2} onChange={(e) => setForm({ ...form, line2: e.target.value })} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
+                  <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input placeholder="PIN code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} required />
+                  <Input placeholder="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+                </div>
+                <p className="rounded-xl bg-[var(--gallery-bg-secondary,#ece8e1)] px-4 py-3 text-sm">
+                  Estimated delivery: <strong>{eta}</strong>
+                  <span className="mt-1 block text-xs text-[var(--gallery-muted,#6f6a63)]">
+                    Shipping estimate · tracked · free over ₹999
+                  </span>
+                </p>
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--aes-border)] px-4 py-3 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={giftWrap}
+                    onChange={(e) => setGiftWrap(e.target.checked)}
+                  />
+                  <span>
+                    <span className="font-semibold">Gift wrap</span>
+                    <span className="mt-0.5 block text-[var(--gallery-muted,#6f6a63)]">
+                      Add protective gift wrap for ₹{GIFT_WRAP_FEE} — packing team sees this as an internal note.
+                    </span>
+                  </span>
                 </label>
-              ) : (
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input type="radio" name="pay" checked={paymentMethod === "demo"} onChange={() => setPaymentMethod("demo")} />
-                  Pay online (demo mode — UPI / Card / Net Banking)
-                </label>
-              )}
-              <p className="text-xs text-[var(--aes-ink-muted)]">Cash on delivery is not available. All prices in ₹ INR.</p>
-            </div>
+                {giftWrap && (
+                  <Input
+                    placeholder="Gift message (optional)"
+                    value={giftMessage}
+                    onChange={(e) => setGiftMessage(e.target.value)}
+                    maxLength={200}
+                  />
+                )}
+                <div className="flex gap-2">
+                  <Button type="button" variant="secondary" onClick={() => setStep(0)}>
+                    Back
+                  </Button>
+                  <Button type="button" className="flex-1" onClick={() => setStep(2)}>
+                    Continue to payment
+                  </Button>
+                </div>
+              </div>
+            )}
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <Button type="submit" className="w-full py-4" disabled={loading}>
-              {loading ? "Placing order…" : `Place order — ${formatInr(total)}`}
-            </Button>
+            {step === 2 && (
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-[var(--aes-ink)]">Pay online</p>
+                {razorpayEnabled ? (
+                  <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--aes-border)] px-4 py-3 text-sm">
+                    <input type="radio" name="pay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} />
+                    UPI · Cards · Net Banking · Wallets (Razorpay)
+                  </label>
+                ) : (
+                  <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--aes-border)] px-4 py-3 text-sm">
+                    <input type="radio" name="pay" checked={paymentMethod === "demo"} onChange={() => setPaymentMethod("demo")} />
+                    Online payment (demo) — UPI · Cards · Net Banking
+                  </label>
+                )}
+                <SecurePaymentRow />
+                <p className="text-xs text-[var(--aes-ink-muted)]">
+                  Online payments only. All prices in ₹ INR.
+                </p>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                <div className="flex gap-2">
+                  <Button type="button" variant="secondary" onClick={() => setStep(1)}>
+                    Back
+                  </Button>
+                  <Button type="submit" className="flex-1 py-4" disabled={loading}>
+                    {loading ? "Placing order…" : `Place order — ${formatInr(total)}`}
+                  </Button>
+                </div>
+              </div>
+            )}
           </form>
 
-          <div className="aes-panel p-6 sm:p-8">
-            <h2 className="font-semibold text-[var(--gallery-ink,#1e1e1c)]">Order summary</h2>
-            <ul className="mt-4 space-y-4">
-              {cart.map((item) => (
-                <li key={item.id} className="flex gap-3">
-                  <div className="h-16 w-16 overflow-hidden rounded-xl">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.images[0]} alt={item.name} className="h-full w-full object-cover" />
+          <div className="space-y-6">
+            <div className="aes-panel p-6 sm:p-8">
+              <h2 className="font-semibold text-[var(--gallery-ink,#1e1e1c)]">Transparent pricing</h2>
+              <div className="mt-6 space-y-2 text-sm text-[var(--aes-ink)]">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{formatInr(cartTotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>GST (18%)</span>
+                  <span>{formatInr(tax)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>{shipping === 0 ? "Free" : formatInr(shipping)}</span>
+                </div>
+                {giftWrap && (
+                  <div className="flex justify-between">
+                    <span>Gift wrap</span>
+                    <span>{formatInr(giftWrapFee)}</span>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-[var(--aes-ink)]">{item.name}</p>
-                    <p className="text-sm text-[var(--aes-ink-muted)]">{formatInr(item.price)}</p>
-                  </div>
-                  <button type="button" onClick={() => removeFromCart(item.id)} className="text-xs text-[var(--aes-ink-soft)] hover:text-[var(--aes-pink)]">
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 space-y-2 border-t border-[var(--aes-border)] pt-4 text-sm text-[var(--aes-ink)]">
-              <div className="flex justify-between"><span>Subtotal</span><span>{formatInr(cartTotal)}</span></div>
-              <div className="flex justify-between"><span>GST (18%)</span><span>{formatInr(tax)}</span></div>
-              <div className="flex justify-between"><span>Shipping</span><span>{shipping === 0 ? "Free" : formatInr(shipping)}</span></div>
-              <div className="flex justify-between text-base font-bold"><span>Total</span><span>{formatInr(total)}</span></div>
+                )}
+                <div className="flex justify-between border-t border-[var(--aes-border)] pt-3 text-base font-bold">
+                  <span>Total</span>
+                  <span>{formatInr(total)}</span>
+                </div>
+              </div>
+              <p className="mt-4 text-xs text-[var(--gallery-muted,#6f6a63)]">
+                Clear delivery window: {eta}. Easy returns within 7 days.
+              </p>
             </div>
+
+            {curated.length > 0 && (
+              <div>
+                <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--gallery-muted,#6f6a63)]">
+                  Curated For You
+                </h2>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  {curated.map((p, i) => (
+                    <ProductCard key={p.id} product={p} index={i} variant="grid" />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

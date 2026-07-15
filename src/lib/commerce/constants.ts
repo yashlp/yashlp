@@ -178,7 +178,14 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[] | ["*"]> = {
   ],
 };
 
-export const PRODUCT_STATUSES = ["DRAFT", "PUBLISHED", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"] as const;
+export const PRODUCT_STATUSES = [
+  "DRAFT",
+  "SCHEDULED",
+  "PUBLISHED",
+  "HIDDEN",
+  "ARCHIVED",
+  "OUT_OF_STOCK",
+] as const;
 export const APPROVAL_STATUSES = ["PENDING", "APPROVED", "REJECTED"] as const;
 export const PO_STATUSES = ["DRAFT", "ORDERED", "PARTIAL", "RECEIVED", "CANCELLED"] as const;
 export const PO_PAYMENT_STATUSES = ["PENDING", "PARTIAL", "PAID"] as const;

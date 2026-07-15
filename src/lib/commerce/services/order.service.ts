@@ -51,7 +51,11 @@ export const orderService = {
     tax?: number;
     shipping: number;
     total: number;
-    paymentMethod: "cod" | "razorpay" | "demo";
+    paymentMethod: "razorpay" | "demo";
+    giftWrap?: boolean;
+    giftWrapFee?: number;
+    giftMessage?: string;
+    customerNotes?: string;
     guest: {
       name: string;
       email: string;
@@ -66,7 +70,19 @@ export const orderService = {
       if (product.stock < item.quantity) throw new Error(`Insufficient stock for ${product.name}`);
     }
 
+    if (input.paymentMethod !== "razorpay" && input.paymentMethod !== "demo") {
+      throw new Error("Online payment required. Cash on delivery is not available.");
+    }
+
     const status = input.paymentMethod === "razorpay" ? "PENDING" : "CONFIRMED";
+    const giftWrap = Boolean(input.giftWrap);
+    const giftWrapFee = giftWrap ? input.giftWrapFee ?? 3 : 0;
+    const guestLine = `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`;
+    const notes = [guestLine, input.customerNotes?.trim()].filter(Boolean).join("\n");
+    const internalParts = [
+      giftWrap ? `GIFT WRAP (+₹${giftWrapFee})` : null,
+      input.giftMessage?.trim() ? `Gift message: ${input.giftMessage.trim()}` : null,
+    ].filter(Boolean);
 
     const order = await prisma.commerceOrder.create({
       data: {
@@ -79,7 +95,11 @@ export const orderService = {
         total: input.total,
         currency: "INR",
         shippingAddress: input.guest.shippingAddress,
-        customerNotes: `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`,
+        customerNotes: notes,
+        giftWrap,
+        giftWrapFee,
+        giftMessage: input.giftMessage?.trim() || null,
+        internalNotes: internalParts.length ? internalParts.join("\n") : null,
         items: {
           create: input.items.map((item) => ({
             productId: item.productId,

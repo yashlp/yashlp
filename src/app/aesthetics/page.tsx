@@ -3,21 +3,28 @@ import { ConsumerNav } from "@/components/aesthetics/layout/consumer-nav";
 import { ConsumerFooter } from "@/components/aesthetics/layout/consumer-footer";
 import { HeroSection } from "@/components/aesthetics/home/hero-section";
 import { ProductRow } from "@/components/aesthetics/home/product-row";
-import { AboutBanner } from "@/components/aesthetics/home/about-banner";
-import { LifestyleSection } from "@/components/aesthetics/home/lifestyle-section";
-import { FunctionFunSection } from "@/components/aesthetics/home/function-fun-section";
-import { TestimonialsSection } from "@/components/aesthetics/home/testimonials-section";
+import { CollectionRow } from "@/components/aesthetics/home/collection-row";
+import { ShopByRoomSection } from "@/components/aesthetics/home/shop-by-room";
+import { MakerStoriesSection } from "@/components/aesthetics/home/maker-stories";
+import { CustomerPhotosSection } from "@/components/aesthetics/home/customer-photos";
+import { NewsletterSection } from "@/components/aesthetics/home/newsletter-section";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { productService } from "@/lib/commerce/services/product.service";
 
 export default async function AestheticsHomePage() {
   let featured: Awaited<ReturnType<typeof productService.listPublished>> = [];
-  let newArrivals: typeof featured = [];
+  let trending: typeof featured = [];
+  let editorsPicks: typeof featured = [];
+  let completeSetups: Awaited<ReturnType<typeof catalogService.getHomepageData>>["completeSetups"] = [];
+  let customerPhotos: Awaited<ReturnType<typeof catalogService.getHomepageData>>["customerPhotos"] = [];
 
   try {
     const data = await catalogService.getHomepageData();
     featured = data.featured;
-    newArrivals = data.newArrivals;
+    trending = data.trending.length ? data.trending : data.featured;
+    editorsPicks = data.editorsPicks.length ? data.editorsPicks : data.featured;
+    completeSetups = data.completeSetups;
+    customerPhotos = data.customerPhotos;
   } catch {
     // Database not seeded
   }
@@ -27,25 +34,41 @@ export default async function AestheticsHomePage() {
       <ConsumerNav />
       <main className="relative">
         <HeroSection products={featured} />
+
         <ProductRow
-          title="Pieces as stunning"
-          titleLine2="as they are intentional"
+          title="Featured Collection"
           titleStyle="upper"
           products={featured.slice(0, 5)}
           bg="blush"
           quickAdd
         />
+
         <ProductRow
-          title="Edits built to match moods"
+          title="Trending"
           titleStyle="upper"
-          products={newArrivals.slice(0, 5)}
+          products={trending.slice(0, 5)}
           bg="lavender"
           quickAdd
         />
-        <AboutBanner />
-        <LifestyleSection />
-        <FunctionFunSection />
-        <TestimonialsSection />
+
+        <ShopByRoomSection />
+
+        {completeSetups.length > 0 && (
+          <CollectionRow collections={completeSetups} />
+        )}
+
+        <ProductRow
+          title="Editor's Picks"
+          titleStyle="upper"
+          products={editorsPicks.slice(0, 5)}
+          bg="sand"
+          quickAdd
+        />
+
+        <MakerStoriesSection />
+        <CustomerPhotosSection photos={customerPhotos} />
+        <NewsletterSection />
+
         {!featured.length && (
           <section className="aes-bg-sand px-4 py-20 text-center sm:px-6">
             <p className="text-lg font-medium text-[var(--aes-ink-muted)]">

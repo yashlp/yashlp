@@ -30,16 +30,15 @@ export default function PaymentsPage() {
     });
   }, []);
 
-  const successful = payments.filter((p) => p.status === "SUCCESS");
+  const successful = payments.filter((p) => p.status === "SUCCESS" || p.status === "PAID");
   const failed = payments.filter((p) => p.status === "FAILED");
   const pending = payments.filter((p) => p.status === "PENDING");
-  const cod = payments.filter((p) => p.provider === "cod");
   const online = payments.filter((p) => p.provider === "razorpay" || p.provider === "demo");
 
   return (
     <div>
       <h1 className="aes-display text-3xl font-semibold italic">Payments</h1>
-      <p className="mt-1 text-[var(--aes-charcoal-muted)]">UPI, cards, net banking, and COD</p>
+      <p className="mt-1 text-[var(--aes-charcoal-muted)]">Online only — UPI, cards, and net banking (no COD)</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Today&apos;s revenue</p><p className="text-2xl font-semibold">{formatInr(daily.revenue)}</p></Card>
@@ -49,8 +48,8 @@ export default function PaymentsPage() {
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">COD payments</p><p className="text-2xl font-semibold">{cod.length}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">UPI / Card / Net Banking</p><p className="text-2xl font-semibold">{online.length}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Online payments</p><p className="text-2xl font-semibold">{online.length}</p></Card>
+        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">COD</p><p className="text-2xl font-semibold">Disabled</p></Card>
       </div>
 
       <div className="mt-8 overflow-x-auto rounded-2xl border bg-white">

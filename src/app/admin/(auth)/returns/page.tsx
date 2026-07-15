@@ -47,10 +47,41 @@ export default function ReturnsPage() {
     load();
   }
 
+  const reasonBuckets = [
+    "Damaged",
+    "Wrong Product",
+    "Late Delivery",
+    "Quality Issue",
+    "Changed Mind",
+  ].map((label) => {
+    const count = returns.filter((r) => {
+      const reason = (r.reason || "").toLowerCase();
+      if (label === "Damaged") return reason.includes("damage");
+      if (label === "Wrong Product") return reason.includes("wrong");
+      if (label === "Late Delivery") return reason.includes("late") || reason.includes("delay");
+      if (label === "Quality Issue") return reason.includes("quality");
+      if (label === "Changed Mind") return reason.includes("change") || reason.includes("mind");
+      return false;
+    }).length;
+    return { label, count };
+  });
+
   return (
     <div>
       <h1 className="aes-display text-3xl font-semibold italic">Returns & Refunds</h1>
       <p className="mt-1 text-[var(--aes-charcoal-muted)]">Approve returns, process refunds, restock inventory</p>
+
+      <Card className="mt-8" hover={false}>
+        <h2 className="font-semibold">Return reasons dashboard</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {reasonBuckets.map((b) => (
+            <div key={b.label} className="rounded-xl border border-[var(--aes-border)] px-3 py-3">
+              <p className="text-xs text-[var(--aes-dusty)]">{b.label}</p>
+              <p className="text-2xl font-semibold">{b.count}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       <div className="mt-8 space-y-4">
         {returns.length === 0 && <Card hover={false}><p className="text-[var(--aes-charcoal-muted)]">No return requests</p></Card>}
