@@ -3,7 +3,7 @@
  * Neue Montreal · royal blue · calm negative space
  */
 
-@import url("https://api.fontshare.com/v2/css?f[]=neue-montreal@400,500,700&display=swap");
+@import url("https://api.fontshare.com/v2/css?f[]=neue-montreal@400,500,700&f[]=sentient@400,500,700&display=swap");
 
 .aesthetics-root {
   /* Brand colors */
@@ -761,6 +761,37 @@
 .aes-gallery-collection-card img {
   transition: transform 0.5s var(--aes-ease);
   will-change: transform;
+}
+
+/* Collection titles/copy on imagery — light + readable (overrides .aes-gallery-title ink) */
+.aesthetics-root .aes-collection-overlay {
+  color: #ffffff;
+}
+
+.aesthetics-root .aes-collection-overlay .aes-gallery-title {
+  color: #ffffff;
+  font-family: "Sentient", "Neue Montreal", Georgia, serif;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.aesthetics-root .aes-collection-overlay .aes-collection-overlay-copy {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+}
+
+.aesthetics-root .aes-collection-overlay .aes-collection-overlay-kicker {
+  color: #f0e2c0;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
+}
+
+.aesthetics-root .aes-collection-overlay .aes-collection-overlay-cta {
+  color: #f0d9a8;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* Brass pendant lamp — About page, once per visit */

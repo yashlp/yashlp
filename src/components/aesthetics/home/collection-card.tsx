@@ -18,16 +18,18 @@ export function CollectionCard({ collection, index = 0 }: { collection: Collecti
             className="h-full w-full object-cover"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(30,30,28,0.72)] via-[rgba(30,30,28,0.2)] to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
+          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(12,12,12,0.82)] via-[rgba(12,12,12,0.35)] to-transparent" />
+          <div className="aes-collection-overlay absolute inset-x-0 bottom-0 p-6 sm:p-8">
             {featured && (
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#E8D4A8]">
+              <p className="aes-collection-overlay-kicker mb-2 text-[10px] font-bold uppercase tracking-[0.22em]">
                 Featured collection
               </p>
             )}
-            <h3 className="aes-gallery-title text-2xl text-white sm:text-3xl">{collection.title}</h3>
-            <p className="mt-2 line-clamp-2 max-w-md text-sm text-white/80">{collection.description}</p>
-            <span className="mt-4 inline-block text-[11px] font-bold uppercase tracking-[0.18em] text-[#C9A96E]">
+            <h3 className="aes-gallery-title text-2xl sm:text-3xl">{collection.title}</h3>
+            <p className="aes-collection-overlay-copy mt-2 line-clamp-2 max-w-md text-sm">
+              {collection.description}
+            </p>
+            <span className="aes-collection-overlay-cta mt-4 inline-block text-[11px] font-bold uppercase tracking-[0.18em]">
               Explore →
             </span>
           </div>
