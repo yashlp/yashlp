@@ -9,7 +9,7 @@ const NOTE_LINES = ["We're just getting started.", "Every piece is currently ava
 const DETAIL_BODY = [
   "Only Aesthetics is still early — a small shop built around mood, makers, and objects worth living with.",
   "Right now, every piece you see can be reserved by pre-order. That lets us make (or source) with care instead of rushing stock onto shelves that don't deserve it.",
-  "When you pre-order, you're holding a place in the next batch. We'll confirm timelines at checkout and keep you updated as your order moves from studio to doorstep.",
+  "When you pre-order, you're holding a place in the next batch. We'll keep you updated as your order moves from studio to doorstep.",
   "Thank you for being here at the start. The collection will grow — slowly, and on purpose.",
 ];
 
