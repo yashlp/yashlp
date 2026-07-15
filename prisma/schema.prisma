@@ -683,6 +683,7 @@ model CommercePayment {
 
   @@index([orderId])
   @@index([status])
+  @@unique([providerPaymentId])
 }
 
 model CommerceRefund {

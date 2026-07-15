@@ -31,8 +31,14 @@ npx prisma db push --skip-generate
 echo "→ ensure commerce admin"
 npx tsx scripts/ensure-commerce-admin.ts
 
-echo "→ seed demo commerce catalog"
-npx tsx prisma/seed-commerce.ts
+# Catalog seed stays idempotent. Demo users/passwords are NOT re-applied in production
+# unless SEED_DEMO_USERS=true (explicit opt-in for staging/previews).
+if [ "${SEED_COMMERCE_CATALOG:-true}" = "true" ]; then
+  echo "→ seed commerce catalog (SEED_DEMO_USERS=${SEED_DEMO_USERS:-false})"
+  SEED_DEMO_USERS="${SEED_DEMO_USERS:-false}" npx tsx prisma/seed-commerce.ts
+else
+  echo "→ skip commerce seed (SEED_COMMERCE_CATALOG=false)"
+fi
 
 echo "→ next build"
 npx next build

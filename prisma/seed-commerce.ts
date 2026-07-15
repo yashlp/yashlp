@@ -430,30 +430,56 @@ async function linkCollectionProducts(collectionSlug: string, productSlugs: stri
 async function main() {
   console.log("Seeding Only Aesthetics demo catalog...");
 
-  const adminEmail = (process.env.COMMERCE_ADMIN_EMAIL || "yash.shah.lp2@gmail.com").toLowerCase().trim();
-  const passwordHash = process.env.COMMERCE_ADMIN_PASSWORD
-    ? await hashPassword(process.env.COMMERCE_ADMIN_PASSWORD)
-    : DEMO_ADMIN_PASSWORD_HASH;
+  const seedDemoUsers = process.env.SEED_DEMO_USERS === "true";
+  const isProdLike =
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL === "1" ||
+    process.env.VERCEL_ENV === "production";
 
-  await prisma.commerceAdmin.upsert({
-    where: { email: adminEmail },
-    update: { passwordHash, name: "Yash Shah", role: "SUPER_ADMIN", isActive: true, mfaEnabled: false },
-    create: { email: adminEmail, name: "Yash Shah", role: "SUPER_ADMIN", passwordHash, mfaEnabled: false },
-  });
+  // Admin password rotation is owned by ensure-commerce-admin.ts.
+  // Never overwrite production passwords from this seed unless SEED_DEMO_USERS=true.
+  if (seedDemoUsers && !isProdLike) {
+    const adminEmail = (process.env.COMMERCE_ADMIN_EMAIL || "yash.shah.lp2@gmail.com")
+      .toLowerCase()
+      .trim();
+    const passwordHash = process.env.COMMERCE_ADMIN_PASSWORD
+      ? await hashPassword(process.env.COMMERCE_ADMIN_PASSWORD)
+      : DEMO_ADMIN_PASSWORD_HASH;
 
-  const demoStaff = [
-    { email: "inventory@onlyaesthetics.in", name: "Priya Inventory", role: "INVENTORY_MANAGER" },
-    { email: "orders@onlyaesthetics.in", name: "Rahul Fulfillment", role: "ORDER_FULFILLMENT" },
-    { email: "support@onlyaesthetics.in", name: "Ananya Support", role: "CUSTOMER_SUPPORT" },
-    { email: "marketing@onlyaesthetics.in", name: "Dev Marketing", role: "MARKETING" },
-  ];
-
-  for (const s of demoStaff) {
     await prisma.commerceAdmin.upsert({
-      where: { email: s.email },
-      update: { name: s.name, role: s.role, isActive: true, passwordHash: DEMO_ADMIN_PASSWORD_HASH },
-      create: { email: s.email, name: s.name, role: s.role, passwordHash: DEMO_ADMIN_PASSWORD_HASH, isActive: true },
+      where: { email: adminEmail },
+      update: { passwordHash, name: "Yash Shah", role: "SUPER_ADMIN", isActive: true },
+      create: {
+        email: adminEmail,
+        name: "Yash Shah",
+        role: "SUPER_ADMIN",
+        passwordHash,
+        mfaEnabled: false,
+      },
     });
+
+    const demoStaff = [
+      { email: "inventory@onlyaesthetics.in", name: "Priya Inventory", role: "INVENTORY_MANAGER" },
+      { email: "orders@onlyaesthetics.in", name: "Rahul Fulfillment", role: "ORDER_FULFILLMENT" },
+      { email: "support@onlyaesthetics.in", name: "Ananya Support", role: "CUSTOMER_SUPPORT" },
+      { email: "marketing@onlyaesthetics.in", name: "Dev Marketing", role: "MARKETING" },
+    ];
+
+    for (const s of demoStaff) {
+      await prisma.commerceAdmin.upsert({
+        where: { email: s.email },
+        update: { name: s.name, role: s.role, isActive: true, passwordHash: DEMO_ADMIN_PASSWORD_HASH },
+        create: {
+          email: s.email,
+          name: s.name,
+          role: s.role,
+          passwordHash: DEMO_ADMIN_PASSWORD_HASH,
+          isActive: true,
+        },
+      });
+    }
+  } else {
+    console.log("Skipping demo admin/staff password seed (production-safe mode)");
   }
 
   for (const cat of CATEGORIES) {
@@ -543,19 +569,27 @@ async function main() {
     await linkCollectionProducts(col.slug, col.productSlugs);
   }
 
-  const customerPasswordHash = DEMO_ADMIN_PASSWORD_HASH;
+  let customer: { id: string } | null = null;
 
-  const customer = await prisma.commerceCustomer.upsert({
-    where: { email: "demo@customer.com" },
-    update: { name: "Demo Customer", status: "ACTIVE", passwordHash: customerPasswordHash, phone: "+919000012345" },
-    create: {
-      email: "demo@customer.com",
-      name: "Demo Customer",
-      status: "ACTIVE",
-      phone: "+919000012345",
-      passwordHash: customerPasswordHash,
-    },
-  });
+  if (seedDemoUsers && !isProdLike) {
+    const customerPasswordHash = DEMO_ADMIN_PASSWORD_HASH;
+    customer = await prisma.commerceCustomer.upsert({
+      where: { email: "demo@customer.com" },
+      update: {
+        name: "Demo Customer",
+        status: "ACTIVE",
+        passwordHash: customerPasswordHash,
+        phone: "+919000012345",
+      },
+      create: {
+        email: "demo@customer.com",
+        name: "Demo Customer",
+        status: "ACTIVE",
+        phone: "+919000012345",
+        passwordHash: customerPasswordHash,
+      },
+    });
+  }
 
   const demoOrders = [
     { orderNumber: "AES-DEMO-DELIVERED", status: "DELIVERED", productSlug: "cloud-vessel", payment: "razorpay" },
@@ -565,9 +599,14 @@ async function main() {
     { orderNumber: "AES-DEMO-PENDING", status: "CONFIRMED", productSlug: "lavender-room-mist", payment: "demo" },
   ] as const;
 
-  for (const o of demoOrders) {
+  const demoCustomer = customer;
+  if (!demoCustomer) {
+    console.log("Skipping demo order seed (no demo customer in production-safe mode)");
+  }
+
+  for (const o of demoCustomer ? demoOrders : []) {
     const product = await prisma.commerceProduct.findUnique({ where: { slug: o.productSlug } });
-    if (!product) continue;
+    if (!product || !demoCustomer) continue;
 
     const subtotal = product.price;
     const gst = Math.round(subtotal * 0.18);
@@ -575,10 +614,10 @@ async function main() {
 
     await prisma.commerceOrder.upsert({
       where: { orderNumber: o.orderNumber },
-      update: { status: o.status, subtotal, total, tax: gst, shipping: subtotal >= 999 ? 0 : 49, customerId: customer.id },
+      update: { status: o.status, subtotal, total, tax: gst, shipping: subtotal >= 999 ? 0 : 49, customerId: demoCustomer.id },
       create: {
         orderNumber: o.orderNumber,
-        customerId: customer.id,
+        customerId: demoCustomer.id,
         sellerId: product.sellerId,
         status: o.status,
         subtotal,
@@ -689,11 +728,11 @@ async function main() {
         where: { id: existing.id },
         data: { status: r.status, isFeatured: r.featured, adminReply: r.status === "APPROVED" ? "Thank you for shopping with Only Aesthetics!" : null },
       });
-    } else {
+    } else if (demoCustomer) {
       await prisma.commerceReview.create({
         data: {
           productId: product.id,
-          customerId: customer.id,
+          customerId: demoCustomer.id,
           rating: r.rating,
           title: r.title,
           body: r.body,
@@ -742,7 +781,8 @@ async function main() {
     { key: "shipping_flat_rate", value: "49", group: "shipping" },
     { key: "free_shipping_threshold", value: "999", group: "shipping" },
     { key: "gst_rate", value: "18", group: "tax" },
-    { key: "cod_enabled", value: "true", group: "payments" },
+    { key: "cod_enabled", value: "false", group: "payments" },
+    { key: "razorpay_enabled", value: "true", group: "payments" },
     { key: "support_email", value: "hello@onlyaesthetics.in", group: "contact" },
     { key: "support_whatsapp", value: "+919876543210", group: "contact" },
     { key: "site_name", value: "Only Aesthetics", group: "general" },
@@ -758,8 +798,12 @@ async function main() {
 
   const productCount = await prisma.commerceProduct.count({ where: { status: "PUBLISHED" } });
   const orderCount = await prisma.commerceOrder.count();
-  console.log(`Demo seed complete: ${productCount} products, ${orderCount} orders, ${DEMO_COLLECTIONS.length} collections.`);
-  console.log(`Admin: ${adminEmail} | Customer demo: demo@customer.com / Chester@2604`);
+  console.log(
+    `Catalog seed complete: ${productCount} products, ${orderCount} orders, ${DEMO_COLLECTIONS.length} collections.`
+  );
+  if (seedDemoUsers && !isProdLike) {
+    console.log("Local demo users seeded (SEED_DEMO_USERS=true). Do not use these on production.");
+  }
 }
 
 main()
