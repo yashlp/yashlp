@@ -44,49 +44,67 @@ export function ConsumerFooter() {
           </div>
         </div>
 
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 text-left sm:px-6">
-          <nav
-            className="flex flex-wrap items-center justify-start gap-x-5 gap-y-2 text-sm text-white/55"
-            aria-label="Shop"
-          >
-            <span className="text-xs font-medium uppercase tracking-[0.18em] text-white/70">Shop</span>
-            <Link href="/aesthetics/shop" className="inline-flex min-h-11 items-center hover:text-white">
-              All products
-            </Link>
-            <Link href="/aesthetics/collections" className="inline-flex min-h-11 items-center hover:text-white">
-              Collections
-            </Link>
-            <Link href="/aesthetics/about" className="inline-flex min-h-11 items-center hover:text-white">
-              About us
-            </Link>
-            <Link href="/aesthetics/wishlist" className="inline-flex min-h-11 items-center hover:text-white">
-              Favourites
-            </Link>
-            <Link href="/aesthetics/account" className="inline-flex min-h-11 items-center hover:text-white">
-              My account
-            </Link>
+        <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 text-left sm:px-6">
+          <nav aria-label="Shop">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-white/70">Shop</p>
+            <ul className="space-y-1 text-sm text-white/55">
+              <li>
+                <Link href="/aesthetics/shop" className="inline-flex min-h-11 items-center hover:text-white">
+                  All products
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/collections" className="inline-flex min-h-11 items-center hover:text-white">
+                  Collections
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/about" className="inline-flex min-h-11 items-center hover:text-white">
+                  About us
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/wishlist" className="inline-flex min-h-11 items-center hover:text-white">
+                  Favourites
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/account" className="inline-flex min-h-11 items-center hover:text-white">
+                  My account
+                </Link>
+              </li>
+            </ul>
           </nav>
 
-          <nav
-            className="flex flex-wrap items-center justify-start gap-x-5 gap-y-2 text-sm text-white/55"
-            aria-label="Help"
-          >
-            <span className="text-xs font-medium uppercase tracking-[0.18em] text-white/70">Help</span>
-            <Link href="/aesthetics/faq" className="inline-flex min-h-11 items-center hover:text-white">
-              FAQ
-            </Link>
-            <Link href="/aesthetics/shipping" className="inline-flex min-h-11 items-center hover:text-white">
-              Shipping &amp; Returns
-            </Link>
-            <Link href="/aesthetics/privacy" className="inline-flex min-h-11 items-center hover:text-white">
-              Privacy Policy
-            </Link>
-            <Link href="/aesthetics/terms" className="inline-flex min-h-11 items-center hover:text-white">
-              Terms
-            </Link>
-            <a href="mailto:hello@onlyaesthetics.app" className="inline-flex min-h-11 items-center hover:text-white">
-              hello@onlyaesthetics.app
-            </a>
+          <nav aria-label="Help">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-white/70">Help</p>
+            <ul className="space-y-1 text-sm text-white/55">
+              <li>
+                <Link href="/aesthetics/faq" className="inline-flex min-h-11 items-center hover:text-white">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/shipping" className="inline-flex min-h-11 items-center hover:text-white">
+                  Shipping &amp; Returns
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/privacy" className="inline-flex min-h-11 items-center hover:text-white">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/aesthetics/terms" className="inline-flex min-h-11 items-center hover:text-white">
+                  Terms
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:hello@onlyaesthetics.app" className="inline-flex min-h-11 items-center hover:text-white">
+                  hello@onlyaesthetics.app
+                </a>
+              </li>
+            </ul>
           </nav>
         </div>
 
