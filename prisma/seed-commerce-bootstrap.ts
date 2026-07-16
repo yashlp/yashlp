@@ -22,6 +22,7 @@ const SETTINGS = [
   { key: "company_gst", value: "", group: "tax" },
   { key: "shipping_flat_rate", value: "49", group: "shipping" },
   { key: "free_shipping_threshold", value: "999", group: "shipping" },
+  { key: "free_delivery_enabled", value: "false", group: "shipping" },
   { key: "gst_rate", value: "18", group: "tax" },
   { key: "cod_enabled", value: "false", group: "payments" },
   { key: "support_email", value: "hello@onlyaesthetics.in", group: "contact" },

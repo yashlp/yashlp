@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { orderService } from "@/lib/commerce/services/order.service";
 import { getCommerceCustomer } from "@/lib/commerce/customer-session";
 import { checkoutSchema } from "@/lib/commerce/validators/customer";
-
-const GST_RATE = 0.18;
-const FREE_SHIPPING_THRESHOLD = 999;
-const SHIPPING_FEE = 49;
+import {
+  computeShippingFee,
+  computeTax,
+  getShippingConfig,
+} from "@/lib/commerce/shipping-config";
 
 function isDemoPaymentAllowed() {
   return process.env.ALLOW_DEMO_PAYMENT === "true" && process.env.NODE_ENV !== "production";
@@ -30,10 +31,11 @@ export async function POST(req: NextRequest) {
     }
 
     const customer = await getCommerceCustomer();
+    const shippingConfig = await getShippingConfig();
 
     const subtotal = body.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-    const tax = Math.round(subtotal * GST_RATE * 100) / 100;
+    const shipping = computeShippingFee(subtotal, shippingConfig);
+    const tax = computeTax(subtotal, shippingConfig);
     const total = subtotal + shipping + tax;
 
     const shippingAddress = [

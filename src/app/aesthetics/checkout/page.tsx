@@ -19,15 +19,18 @@ declare global {
   }
 }
 
-const FREE_SHIPPING = 999;
-const SHIPPING_FEE = 49;
-const GST_RATE = 0.18;
-
 function formatInr(n: number) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 }
 
 type CheckoutStep = "identity" | "details" | "payment";
+
+type ShippingRates = {
+  flatRate: number;
+  freeThreshold: number;
+  alwaysFree: boolean;
+  gstRatePercent: number;
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -37,6 +40,12 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "demo">("razorpay");
+  const [rates, setRates] = useState<ShippingRates>({
+    flatRate: 49,
+    freeThreshold: 999,
+    alwaysFree: false,
+    gstRatePercent: 18,
+  });
   const [form, setForm] = useState<CheckoutFormState>({
     name: "",
     email: "",
@@ -58,6 +67,18 @@ export default function CheckoutPage() {
         if (!enabled) setPaymentMethod("demo");
       })
       .catch(() => setRazorpayEnabled(false));
+
+    fetch("/api/commerce/shipping")
+      .then((r) => r.json())
+      .then((d) => {
+        setRates({
+          flatRate: Number(d.shipping?.flatRate ?? 49),
+          freeThreshold: Number(d.shipping?.freeThreshold ?? 999),
+          alwaysFree: Boolean(d.shipping?.alwaysFree),
+          gstRatePercent: Number(d.tax?.gstRatePercent ?? 18),
+        });
+      })
+      .catch(() => undefined);
 
     fetch("/api/commerce/auth/me")
       .then((r) => r.json())
@@ -81,8 +102,12 @@ export default function CheckoutPage() {
       .catch(() => undefined);
   }, []);
 
-  const shipping = cartTotal >= FREE_SHIPPING ? 0 : SHIPPING_FEE;
-  const tax = Math.round(cartTotal * GST_RATE * 100) / 100;
+  const shipping = rates.alwaysFree
+    ? 0
+    : rates.freeThreshold > 0 && cartTotal >= rates.freeThreshold
+      ? 0
+      : Math.max(0, rates.flatRate);
+  const tax = Math.round(cartTotal * (rates.gstRatePercent / 100) * 100) / 100;
   const total = cartTotal + shipping + tax;
 
   async function placeOrder() {
@@ -309,13 +334,21 @@ export default function CheckoutPage() {
                 <span>{formatInr(cartTotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span>GST (18%)</span>
+                <span>GST ({rates.gstRatePercent}%)</span>
                 <span>{formatInr(tax)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping</span>
+                <span>Delivery</span>
                 <span>{shipping === 0 ? "Free" : formatInr(shipping)}</span>
               </div>
+              {!rates.alwaysFree && shipping > 0 && rates.freeThreshold > 0 && (
+                <p className="text-xs text-[var(--aes-ink-muted)]">
+                  Free delivery on orders of {formatInr(rates.freeThreshold)} or more.
+                </p>
+              )}
+              {rates.alwaysFree && (
+                <p className="text-xs text-[var(--aes-ink-muted)]">Free delivery on all orders.</p>
+              )}
               <div className="flex justify-between text-base font-bold">
                 <span>Total</span>
                 <span>{formatInr(total)}</span>
