@@ -1,31 +1,35 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isCommercePath, isIndiaRequest } from "@/lib/commerce/geo";
 
 function withPathHeader(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const requestHeaders = new Headers(request.headers);
-  // Must be on the *request* so server components can read it via headers()
   requestHeaders.set("x-pathname", path);
   return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+function indiaBlockedResponse(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/aesthetics/india-only";
+  return NextResponse.rewrite(url);
 }
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Keep admins isolated:
-  // - /admin*           → Only Aesthetics commerce admin
-  // - /civic-admin*     → CivicLens community admin
-  // Never redirect one into the other — they use different cookies + APIs.
-  const response = withPathHeader(request);
-
-  // Never process Next.js static/runtime assets through app security middleware.
   if (path.startsWith("/_next/") || path === "/favicon.ico") {
-    return response;
+    return withPathHeader(request);
   }
+
+  if (isCommercePath(path) && path !== "/aesthetics/india-only" && !isIndiaRequest(request)) {
+    return indiaBlockedResponse(request);
+  }
+
+  const response = withPathHeader(request);
 
   const isProd = process.env.NODE_ENV === "production";
 
-  // In development, skip strict CSP so Turbopack/HMR and dev tooling work reliably.
   if (!isProd) {
     return response;
   }
@@ -44,7 +48,7 @@ export function middleware(request: NextRequest) {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://js.stripe.com",
       "style-src 'self' 'unsafe-inline' https://api.fontshare.com",
-      "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.openstreetmap.org https://images.unsplash.com",
+      "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.openstreetmap.org https://images.unsplash.com https://*.public.blob.vercel-storage.com",
       "connect-src 'self' https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org https://api.razorpay.com https://checkout.razorpay.com https://api.stripe.com",
       "frame-src https://api.razorpay.com https://checkout.razorpay.com https://js.stripe.com https://hooks.stripe.com",
       "font-src 'self' data: https://api.fontshare.com https://cdn.fontshare.com",

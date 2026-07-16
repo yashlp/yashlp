@@ -22,8 +22,18 @@ else
   echo "→ ensure commerce admin"
   npx tsx scripts/ensure-commerce-admin.ts || echo "WARN: ensure-commerce-admin failed — continuing build"
 
-  echo "→ seed commerce catalog"
-  npx tsx prisma/seed-commerce.ts || echo "WARN: seed-commerce failed — continuing build"
+  echo "→ bootstrap commerce settings (no demo catalog)"
+  npx tsx prisma/seed-commerce-bootstrap.ts || echo "WARN: seed-commerce-bootstrap failed — continuing build"
+
+  if [ "${PURGE_DEMO_CATALOG:-}" = "true" ]; then
+    echo "→ purge demo catalog"
+    npx tsx scripts/purge-demo-catalog.ts || echo "WARN: purge-demo-catalog failed — continuing build"
+  fi
+
+  if [ "${SEED_DEMO_CATALOG:-}" = "true" ]; then
+    echo "→ seed demo catalog (SEED_DEMO_CATALOG=true)"
+    npx tsx prisma/seed-commerce.ts || echo "WARN: seed-commerce failed — continuing build"
+  fi
 fi
 
 echo "→ next build"

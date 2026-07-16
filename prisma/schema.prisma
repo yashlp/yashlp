@@ -560,6 +560,7 @@ model CommerceCustomer {
   phone         String?  @unique
   passwordHash  String?
   name          String?
+  emailVerified Boolean  @default(false)
   status        String   @default("ACTIVE")
   loyaltyPoints Int      @default(0)
   loyaltyLevel  String   @default("STANDARD")
@@ -618,6 +619,19 @@ model CommerceCustomerPhoneOtp {
   createdAt DateTime @default(now())
 
   @@index([phone])
+}
+
+model CommerceCustomerEmailOtp {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  purpose    String    @default("SIGNUP")
+  expiresAt  DateTime
+  verifiedAt DateTime?
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
 }
 
 model CommerceOrder {

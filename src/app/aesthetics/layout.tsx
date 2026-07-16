@@ -5,16 +5,18 @@ import { StorefrontProviders } from "@/components/aesthetics/providers/storefron
 import { BrandLoader } from "@/components/aesthetics/layout/brand-loader";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://onlyaesthetics.in"),
   title: { default: "Only Aesthetics", template: "%s · Only Aesthetics" },
   description:
-    "Because Details Matter. A curated design marketplace for independent makers and wellness objects.",
+    "Because Details Matter. Curated design objects from independent makers — shipped across India.",
   applicationName: "Only Aesthetics",
   openGraph: {
     title: "Only Aesthetics — Because Details Matter",
     description:
-      "A curated design marketplace. Independent makers, mood-matched edits, editorial curation.",
+      "Curated home, wellness, and lifestyle objects from independent makers. India only.",
     siteName: "Only Aesthetics",
     type: "website",
+    locale: "en_IN",
   },
 };
 

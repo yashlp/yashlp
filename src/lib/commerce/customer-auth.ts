@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword, verifyPassword } from "./password";
 import { createCustomerSession } from "./customer-session";
+import { sendSignupOtpEmail } from "./commerce-email";
 
 const OTP_EXPIRY_MIN = 10;
 
@@ -9,8 +10,88 @@ function normalizePhone(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
+function normalizeEmail(email: string) {
+  return email.toLowerCase().trim();
+}
+
 function hashOtp(code: string) {
   return createHash("sha256").update(code).digest("hex");
+}
+
+function requireEmailVerification(): boolean {
+  return process.env.NODE_ENV === "production" || process.env.REQUIRE_EMAIL_OTP === "true";
+}
+
+async function consumeVerifiedEmailOtp(email: string) {
+  const otp = await prisma.commerceCustomerEmailOtp.findFirst({
+    where: {
+      email,
+      purpose: "SIGNUP",
+      verifiedAt: { not: null },
+      usedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { verifiedAt: "desc" },
+  });
+
+  if (!otp) {
+    throw new Error("Verify your email with the OTP we sent before creating an account.");
+  }
+
+  await prisma.commerceCustomerEmailOtp.update({
+    where: { id: otp.id },
+    data: { usedAt: new Date() },
+  });
+}
+
+export async function sendEmailOtp(email: string, purpose: "SIGNUP" = "SIGNUP") {
+  const normalized = normalizeEmail(email);
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MIN * 60 * 1000);
+
+  await prisma.commerceCustomerEmailOtp.create({
+    data: { email: normalized, codeHash: hashOtp(code), purpose, expiresAt },
+  });
+
+  const sent = await sendSignupOtpEmail(normalized, code);
+  if (!sent.ok) {
+    if (process.env.NODE_ENV !== "production") {
+      console.info(`[Aesthetics email OTP] ${normalized}: ${code}`);
+      return { email: normalized, devCode: code };
+    }
+    throw new Error(sent.error);
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    console.info(`[Aesthetics email OTP] ${normalized}: ${code}`);
+    return { email: normalized, devCode: code };
+  }
+
+  return { email: normalized };
+}
+
+export async function verifyEmailOtp(email: string, code: string, purpose: "SIGNUP" = "SIGNUP") {
+  const normalized = normalizeEmail(email);
+  const otp = await prisma.commerceCustomerEmailOtp.findFirst({
+    where: {
+      email: normalized,
+      purpose,
+      expiresAt: { gt: new Date() },
+      usedAt: null,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!otp || otp.codeHash !== hashOtp(code)) {
+    throw new Error("Invalid or expired verification code");
+  }
+
+  await prisma.commerceCustomerEmailOtp.update({
+    where: { id: otp.id },
+    data: { verifiedAt: new Date() },
+  });
+
+  return { email: normalized, verified: true };
 }
 
 export async function registerCustomer(input: {
@@ -28,8 +109,12 @@ export async function registerCustomer(input: {
   };
   orderId?: string;
 }) {
-  const email = input.email.toLowerCase().trim();
+  const email = normalizeEmail(input.email);
   const phone = normalizePhone(input.phone);
+
+  if (requireEmailVerification()) {
+    await consumeVerifiedEmailOtp(email);
+  }
 
   const existing = await prisma.commerceCustomer.findFirst({
     where: { OR: [{ email }, { phone }] },
@@ -43,10 +128,24 @@ export async function registerCustomer(input: {
   const customer = existing
     ? await prisma.commerceCustomer.update({
         where: { id: existing.id },
-        data: { name: input.name, email, phone, passwordHash, status: "ACTIVE" },
+        data: {
+          name: input.name,
+          email,
+          phone,
+          passwordHash,
+          emailVerified: true,
+          status: "ACTIVE",
+        },
       })
     : await prisma.commerceCustomer.create({
-        data: { name: input.name, email, phone, passwordHash, status: "ACTIVE" },
+        data: {
+          name: input.name,
+          email,
+          phone,
+          passwordHash,
+          emailVerified: true,
+          status: "ACTIVE",
+        },
       });
 
   await prisma.commerceCustomerAddress.deleteMany({ where: { customerId: customer.id } });

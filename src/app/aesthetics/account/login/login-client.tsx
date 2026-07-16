@@ -103,9 +103,6 @@ export default function AccountLoginClient() {
         <p className="mt-3 text-center text-sm text-[var(--gallery-muted,#6f6a63)]">
           Sign in to save favourites, view orders, and request refunds.
         </p>
-        <p className="mt-2 text-center text-xs text-[var(--aes-ink-soft)]">
-          Demo: demo@customer.com / Chester@2604
-        </p>
 
         <div className="aes-panel mt-8 flex p-1">
           <button

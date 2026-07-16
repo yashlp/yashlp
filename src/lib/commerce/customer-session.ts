@@ -20,6 +20,44 @@ export type CommerceCustomerUser = {
   name: string | null;
 };
 
+export type CommerceCustomerWithAddress = CommerceCustomerUser & {
+  address: {
+    line1: string;
+    line2: string | null;
+    city: string;
+    state: string | null;
+    postalCode: string;
+    country: string;
+    phone: string | null;
+  } | null;
+};
+
+async function loadCustomerFromSession(token: string) {
+  return prisma.commerceCustomerSession.findFirst({
+    where: {
+      tokenHash: hashToken(token),
+      revokedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          name: true,
+          status: true,
+          addresses: {
+            where: { isDefault: true },
+            take: 1,
+            orderBy: { updatedAt: "desc" },
+          },
+        },
+      },
+    },
+  });
+}
+
 export async function createCustomerSession(customerId: string) {
   const token = generateSessionToken();
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
@@ -69,21 +107,39 @@ export async function getCommerceCustomer(): Promise<CommerceCustomerUser | null
   const token = cookieStore.get(CUSTOMER_SESSION_COOKIE)?.value;
   if (!token) return null;
 
-  const session = await prisma.commerceCustomerSession.findFirst({
-    where: {
-      tokenHash: hashToken(token),
-      revokedAt: null,
-      expiresAt: { gt: new Date() },
-    },
-    include: {
-      customer: {
-        select: { id: true, email: true, phone: true, name: true, status: true },
-      },
-    },
-  });
-
+  const session = await loadCustomerFromSession(token);
   if (!session?.customer || session.customer.status !== "ACTIVE") return null;
-  return session.customer;
+  const { addresses, ...customer } = session.customer;
+  void addresses;
+  return customer;
+}
+
+export async function getCommerceCustomerWithAddress(): Promise<CommerceCustomerWithAddress | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(CUSTOMER_SESSION_COOKIE)?.value;
+  if (!token) return null;
+
+  const session = await loadCustomerFromSession(token);
+  if (!session?.customer || session.customer.status !== "ACTIVE") return null;
+
+  const addr = session.customer.addresses[0];
+  return {
+    id: session.customer.id,
+    email: session.customer.email,
+    phone: session.customer.phone,
+    name: session.customer.name,
+    address: addr
+      ? {
+          line1: addr.line1,
+          line2: addr.line2,
+          city: addr.city,
+          state: addr.state,
+          postalCode: addr.postalCode,
+          country: addr.country,
+          phone: addr.phone,
+        }
+      : null,
+  };
 }
 
 export async function requireCommerceCustomer(): Promise<CommerceCustomerUser> {

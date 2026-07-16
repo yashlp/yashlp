@@ -8,6 +8,10 @@ import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
 import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
+import {
+  CheckoutIdentityStep,
+  type CheckoutFormState,
+} from "@/components/aesthetics/checkout/checkout-identity-step";
 
 declare global {
   interface Window {
@@ -23,14 +27,17 @@ function formatInr(n: number) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 }
 
+type CheckoutStep = "identity" | "details" | "payment";
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartTotal, cartCount, removeFromCart, clearCart } = useCart();
+  const [step, setStep] = useState<CheckoutStep>("identity");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "demo">("razorpay");
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<CheckoutFormState>({
     name: "",
     email: "",
     phone: "",
@@ -50,10 +57,28 @@ export default function CheckoutPage() {
         setRazorpayEnabled(enabled);
         if (!enabled) setPaymentMethod("demo");
       })
-      .catch(() => {
-        setRazorpayEnabled(false);
-        setPaymentMethod("demo");
-      });
+      .catch(() => setRazorpayEnabled(false));
+
+    fetch("/api/commerce/auth/me")
+      .then((r) => r.json())
+      .then((me) => {
+        if (!me.customer) return;
+        const a = me.customer.address;
+        setForm((prev) => ({
+          ...prev,
+          name: me.customer.name || prev.name,
+          email: me.customer.email || prev.email,
+          phone: me.customer.phone || prev.phone,
+          line1: a?.line1 || prev.line1,
+          line2: a?.line2 || prev.line2,
+          city: a?.city || prev.city,
+          state: a?.state || prev.state,
+          postalCode: a?.postalCode || prev.postalCode,
+          country: a?.country || "IN",
+        }));
+        setStep("details");
+      })
+      .catch(() => undefined);
   }, []);
 
   const shipping = cartTotal >= FREE_SHIPPING ? 0 : SHIPPING_FEE;
@@ -66,7 +91,8 @@ export default function CheckoutPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        paymentMethod,
+        country: "IN",
+        paymentMethod: razorpayEnabled ? "razorpay" : paymentMethod,
         items: cart.map((p) => ({
           productId: p.id,
           quantity: 1,
@@ -131,9 +157,13 @@ export default function CheckoutPage() {
     setLoading(true);
     setError("");
     try {
+      if (!razorpayEnabled) {
+        throw new Error("Online payment is not available. Please try again later.");
+      }
+
       const order = await placeOrder();
 
-      if (paymentMethod === "razorpay" && razorpayEnabled) {
+      if (razorpayEnabled) {
         await openRazorpay(order);
       }
 
@@ -141,15 +171,6 @@ export default function CheckoutPage() {
       const params = new URLSearchParams({
         orderId: order.id,
         orderNumber: order.orderNumber,
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        line1: form.line1,
-        line2: form.line2 || "",
-        city: form.city,
-        state: form.state || "",
-        postalCode: form.postalCode,
-        country: form.country,
       });
       router.push(`/aesthetics/checkout/success?${params.toString()}`);
     } catch (err) {
@@ -163,11 +184,7 @@ export default function CheckoutPage() {
     return (
       <ConsumerPage cartCount={cartCount} room="calm">
         <main className="mx-auto max-w-lg px-4 py-12">
-          <EmptyState
-            {...EMPTY_COPY.cart}
-            actionHref="/aesthetics/shop"
-            actionLabel="Continue shopping"
-          />
+          <EmptyState {...EMPTY_COPY.cart} actionHref="/aesthetics/shop" actionLabel="Continue shopping" />
         </main>
       </ConsumerPage>
     );
@@ -177,46 +194,91 @@ export default function CheckoutPage() {
     <ConsumerPage cartCount={cartCount} room="calm">
       {razorpayEnabled && <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />}
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-        <p className="aes-gallery-eyebrow">Secure payment</p>
+        <p className="aes-gallery-eyebrow">Secure payment · India only</p>
         <h1 className="aes-gallery-title mt-3">Checkout</h1>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-2">
-          <form onSubmit={submit} className="aes-panel space-y-4 p-6 sm:p-8">
-            <Input placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-            <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-            <Input type="tel" placeholder="Mobile number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
-            <Input placeholder="Address line 1" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} required />
-            <Input placeholder="Address line 2 (optional)" value={form.line2} onChange={(e) => setForm({ ...form, line2: e.target.value })} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
-              <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input placeholder="PIN code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} required />
-              <Input placeholder="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-            </div>
+          <div className="space-y-6">
+            {step === "identity" && (
+              <CheckoutIdentityStep
+                form={form}
+                onFormChange={setForm}
+                onContinue={() => setStep("details")}
+              />
+            )}
 
-            <div className="space-y-2 border-t border-[var(--aes-border)] pt-4">
-              <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment — online only (India)</p>
-              {razorpayEnabled ? (
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input type="radio" name="pay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} />
-                  UPI · Cards · Net Banking · Wallets (Razorpay)
-                </label>
-              ) : (
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input type="radio" name="pay" checked={paymentMethod === "demo"} onChange={() => setPaymentMethod("demo")} />
-                  Pay online (demo mode — UPI / Card / Net Banking)
-                </label>
-              )}
-              <p className="text-xs text-[var(--aes-ink-muted)]">Cash on delivery is not available. All prices in ₹ INR.</p>
-            </div>
+            {step === "details" && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setStep("payment");
+                }}
+                className="aes-panel space-y-4 p-6 sm:p-8"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="text-lg font-semibold text-[var(--aes-ink)]">Delivery details</h2>
+                  <button
+                    type="button"
+                    className="text-xs text-[var(--aes-ink-muted)] underline"
+                    onClick={() => setStep("identity")}
+                  >
+                    Change account
+                  </button>
+                </div>
+                <Input placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                <Input type="tel" placeholder="Mobile number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
+                <Input placeholder="Address line 1" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} required />
+                <Input placeholder="Address line 2 (optional)" value={form.line2} onChange={(e) => setForm({ ...form, line2: e.target.value })} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
+                  <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+                </div>
+                <Input placeholder="PIN code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} required />
+                <Input placeholder="Country" value="India" disabled />
+                <Button type="submit" className="w-full py-4">
+                  Continue to payment
+                </Button>
+              </form>
+            )}
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <Button type="submit" className="w-full py-4" disabled={loading}>
-              {loading ? "Placing order…" : `Place order — ${formatInr(total)}`}
-            </Button>
-          </form>
+            {step === "payment" && (
+              <form onSubmit={submit} className="aes-panel space-y-4 p-6 sm:p-8">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="text-lg font-semibold text-[var(--aes-ink)]">Payment</h2>
+                  <button
+                    type="button"
+                    className="text-xs text-[var(--aes-ink-muted)] underline"
+                    onClick={() => setStep("details")}
+                  >
+                    Edit address
+                  </button>
+                </div>
+                <div className="rounded-xl bg-[var(--aes-sand)] p-4 text-sm text-[var(--aes-ink-muted)]">
+                  <p className="font-medium text-[var(--aes-ink)]">{form.name}</p>
+                  <p>{form.line1}</p>
+                  {form.line2 && <p>{form.line2}</p>}
+                  <p>
+                    {form.city}
+                    {form.state ? `, ${form.state}` : ""} {form.postalCode}
+                  </p>
+                  <p className="mt-2">{form.email} · {form.phone}</p>
+                </div>
+                <div className="space-y-2 border-t border-[var(--aes-border)] pt-4">
+                  <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment — online only (India)</p>
+                  {razorpayEnabled ? (
+                    <p className="text-sm text-[var(--aes-ink-muted)]">UPI · Cards · Net Banking · Wallets (Razorpay)</p>
+                  ) : (
+                    <p className="text-sm text-amber-800">Razorpay is not configured on this environment.</p>
+                  )}
+                </div>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                <Button type="submit" className="w-full py-4" disabled={loading || !razorpayEnabled}>
+                  {loading ? "Placing order…" : `Pay ${formatInr(total)}`}
+                </Button>
+              </form>
+            )}
+          </div>
 
           <div className="aes-panel p-6 sm:p-8">
             <h2 className="font-semibold text-[var(--gallery-ink,#1e1e1c)]">Order summary</h2>
@@ -231,17 +293,33 @@ export default function CheckoutPage() {
                     <p className="text-sm font-semibold text-[var(--aes-ink)]">{item.name}</p>
                     <p className="text-sm text-[var(--aes-ink-muted)]">{formatInr(item.price)}</p>
                   </div>
-                  <button type="button" onClick={() => removeFromCart(item.id)} className="aes-touch px-2 text-xs text-[var(--aes-ink-soft)] hover:text-[var(--aes-pink)]">
+                  <button
+                    type="button"
+                    onClick={() => removeFromCart(item.id)}
+                    className="aes-touch px-2 text-xs text-[var(--aes-ink-soft)] hover:text-[var(--aes-pink)]"
+                  >
                     Remove
                   </button>
                 </li>
               ))}
             </ul>
             <div className="mt-6 space-y-2 border-t border-[var(--aes-border)] pt-4 text-sm text-[var(--aes-ink)]">
-              <div className="flex justify-between"><span>Subtotal</span><span>{formatInr(cartTotal)}</span></div>
-              <div className="flex justify-between"><span>GST (18%)</span><span>{formatInr(tax)}</span></div>
-              <div className="flex justify-between"><span>Shipping</span><span>{shipping === 0 ? "Free" : formatInr(shipping)}</span></div>
-              <div className="flex justify-between text-base font-bold"><span>Total</span><span>{formatInr(total)}</span></div>
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>{formatInr(cartTotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>GST (18%)</span>
+                <span>{formatInr(tax)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span>{shipping === 0 ? "Free" : formatInr(shipping)}</span>
+              </div>
+              <div className="flex justify-between text-base font-bold">
+                <span>Total</span>
+                <span>{formatInr(total)}</span>
+              </div>
             </div>
           </div>
         </div>
