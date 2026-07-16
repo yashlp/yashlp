@@ -143,10 +143,7 @@ export function AuthModal({
           </form>
         )}
 
-        <p className="mt-6 text-center text-xs text-[var(--aes-ink-muted)]">
-          Demo account: <span className="font-medium">demo@customer.com</span> / Chester@2604
-        </p>
-        <p className="mt-2 text-center text-sm">
+        <p className="mt-6 text-center text-sm">
           <Link href="/aesthetics/account/login" className="text-[var(--aes-pink)] hover:underline" onClick={onClose}>
             Open full sign-in page
           </Link>

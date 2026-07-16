@@ -7,9 +7,28 @@ const GST_RATE = 0.18;
 const FREE_SHIPPING_THRESHOLD = 999;
 const SHIPPING_FEE = 49;
 
+function isDemoPaymentAllowed() {
+  return process.env.ALLOW_DEMO_PAYMENT === "true" && process.env.NODE_ENV !== "production";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = checkoutSchema.parse(await req.json());
+
+    if (body.paymentMethod === "demo" && !isDemoPaymentAllowed()) {
+      return NextResponse.json(
+        { error: "Online payment is required. Please complete payment via Razorpay." },
+        { status: 400 }
+      );
+    }
+
+    if (body.country.toUpperCase() !== "IN") {
+      return NextResponse.json(
+        { error: "Only Aesthetics currently ships within India." },
+        { status: 400 }
+      );
+    }
+
     const customer = await getCommerceCustomer();
 
     const subtotal = body.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);

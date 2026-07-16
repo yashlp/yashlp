@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { ORDER_STATUSES } from "../constants";
+import { sendOrderConfirmationEmail } from "../commerce-email";
 
 function orderNumber() {
   return `AES-${Date.now().toString(36).toUpperCase()}`;
@@ -102,6 +103,12 @@ export const orderService = {
 
     if (status === "CONFIRMED") {
       await this.decrementStock(order.id);
+      void sendOrderConfirmationEmail({
+        to: input.guest.email,
+        name: input.guest.name,
+        orderNumber: order.orderNumber,
+        totalInr: order.total,
+      });
     }
 
     return order;
@@ -145,7 +152,25 @@ export const orderService = {
     });
 
     await this.decrementStock(orderId);
-    return this.getById(orderId);
+    const confirmed = await this.getById(orderId);
+    if (!confirmed) return order;
+
+    const emailMatch = confirmed.customerNotes?.match(/[\w.+-]+@[\w.-]+\.\w+/);
+    const guestEmail = emailMatch?.[0];
+    const guestName = confirmed.customerNotes?.match(/Guest:\s*([^|]+)/)?.[1]?.trim();
+    const to = confirmed.customer?.email || guestEmail;
+    const name = confirmed.customer?.name || guestName || "there";
+
+    if (to) {
+      void sendOrderConfirmationEmail({
+        to,
+        name,
+        orderNumber: confirmed.orderNumber,
+        totalInr: confirmed.total,
+      });
+    }
+
+    return confirmed;
   },
 
   async updateStatus(
