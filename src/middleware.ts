@@ -2,6 +2,26 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isCommercePath, isIndiaRequest } from "@/lib/commerce/geo";
 
+/** Separate Vercel project for the store — set PRODUCT_SURFACE=aesthetics */
+function isAestheticsOnlyDeploy() {
+  return process.env.PRODUCT_SURFACE === "aesthetics";
+}
+
+const CIVIC_PATH_PREFIXES = [
+  "/civic-admin",
+  "/api/civic-admin",
+  "/api/auth",
+  "/api/incidents",
+  "/api/payments",
+  "/api/reports",
+  "/reports",
+  "/report",
+  "/ask",
+  "/compare",
+  "/login",
+  "/map",
+];
+
 function withPathHeader(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const requestHeaders = new Headers(request.headers);
@@ -25,11 +45,35 @@ function indiaBlockedResponse(request: NextRequest) {
   return NextResponse.rewrite(url);
 }
 
+function isCivicPath(path: string) {
+  return CIVIC_PATH_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   if (path.startsWith("/_next/") || path === "/favicon.ico") {
     return withPathHeader(request);
+  }
+
+  // Dedicated Only Aesthetics Vercel project: keep CivicLens off this hostname.
+  if (isAestheticsOnlyDeploy()) {
+    if (path === "/") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/aesthetics";
+      return NextResponse.redirect(url);
+    }
+    if (isCivicPath(path)) {
+      if (path.startsWith("/api/")) {
+        return NextResponse.json(
+          { error: "Not available on Only Aesthetics", code: "AESTHETICS_ONLY" },
+          { status: 404 }
+        );
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = "/aesthetics";
+      return NextResponse.redirect(url);
+    }
   }
 
   if (isCommercePath(path) && path !== "/aesthetics/india-only" && !isIndiaRequest(request)) {
@@ -51,7 +95,6 @@ export function middleware(request: NextRequest) {
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
   response.headers.set("X-DNS-Prefetch-Control", "off");
   response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
-  // Camera needed for Quick Report photo capture; mic stays blocked.
   response.headers.set("Permissions-Policy", "camera=(self), microphone=(), geolocation=(self)");
   response.headers.set(
     "Content-Security-Policy",

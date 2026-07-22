@@ -26,7 +26,17 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
+    const aestheticsOnly = process.env.PRODUCT_SURFACE === "aesthetics";
     return [
+      ...(aestheticsOnly
+        ? [
+            {
+              source: "/",
+              destination: "/aesthetics",
+              permanent: false,
+            },
+          ]
+        : []),
       {
         source: "/aesthetic-demo",
         destination: "/aesthetics",

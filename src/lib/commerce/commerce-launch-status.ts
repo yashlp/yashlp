@@ -133,9 +133,20 @@ export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
       status: customDomainOk() ? "ok" : "warn",
       detail: customDomainOk()
         ? `NEXT_PUBLIC_SITE_URL=${getSiteUrl()}`
-        : "You: point onlyaesthetics.in DNS to Vercel (currently still WordPress) and set NEXT_PUBLIC_SITE_URL",
+        : "You: create Vercel project only-aesthetics, point onlyaesthetics.in DNS there (leave CivicLens/yashlp alone)",
       required: false,
       youMustDo: !customDomainOk(),
+    },
+    {
+      id: "product_surface",
+      label: "Aesthetics-only deploy mode",
+      status: process.env.PRODUCT_SURFACE === "aesthetics" ? "ok" : "warn",
+      detail:
+        process.env.PRODUCT_SURFACE === "aesthetics"
+          ? "PRODUCT_SURFACE=aesthetics — CivicLens routes blocked on this project"
+          : "You: on project only-aesthetics set PRODUCT_SURFACE=aesthetics (do not set this on CivicLens)",
+      required: true,
+      youMustDo: process.env.PRODUCT_SURFACE !== "aesthetics",
     },
     {
       id: "site_url",
@@ -143,7 +154,7 @@ export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
       status: process.env.NEXT_PUBLIC_SITE_URL ? "ok" : "warn",
       detail: process.env.NEXT_PUBLIC_SITE_URL
         ? `NEXT_PUBLIC_SITE_URL=${process.env.NEXT_PUBLIC_SITE_URL}`
-        : "You: set NEXT_PUBLIC_SITE_URL=https://onlyaesthetics.in",
+        : "You: set NEXT_PUBLIC_SITE_URL=https://onlyaesthetics.in on only-aesthetics",
       required: false,
       youMustDo: !process.env.NEXT_PUBLIC_SITE_URL,
     },

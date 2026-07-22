@@ -114,7 +114,10 @@ export default function CommerceLaunchPage() {
       <div className="rounded-2xl border border-[var(--aes-border)] bg-white p-5 text-sm text-[var(--aes-charcoal-muted)]">
         <p className="font-semibold text-[var(--aes-charcoal)]">After env is green</p>
         <ol className="mt-2 list-decimal space-y-1 pl-5">
-          <li>Point onlyaesthetics.in DNS to Vercel (leave WordPress).</li>
+          <li>
+            Create Vercel project <strong>only-aesthetics</strong> (not CivicLens / yashlp) and set PRODUCT_SURFACE=aesthetics.
+          </li>
+          <li>Point onlyaesthetics.in DNS to that project (leave WordPress).</li>
           <li>Redeploy Production once.</li>
           <li>Optional one-time: PURGE_DEMO_CATALOG=true → redeploy → remove var → redeploy.</li>
           <li>
