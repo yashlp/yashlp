@@ -69,7 +69,17 @@ export const dashboardService = {
       prisma.commerceOrder.findMany({
         take: 10,
         orderBy: { createdAt: "desc" },
-        include: { customer: true },
+        include: {
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              status: true,
+            },
+          },
+        },
       }),
       prisma.commerceOrderItem.groupBy({
         by: ["productId"],

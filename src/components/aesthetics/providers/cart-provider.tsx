@@ -7,12 +7,16 @@ import {
   recordInteraction,
   type PreferenceState,
 } from "@/lib/aesthetics/preferences";
+
+export type CartItem = Product & { quantity: number };
+
 type CartContextValue = {
-  cart: Product[];
+  cart: CartItem[];
   wishlist: Product[];
   prefs: PreferenceState;
   addToCart: (product: Product) => void;
   removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   toggleWishlist: (product: Product) => boolean;
   isWishlisted: (id: string) => boolean;
@@ -25,20 +29,32 @@ type CartContextValue = {
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, setCart] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [prefs, setPrefs] = useState<PreferenceState>(createPreferenceState);
 
   const addToCart = useCallback((product: Product) => {
     setCart((c) => {
-      if (c.some((p) => p.id === product.id)) return c;
-      return [...c, product];
+      const existing = c.find((p) => p.id === product.id);
+      if (existing) {
+        return c.map((p) =>
+          p.id === product.id ? { ...p, ...product, quantity: p.quantity + 1 } : p
+        );
+      }
+      return [...c, { ...product, quantity: 1 }];
     });
     setPrefs((p) => recordInteraction(p, product, "cart"));
   }, []);
 
   const removeFromCart = useCallback((id: string) => {
     setCart((c) => c.filter((p) => p.id !== id));
+  }, []);
+
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    setCart((c) => {
+      if (quantity <= 0) return c.filter((p) => p.id !== id);
+      return c.map((p) => (p.id === id ? { ...p, quantity } : p));
+    });
   }, []);
 
   const clearCart = useCallback(() => {
@@ -70,7 +86,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setPrefs((p) => recordInteraction(p, product, "view", seconds));
   }, []);
 
-  const cartTotal = useMemo(() => cart.reduce((s, p) => s + p.price, 0), [cart]);
+  const cartTotal = useMemo(
+    () => cart.reduce((s, p) => s + p.price * p.quantity, 0),
+    [cart]
+  );
+
+  const cartCount = useMemo(() => cart.reduce((s, p) => s + p.quantity, 0), [cart]);
 
   const value = useMemo(
     () => ({
@@ -79,13 +100,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       prefs,
       addToCart,
       removeFromCart,
+      updateQuantity,
       clearCart,
       toggleWishlist,
       isWishlisted,
       recordPass,
       recordView,
       cartTotal,
-      cartCount: cart.length,
+      cartCount,
     }),
     [
       cart,
@@ -93,12 +115,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       prefs,
       addToCart,
       removeFromCart,
+      updateQuantity,
       clearCart,
       toggleWishlist,
       isWishlisted,
       recordPass,
       recordView,
       cartTotal,
+      cartCount,
     ]
   );
 

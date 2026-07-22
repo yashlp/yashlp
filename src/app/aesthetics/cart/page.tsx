@@ -8,7 +8,7 @@ import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 import { formatInr } from "@/lib/aesthetics/format-inr";
 
 export default function CartPage() {
-  const { cart, cartTotal, removeFromCart, cartCount } = useCart();
+  const { cart, cartTotal, removeFromCart, updateQuantity, cartCount } = useCart();
 
   return (
     <ConsumerPage cartCount={cartCount} room="calm">
@@ -38,7 +38,28 @@ export default function CartPage() {
                     >
                       {item.name}
                     </Link>
-                    <p className="mt-1 text-lg font-semibold text-[var(--gallery-ink,#1e1e1c)]">{formatInr(item.price)}</p>
+                    <p className="mt-1 text-lg font-semibold text-[var(--gallery-ink,#1e1e1c)]">
+                      {formatInr(item.price * item.quantity)}
+                    </p>
+                    <div className="mt-3 flex items-center gap-3">
+                      <button
+                        type="button"
+                        className="aes-touch grid h-9 w-9 place-items-center rounded-full border border-[var(--aes-border)] text-sm"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
+                      <span className="min-w-[1.5rem] text-center text-sm font-semibold">{item.quantity}</span>
+                      <button
+                        type="button"
+                        className="aes-touch grid h-9 w-9 place-items-center rounded-full border border-[var(--aes-border)] text-sm"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                   <button
                     type="button"

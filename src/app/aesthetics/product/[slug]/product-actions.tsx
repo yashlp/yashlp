@@ -21,10 +21,9 @@ export function ProductActions({ product }: { product: Product }) {
   const wishlisted = isWishlisted(product.id);
 
   function onAdd() {
-    if (inCart) return;
     addToCart(product);
     flyToBag(product.images[0], btnRef.current);
-    notice?.pushNotice("Added to Shopping Bag", "bag");
+    notice?.pushNotice(inCart ? "Quantity updated" : "Added to Shopping Bag", "bag");
   }
 
   function onWishlist() {
@@ -35,9 +34,9 @@ export function ProductActions({ product }: { product: Product }) {
   return (
     <>
       <div className="mt-8 flex gap-3">
-        <Button ref={btnRef} className="min-h-12 flex-1 gap-2" onClick={onAdd} disabled={inCart}>
+        <Button ref={btnRef} className="min-h-12 flex-1 gap-2" onClick={onAdd}>
           <ShoppingBag className="h-4 w-4" />
-          {inCart ? "In bag" : "Add to bag"}
+          {inCart ? "Add another" : "Add to bag"}
         </Button>
         <Button
           variant="secondary"

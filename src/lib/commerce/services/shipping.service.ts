@@ -3,12 +3,22 @@ import { orderService } from "./order.service";
 
 export const COURIERS = ["Shiprocket", "Delhivery", "BlueDart", "DTDC", "Manual"] as const;
 
+const CUSTOMER_SAFE_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  status: true,
+  emailVerified: true,
+  createdAt: true,
+} as const;
+
 export const shippingService = {
   async listPending() {
     return prisma.commerceOrder.findMany({
       where: { status: { in: ["CONFIRMED", "PACKED", "READY_TO_SHIP"] } },
       include: {
-        customer: true,
+        customer: { select: CUSTOMER_SAFE_SELECT },
         items: { include: { product: { select: { name: true } } } },
       },
       orderBy: { createdAt: "asc" },
@@ -24,15 +34,47 @@ export const shippingService = {
     });
   },
 
+  /**
+   * Advance through STATUS_FLOW one step at a time so label/ship actions
+   * work from CONFIRMED or PACKED without illegal jumps.
+   */
   async assignShipping(
     orderId: string,
     input: { courier: string; trackingNumber: string; markShipped?: boolean }
   ) {
-    const status = input.markShipped ? "SHIPPED" : "READY_TO_SHIP";
-    return orderService.updateStatus(orderId, status, {
-      courier: input.courier,
-      trackingNumber: input.trackingNumber,
-    });
+    let order = await prisma.commerceOrder.findUniqueOrThrow({ where: { id: orderId } });
+
+    if (order.status === "CONFIRMED") {
+      await orderService.updateStatus(orderId, "PACKED");
+      order = await prisma.commerceOrder.findUniqueOrThrow({ where: { id: orderId } });
+    }
+
+    if (order.status === "PACKED") {
+      await orderService.updateStatus(orderId, "READY_TO_SHIP", {
+        courier: input.courier,
+        trackingNumber: input.trackingNumber,
+      });
+      order = await prisma.commerceOrder.findUniqueOrThrow({ where: { id: orderId } });
+    }
+
+    if (input.markShipped) {
+      if (order.status === "READY_TO_SHIP") {
+        return orderService.updateStatus(orderId, "SHIPPED", {
+          courier: input.courier,
+          trackingNumber: input.trackingNumber,
+        });
+      }
+      throw new Error(`Cannot mark shipped from ${order.status}`);
+    }
+
+    if (order.status === "READY_TO_SHIP") {
+      return orderService.updateStatus(orderId, "READY_TO_SHIP", {
+        courier: input.courier,
+        trackingNumber: input.trackingNumber,
+      });
+    }
+
+    throw new Error(`Cannot assign shipping from ${order.status}`);
   },
 
   /** Stub for Shiprocket/Delhivery — returns mock label URL when API keys not set */

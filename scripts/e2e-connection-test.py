@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import random
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from http.cookiejar import CookieJar
@@ -399,9 +401,12 @@ def main():
 
     # ------------------------------------------------------------------
     section("7. Customer auth (sign up OTP flow / login)")
+    # Unique email each run so re-tests don't fail on "already exists"
+    signup_email = f"new.customer.{int(time.time())}@example.com"
+    signup_phone = f"91{random.randint(2000000000, 9999999999)}"
     # Email OTP send
     status, data, raw, _ = store.request(
-        "POST", "/api/commerce/auth/email/send-otp", {"email": "new.customer@example.com"}
+        "POST", "/api/commerce/auth/email/send-otp", {"email": signup_email}
     )
     if status == 200:
         ok("Send signup email OTP", str(data)[:120])
@@ -414,7 +419,7 @@ def main():
         status, data, raw, _ = store.request(
             "POST",
             "/api/commerce/auth/email/verify-otp",
-            {"email": "new.customer@example.com", "code": code},
+            {"email": signup_email, "code": code},
         )
         if status == 200 and (data or {}).get("verified"):
             ok("Verify signup email OTP")
@@ -426,8 +431,8 @@ def main():
             "/api/commerce/auth/register",
             {
                 "name": "New Customer",
-                "email": "new.customer@example.com",
-                "phone": "9123456780",
+                "email": signup_email,
+                "phone": signup_phone,
                 "password": "Customer123!",
                 "address": {
                     "line1": "88 MG Road",
