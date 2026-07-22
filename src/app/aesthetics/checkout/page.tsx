@@ -39,7 +39,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "demo">("razorpay");
+  const [demoAllowed, setDemoAllowed] = useState(false);
   const [rates, setRates] = useState<ShippingRates>({
     flatRate: 49,
     freeThreshold: 999,
@@ -63,10 +63,14 @@ export default function CheckoutPage() {
       .then((r) => r.json())
       .then((d) => {
         const enabled = Boolean(d.razorpay);
+        const demo = Boolean(d.demo);
         setRazorpayEnabled(enabled);
-        if (!enabled) setPaymentMethod("demo");
+        setDemoAllowed(demo);
       })
-      .catch(() => setRazorpayEnabled(false));
+      .catch(() => {
+        setRazorpayEnabled(false);
+        setDemoAllowed(false);
+      });
 
     fetch("/api/commerce/shipping")
       .then((r) => r.json())
@@ -110,18 +114,20 @@ export default function CheckoutPage() {
   const tax = Math.round(cartTotal * (rates.gstRatePercent / 100) * 100) / 100;
   const total = cartTotal + shipping + tax;
 
+  const canPay = razorpayEnabled || demoAllowed;
+
   async function placeOrder() {
+    const method = razorpayEnabled ? "razorpay" : "demo";
     const res = await fetch("/api/commerce/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
         country: "IN",
-        paymentMethod: razorpayEnabled ? "razorpay" : paymentMethod,
+        paymentMethod: method,
         items: cart.map((p) => ({
           productId: p.id,
-          quantity: 1,
-          unitPrice: p.price,
+          quantity: p.quantity,
         })),
       }),
     });
@@ -182,7 +188,7 @@ export default function CheckoutPage() {
     setLoading(true);
     setError("");
     try {
-      if (!razorpayEnabled) {
+      if (!canPay) {
         throw new Error("Online payment is not available. Please try again later.");
       }
 
@@ -293,12 +299,16 @@ export default function CheckoutPage() {
                   <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment — online only (India)</p>
                   {razorpayEnabled ? (
                     <p className="text-sm text-[var(--aes-ink-muted)]">UPI · Cards · Net Banking · Wallets (Razorpay)</p>
+                  ) : demoAllowed ? (
+                    <p className="text-sm text-amber-800">
+                      Razorpay is not configured — demo checkout is enabled for this environment only.
+                    </p>
                   ) : (
-                    <p className="text-sm text-amber-800">Razorpay is not configured on this environment.</p>
+                    <p className="text-sm text-amber-800">Online payment is not available on this environment.</p>
                   )}
                 </div>
                 {error && <p className="text-sm text-red-600">{error}</p>}
-                <Button type="submit" className="w-full py-4" disabled={loading || !razorpayEnabled}>
+                <Button type="submit" className="w-full py-4" disabled={loading || !canPay}>
                   {loading ? "Placing order…" : `Pay ${formatInr(total)}`}
                 </Button>
               </form>
@@ -316,7 +326,10 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-[var(--aes-ink)]">{item.name}</p>
-                    <p className="text-sm text-[var(--aes-ink-muted)]">{formatInr(item.price)}</p>
+                    <p className="text-sm text-[var(--aes-ink-muted)]">
+                      {formatInr(item.price)}
+                      {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                    </p>
                   </div>
                   <button
                     type="button"

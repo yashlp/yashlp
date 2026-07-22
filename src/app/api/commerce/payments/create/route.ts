@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { commercePaymentService } from "@/lib/commerce/services/commerce-payment.service";
 import { isRazorpayConfigured } from "@/lib/payments/config";
 
+function isDemoPaymentAllowed() {
+  return process.env.ALLOW_DEMO_PAYMENT === "true" && process.env.NODE_ENV !== "production";
+}
+
 export async function GET() {
   return NextResponse.json({
     razorpay: isRazorpayConfigured(),
-    cod: true,
+    demo: isDemoPaymentAllowed(),
+    cod: false,
     currency: "INR",
   });
 }

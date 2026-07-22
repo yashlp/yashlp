@@ -2,13 +2,27 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { commerceApiError, withAdminAuth } from "@/lib/commerce/api-utils";
 
+const CUSTOMER_SAFE_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  status: true,
+  emailVerified: true,
+  createdAt: true,
+} as const;
+
 export async function GET() {
   try {
     const orders = await withAdminAuth("orders:read", async () => {
       return prisma.commerceOrder.findMany({
         orderBy: { createdAt: "desc" },
         take: 100,
-        include: { customer: true, items: { include: { product: true } } },
+        include: {
+          customer: { select: CUSTOMER_SAFE_SELECT },
+          items: { include: { product: true } },
+          payments: true,
+        },
       });
     });
     return NextResponse.json({ orders });

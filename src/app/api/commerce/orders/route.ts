@@ -33,7 +33,11 @@ export async function POST(req: NextRequest) {
     const customer = await getCommerceCustomer();
     const shippingConfig = await getShippingConfig();
 
-    const subtotal = body.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+    // Prices come from the catalog — never from the client payload.
+    const pricedItems = await orderService.priceItems(
+      body.items.map((i) => ({ productId: i.productId, quantity: i.quantity }))
+    );
+    const subtotal = pricedItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
     const shipping = computeShippingFee(subtotal, shippingConfig);
     const tax = computeTax(subtotal, shippingConfig);
     const total = subtotal + shipping + tax;
@@ -51,7 +55,7 @@ export async function POST(req: NextRequest) {
       .join("\n");
 
     const order = await orderService.createGuestOrder({
-      items: body.items,
+      items: pricedItems,
       subtotal,
       tax,
       shipping,

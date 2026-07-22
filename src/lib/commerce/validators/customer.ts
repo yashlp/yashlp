@@ -16,7 +16,8 @@ export const checkoutSchema = z.object({
       z.object({
         productId: z.string().min(1),
         quantity: z.number().int().min(1).default(1),
-        unitPrice: z.number().positive(),
+        /** Ignored — server loads catalog price. Kept optional for older clients. */
+        unitPrice: z.number().positive().optional(),
       })
     )
     .min(1),
