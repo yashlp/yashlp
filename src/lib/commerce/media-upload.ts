@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { put } from "@vercel/blob";
+import { isObjectStorageConfigured, putCommerceObject } from "./object-storage";
 
 export const COMMERCE_UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "commerce");
 export const COMMERCE_UPLOAD_PUBLIC = "/uploads/commerce";
@@ -31,7 +32,10 @@ function extFor(mime: string, fallbackName: string): string {
   return "bin";
 }
 
-/** Persist an uploaded file and return a public URL. Prefer Vercel Blob when configured. */
+/**
+ * Persist an uploaded file and return a public URL.
+ * Preference: Cloudflare R2 / S3 → Vercel Blob → local disk (dev / single-node hosts).
+ */
 export async function saveCommerceUpload(file: File): Promise<{ url: string; type: "IMAGE" | "VIDEO" }> {
   const type = mediaKind(file.type);
   if (!type) {
@@ -46,9 +50,19 @@ export async function saveCommerceUpload(file: File): Promise<{ url: string; typ
 
   const ext = extFor(file.type, file.name);
   const filename = `commerce/${randomUUID()}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (isObjectStorageConfigured()) {
+    const url = await putCommerceObject({
+      key: filename,
+      body: buffer,
+      contentType: file.type || "application/octet-stream",
+    });
+    return { url, type };
+  }
 
   if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const blob = await put(filename, file, {
+    const blob = await put(filename, buffer, {
       access: "public",
       token: process.env.BLOB_READ_WRITE_TOKEN,
       contentType: file.type || undefined,
@@ -59,7 +73,6 @@ export async function saveCommerceUpload(file: File): Promise<{ url: string; typ
   await mkdir(COMMERCE_UPLOAD_DIR, { recursive: true });
   const localName = `${randomUUID()}.${ext}`;
   const abs = path.join(COMMERCE_UPLOAD_DIR, localName);
-  const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(abs, buffer);
   return { url: `${COMMERCE_UPLOAD_PUBLIC}/${localName}`, type };
 }
