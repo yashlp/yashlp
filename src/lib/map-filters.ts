@@ -61,7 +61,9 @@ export function filterMapIncidents<T extends MappableIncident>(
     }
   }
 
-  if (options.nearMeOnly && options.userLocation) {
+  if (options.nearMeOnly) {
+    // Until GPS arrives, show nothing — avoid flashing every pin worldwide.
+    if (!options.userLocation) return [];
     const radius = options.nearRadiusM ?? NEAR_ME_RADIUS_M;
     result = result.filter(
       (i) =>

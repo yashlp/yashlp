@@ -76,6 +76,8 @@ const createSchema = z.object({
   countryCode: z.string().optional(),
   photoUrls: z.array(z.string()).max(MAX_PHOTOS_PER_REPORT).optional(),
   attachToExisting: z.string().optional(),
+  /** Skip nearby-duplicate merge and create a fresh pin. */
+  forceCreate: z.boolean().optional(),
   institutionType: z.string().optional(),
   servicePoint: z.string().optional(),
   corruptionIssueType: z.string().optional(),
@@ -132,13 +134,15 @@ export async function POST(req: Request) {
 
     const duplicate = data.attachToExisting
       ? await prisma.incident.findUnique({ where: { id: data.attachToExisting } })
-      : await findNearbyDuplicate(
-          data.latitude,
-          data.longitude,
-          data.categoryId,
-          isPositive,
-          category.slug
-        );
+      : data.forceCreate
+        ? null
+        : await findNearbyDuplicate(
+            data.latitude,
+            data.longitude,
+            data.categoryId,
+            isPositive,
+            category.slug
+          );
 
     if (duplicate && duplicate.reporterId === user.id && data.attachToExisting) {
       return NextResponse.json(
@@ -148,9 +152,10 @@ export async function POST(req: Request) {
     }
 
     if (duplicate && !data.attachToExisting) {
+      // Only expose public fields — never reporterId / internal columns.
       return NextResponse.json({
         duplicate: true,
-        incident: duplicate,
+        incident: { id: duplicate.id, title: duplicate.title },
         message: "Similar incident found nearby. Confirm existing or create new.",
       });
     }

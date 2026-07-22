@@ -31,15 +31,25 @@ export default function ComparePage() {
   const [healthB, setHealthB] = useState<HealthData | null>(null);
 
   useEffect(() => {
+    setHealthA(null);
     fetch(`/api/health?lat=${placeA.lat}&lng=${placeA.lng}`)
       .then((r) => r.json())
-      .then(setHealthA);
+      .then((d) => {
+        if (typeof d?.overallScore === "number") setHealthA(d);
+        else setHealthA(null);
+      })
+      .catch(() => setHealthA(null));
   }, [placeA]);
 
   useEffect(() => {
+    setHealthB(null);
     fetch(`/api/health?lat=${placeB.lat}&lng=${placeB.lng}`)
       .then((r) => r.json())
-      .then(setHealthB);
+      .then((d) => {
+        if (typeof d?.overallScore === "number") setHealthB(d);
+        else setHealthB(null);
+      })
+      .catch(() => setHealthB(null));
   }, [placeB]);
 
   const winner =

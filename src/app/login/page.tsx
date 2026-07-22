@@ -6,10 +6,18 @@ import Link from "next/link";
 import { RefreshCw, Shield, UserRound } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
+/** Only same-origin relative paths — blocks //evil.com open redirects. */
+function safeInternalPath(path: string | null): string | null {
+  if (!path || !path.startsWith("/") || path.startsWith("//") || path.includes("\\")) {
+    return null;
+  }
+  return path;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next");
+  const nextPath = safeInternalPath(searchParams.get("next"));
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -47,8 +55,9 @@ export default function LoginPage() {
       .then((r) => r.json())
       .then((d) => {
         if (!d.user) return;
-        if (d.user.role === "admin") router.replace("/admin");
-        else if (nextPath?.startsWith("/")) router.replace(nextPath);
+        // CivicLens admins use /civic-admin — never Only Aesthetics /admin.
+        if (d.user.role === "admin") router.replace("/civic-admin");
+        else if (nextPath) router.replace(nextPath);
         else router.replace("/");
       })
       .catch(() => {});
@@ -94,7 +103,9 @@ export default function LoginPage() {
       return;
     }
     window.dispatchEvent(new Event("civiclens-auth"));
-    if (nextPath?.startsWith("/")) {
+    if (data.user?.role === "admin") {
+      router.push("/civic-admin");
+    } else if (nextPath) {
       router.push(nextPath);
     } else {
       router.push("/");
@@ -134,9 +145,18 @@ export default function LoginPage() {
               <p className="mt-1 text-xs text-stone-400">Include country code (e.g. 91 for India)</p>
             </div>
             {error && <p className="text-sm text-rose-600">{error}</p>}
+            {authMode === "unavailable" && (
+              <p className="text-sm text-rose-600">
+                Sign-in is temporarily unavailable. Please try again later.
+              </p>
+            )}
             <button
               type="submit"
-              disabled={loading || phone.replace(/\D/g, "").length < 10}
+              disabled={
+                loading ||
+                phone.replace(/\D/g, "").length < 10 ||
+                authMode === "unavailable"
+              }
               className="w-full rounded-2xl bg-orange-600 py-3.5 font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
             >
               {loading ? "Sending..." : "Send verification code"}

@@ -51,7 +51,8 @@ export function middleware(request: NextRequest) {
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
   response.headers.set("X-DNS-Prefetch-Control", "off");
   response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
-  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+  // Camera needed for Quick Report photo capture; mic stays blocked.
+  response.headers.set("Permissions-Policy", "camera=(self), microphone=(), geolocation=(self)");
   response.headers.set(
     "Content-Security-Policy",
     [

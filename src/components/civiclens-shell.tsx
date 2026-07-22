@@ -134,7 +134,7 @@ export function CivicLensShell({ children }: { children: React.ReactNode }) {
           isMapPage ? "relative min-h-0 overflow-hidden" : "pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
         )}
       >
-        {siteConfig?.maintenanceMode && !isAdminPage ? (
+        {siteConfig?.maintenanceMode && !isAdminPage && pathname !== "/login" ? (
           <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
             <p className="text-lg font-semibold text-stone-800">We&apos;ll be back shortly</p>
             <p className="mt-2 max-w-md text-sm text-stone-500">

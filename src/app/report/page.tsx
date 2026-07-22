@@ -54,6 +54,19 @@ export default function ReportPage() {
   const isCorruptionReport = selected?.slug === "corruption-bribery";
 
   useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.user) {
+          router.replace(`/login?next=${encodeURIComponent("/report")}`);
+        }
+      })
+      .catch(() => {
+        router.replace(`/login?next=${encodeURIComponent("/report")}`);
+      });
+  }, [router]);
+
+  useEffect(() => {
     fetch(`/api/categories?type=${signalType}`)
       .then((r) => r.json())
       .then((d) => setCategories(d.categories));
@@ -145,7 +158,7 @@ export default function ReportPage() {
     }
   };
 
-  const submit = async (attachToExisting?: string) => {
+  const submit = async (opts?: { attachToExisting?: string; forceCreate?: boolean }) => {
     if (!selected) return;
     if (selected.photoRule === "required" && photos.length === 0) {
       setError("Please add a photo for this report type.");
@@ -160,43 +173,53 @@ export default function ReportPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/incidents", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        categoryId: selected.id,
-        description: description || undefined,
-        latitude: pinLocation.lat,
-        longitude: pinLocation.lng,
-        address: selectedPlace?.name,
-        photoUrls: photos,
-        attachToExisting,
-        institutionType: institutionType || undefined,
-        servicePoint: servicePoint || undefined,
-        corruptionIssueType: corruptionIssueType || undefined,
-      }),
-    });
+    try {
+      const res = await fetch("/api/incidents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoryId: selected.id,
+          description: description || undefined,
+          latitude: pinLocation.lat,
+          longitude: pinLocation.lng,
+          address: selectedPlace?.name,
+          photoUrls: photos,
+          attachToExisting: opts?.attachToExisting,
+          forceCreate: opts?.forceCreate || undefined,
+          institutionType: institutionType || undefined,
+          servicePoint: servicePoint || undefined,
+          corruptionIssueType: corruptionIssueType || undefined,
+        }),
+      });
 
-    const data = await res.json();
-    setLoading(false);
+      const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
-      setError(data.error ?? "Failed to submit");
-      return;
+      if (!res.ok) {
+        if (res.status === 401) {
+          router.replace(`/login?next=${encodeURIComponent("/report")}`);
+          return;
+        }
+        setError(data.error ?? "Failed to submit");
+        return;
+      }
+
+      if (data.duplicate) {
+        setDuplicate({ id: data.incident.id, title: data.incident.title });
+        return;
+      }
+
+      if (data.photosPendingReview) {
+        alert(
+          "Report submitted. Your photos are pending admin approval and will appear publicly once approved."
+        );
+      }
+
+      router.push("/");
+    } catch {
+      setError("Network error. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-
-    if (data.duplicate) {
-      setDuplicate({ id: data.incident.id, title: data.incident.title });
-      return;
-    }
-
-    if (data.photosPendingReview) {
-      alert(
-        "Report submitted. Your photos are pending admin approval and will appear publicly once approved."
-      );
-    }
-
-    router.push("/");
   };
 
   const pickCategory = (cat: Category) => {
@@ -458,14 +481,21 @@ export default function ReportPage() {
               <p className="mt-1 text-sm text-amber-800">Confirm the existing pin instead?</p>
               <div className="mt-3 flex gap-2">
                 <button
-                  onClick={() => submit(duplicate.id)}
-                  className="flex-1 rounded-xl bg-orange-600 py-2.5 text-sm font-semibold text-white"
+                  type="button"
+                  disabled={loading}
+                  onClick={() => submit({ attachToExisting: duplicate.id })}
+                  className="flex-1 rounded-xl bg-orange-600 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   Yes, confirm it
                 </button>
                 <button
-                  onClick={() => { setDuplicate(null); submit(); }}
-                  className="rounded-xl border px-4 py-2.5 text-sm"
+                  type="button"
+                  disabled={loading}
+                  onClick={() => {
+                    setDuplicate(null);
+                    void submit({ forceCreate: true });
+                  }}
+                  className="rounded-xl border px-4 py-2.5 text-sm disabled:opacity-50"
                 >
                   New pin
                 </button>
