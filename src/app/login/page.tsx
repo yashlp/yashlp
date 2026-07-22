@@ -67,50 +67,60 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/auth/send-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(data.error ?? "Could not send code");
-      return;
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "Could not send code");
+        return;
+      }
+      setHint(data.demoHint ?? "");
+      setStep("otp");
+    } catch {
+      setError("Network error. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    setHint(data.demoHint ?? "");
-    setStep("otp");
   };
 
   const verifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/auth/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        phone,
-        otp,
-        useRandomName,
-        name: useRandomName ? undefined : customName.trim() || undefined,
-      }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(data.error ?? "Invalid code");
-      return;
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+          otp,
+          useRandomName,
+          name: useRandomName ? undefined : customName.trim() || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "Invalid code");
+        return;
+      }
+      window.dispatchEvent(new Event("civiclens-auth"));
+      if (data.user?.role === "admin") {
+        router.push("/civic-admin");
+      } else if (nextPath) {
+        router.push(nextPath);
+      } else {
+        router.push("/");
+      }
+      router.refresh();
+    } catch {
+      setError("Network error. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    window.dispatchEvent(new Event("civiclens-auth"));
-    if (data.user?.role === "admin") {
-      router.push("/civic-admin");
-    } else if (nextPath) {
-      router.push(nextPath);
-    } else {
-      router.push("/");
-    }
-    router.refresh();
   };
 
   return (

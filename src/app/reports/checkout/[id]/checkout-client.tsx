@@ -165,29 +165,28 @@ export function ReportCheckoutClient() {
             razorpay_payment_id: string;
             razorpay_signature: string;
           }) => {
-            const verifyRes = await fetch("/api/payments/verify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                provider: "razorpay",
-                orderId: response.razorpay_order_id,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                productId: resolvedId,
-                latitude: selectedPlace.lat,
-                longitude: selectedPlace.lng,
-                placeName: selectedPlace.name,
-                amount: data.amount,
-                currency: data.currency,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok) {
-              setError(verifyData.error ?? "Payment verification failed");
+            try {
+              const verifyRes = await fetch("/api/payments/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  provider: "razorpay",
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature,
+                }),
+              });
+              const verifyData = await verifyRes.json().catch(() => ({}));
+              if (!verifyRes.ok) {
+                setError(verifyData.error ?? "Payment verification failed");
+                return;
+              }
+              router.push(viewUrl);
+            } catch {
+              setError("Payment verification failed. Contact support if you were charged.");
+            } finally {
               setPaying(false);
-              return;
             }
-            router.push(viewUrl);
           },
           modal: {
             ondismiss: () => setPaying(false),

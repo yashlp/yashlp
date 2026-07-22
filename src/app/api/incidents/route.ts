@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { CACHE_PUBLIC_SHORT, jsonWithCache } from "@/lib/api-cache";
 import { getSessionUser } from "@/lib/auth";
+import { getAdminUser } from "@/lib/admin";
 import { rateLimitResponse } from "@/lib/api-security";
 import { inferCountryCode } from "@/lib/country-from-coords";
 import { mockAIVerify } from "@/lib/ai";
@@ -32,7 +33,9 @@ import {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const includePrivate = searchParams.get("includePrivate") === "true";
+  const wantsPrivate = searchParams.get("includePrivate") === "true";
+  const admin = wantsPrivate ? await getAdminUser() : null;
+  const includePrivate = Boolean(wantsPrivate && admin);
   const now = new Date();
 
   const incidents = await prisma.incident.findMany({

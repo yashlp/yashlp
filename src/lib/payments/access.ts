@@ -41,16 +41,39 @@ export async function markReportPurchasePaid(input: {
   providerOrderId?: string | null;
   providerPaymentId: string;
 }) {
-  const loc = purchaseLocationKey(input.lat, input.lng);
   const now = new Date();
 
-  const existing = await prisma.reportPurchase.findFirst({
-    where: {
-      providerPaymentId: input.providerPaymentId,
-    },
+  const byPayment = await prisma.reportPurchase.findFirst({
+    where: { providerPaymentId: input.providerPaymentId },
   });
-  if (existing?.status === PAID) return existing;
+  if (byPayment?.status === PAID) return byPayment;
 
+  // Prefer the pending row created at checkout (trusted product/coords/amount).
+  const byOrder =
+    input.providerOrderId
+      ? await prisma.reportPurchase.findFirst({
+          where: {
+            providerOrderId: input.providerOrderId,
+            userId: input.userId,
+            provider: input.provider,
+          },
+          orderBy: { createdAt: "desc" },
+        })
+      : null;
+
+  if (byOrder) {
+    if (byOrder.status === PAID) return byOrder;
+    return prisma.reportPurchase.update({
+      where: { id: byOrder.id },
+      data: {
+        status: PAID,
+        paidAt: now,
+        providerPaymentId: input.providerPaymentId,
+      },
+    });
+  }
+
+  const loc = purchaseLocationKey(input.lat, input.lng);
   const pending = await prisma.reportPurchase.findFirst({
     where: {
       userId: input.userId,
@@ -71,29 +94,13 @@ export async function markReportPurchasePaid(input: {
         paidAt: now,
         providerOrderId: input.providerOrderId ?? pending.providerOrderId,
         providerPaymentId: input.providerPaymentId,
-        amount: input.amount,
-        currency: input.currency,
-        placeName: input.placeName ?? pending.placeName,
       },
     });
   }
 
-  return prisma.reportPurchase.create({
-    data: {
-      userId: input.userId,
-      productId: input.productId,
-      latitude: loc.lat,
-      longitude: loc.lng,
-      placeName: input.placeName ?? null,
-      amount: input.amount,
-      currency: input.currency,
-      provider: input.provider,
-      providerOrderId: input.providerOrderId ?? null,
-      providerPaymentId: input.providerPaymentId,
-      status: PAID,
-      paidAt: now,
-    },
-  });
+  // Do not invent a paid purchase from client-supplied product/coords —
+  // checkout must have created a pending row first.
+  throw new Error("No matching pending purchase for this payment");
 }
 
 export async function createPendingPurchase(input: {

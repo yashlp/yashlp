@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { markReportPurchasePaid } from "@/lib/payments/access";
 import { verifyRazorpaySignature } from "@/lib/payments/razorpay";
@@ -7,20 +8,14 @@ import { getPaidStripeSession } from "@/lib/payments/stripe";
 
 const razorpaySchema = z.object({
   provider: z.literal("razorpay"),
-  orderId: z.string(),
-  paymentId: z.string(),
-  signature: z.string(),
-  productId: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
-  placeName: z.string().optional(),
-  amount: z.number(),
-  currency: z.string(),
+  orderId: z.string().min(1),
+  paymentId: z.string().min(1),
+  signature: z.string().min(1),
 });
 
 const stripeSchema = z.object({
   provider: z.literal("stripe"),
-  sessionId: z.string(),
+  sessionId: z.string().min(1),
 });
 
 const schema = z.discriminatedUnion("provider", [razorpaySchema, stripeSchema]);
@@ -44,20 +39,39 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
       }
 
+      // Trust only the pending purchase created at checkout — never client product/coords.
+      const pending = await prisma.reportPurchase.findFirst({
+        where: {
+          providerOrderId: data.orderId,
+          userId: user.id,
+          provider: "razorpay",
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      if (!pending) {
+        return NextResponse.json({ error: "No matching order found" }, { status: 400 });
+      }
+
       await markReportPurchasePaid({
         userId: user.id,
-        productId: data.productId,
-        lat: data.latitude,
-        lng: data.longitude,
-        placeName: data.placeName,
-        amount: data.amount,
-        currency: data.currency,
+        productId: pending.productId,
+        lat: pending.latitude,
+        lng: pending.longitude,
+        placeName: pending.placeName,
+        amount: pending.amount,
+        currency: pending.currency,
         provider: "razorpay",
         providerOrderId: data.orderId,
         providerPaymentId: data.paymentId,
       });
 
-      return NextResponse.json({ ok: true, paid: true });
+      return NextResponse.json({
+        ok: true,
+        paid: true,
+        productId: pending.productId,
+        latitude: pending.latitude,
+        longitude: pending.longitude,
+      });
     }
 
     const session = await getPaidStripeSession(data.sessionId);
@@ -90,6 +104,9 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: e.errors[0].message }, { status: 400 });
+    }
+    if (e instanceof Error) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
     }
     console.error(e);
     return NextResponse.json({ error: "Payment verification failed" }, { status: 500 });

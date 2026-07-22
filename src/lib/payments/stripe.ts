@@ -43,7 +43,11 @@ export async function createStripeCheckoutSession(input: {
       lng: String(input.lng),
       placeName: input.placeName ?? "",
     },
-    success_url: `${siteUrl}${input.successPath}?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: (() => {
+      // successPath may already include ?lat=&lng= — always append session_id correctly.
+      const joiner = input.successPath.includes("?") ? "&" : "?";
+      return `${siteUrl}${input.successPath}${joiner}session_id={CHECKOUT_SESSION_ID}`;
+    })(),
     cancel_url: `${siteUrl}${input.cancelPath}`,
   });
 }
