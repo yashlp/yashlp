@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { startOfMonth, subMonths } from "date-fns";
+import { extractOrderCity } from "@/lib/commerce/order-city";
 
 export const analyticsService = {
   async getStats() {
@@ -7,7 +8,7 @@ export const analyticsService = {
     const monthStart = startOfMonth(now);
     const lastMonthStart = startOfMonth(subMonths(now, 1));
 
-    const [orders, lastMonthOrders, products, orderItems, customers] = await Promise.all([
+    const [orders, lastMonthOrders, products, orderItems, customers, cityOrders] = await Promise.all([
       prisma.commerceOrder.findMany({
         where: { status: { notIn: ["CANCELLED"] }, createdAt: { gte: monthStart } },
         include: { items: { include: { product: { select: { purchaseCost: true } } } } },
@@ -27,6 +28,17 @@ export const analyticsService = {
       }),
       prisma.commerceCustomer.findMany({
         select: { id: true, _count: { select: { orders: true } } },
+      }),
+      prisma.commerceOrder.findMany({
+        where: { status: { notIn: ["CANCELLED"] } },
+        select: {
+          total: true,
+          shippingCity: true,
+          shippingAddress: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 2000,
       }),
     ]);
 
@@ -60,6 +72,24 @@ export const analyticsService = {
     const repeatCustomers = customers.filter((c) => c._count.orders > 1).length;
     const repeatRate = customers.length > 0 ? Math.round((repeatCustomers / customers.length) * 100) : 0;
 
+    const cityMap = new Map<string, { city: string; orders: number; revenue: number }>();
+    for (const order of cityOrders) {
+      const city = extractOrderCity(order);
+      if (!city) continue;
+      const existing = cityMap.get(city) || { city, orders: 0, revenue: 0 };
+      existing.orders += 1;
+      existing.revenue += order.total;
+      cityMap.set(city, existing);
+    }
+
+    const topCities = [...cityMap.values()]
+      .sort((a, b) => b.orders - a.orders || b.revenue - a.revenue)
+      .slice(0, 15);
+
+    const cityOrderTotal = topCities.reduce((s, c) => s + c.orders, 0);
+    const citiesWithData = cityMap.size;
+    const unknownCityOrders = cityOrders.length - [...cityMap.values()].reduce((s, c) => s + c.orders, 0);
+
     return {
       revenue,
       grossProfit,
@@ -72,6 +102,13 @@ export const analyticsService = {
       repeatRate,
       repeatCustomers,
       totalCustomers: customers.length,
+      topCities,
+      cityInsights: {
+        citiesTracked: citiesWithData,
+        ordersWithCity: cityOrderTotal,
+        ordersMissingCity: Math.max(0, unknownCityOrders),
+        sampleSize: cityOrders.length,
+      },
     };
   },
 };

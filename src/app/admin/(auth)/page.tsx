@@ -22,6 +22,7 @@ type DashboardStats = {
   users: { customers: number; suppliers: number };
   topProducts: { id: string; name: string; slug: string; sold: number }[];
   bestCategories: { name: string; revenue: number }[];
+  topCities: { city: string; orders: number; revenue: number }[];
   chart: { date: string; revenue: number; orders: number }[];
   recentOrders: { id: string; orderNumber: string; total: number; status: string }[];
 };
@@ -146,17 +147,39 @@ export default function AdminDashboardPage() {
         </Card>
 
         <Card hover={false}>
-          <h2 className="font-semibold">Recent orders</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-semibold">Top cities by orders</h2>
+            <Link href="/admin/analytics" className="text-xs text-[var(--aes-royal)] hover:underline">
+              Full analytics →
+            </Link>
+          </div>
           <ul className="mt-4 space-y-2 text-sm">
-            {stats.recentOrders.map((o) => (
-              <li key={o.id} className="flex justify-between border-b border-[var(--aes-border)] py-2">
-                <Link href="/admin/orders" className="hover:text-[var(--aes-royal)]">{o.orderNumber}</Link>
-                <span className="text-[var(--aes-charcoal-muted)]">{o.status} · {formatInr(o.total)}</span>
+            {(stats.topCities || []).length === 0 && (
+              <li className="text-[var(--aes-dusty)]">No city data yet — appears after checkouts</li>
+            )}
+            {(stats.topCities || []).map((c) => (
+              <li key={c.city} className="flex justify-between border-b border-[var(--aes-border)] py-2">
+                <span>{c.city}</span>
+                <span className="text-[var(--aes-charcoal-muted)]">
+                  {c.orders} orders · {formatInr(c.revenue)}
+                </span>
               </li>
             ))}
           </ul>
         </Card>
       </div>
+
+      <Card hover={false} className="mt-6">
+        <h2 className="font-semibold">Recent orders</h2>
+        <ul className="mt-4 space-y-2 text-sm">
+          {stats.recentOrders.map((o) => (
+            <li key={o.id} className="flex justify-between border-b border-[var(--aes-border)] py-2">
+              <Link href="/admin/orders" className="hover:text-[var(--aes-royal)]">{o.orderNumber}</Link>
+              <span className="text-[var(--aes-charcoal-muted)]">{o.status} · {formatInr(o.total)}</span>
+            </li>
+          ))}
+        </ul>
+      </Card>
     </div>
   );
 }

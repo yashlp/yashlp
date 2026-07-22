@@ -62,6 +62,8 @@ export async function POST(req: NextRequest) {
         email: body.email,
         phone: body.phone,
         shippingAddress,
+        city: body.city,
+        state: body.state,
       },
       customerId: customer?.id,
     });

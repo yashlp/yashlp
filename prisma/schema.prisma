@@ -649,6 +649,8 @@ model CommerceOrder {
   customerNotes   String?
   internalNotes   String?
   shippingAddress String?
+  shippingCity    String?
+  shippingState   String?
   trackingNumber  String?
   courier         String?
   createdAt       DateTime @default(now())
@@ -664,6 +666,7 @@ model CommerceOrder {
   @@index([status])
   @@index([customerId])
   @@index([createdAt])
+  @@index([shippingCity])
 }
 
 model CommerceOrderItem {
