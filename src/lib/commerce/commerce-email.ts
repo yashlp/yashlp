@@ -70,3 +70,12 @@ export async function sendOrderConfirmationEmail(input: {
     html: `<p>Hi ${input.name},</p><p>Thank you for your order <strong>${input.orderNumber}</strong> (${total}).</p><p>We'll email you when it ships.</p><p>— Only Aesthetics</p>`,
   });
 }
+
+export async function sendAdminOtpEmail(email: string, code: string) {
+  return sendCommerceEmail({
+    to: email,
+    subject: "Only Aesthetics admin sign-in code",
+    text: `Your admin sign-in code is ${code}. It expires in 10 minutes.\n\nIf you did not try to sign in, ignore this email and change your password.`,
+    html: `<p>Your admin sign-in code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p><p>If you did not try to sign in, ignore this email and change your password.</p>`,
+  });
+}

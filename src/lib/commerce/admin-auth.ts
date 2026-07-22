@@ -6,6 +6,7 @@ import {
   getRequestMeta,
   type CommerceAdminUser,
 } from "./admin-session";
+import { sendAdminOtpEmail } from "./commerce-email";
 
 const OTP_EXPIRY_MIN = 10;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -84,10 +85,10 @@ export async function adminLogin(
 }
 
 export async function createAdminOtp(adminId: string) {
-  const code =
-    process.env.ALLOW_DEMO_OTP === "true"
-      ? "123456"
-      : String(Math.floor(100000 + Math.random() * 900000));
+  const admin = await prisma.commerceAdmin.findUniqueOrThrow({ where: { id: adminId } });
+  const allowDemo =
+    process.env.ALLOW_DEMO_OTP === "true" && process.env.NODE_ENV !== "production";
+  const code = allowDemo ? "123456" : String(Math.floor(100000 + Math.random() * 900000));
 
   await prisma.commerceAdminOtp.create({
     data: {
@@ -97,9 +98,13 @@ export async function createAdminOtp(adminId: string) {
     },
   });
 
-  // Production: send email via Resend
-  if (process.env.NODE_ENV === "development") {
-    console.info(`[Commerce Admin OTP] ${code}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.info(`[Commerce Admin OTP] ${admin.email}: ${code}`);
+  }
+
+  const sent = await sendAdminOtpEmail(admin.email, code);
+  if (!sent.ok && process.env.NODE_ENV === "production") {
+    throw new Error(`Could not send admin OTP email: ${sent.error}`);
   }
 }
 
