@@ -58,6 +58,8 @@ export const orderService = {
       email: string;
       phone: string;
       shippingAddress: string;
+      city?: string;
+      state?: string;
     };
     customerId?: string;
   }) {
@@ -80,6 +82,8 @@ export const orderService = {
         total: input.total,
         currency: "INR",
         shippingAddress: input.guest.shippingAddress,
+        shippingCity: input.guest.city?.trim() || null,
+        shippingState: input.guest.state?.trim() || null,
         customerNotes: `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`,
         items: {
           create: input.items.map((item) => ({

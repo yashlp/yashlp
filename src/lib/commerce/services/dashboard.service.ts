@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear, subDays } from "date-fns";
+import { extractOrderCity } from "@/lib/commerce/order-city";
 
 function sumOrders(where: object) {
   return prisma.commerceOrder.aggregate({
@@ -122,6 +123,25 @@ export const dashboardService = {
       })
     );
 
+    const recentForCities = await prisma.commerceOrder.findMany({
+      where: { status: { not: "CANCELLED" } },
+      select: { shippingCity: true, shippingAddress: true, total: true },
+      orderBy: { createdAt: "desc" },
+      take: 1000,
+    });
+    const cityMap = new Map<string, { city: string; orders: number; revenue: number }>();
+    for (const order of recentForCities) {
+      const city = extractOrderCity(order);
+      if (!city) continue;
+      const existing = cityMap.get(city) || { city, orders: 0, revenue: 0 };
+      existing.orders += 1;
+      existing.revenue += order.total;
+      cityMap.set(city, existing);
+    }
+    const topCities = [...cityMap.values()]
+      .sort((a, b) => b.orders - a.orders || b.revenue - a.revenue)
+      .slice(0, 5);
+
     return {
       sales: {
         today: today._sum.total || 0,
@@ -149,6 +169,7 @@ export const dashboardService = {
         sold: topProducts.find((t) => t.productId === p.id)?._sum.quantity || 0,
       })),
       bestCategories,
+      topCities,
       chart: last7Days,
       recentOrders,
     };

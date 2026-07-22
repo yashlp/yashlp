@@ -60,7 +60,7 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     label: "Growth",
     items: [
       { href: "/admin/marketing", label: "Marketing", icon: Megaphone, description: "Coupons & campaigns" },
-      { href: "/admin/analytics", label: "Analytics", icon: BarChart3, description: "Revenue & profit" },
+      { href: "/admin/analytics", label: "Analytics", icon: BarChart3, description: "Revenue, cities & profit" },
       { href: "/admin/content", label: "Content", icon: FileText, description: "CMS pages & banners" },
     ],
   },
