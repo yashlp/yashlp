@@ -1,76 +1,98 @@
 # Only Aesthetics — Production launch checklist
 
-Launch domain: **https://onlyaesthetics.in**
+Launch domain: **https://onlyaesthetics.in**  
+Fallback until DNS: **https://yashlp.vercel.app/aesthetics**
 
-## 1. Vercel environment variables
+---
+
+## What Cursor already did (you do not need to redo)
+
+- Storefront + admin commerce app built and on `main`
+- Checkout security fixes merged (server-side prices, no password hash leaks, stock/shipping fixes)
+- Production deploy from `main` is wired (`vercel-build` → DB push + admin bootstrap)
+- India-only geo gate enabled for storefront/APIs
+- Demo catalog seed off by default in production
+- Admin OTP emails via Resend (when keys are set)
+- Admin **Go-live** page at `/admin/launch` showing missing env
+
+---
+
+## What ONLY YOU can do (Cursor cannot)
+
+These need your logins / bank / DNS registrar:
+
+### A. Accounts & keys (30–60 min)
+
+| # | You do | Paste into Vercel Production |
+|---|--------|------------------------------|
+| 1 | Create [Neon](https://neon.tech) Postgres (prefer Mumbai) | `DATABASE_URL` |
+| 2 | Run `openssl rand -base64 32` | `SESSION_SECRET` |
+| 3 | Choose admin email + strong password | `COMMERCE_ADMIN_EMAIL`, `COMMERCE_ADMIN_PASSWORD` |
+| 4 | [Razorpay](https://razorpay.com) KYC + Live API keys | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` |
+| 5 | [Resend](https://resend.com) + verify `onlyaesthetics.in` | `RESEND_API_KEY`, `COMMERCE_FROM_EMAIL` |
+| 6 | Vercel → Storage → Blob | `BLOB_READ_WRITE_TOKEN` |
+
+Also set:
+
+```text
+NEXT_PUBLIC_SITE_URL=https://onlyaesthetics.in
+COMMERCE_ADMIN_REQUIRE_OTP=true
+ALLOW_DEMO_OTP=false
+INDIA_ONLY_STOREFRONT=true
+```
+
+Do **not** set `ALLOW_DEMO_PAYMENT` or `SEED_DEMO_CATALOG` in production.
+
+### B. Domain (critical — currently still WordPress)
+
+`onlyaesthetics.in` still serves **WordPress/PHP**, not this app.
+
+1. Vercel → Project → **Domains** → add `onlyaesthetics.in` + `www`
+2. At your registrar, replace WordPress DNS with Vercel’s A/CNAME records
+3. Wait until Vercel shows domain **Valid**
+
+### C. Deploy
+
+1. Vercel → **Deployments** → Redeploy **Production** (`main`)
+2. If demo products remain: set `PURGE_DEMO_CATALOG=true` → Redeploy once → **delete** that var → Redeploy again
+
+### D. Your catalog + first sale
+
+1. Sign in at `/admin/login`
+2. Open `/admin/launch` — all required rows should be green
+3. Add products at `/admin/products` → publish
+4. Set shipping under Settings
+5. Place one Razorpay order from an **India** network
+
+---
+
+## Full env table
 
 | Variable | Required | Notes |
 |----------|----------|-------|
-| `DATABASE_URL` | Yes | Neon PostgreSQL with pooling (`?sslmode=require`) |
+| `DATABASE_URL` | Yes | Neon pooled `postgresql://…?sslmode=require` |
 | `SESSION_SECRET` | Yes | `openssl rand -base64 32` |
 | `NEXT_PUBLIC_SITE_URL` | Yes | `https://onlyaesthetics.in` |
-| `COMMERCE_ADMIN_EMAIL` | Yes | Your admin login email |
-| `COMMERCE_ADMIN_PASSWORD` | Yes | Strong password — required in production builds |
+| `COMMERCE_ADMIN_EMAIL` | Yes | Admin login email |
+| `COMMERCE_ADMIN_PASSWORD` | Yes | Strong password |
 | `COMMERCE_ADMIN_REQUIRE_OTP` | Yes | `true` |
 | `ALLOW_DEMO_OTP` | Yes | `false` |
-| `RAZORPAY_KEY_ID` | Yes | Live keys (`rzp_live_…`) |
+| `RAZORPAY_KEY_ID` | Yes | Live `rzp_live_…` |
 | `RAZORPAY_KEY_SECRET` | Yes | Live secret |
-| `RESEND_API_KEY` | Yes | Signup OTP + order emails |
+| `RESEND_API_KEY` | Yes | Signup OTP + order emails + admin OTP |
 | `COMMERCE_FROM_EMAIL` | Yes | Verified sender on Resend |
-| `BLOB_READ_WRITE_TOKEN` | Yes | Product image uploads in admin |
+| `BLOB_READ_WRITE_TOKEN` | Yes | Product image uploads |
 | `INDIA_ONLY_STOREFRONT` | Yes | `true` |
-| `PURGE_DEMO_CATALOG` | Once | Set `true` for **one** deploy to wipe demo products, then remove |
-| `SEED_DEMO_CATALOG` | No | Leave unset / `false` in production |
+| `PURGE_DEMO_CATALOG` | Once | `true` for one deploy only, then remove |
+| `SEED_DEMO_CATALOG` | No | Leave unset / `false` |
 
-## 2. Domain (onlyaesthetics.in)
+---
 
-1. Add `onlyaesthetics.in` and `www.onlyaesthetics.in` in Vercel → Project → Domains.
-2. Point DNS A/CNAME records per Vercel instructions.
-3. Set primary domain to `onlyaesthetics.in`.
+## Post-launch checks
 
-## 3. Database
-
-- Use **Neon** (or Vercel Postgres) on the **Mumbai / ap-south** region if available for lower latency in India.
-- Deploy runs `prisma db push` + bootstrap settings (no demo catalog).
-- After first deploy with `PURGE_DEMO_CATALOG=true`, demo Unsplash products and `AES-DEMO-*` orders are removed.
-
-## 4. Add real catalog (admin ↔ storefront)
-
-1. Sign in at `/admin/login`.
-2. Upload products at `/admin/products` (images → Vercel Blob).
-3. Publish products (`PUBLISHED` + `APPROVED`).
-4. Create collections at `/admin/collections`.
-5. Storefront reads the same database — changes appear immediately.
-
-## 5. Integrations status
-
-| Integration | Status |
-|-------------|--------|
-| Razorpay (INR) | Required for checkout |
-| Resend (email OTP + order confirmation) | Required for signup |
-| Vercel Blob (media) | Required for admin uploads |
-| MSG91 (SMS) | Optional — phone OTP logs in dev only |
-| Shiprocket / Delhivery | Not wired — fulfil manually in admin |
-
-## 6. Security
-
-- Demo payment blocked in production.
-- Demo catalog seed disabled unless `SEED_DEMO_CATALOG=true`.
-- India-only geo block on `/aesthetics`, `/admin`, commerce APIs.
-- Rate limits on login, register, and email OTP.
-- Admin password required at deploy time.
-
-## 7. Checkout flow
-
-1. **Account** — Sign in, Sign up (email OTP), or Guest.
-2. **Delivery** — Address (India PIN codes).
-3. **Payment** — Razorpay only.
-
-## 8. Post-launch verification
-
-- [ ] `/aesthetics` loads with real products only
-- [ ] Checkout completes with Razorpay test/live payment
-- [ ] Order appears in `/admin/orders`
+- [ ] `https://onlyaesthetics.in/aesthetics` shows **your** products (not WordPress)
+- [ ] Email OTP signup works
+- [ ] Razorpay payment completes
+- [ ] Order in `/admin/orders`
 - [ ] Confirmation email received
-- [ ] Non-India IP sees india-only page
-- [ ] Mobile + desktop responsive pass
+- [ ] Outside India → india-only page

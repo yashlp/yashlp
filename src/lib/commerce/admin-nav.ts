@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Megaphone,
   Package,
+  Rocket,
   RotateCcw,
   Settings,
   Shield,
@@ -68,6 +69,7 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     id: "system",
     label: "System",
     items: [
+      { href: "/admin/launch", label: "Go-live", icon: Rocket, description: "Launch checklist & missing env" },
       { href: "/admin/staff", label: "Admin & Staff", icon: Shield, description: "Roles & team access" },
       { href: "/admin/settings", label: "Settings", icon: Settings, description: "GST, bank, WhatsApp" },
       { href: "/admin/audit-logs", label: "Audit Logs", icon: FileText, description: "Activity history" },
