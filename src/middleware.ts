@@ -10,6 +10,16 @@ function withPathHeader(request: NextRequest) {
 }
 
 function indiaBlockedResponse(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  if (path.startsWith("/api/")) {
+    return NextResponse.json(
+      {
+        error: "Only Aesthetics is available in India only",
+        code: "INDIA_ONLY",
+      },
+      { status: 403 }
+    );
+  }
   const url = request.nextUrl.clone();
   url.pathname = "/aesthetics/india-only";
   return NextResponse.rewrite(url);
