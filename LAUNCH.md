@@ -1,180 +1,139 @@
-# CivicLens — Official launch guide
+# CivicLens — Launch guide
 
-Your live site: **https://yashlp.vercel.app** (replace with your `.com` when ready)
-
-> **Honest security note:** No website is "unhackable." CivicLens uses HTTPS, secure sessions, rate limits, CSP headers, admin password gate, and server-side payment verification. Follow this checklist to minimize risk.
-
----
-
-## What is already built (no action needed)
-
-| Feature | Status |
-|---------|--------|
-| Map (OpenStreetMap) | Free, no API key |
-| Place search (Nominatim) | Free, no API key |
-| Report data minimums | Blocks purchase if insufficient pins |
-| Picture approval (admin) | `/admin/picture-approvals` |
-| Razorpay + Stripe code | Ready — needs your API keys |
-| MSG91 SMS code | Ready — needs your API key |
-| OpenAI Ask AI | Uses GPT when `OPENAI_API_KEY` set |
-| Resend support email | When `RESEND_API_KEY` set |
-| Admin launch checklist | `/admin/launch` |
-| Security headers | CSP, HSTS, X-Frame-Options, etc. |
+**Live site:** https://yashlp.vercel.app  
+**CivicLens admin:** https://yashlp.vercel.app/civic-admin/login  
+**Only Aesthetics admin:** https://yashlp.vercel.app/admin/login *(different product — do not mix)*
 
 ---
 
-## YOU must do these (Vercel + provider accounts)
+## Current status (as of latest deploy)
 
-### Step 1 — Vercel environment variables (15 min)
+| Item | Status |
+|------|--------|
+| Website live on Vercel | Done |
+| Map / report / compare / insights / ask | Done in code |
+| QA bugfixes (camera, New pin, payments harden, privacy) | On branch — merge to `main` to deploy |
+| `authMode` | **demo** (OTP still `123456` until MSG91) |
+| Payments | **not configured** (`paymentsConfigured: false`) |
+| Custom domain | Optional — using `*.vercel.app` |
 
-Go to **Vercel → your project → Settings → Environment Variables → Production**
+---
 
-Add every row below, then click **Redeploy**.
+## Who does what
 
-| Variable | Where to get it | Required |
-|----------|-----------------|----------|
-| `DATABASE_URL` | [Neon](https://neon.tech) → pooled PostgreSQL URL | Yes |
-| `SESSION_SECRET` | Run: `openssl rand -base64 32` | Yes |
+### Agent already did / will do (code)
+
+- [x] Build CivicLens product flows (map, report, reports, payments code, admin)
+- [x] Security headers, rate limits, photo approval, data readiness gates
+- [x] Final QA fixes (report loop, camera CSP, open redirect, payment verify trust, private pin leak)
+- [x] Admin launch checklist UI at `/civic-admin/launch`
+- [x] “Publish for customers” API at CivicLens admin settings
+- [x] Keep `/civic-admin` separate from Only Aesthetics `/admin`
+- [ ] Merge QA branch to `main` so Vercel redeploys (see below)
+
+### You must do (accounts + secrets — agent cannot)
+
+These need **your** identity, bank KYC, and Vercel dashboard access. No one else can complete them.
+
+| # | Task | Blocks |
+|---|------|--------|
+| 1 | Paste env vars in Vercel Production | Real OTP + payments |
+| 2 | MSG91 KYC + Auth Key + DLT template | Real SMS login |
+| 3 | Razorpay KYC + live API keys | Collecting money in India |
+| 4 | Click **Publish for customers** in `/civic-admin` | Customer-facing banner / go-live settings |
+| 5 | (Optional) Stripe, OpenAI, Resend, custom domain | Nice-to-have |
+
+---
+
+## Step-by-step — YOU
+
+### Step 1 — Merge QA + redeploy (2 min)
+
+1. Open the PR for branch `cursor/final-qa-fixes-ec9d` (or merge it in GitHub)
+2. After merge, Vercel auto-deploys `main`
+3. Confirm camera works: open `/report` on phone → add photo (Permissions-Policy should allow camera)
+
+### Step 2 — Vercel environment variables (15 min)
+
+**Vercel → Project → Settings → Environment Variables → Production**
+
+| Variable | Value | Required |
+|----------|-------|----------|
+| `DATABASE_URL` | Neon pooled `postgresql://…` | Yes (likely already set) |
+| `SESSION_SECRET` | 32+ random chars (generate: `openssl rand -base64 32`) | Yes |
 | `ADMIN_PHONES` | Your phone E.164 e.g. `+919558812335` | Yes |
-| `SMS_PROVIDER` | `msg91` | Yes |
-| `SMS_API_KEY` | MSG91 dashboard → Auth Key | Yes |
-| `SMS_SENDER_ID` | MSG91 approved sender e.g. `CIVCLN` | Yes |
-| `ALLOW_DEMO_OTP` | `false` (after MSG91 works) | Yes |
-| `RAZORPAY_KEY_ID` | Razorpay → Live → Key ID `rzp_live_...` | Yes |
-| `RAZORPAY_KEY_SECRET` | Razorpay → Live → Key Secret | Yes |
-| `STRIPE_PUBLISHABLE_KEY` | Stripe → Live `pk_live_...` | Optional |
-| `STRIPE_SECRET_KEY` | Stripe → Live `sk_live_...` | Optional |
-| `NEXT_PUBLIC_SITE_URL` | `https://yourdomain.com` | Optional |
-| `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com) | Optional |
-| `OPENAI_MODEL` | `gpt-4o-mini` (default) | Optional |
-| `RESEND_API_KEY` | [resend.com](https://resend.com) | Optional |
-| `RESEND_FROM_EMAIL` | `CivicLens <onboarding@resend.dev>` or verified domain | Optional |
-| `SUPPORT_EMAIL_TO` | Your inbox e.g. `yash.shah.uk@gmail.com` | Optional |
+| `SMS_PROVIDER` | `msg91` | Yes for real OTP |
+| `SMS_API_KEY` | MSG91 Auth Key | Yes for real OTP |
+| `SMS_SENDER_ID` | Approved sender e.g. `CIVCLN` | Yes for real OTP |
+| `ALLOW_DEMO_OTP` | `false` **only after** MSG91 works | Yes for official launch |
+| `RAZORPAY_KEY_ID` | Live `rzp_live_…` | Yes for payments |
+| `RAZORPAY_KEY_SECRET` | Live secret | Yes for payments |
+| `NEXT_PUBLIC_SITE_URL` | `https://yashlp.vercel.app` or your domain | Recommended |
+| `OPENAI_API_KEY` | From platform.openai.com | Optional |
+| `STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` | Live keys | Optional (intl) |
+| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `SUPPORT_EMAIL_TO` | Resend + your inbox | Optional |
 
----
+Then **Redeploy** Production.
 
-### Step 2 — MSG91 SMS OTP (20 min)
+### Step 3 — MSG91 SMS (20–40 min + KYC wait)
 
-1. Sign up at **https://msg91.com**
-2. Complete business KYC and **DLT** registration (required for India SMS)
-3. Create an OTP / SMS template approved for login codes
-4. Copy **Auth Key** from dashboard
-5. Add to Vercel: `SMS_PROVIDER=msg91`, `SMS_API_KEY=...`, `SMS_SENDER_ID=...`
-6. Set `ALLOW_DEMO_OTP=false`
-7. Redeploy and test: `/login` → your phone → receive real SMS
+1. https://msg91.com → sign up → business KYC + India DLT
+2. Create OTP template → get Auth Key + sender ID
+3. Put keys in Vercel (Step 2)
+4. Set `ALLOW_DEMO_OTP=false` → Redeploy
+5. Test `/login` — you should get a real SMS (not `123456`)
 
----
+### Step 4 — Razorpay (30 min + KYC wait)
 
-### Step 3 — Razorpay payments India (30 min)
+1. https://razorpay.com → KYC + bank account
+2. Live mode → API Keys → generate
+3. Add keys to Vercel → Redeploy
+4. Test: `/reports` → pick Mumbai (data-rich) → pay with UPI
 
-1. Sign up at **https://razorpay.com**
-2. Complete **KYC** and link your **bank account** (settlements go here)
-3. Switch to **Live mode** → Settings → API Keys → Generate
-4. Add to Vercel: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`
-5. Redeploy
-6. Test: `/reports` → buy a report in a data-rich area (Mumbai) → pay ₹29 with UPI test or real
-
-**How you receive money:** Razorpay dashboard → Settlements → your bank (typically T+2 days).
-
----
-
-### Step 4 — Stripe international (optional, 20 min)
-
-1. Sign up at **https://stripe.com**
-2. Complete business verification + bank account
-3. Developers → API keys → **Live** mode
-4. Add `STRIPE_PUBLISHABLE_KEY` + `STRIPE_SECRET_KEY` to Vercel
-5. Redeploy — international report areas use Stripe USD checkout
-
----
+Money → Razorpay Settlements → your bank (usually T+2).
 
 ### Step 5 — Publish for customers (1 min)
 
-1. Go to **https://yashlp.vercel.app/civic-admin/login** (CivicLens only — not `/admin`)
-2. Admin OTP → set admin password if first time
-3. **CivicLens Admin → Site settings → Publish for customers**
-4. Or **CivicLens Admin → Launch** to see green checklist
+1. https://yashlp.vercel.app/civic-admin/login
+2. Sign in with admin phone OTP
+3. **Site settings → Publish for customers**  
+   **or** open **Launch** and confirm required rows are green
 
-> **Important:** `/admin` is **Only Aesthetics** store admin. CivicLens admin is **`/civic-admin`**. Different cookies, different APIs, different UI — do not mix them.
+### Step 6 — Optional polish
 
----
-
-### Step 6 — Custom `.com` domain (optional, 15 min)
-
-1. Buy a domain (e.g. `getciviclens.com` — `civiclens.com` is taken by another company)
-2. Vercel → Project → **Settings → Domains** → Add domain
-3. At your registrar, add DNS records Vercel shows (usually CNAME or A)
-4. Wait for SSL (automatic, ~5–30 min)
-5. Set `NEXT_PUBLIC_SITE_URL=https://www.yourdomain.com` in Vercel
-6. Redeploy
+- Custom domain in Vercel → Domains (avoid `civiclens.com` — taken)
+- OpenAI for Ask AI
+- Stripe for international USD
+- Resend for support email
 
 ---
 
-### Step 7 — OpenAI Ask AI (optional, 5 min)
+## Soft launch vs official launch
 
-1. Create API key at **https://platform.openai.com**
-2. Add `OPENAI_API_KEY` to Vercel
-3. Redeploy — `/ask` uses GPT grounded on your community data
+| Mode | When | Sign-in | Payments |
+|------|------|---------|----------|
+| **Soft launch** (site already live) | Now | Demo OTP `123456` | Off until Razorpay keys |
+| **Official launch** | After Steps 2–5 | Real MSG91 SMS | Razorpay live |
 
----
-
-### Step 8 — Resend support email (optional, 10 min)
-
-1. Sign up at **https://resend.com**
-2. Verify your sending domain (or use Resend test domain initially)
-3. Add to Vercel:
-   - `RESEND_API_KEY`
-   - `RESEND_FROM_EMAIL=CivicLens <noreply@yourdomain.com>`
-   - `SUPPORT_EMAIL_TO=your@email.com`
-4. Users can POST `/api/support` when signed in (wire UI in Profile if desired)
+You can soft-launch today for friends/testers. Official launch needs MSG91 + Razorpay.
 
 ---
 
-### Step 9 — Cloud photo storage (optional, later)
+## Verify after you finish Steps 2–5
 
-Photos are stored in PostgreSQL today (fine for early scale). For S3/R2 at scale, add:
-
-```
-S3_BUCKET=
-S3_ACCESS_KEY_ID=
-S3_SECRET_ACCESS_KEY=
-S3_ENDPOINT=        # Cloudflare R2 or AWS
-S3_PUBLIC_URL=
-```
-
-(Full S3 migration can be done in a follow-up — not blocking launch.)
+1. `/civic-admin/launch` — all **required** items green
+2. `/login` — real SMS code
+3. `/report` — photo + pin → submit → approve in Picture Approvals
+4. `/reports` — pay in a data-ready area → success
+5. Homepage — no demo/maintenance banners
 
 ---
 
-## Security checklist
+## What the agent cannot do
 
-| Item | Action |
-|------|--------|
-| Strong `SESSION_SECRET` | 32+ random chars, never commit to git |
-| `ALLOW_DEMO_OTP=false` | After MSG91 live |
-| Admin password | 12+ chars, rotate in Admin → Settings |
-| Neon password | Rotate if ever shared in chat |
-| HTTPS only | Vercel default |
-| Rate limits | On OTP, API, Ask AI (built-in) |
-| Payment verification | Server-side signature check (built-in) |
-| Photo approval | Admin reviews uploads before public display |
+- Create MSG91 / Razorpay / Stripe / OpenAI / Resend accounts (KYC + your ID)
+- Paste secrets into your Vercel project
+- Buy or point a custom domain at your registrar
+- Click “Publish for customers” while signed in as you (needs your admin session)
 
----
-
-## Verify launch
-
-1. Open **Admin → Launch** — all required items green
-2. Customer sign-in with real SMS (not `123456`)
-3. Submit a report with photo → approve in **Picture Approval**
-4. Buy report where data exists → Razorpay payment succeeds
-5. Hard refresh homepage — no demo banners
-
----
-
-## What the agent cannot do for you
-
-- Create MSG91 / Razorpay / Stripe / OpenAI / Resend accounts (needs your identity + KYC)
-- Paste secrets into Vercel (only you have dashboard access)
-- Buy or configure your `.com` DNS at registrar
-
-Everything else is in the codebase and deploys from `main` automatically.
+Everything else is in the repo and deploys from `main`.
