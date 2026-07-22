@@ -2,9 +2,11 @@
 
 Launch domain: **https://onlyaesthetics.in**
 
-> **Important:** Use a **separate Vercel project** named `only-aesthetics`.  
-> Do **not** add these variables to the CivicLens / `yashlp` project.  
-> Step-by-step: [VERCEL_ONLY_AESTHETICS_PROJECT.md](./VERCEL_ONLY_AESTHETICS_PROJECT.md)
+> **No Vercel credits?** Host on Render or Railway instead:  
+> [HOSTING_WITHOUT_VERCEL.md](./HOSTING_WITHOUT_VERCEL.md)
+
+> Prefer a separate app from CivicLens. Use `PRODUCT_SURFACE=aesthetics` and a dedicated host project.  
+> Vercel project guide (optional): [VERCEL_ONLY_AESTHETICS_PROJECT.md](./VERCEL_ONLY_AESTHETICS_PROJECT.md)
 
 ---
 
@@ -23,26 +25,28 @@ Launch domain: **https://onlyaesthetics.in**
 
 ## What ONLY YOU can do (Cursor cannot)
 
-### 0. Create Vercel project `only-aesthetics` (required)
+### 0. Pick a host (do **not** need Vercel)
 
-1. Open [vercel.com/new](https://vercel.com/new)
-2. Import GitHub repo `yashlp/yashlp`
-3. **Project Name:** `only-aesthetics`
-4. Leave CivicLens (`yashlp`) untouched — do not paste store env there
-5. Full clicks: [VERCEL_ONLY_AESTHETICS_PROJECT.md](./VERCEL_ONLY_AESTHETICS_PROJECT.md)
+**Recommended if no Vercel credits:** [Render](https://render.com) or [Railway](https://railway.app)  
+Full steps: [HOSTING_WITHOUT_VERCEL.md](./HOSTING_WITHOUT_VERCEL.md)
 
-### A. Accounts & keys → paste into **only-aesthetics** only
+1. Connect GitHub `yashlp/yashlp`
+2. Deploy with the repo `Dockerfile`
+3. Paste aesthetics env vars (template: `.env.only-aesthetics.example`)
+4. Attach `onlyaesthetics.in` DNS to **that** host — leave CivicLens alone
 
-| # | You do | Paste into Vercel Production on `only-aesthetics` |
-|---|--------|-----------------------------------------------------|
-| 1 | Create [Neon](https://neon.tech) Postgres (**new DB**, not CivicLens) | `DATABASE_URL` |
-| 2 | Run `openssl rand -base64 32` | `SESSION_SECRET` |
-| 3 | Choose admin email + strong password | `COMMERCE_ADMIN_EMAIL`, `COMMERCE_ADMIN_PASSWORD` |
-| 4 | [Razorpay](https://razorpay.com) KYC + Live API keys | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` |
-| 5 | [Resend](https://resend.com) + verify `onlyaesthetics.in` | `RESEND_API_KEY`, `COMMERCE_FROM_EMAIL` |
-| 6 | Vercel Blob on **this** project | `BLOB_READ_WRITE_TOKEN` |
+### A. Accounts & keys → paste into Render/Railway (not CivicLens)
 
-Also set on **only-aesthetics**:
+| # | You do | Env var |
+|---|--------|---------|
+| 1 | [Neon](https://neon.tech) Postgres (**new DB**) | `DATABASE_URL` |
+| 2 | `openssl rand -base64 32` | `SESSION_SECRET` |
+| 3 | Admin email + password | `COMMERCE_ADMIN_EMAIL`, `COMMERCE_ADMIN_PASSWORD` |
+| 4 | [Razorpay](https://razorpay.com) Live keys | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` |
+| 5 | [Resend](https://resend.com) | `RESEND_API_KEY`, `COMMERCE_FROM_EMAIL` |
+| 6 | [Cloudflare R2](https://dash.cloudflare.com) free bucket | `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_ENDPOINT`, `S3_PUBLIC_URL` |
+
+Also set:
 
 ```text
 PRODUCT_SURFACE=aesthetics
@@ -52,24 +56,13 @@ ALLOW_DEMO_OTP=false
 INDIA_ONLY_STOREFRONT=true
 ```
 
-Template: [`.env.only-aesthetics.example`](../.env.only-aesthetics.example)
+### B. Domain
 
-Do **not** set `ALLOW_DEMO_PAYMENT` or `SEED_DEMO_CATALOG` in production.
+Point `onlyaesthetics.in` to Render/Railway/Fly (not WordPress, not CivicLens Vercel).
 
-### B. Domain (critical — currently still WordPress)
+### C. Catalog + first sale
 
-1. On project **only-aesthetics** → **Domains** → add `onlyaesthetics.in` + `www`
-2. At your registrar, replace WordPress DNS with Vercel’s records
-3. Wait until Vercel shows domain **Valid**
-
-### C. Deploy
-
-1. Project **only-aesthetics** → Redeploy Production (`main`)
-2. Optional once: `PURGE_DEMO_CATALOG=true` → redeploy → remove → redeploy
-
-### D. Catalog + first sale
-
-1. `/admin/login` → `/admin/launch` (all required green)
+1. `/admin/login` → `/admin/launch`
 2. Add products → publish
 3. One Razorpay order from India
 

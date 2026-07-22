@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: only-aesthetics
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /aesthetics
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PRODUCT_SURFACE
+        value: aesthetics
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: COMMERCE_ADMIN_EMAIL
+        sync: false
+      - key: COMMERCE_ADMIN_PASSWORD
+        sync: false
+      - key: COMMERCE_ADMIN_REQUIRE_OTP
+        value: "true"
+      - key: ALLOW_DEMO_OTP
+        value: "false"
+      - key: INDIA_ONLY_STOREFRONT
+        value: "true"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: COMMERCE_FROM_EMAIL
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_PUBLIC_URL
+        sync: false
+      - key: S3_REGION
+        value: auto

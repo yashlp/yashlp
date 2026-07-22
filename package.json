@@ -25,6 +25,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.787.0",
     "@prisma/client": "^6.11.1",
     "@vercel/blob": "^2.6.1",
     "bcryptjs": "^3.0.2",

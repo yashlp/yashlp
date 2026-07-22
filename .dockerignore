@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.only-aesthetics.example
+!.env.example
+npm-debug.log*
+README.md
+docs
+*.md
+!docs/HOSTING_WITHOUT_VERCEL.md
+playwright*
+coverage
+.tmp
+/tmp

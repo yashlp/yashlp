@@ -1,4 +1,5 @@
 import { isCommerceEmailConfigured } from "@/lib/commerce/commerce-email";
+import { isObjectStorageConfigured } from "@/lib/commerce/object-storage";
 import { isRazorpayConfigured } from "@/lib/payments/config";
 import { getSiteUrl } from "@/lib/payments/config";
 
@@ -21,7 +22,7 @@ function databaseOk() {
 }
 
 function blobOk() {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim()) || isObjectStorageConfigured();
 }
 
 function adminCredsOk() {
@@ -99,11 +100,13 @@ export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
     },
     {
       id: "blob",
-      label: "Vercel Blob media uploads",
+      label: "Product media storage",
       status: blobOk() ? "ok" : "fail",
-      detail: blobOk()
-        ? "BLOB_READ_WRITE_TOKEN set"
-        : "You: create a Vercel Blob store and set BLOB_READ_WRITE_TOKEN",
+      detail: isObjectStorageConfigured()
+        ? "Cloudflare R2 / S3 configured"
+        : process.env.BLOB_READ_WRITE_TOKEN?.trim()
+          ? "Vercel Blob configured"
+          : "You: set Cloudflare R2 (S3_*) on Render/Railway, or BLOB_READ_WRITE_TOKEN on Vercel",
       required: true,
       youMustDo: !blobOk(),
     },
