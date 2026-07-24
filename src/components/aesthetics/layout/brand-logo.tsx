@@ -25,11 +25,6 @@ export function BrandLogo({ variant = "nav", className, href = "/aesthetics" }: 
       >
         <OnlyAestheticMark tone={isFooter ? "light" : "ink"} />
       </div>
-      {isHero && (
-        <p className="aes-brand-tagline mt-5 text-[11px] tracking-wide sm:text-xs">
-          Details matter · Small-batch makers · Maker-vetted · Mood-first edits · Ships with care
-        </p>
-      )}
     </div>
   );
 

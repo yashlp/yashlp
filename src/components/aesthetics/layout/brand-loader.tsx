@@ -50,11 +50,11 @@ export function BrandLoader() {
       <div className="oa-logo-wrap oa-logo-wrap--loader max-w-full animate-pulse">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/brand/only-aesthetic-logo.svg"
+          src="/brand/only-aesthetic-logo.png"
           alt=""
           className="h-auto w-full"
-          width={520}
-          height={520}
+          width={1024}
+          height={1024}
         />
       </div>
     </div>

@@ -33,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#fff5e1",
+  themeColor: "#fdfcfb",
 };
 
 export default function AestheticsLayout({ children }: { children: React.ReactNode }) {
