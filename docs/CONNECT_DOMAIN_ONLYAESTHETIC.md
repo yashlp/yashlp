@@ -1,21 +1,59 @@
 # Connect domain: onlyaesthetic.in
 
 Brand: **Only Aesthetic**  
-Domain you bought: **onlyaesthetic.in**
+Domain you bought: **onlyaesthetic.in**  
+Vercel project: **onlyaesthetic** (URL like `onlyaesthetics-omega.vercel.app`)
+
+---
+
+## Why `/` shows CivicLens (not the store)
+
+This repo has **two apps** in one codebase. By default the home page is CivicLens.
+
+Your **Only Aesthetic** store is already on the same deploy at:
+
+```text
+https://onlyaesthetics-omega.vercel.app/aesthetics
+```
+
+Admin:
+
+```text
+https://onlyaesthetics-omega.vercel.app/admin/login
+```
+
+To make **`/`** open Only Aesthetic (and hide CivicLens on this project):
+
+1. Vercel → project **onlyaesthetic** → **Settings → Environment Variables**
+2. Add for **Production** (and Preview if you want):
+
+| Name | Value |
+|------|--------|
+| `PRODUCT_SURFACE` | `aesthetics` |
+| `NEXT_PUBLIC_SITE_URL` | `https://onlyaesthetic.in` (or `https://onlyaesthetics-omega.vercel.app` until domain is live) |
+
+3. **Deployments → … on latest → Redeploy** (must redeploy — env vars do not apply to old builds)
+
+After redeploy, `https://onlyaesthetics-omega.vercel.app/` should open the store, not CivicLens.
+
+> Do **not** set `PRODUCT_SURFACE=aesthetics` on the CivicLens project (`yashlp`).
+
+> If you see “India only”, open the site from an India network (or temporarily set `ALLOW_NON_INDIA_ACCESS=true` for testing).
 
 ---
 
 ## Important first
 
-Your Vercel project **onlyaesthetics** may show `DEPLOYMENT_DISABLED` until billing/credits work.  
-Domain will only go live after that project can serve traffic.
+If a Vercel project shows `DEPLOYMENT_DISABLED`, fix billing/credits first.  
+Domain will only go live after that project can serve traffic.  
+Your **onlyaesthetic** / `onlyaesthetics-omega` project is the one to use for the store + domain.
 
 ---
 
 ## Step 1 — Add domain in Vercel
 
 1. Open [vercel.com/dashboard](https://vercel.com/dashboard)
-2. Open project **`onlyaesthetics`** (store project — not `yashlp`)
+2. Open project **`onlyaesthetic`** (store — URL like `onlyaesthetics-omega.vercel.app` — **not** `yashlp`)
 3. **Settings → Domains**
 4. Add:
    - `onlyaesthetic.in`
@@ -64,14 +102,16 @@ You only need the **A** record for `@` (above). Do **not** put a CNAME on `@`.
 
 ## Step 3 — Env var on Vercel
 
-Project **onlyaesthetics** → **Settings → Environment Variables** → Production:
+Project **onlyaesthetic** → **Settings → Environment Variables** → Production:
 
 ```text
-NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
 PRODUCT_SURFACE=aesthetics
+NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
 ```
 
-Then **Deployments → Redeploy**.
+Then **Deployments → Redeploy** (required).
+
+Without `PRODUCT_SURFACE=aesthetics`, the homepage stays CivicLens.
 
 ---
 
@@ -107,5 +147,5 @@ https://onlyaesthetic.in
 
 ## If deployment is still disabled
 
-Vercel → **onlyaesthetics** → fix payment / enable deployment first.  
-Until then the domain cannot serve the app.
+Vercel → fix payment / enable deployment on the project that is disabled.  
+Use the working project (**onlyaesthetic** / `onlyaesthetics-omega`) for the domain if that one deploys.
