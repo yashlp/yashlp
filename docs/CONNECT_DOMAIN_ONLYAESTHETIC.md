@@ -10,7 +10,9 @@ Vercel project: **onlyaesthetic** (URL like `onlyaesthetics-omega.vercel.app`)
 
 This repo has **two apps** in one codebase. By default the home page is CivicLens.
 
-Your **Only Aesthetic** store is already on the same deploy at:
+**Code now auto-detects** `onlyaesthetic*` / `onlyaesthetic.in` hostnames and redirects `/` → store (CivicLens stays on `yashlp`).
+
+Your store URL today:
 
 ```text
 https://onlyaesthetics-omega.vercel.app/aesthetics
@@ -22,19 +24,14 @@ Admin:
 https://onlyaesthetics-omega.vercel.app/admin/login
 ```
 
-To make **`/`** open Only Aesthetic (and hide CivicLens on this project):
-
-1. Vercel → project **onlyaesthetic** → **Settings → Environment Variables**
-2. Add for **Production** (and Preview if you want):
+Still recommended on project **onlyaesthetic**:
 
 | Name | Value |
 |------|--------|
 | `PRODUCT_SURFACE` | `aesthetics` |
 | `NEXT_PUBLIC_SITE_URL` | `https://onlyaesthetic.in` (or `https://onlyaesthetics-omega.vercel.app` until domain is live) |
 
-3. **Deployments → … on latest → Redeploy** (must redeploy — env vars do not apply to old builds)
-
-After redeploy, `https://onlyaesthetics-omega.vercel.app/` should open the store, not CivicLens.
+Then **Deployments → Redeploy**.
 
 > Do **not** set `PRODUCT_SURFACE=aesthetics` on the CivicLens project (`yashlp`).
 

@@ -1,5 +1,22 @@
 import type { NextConfig } from "next";
 
+function aestheticsOnlyFromEnv() {
+  if (process.env.PRODUCT_SURFACE === "aesthetics") return true;
+  const hosts = [
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.VERCEL_URL,
+  ];
+  for (const raw of hosts) {
+    if (!raw) continue;
+    const h = (raw.includes("://") ? (() => { try { return new URL(raw).hostname; } catch { return raw; } })() : raw)
+      .toLowerCase();
+    if (h.includes("yashlp") || h.includes("civiclens")) continue;
+    if (/onlyaesthetic/.test(h)) return true;
+  }
+  return false;
+}
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -27,7 +44,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    const aestheticsOnly = process.env.PRODUCT_SURFACE === "aesthetics";
+    const aestheticsOnly = aestheticsOnlyFromEnv();
     return [
       ...(aestheticsOnly
         ? [

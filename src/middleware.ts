@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isAestheticsOnlyRequest } from "@/lib/commerce/aesthetics-surface";
 import { isCommercePath, isIndiaRequest } from "@/lib/commerce/geo";
-
-/** Separate Vercel project for the store — set PRODUCT_SURFACE=aesthetics */
-function isAestheticsOnlyDeploy() {
-  return process.env.PRODUCT_SURFACE === "aesthetics";
-}
 
 const CIVIC_PATH_PREFIXES = [
   "/civic-admin",
@@ -56,8 +52,9 @@ export function middleware(request: NextRequest) {
     return withPathHeader(request);
   }
 
-  // Dedicated Only Aesthetic Vercel project: keep CivicLens off this hostname.
-  if (isAestheticsOnlyDeploy()) {
+  // Store project / onlyaesthetic* hosts: keep CivicLens off this hostname.
+  const host = request.headers.get("host");
+  if (isAestheticsOnlyRequest(host)) {
     if (path === "/") {
       const url = request.nextUrl.clone();
       url.pathname = "/aesthetics";

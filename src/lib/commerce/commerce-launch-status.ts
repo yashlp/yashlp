@@ -1,3 +1,4 @@
+import { isAestheticsOnlyDeploy } from "@/lib/commerce/aesthetics-surface";
 import { isCommerceEmailConfigured } from "@/lib/commerce/commerce-email";
 import { isObjectStorageConfigured } from "@/lib/commerce/object-storage";
 import { isRazorpayConfigured } from "@/lib/payments/config";
@@ -146,13 +147,14 @@ export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
     {
       id: "product_surface",
       label: "Aesthetics-only deploy mode",
-      status: process.env.PRODUCT_SURFACE === "aesthetics" ? "ok" : "warn",
-      detail:
-        process.env.PRODUCT_SURFACE === "aesthetics"
+      status: isAestheticsOnlyDeploy() ? "ok" : "warn",
+      detail: isAestheticsOnlyDeploy()
+        ? process.env.PRODUCT_SURFACE === "aesthetics"
           ? "PRODUCT_SURFACE=aesthetics — CivicLens routes blocked on this project"
-          : "You: on project onlyaesthetics set PRODUCT_SURFACE=aesthetics (do not set this on CivicLens)",
+          : "Store hostname auto-detected (onlyaesthetic*) — CivicLens blocked"
+        : "You: on project onlyaesthetic set PRODUCT_SURFACE=aesthetics (or deploy on onlyaesthetic* URL)",
       required: true,
-      youMustDo: process.env.PRODUCT_SURFACE !== "aesthetics",
+      youMustDo: !isAestheticsOnlyDeploy(),
     },
     {
       id: "site_url",
