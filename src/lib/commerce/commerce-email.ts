@@ -94,3 +94,25 @@ export async function sendAdminOtpEmail(email: string, code: string) {
     html: `<p>Your admin sign-in code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p><p>If you did not try to sign in, ignore this email and change your password.</p>`,
   });
 }
+
+export async function sendShipmentEmail(input: {
+  to: string;
+  name: string;
+  orderNumber: string;
+  courier: string;
+  trackingNumber: string;
+}) {
+  const brand = await getBrandSettings().catch(() => null);
+  const siteName = brand?.siteName || DEFAULT_BRAND_NAME;
+  const support = brand?.supportEmail || DEFAULT_SUPPORT_EMAIL;
+  const trackHint = input.trackingNumber
+    ? `Courier: ${input.courier}\nTracking: ${input.trackingNumber}`
+    : `Courier: ${input.courier}`;
+
+  return sendCommerceEmail({
+    to: input.to,
+    subject: `Your order ${input.orderNumber} has shipped`,
+    text: `Hi ${input.name},\n\nGood news — order ${input.orderNumber} is on its way.\n\n${trackHint}\n\nQuestions? ${support}\n\n— ${siteName}`,
+    html: `<p>Hi ${input.name},</p><p>Good news — order <strong>${input.orderNumber}</strong> is on its way.</p><p>Courier: <strong>${input.courier}</strong><br/>Tracking: <strong>${input.trackingNumber}</strong></p><p>Questions? <a href="mailto:${support}">${support}</a></p><p>— ${siteName}</p>`,
+  });
+}

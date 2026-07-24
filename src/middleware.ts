@@ -73,7 +73,12 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if (isCommercePath(path) && path !== "/aesthetics/india-only" && !isIndiaRequest(request)) {
+  if (
+    isCommercePath(path) &&
+    path !== "/aesthetics/india-only" &&
+    !path.startsWith("/api/commerce/shipping/shiprocket-webhook") &&
+    !isIndiaRequest(request)
+  ) {
     return indiaBlockedResponse(request);
   }
 
