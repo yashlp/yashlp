@@ -11,7 +11,11 @@ const NEXT_STATUS: Record<string, { status: string; label: string }[]> = {
   CONFIRMED: [{ status: "PACKED", label: "Mark packed" }],
   PACKED: [{ status: "READY_TO_SHIP", label: "Ready to ship" }],
   READY_TO_SHIP: [{ status: "SHIPPED", label: "Mark shipped" }],
-  SHIPPED: [{ status: "DELIVERED", label: "Mark delivered" }],
+  SHIPPED: [
+    { status: "OUT_FOR_DELIVERY", label: "Out for delivery" },
+    { status: "DELIVERED", label: "Mark delivered" },
+  ],
+  OUT_FOR_DELIVERY: [{ status: "DELIVERED", label: "Mark delivered" }],
 };
 
 function formatInr(n: number) {
@@ -33,6 +37,9 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [courier, setCourier] = useState("");
   const [tracking, setTracking] = useState("");
+  const [shipMessage, setShipMessage] = useState("");
+  const [shipError, setShipError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   function load() {
     fetch(`/api/admin/orders/${id}`).then((r) => r.json()).then((d) => {
@@ -45,21 +52,49 @@ export default function OrderDetailPage() {
   useEffect(() => { if (id) load(); }, [id]);
 
   async function updateStatus(status: string) {
-    await fetch(`/api/admin/orders/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, courier, trackingNumber: tracking }),
-    });
-    load();
+    setShipError("");
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, courier, trackingNumber: tracking }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Update failed");
+      load();
+    } catch (e) {
+      setShipError(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function generateLabel() {
-    await fetch("/api/admin/shipping", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: id, courier: courier || "Shiprocket", generateLabel: true }),
-    });
-    load();
+    setShipError("");
+    setShipMessage("");
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/shipping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: id, courier: courier || "Shiprocket", generateLabel: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Shipment failed");
+      const result = data.result || {};
+      setShipMessage(result.message || "Shipment created");
+      if (result.trackingNumber) setTracking(result.trackingNumber);
+      if (result.courier) setCourier(result.courier);
+      if (result.labelUrl) {
+        window.open(result.labelUrl, "_blank", "noopener,noreferrer");
+      }
+      load();
+    } catch (e) {
+      setShipError(e instanceof Error ? e.message : "Shipment failed");
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (!order) return <div className="aes-skeleton h-40 rounded-2xl" />;
@@ -99,10 +134,19 @@ export default function OrderDetailPage() {
             <Input placeholder="Tracking number" value={tracking} onChange={(e) => setTracking(e.target.value)} />
             <div className="flex flex-wrap gap-2">
               {actions.map((a) => (
-                <Button key={a.status} onClick={() => updateStatus(a.status)}>{a.label}</Button>
+                <Button key={a.status} disabled={busy} onClick={() => updateStatus(a.status)}>
+                  {a.label}
+                </Button>
               ))}
-              <Button variant="secondary" onClick={generateLabel}>Shipping label</Button>
+              <Button variant="secondary" disabled={busy} onClick={generateLabel}>
+                {busy ? "Working…" : "Create Shiprocket shipment"}
+              </Button>
             </div>
+            {shipMessage && <p className="text-sm text-emerald-700">{shipMessage}</p>}
+            {shipError && <p className="text-sm text-red-600">{shipError}</p>}
+            <p className="text-xs text-[var(--aes-charcoal-muted)]">
+              After payment: Pack → Ready to ship → Create Shiprocket shipment (or enter tracking manually).
+            </p>
             <div className="mt-4 flex flex-wrap gap-3 text-sm">
               <Link href={`/admin/orders/${id}/invoice`} className="text-[var(--aes-royal)]" target="_blank">Invoice</Link>
               <Link href={`/admin/orders/${id}/packing-slip`} className="text-[var(--aes-royal)]" target="_blank">Packing slip</Link>

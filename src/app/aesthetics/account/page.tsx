@@ -17,6 +17,8 @@ type Order = {
   status: string;
   total: number;
   createdAt: string;
+  courier: string | null;
+  trackingNumber: string | null;
   items: { product: { name: string }; quantity: number }[];
   returns: { id: string; status: string }[];
 };
@@ -147,6 +149,12 @@ export default function AccountPage() {
                       <li key={i}>{item.product.name} × {item.quantity}</li>
                     ))}
                   </ul>
+                  {o.trackingNumber && (
+                    <p className="mt-3 text-sm text-[var(--aes-ink)]">
+                      <span className="text-[var(--aes-ink-muted)]">Tracking · </span>
+                      {o.courier || "Courier"} · <span className="font-medium">{o.trackingNumber}</span>
+                    </p>
+                  )}
                   {o.status === "DELIVERED" && o.returns.length === 0 && (
                     <button
                       type="button"
