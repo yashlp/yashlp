@@ -1,6 +1,7 @@
-# Only Aesthetics — Production launch checklist
+# Only Aesthetic — Production launch checklist
 
-Launch domain: **https://onlyaesthetics.in**
+Launch domain: **https://onlyaesthetic.in**  
+Domain connect steps: [CONNECT_DOMAIN_ONLYAESTHETIC.md](./CONNECT_DOMAIN_ONLYAESTHETIC.md)
 
 > **No Vercel credits?** Host on Render or Railway instead:  
 > [HOSTING_WITHOUT_VERCEL.md](./HOSTING_WITHOUT_VERCEL.md)
@@ -33,7 +34,7 @@ Full steps: [HOSTING_WITHOUT_VERCEL.md](./HOSTING_WITHOUT_VERCEL.md)
 1. Connect GitHub `yashlp/yashlp`
 2. Deploy with the repo `Dockerfile`
 3. Paste aesthetics env vars (template: `.env.only-aesthetics.example`)
-4. Attach `onlyaesthetics.in` DNS to **that** host — leave CivicLens alone
+4. Attach `onlyaesthetic.in` DNS to **that** host — leave CivicLens alone
 
 ### A. Accounts & keys → paste into Render/Railway (not CivicLens)
 
@@ -50,7 +51,7 @@ Also set:
 
 ```text
 PRODUCT_SURFACE=aesthetics
-NEXT_PUBLIC_SITE_URL=https://onlyaesthetics.in
+NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
 COMMERCE_ADMIN_REQUIRE_OTP=true
 ALLOW_DEMO_OTP=false
 INDIA_ONLY_STOREFRONT=true
@@ -58,7 +59,7 @@ INDIA_ONLY_STOREFRONT=true
 
 ### B. Domain
 
-Point `onlyaesthetics.in` to Render/Railway/Fly (not WordPress, not CivicLens Vercel).
+Point `onlyaesthetic.in` to Render/Railway/Fly (or Vercel project **onlyaesthetics** — not WordPress, not CivicLens).
 
 ### C. Catalog + first sale
 
@@ -75,7 +76,7 @@ Point `onlyaesthetics.in` to Render/Railway/Fly (not WordPress, not CivicLens Ve
 | `PRODUCT_SURFACE` | Yes | `aesthetics` |
 | `DATABASE_URL` | Yes | Separate Neon DB from CivicLens |
 | `SESSION_SECRET` | Yes | New secret — do not reuse CivicLens |
-| `NEXT_PUBLIC_SITE_URL` | Yes | `https://onlyaesthetics.in` |
+| `NEXT_PUBLIC_SITE_URL` | Yes | `https://onlyaesthetic.in` |
 | `COMMERCE_ADMIN_EMAIL` | Yes | Admin login |
 | `COMMERCE_ADMIN_PASSWORD` | Yes | Strong password |
 | `COMMERCE_ADMIN_REQUIRE_OTP` | Yes | `true` |
@@ -93,7 +94,7 @@ Point `onlyaesthetics.in` to Render/Railway/Fly (not WordPress, not CivicLens Ve
 
 ## Post-launch checks
 
-- [ ] `https://onlyaesthetics.in` opens the store (not WordPress / not CivicLens)
+- [ ] `https://onlyaesthetic.in` opens the store (not WordPress / not CivicLens)
 - [ ] Email OTP signup works
 - [ ] Razorpay payment completes
 - [ ] Order in `/admin/orders`
