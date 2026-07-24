@@ -26,7 +26,7 @@ export default async function AestheticsHomePage() {
     <>
       <ConsumerNav />
       <main className="relative">
-        <HeroSection products={featured} />
+        <HeroSection />
         <ProductRow
           title="Pieces as stunning"
           titleLine2="as they are intentional"
