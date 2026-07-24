@@ -99,9 +99,28 @@ Money → Razorpay Settlements → your bank (usually T+2).
 3. **Site settings → Publish for customers**  
    **or** open **Launch** and confirm required rows are green
 
-### Step 6 — Optional polish
+### Step 6 — CivicLens custom domain (you buy + connect)
 
-- Custom domain in Vercel → Domains (avoid `civiclens.com` — taken)
+**`civiclens.com` is taken** (another company’s GIS product).  
+**`getciviclens.com` is also taken** (a different “CivicLens AI” site).
+
+Pick a brandable alternative, buy it, then point it at Vercel:
+
+**Good name ideas to search (check availability on GoDaddy / Namecheap / Porkbun):**
+- `useciviclens.com`
+- `civiclens.app`
+- `civiclens.ai`
+- `helloCiviclens.com` / `myciviclens.in` / `civiclens.community`
+
+**Connect to Vercel (after purchase):**
+1. Vercel → your project → **Settings → Domains** → Add `yourdomain.com` and `www.yourdomain.com`
+2. At your registrar, add the DNS records Vercel shows (usually nameservers `ns1.vercel-dns.com` / `ns2.vercel-dns.com`, or an A/CNAME)
+3. Wait for SSL (automatic, often 5–30 min)
+4. In Vercel env: `NEXT_PUBLIC_SITE_URL=https://yourdomain.com` → **Redeploy**
+5. Optional: set the new domain as **Primary** in Vercel Domains
+
+### Step 7 — Optional polish
+
 - OpenAI for Ask AI
 - Stripe for international USD
 - Resend for support email
