@@ -1,8 +1,59 @@
 # Connect domain: onlyaesthetic.in
 
 Brand: **Only Aesthetic**  
-Domain you bought: **onlyaesthetic.in**  
-Vercel project: **onlyaesthetic** (URL like `onlyaesthetics-omega.vercel.app`)
+Domain you bought: **onlyaesthetic.in** (GoDaddy)  
+Vercel project: **onlyaesthetic** → currently `https://onlyaesthetics-omega.vercel.app`
+
+---
+
+## Do this now (≈10 minutes) — then `onlyaesthetic.in` opens the store
+
+Right now DNS for `onlyaesthetic.in` is **not set** (`NXDOMAIN`), so the domain cannot open anything until you finish these clicks. Cursor cannot log into GoDaddy or Vercel for you.
+
+### A. Merge this PR first
+Merge **PR #29** into `main` so production auto-detects `onlyaesthetic.in` and serves Only Aesthetic (not CivicLens).
+
+### B. Vercel — attach the domain
+1. Open [vercel.com/dashboard](https://vercel.com/dashboard)
+2. Project **`onlyaesthetic`** (the one with `onlyaesthetics-omega.vercel.app`) — **not** `yashlp`
+3. **Settings → Domains → Add**
+   - `onlyaesthetic.in`
+   - `www.onlyaesthetic.in`
+4. Make `onlyaesthetic.in` primary (redirect www → apex)
+
+### C. GoDaddy — point DNS
+1. [dcc.godaddy.com](https://dcc.godaddy.com) → **Domains** → **onlyaesthetic.in** → **DNS**
+2. Turn **off** Forwarding / Parking / Website Builder
+3. Delete old **A** for `@` and **CNAME/A** for `www`
+4. Add:
+
+| Type | Name | Value |
+|------|------|--------|
+| **A** | `@` | `76.76.21.21` |
+| **CNAME** | `www` | `cname.vercel-dns.com` |
+
+(Use the exact values Vercel shows if different.) Save. Wait 5–60 min.
+
+### D. Vercel env + redeploy
+Project **onlyaesthetic** → **Environment Variables** → Production:
+
+```text
+PRODUCT_SURFACE=aesthetics
+NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
+```
+
+**Deployments → Redeploy** latest production.
+
+### E. Check
+- [ ] `https://onlyaesthetic.in` → Only Aesthetic store (not CivicLens)
+- [ ] `https://onlyaesthetic.in/admin/login` works
+- [ ] Vercel Domains shows **Valid** + SSL
+
+Until DNS propagates, the live store is still:
+
+```text
+https://onlyaesthetics-omega.vercel.app/aesthetics
+```
 
 ---
 
