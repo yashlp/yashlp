@@ -26,23 +26,39 @@ Vercel will show DNS records. Keep that page open.
 
 ---
 
-## Step 2 — Point DNS at your registrar
+## Step 2 — Point DNS in GoDaddy
 
-At whoever you bought the domain from (GoDaddy, Namecheap, Cloudflare, Hostinger, etc.):
+You bought the domain on **GoDaddy**. Do this:
 
-### Option A — Recommended (Apex + www)
+1. Open [dcc.godaddy.com](https://dcc.godaddy.com) → sign in
+2. Click **Domains** → find **onlyaesthetic.in** → **DNS** / **Manage DNS**
+3. Turn **off** domain forwarding / parking / “Website Builder” if GoDaddy offers it (Forwarding would override DNS)
+4. Keep **GoDaddy nameservers** (default). Do **not** change nameservers unless Vercel tells you to.
 
-| Type | Name / Host | Value |
-|------|-------------|--------|
-| **A** | `@` | `76.76.21.21` |
-| **CNAME** | `www` | `cname.vercel-dns.com` |
+### Delete conflicting records first
 
-Use the **exact** values Vercel shows if they differ.
+In the DNS table, remove any existing records that conflict:
 
-### Option B — If registrar only allows CNAME for apex
-Follow Vercel’s “CNAME flattening” / ALIAS instructions for your registrar.
+- Any **A** record for `@` / blank / `onlyaesthetic.in`
+- Any **CNAME** or **A** for `www`
+- Parking / “Parked” / “Coming Soon” records GoDaddy may have added
 
-Save DNS. Wait 5–60 minutes (sometimes up to 24h).
+Leave **NS** and **SOA** alone. Keep MX only if you use GoDaddy email.
+
+### Add these two records
+
+| Type | Name / Host | Value / Points to | TTL |
+|------|-------------|-------------------|-----|
+| **A** | `@` | `76.76.21.21` | 1 Hour (or default) |
+| **CNAME** | `www` | `cname.vercel-dns.com` | 1 Hour (or default) |
+
+Use the **exact** values from Vercel Domains if they differ.
+
+Click **Save**. Wait **5–60 minutes** (sometimes up to 24h).
+
+### If GoDaddy blocks apex CNAME
+
+You only need the **A** record for `@` (above). Do **not** put a CNAME on `@`.
 
 ---
 
