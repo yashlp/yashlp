@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { OnlyAestheticMark } from "@/components/aesthetics/layout/only-aesthetic-mark";
 
 type BrandLogoProps = {
   variant?: "nav" | "hero" | "footer";
@@ -15,20 +16,17 @@ export function BrandLogo({ variant = "nav", className, href = "/aesthetics" }: 
     <div className={cn(isHero ? "text-center" : "", className)}>
       <div
         className={cn(
-          "aes-brand-lockup",
-          isHero && "aes-brand-lockup-hero",
-          !isHero && !isFooter && "aes-brand-lockup-nav",
-          isFooter && "aes-brand-lockup-footer"
+          "oa-logo-wrap",
+          isHero && "oa-logo-wrap--hero",
+          !isHero && !isFooter && "oa-logo-wrap--nav",
+          isFooter && "oa-logo-wrap--footer"
         )}
         aria-label="Only Aesthetic"
       >
-        <span className={cn("aes-brand-only", isFooter && "text-white")}>only</span>
-        <span className={cn("aes-brand-wordmark", isFooter && "text-white")}>
-          A E S T H E T I C
-        </span>
+        <OnlyAestheticMark tone={isFooter ? "light" : "ink"} />
       </div>
       {isHero && (
-        <p className="aes-brand-tagline mt-6 text-[11px] tracking-wide sm:text-xs">
+        <p className="aes-brand-tagline mt-5 text-[11px] tracking-wide sm:text-xs">
           Details matter · Small-batch makers · Maker-vetted · Mood-first edits · Ships with care
         </p>
       )}

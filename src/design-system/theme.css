@@ -214,6 +214,36 @@
   opacity: 0.88;
 }
 
+/* Seal logo — transparent SVG, sized per placement */
+.oa-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.oa-logo-wrap--nav {
+  width: clamp(3.25rem, 9vw, 4.25rem);
+}
+
+.oa-logo-wrap--hero {
+  width: clamp(11rem, 42vw, 18rem);
+  margin-inline: auto;
+}
+
+.oa-logo-wrap--footer {
+  width: clamp(8rem, 28vw, 11rem);
+  margin-inline: auto;
+}
+
+.oa-logo-wrap--loader {
+  width: clamp(9rem, 36vw, 14rem);
+}
+
+.oa-mark {
+  color: var(--aes-ink);
+}
+
 .aes-brand-only {
   font-family: var(--aes-font-brand);
   font-weight: 400;
