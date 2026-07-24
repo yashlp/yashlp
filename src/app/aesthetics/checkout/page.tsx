@@ -7,6 +7,7 @@ import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
 import { useCart } from "@/components/aesthetics/providers/cart-provider";
+import { useBrandSettings } from "@/components/aesthetics/hooks/use-brand-settings";
 import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 import {
   CheckoutIdentityStep,
@@ -35,6 +36,7 @@ type ShippingRates = {
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartTotal, cartCount, removeFromCart, clearCart } = useCart();
+  const brand = useBrandSettings();
   const [step, setStep] = useState<CheckoutStep>("identity");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -154,7 +156,7 @@ export default function CheckoutPage() {
         key: payData.keyId,
         amount: payData.amount,
         currency: payData.currency,
-        name: "Only Aesthetics",
+        name: brand.siteName,
         description: order.orderNumber,
         order_id: payData.razorpayOrderId,
         handler: async (response: {

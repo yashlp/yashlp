@@ -6,7 +6,7 @@ export default function IndiaOnlyPage() {
     <ConsumerPage room="calm">
       <main className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6">
         <p className="aes-gallery-eyebrow">India only</p>
-        <h1 className="aes-gallery-title mt-3 text-balance">Only Aesthetics is available in India</h1>
+        <h1 className="aes-gallery-title mt-3 text-balance">Only Aesthetic is available in India</h1>
         <p className="mt-4 text-sm leading-relaxed text-[var(--aes-ink-muted)]">
           We currently serve customers across India only. If you are browsing from outside India, check back when we
           expand.

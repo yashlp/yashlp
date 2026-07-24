@@ -7,7 +7,7 @@ const NOTE_TITLE = "A note from the beginning";
 const NOTE_LINES = ["We're just getting started.", "Every piece is currently available by pre-order."];
 
 const DETAIL_BODY = [
-  "Only Aesthetics is still early — a small shop built around mood, makers, and objects worth living with.",
+  "Only Aesthetic is still early — a small shop built around mood, makers, and objects worth living with.",
   "Right now, every piece you see can be reserved by pre-order. That lets us make (or source) with care instead of rushing stock onto shelves that don't deserve it.",
   "When you pre-order, you're holding a place in the next batch. We'll keep you updated as your order moves from studio to doorstep.",
   "Thank you for being here at the start. The collection will grow — slowly, and on purpose.",
@@ -85,7 +85,7 @@ export function HangingNoteBoard() {
                 <p key={para.slice(0, 24)}>{para}</p>
               ))}
             </div>
-            <p className="aes-hanging-note__dialog-signoff">— Only Aesthetics</p>
+            <p className="aes-hanging-note__dialog-signoff">— Only Aesthetic</p>
           </div>
         </div>
       )}

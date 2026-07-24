@@ -39,11 +39,11 @@ const civicMetadata: Metadata = {
 const aestheticsMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Only Aesthetics",
-    template: "%s · Only Aesthetics",
+    default: "Only Aesthetic",
+    template: "%s · Only Aesthetic",
   },
-  description: "Only Aesthetics — premium direct-to-consumer beauty & lifestyle.",
-  applicationName: "Only Aesthetics",
+  description: "Only Aesthetic — premium direct-to-consumer beauty & lifestyle.",
+  applicationName: "Only Aesthetic",
   robots: { index: true, follow: true },
 };
 

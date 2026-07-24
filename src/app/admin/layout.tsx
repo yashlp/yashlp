@@ -6,9 +6,9 @@ import "@/design-system/theme.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: { default: "Only Aesthetics Admin", template: "%s · Only Aesthetics Admin" },
-  description: "Direct-to-consumer operations portal for Only Aesthetics — inventory, orders, purchases, and analytics.",
-  applicationName: "Only Aesthetics",
+  title: { default: "Only Aesthetic Admin", template: "%s · Only Aesthetic Admin" },
+  description: "Direct-to-consumer operations portal for Only Aesthetic — inventory, orders, purchases, and analytics.",
+  applicationName: "Only Aesthetic",
   robots: { index: false, follow: false },
 };
 

@@ -7,6 +7,7 @@ import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
 import { useCustomer } from "@/components/aesthetics/providers/customer-provider";
+import { useBrandSettings } from "@/components/aesthetics/hooks/use-brand-settings";
 import { formatInr } from "@/lib/aesthetics/format-inr";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,7 @@ type Tab = "orders" | "refunds" | "contact";
 export default function AccountPage() {
   const router = useRouter();
   const { customer, loading, logout } = useCustomer();
+  const brand = useBrandSettings();
   const [tab, setTab] = useState<Tab>("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [returns, setReturns] = useState<ReturnRow[]>([]);
@@ -215,8 +217,23 @@ export default function AccountPage() {
             <div className="aes-panel p-6">
               <h2 className="font-bold text-[var(--aes-ink)]">Contact us</h2>
               <p className="mt-2 text-sm text-[var(--aes-ink-muted)]">
-                Email <a href="mailto:hello@onlyaesthetics.in" className="text-[var(--aes-pink)]">hello@onlyaesthetics.in</a> or
-                WhatsApp <a href="https://wa.me/919876543210" className="text-[var(--aes-pink)]">+91 98765 43210</a> for refund support.
+                Email{" "}
+                <a href={`mailto:${brand.supportEmail}`} className="text-[var(--aes-pink)]">
+                  {brand.supportEmail}
+                </a>
+                {brand.supportPhone ? (
+                  <>
+                    {" "}
+                    or WhatsApp{" "}
+                    <a
+                      href={`https://wa.me/${brand.supportPhone.replace(/\D/g, "")}`}
+                      className="text-[var(--aes-pink)]"
+                    >
+                      {brand.supportPhone}
+                    </a>
+                  </>
+                ) : null}{" "}
+                for refund support.
               </p>
               <form
                 className="mt-4 space-y-4"

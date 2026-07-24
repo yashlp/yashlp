@@ -26,7 +26,7 @@ export default function OrderInvoicePage() {
         <Link href={`/admin/orders/${id}`} className="text-sm text-[var(--aes-royal)]">← Back</Link>
         <button type="button" onClick={() => window.print()} className="rounded-lg bg-[var(--aes-charcoal)] px-4 py-2 text-sm text-white">Print invoice</button>
       </div>
-      <h1 className="text-2xl font-bold">Only Aesthetics</h1>
+      <h1 className="text-2xl font-bold">Only Aesthetic</h1>
       <p className="text-sm text-gray-500">Tax Invoice</p>
       <div className="mt-6 flex justify-between text-sm">
         <div>

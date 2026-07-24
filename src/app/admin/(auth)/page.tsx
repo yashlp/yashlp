@@ -53,7 +53,7 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <h1 className="aes-display text-3xl font-semibold italic text-[var(--aes-charcoal)]">Dashboard</h1>
-      <p className="mt-1 text-[var(--aes-charcoal-muted)]">Only Aesthetics — direct-to-consumer operations</p>
+      <p className="mt-1 text-[var(--aes-charcoal-muted)]">Only Aesthetic — direct-to-consumer operations</p>
 
       <Card hover={false} className="mt-8 border-[var(--aes-royal)]/20 bg-[var(--aes-cream)]">
         <h2 className="font-semibold text-[var(--aes-charcoal)]">Quick start after login</h2>

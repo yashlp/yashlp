@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Mail, Phone, Shield } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
-/** CivicLens-only admin login — never shared with Only Aesthetics `/admin`. */
+/** CivicLens-only admin login — never shared with Only Aesthetic `/admin`. */
 export default function CivicAdminLoginPage() {
   const router = useRouter();
   const [phoneDisplay, setPhoneDisplay] = useState("");
@@ -78,7 +78,7 @@ export default function CivicAdminLoginPage() {
           </p>
           <h1 className="mt-1 text-2xl font-bold text-stone-900">Community admin sign in</h1>
           <p className="mt-1 text-sm text-stone-500">
-            Map pins, picture approval, and launch settings. Separate from the Only Aesthetics store
+            Map pins, picture approval, and launch settings. Separate from the Only Aesthetic store
             admin.
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function CivicAdminLoginPage() {
             </div>
           )}
           <p className="text-xs text-stone-500">
-            Customer map sign-in is at /login. Store admin is at /admin/login (Only Aesthetics).
+            Customer map sign-in is at /login. Store admin is at /admin/login (Only Aesthetic).
           </p>
         </div>
 

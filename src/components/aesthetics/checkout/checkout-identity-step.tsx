@@ -160,7 +160,7 @@ export function CheckoutIdentityStep({ form, onFormChange, onContinue }: Props) 
         <div>
           <h2 className="text-lg font-semibold text-[var(--aes-ink)]">Before you checkout</h2>
           <p className="mt-2 text-sm text-[var(--aes-ink-muted)]">
-            Do you already have an Only Aesthetics account?
+            Do you already have an Only Aesthetic account?
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">

@@ -10,7 +10,7 @@ export async function RootShell({ children }: { children: React.ReactNode }) {
   const h = await headers();
   const pathname = h.get("x-pathname") || h.get("x-invoke-path") || "";
 
-  // Only Aesthetics commerce UI — never wrap with CivicLens chrome.
+  // Only Aesthetic commerce UI — never wrap with CivicLens chrome.
   // CivicLens admin lives at /civic-admin and uses CivicLens AppShell.
   if (
     isCommercePlatformPath(pathname) ||

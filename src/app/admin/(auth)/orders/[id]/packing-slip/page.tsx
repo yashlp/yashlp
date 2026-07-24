@@ -33,7 +33,7 @@ export default function PackingSlipPage() {
           </li>
         ))}
       </ul>
-      <p className="mt-8 text-center text-xs text-gray-400">Only Aesthetics — packed with care</p>
+      <p className="mt-8 text-center text-xs text-gray-400">Only Aesthetic — packed with care</p>
     </div>
   );
 }

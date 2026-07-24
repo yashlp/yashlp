@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     if (body.country.toUpperCase() !== "IN") {
       return NextResponse.json(
-        { error: "Only Aesthetics currently ships within India." },
+        { error: "Only Aesthetic currently ships within India." },
         { status: 400 }
       );
     }

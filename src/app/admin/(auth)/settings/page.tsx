@@ -6,10 +6,12 @@ import { Card } from "@/components/aesthetics/ui/card";
 import { Input } from "@/components/aesthetics/ui/input";
 
 const TEXT_FIELDS = [
-  { key: "company_name", label: "Company name", group: "company" },
+  { key: "site_name", label: "Store display name (shown to customers)", group: "general" },
+  { key: "company_name", label: "Company / legal name", group: "company" },
+  { key: "site_url", label: "Website URL (update after you buy a domain)", group: "general" },
   { key: "company_gst", label: "GST number", group: "tax" },
   { key: "company_address", label: "Business address", group: "company" },
-  { key: "support_email", label: "Support email", group: "contact" },
+  { key: "support_email", label: "Customer support email (all queries)", group: "contact" },
   { key: "support_phone", label: "Support phone", group: "contact" },
   { key: "gst_rate", label: "GST rate (%)", group: "tax" },
   { key: "razorpay_enabled", label: "Razorpay enabled (true/false)", group: "payments" },
@@ -78,7 +80,7 @@ export default function SettingsPage() {
     <div>
       <h1 className="aes-display text-3xl font-semibold italic">Settings</h1>
       <p className="mt-1 text-[var(--aes-charcoal-muted)]">
-        Delivery charges, free delivery, GST, payments, and business details
+        Brand name, customer contact email, delivery charges, GST, payments — editable anytime (including after you buy a domain)
       </p>
 
       <Card className="mt-8 space-y-5">
@@ -156,7 +158,11 @@ export default function SettingsPage() {
       </Card>
 
       <Card className="mt-6 space-y-4">
-        <h2 className="text-lg font-semibold text-[var(--aes-ink)]">Business & other settings</h2>
+        <h2 className="text-lg font-semibold text-[var(--aes-ink)]">Brand & customer contact</h2>
+        <p className="text-sm text-[var(--aes-charcoal-muted)]">
+          Support email appears in the footer, policies, and order emails. Change it here anytime —
+          redeploys will not overwrite your saved values.
+        </p>
         {TEXT_FIELDS.map((d) => (
           <div key={d.key}>
             <label className="aes-mono mb-1 block text-[10px] uppercase text-[var(--aes-dusty)]">{d.label}</label>
@@ -169,7 +175,7 @@ export default function SettingsPage() {
         <Button onClick={save} disabled={saving}>
           {saving ? "Saving…" : "Save settings"}
         </Button>
-        {saved && <p className="text-sm text-green-600">Settings saved — checkout will use the new rates.</p>}
+        {saved && <p className="text-sm text-green-600">Settings saved — storefront and emails will use the new values.</p>}
       </Card>
     </div>
   );

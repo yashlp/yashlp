@@ -4,7 +4,7 @@ const REVIEWS = [
   {
     title: "Perfect way to unwind",
     name: "Tina A.",
-    text: "I was honestly skeptical at first, but Only Aesthetics completely changed how I shop. Every collection feels personal and thoughtful.",
+    text: "I was honestly skeptical at first, but Only Aesthetic completely changed how I shop. Every collection feels personal and thoughtful.",
   },
   {
     title: "My new favorite find",

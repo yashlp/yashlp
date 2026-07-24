@@ -20,11 +20,11 @@ export function BrandLogo({ variant = "nav", className, href = "/aesthetics" }: 
           !isHero && !isFooter && "aes-brand-lockup-nav",
           isFooter && "aes-brand-lockup-footer"
         )}
-        aria-label="Only Aesthetics"
+        aria-label="Only Aesthetic"
       >
         <span className={cn("aes-brand-only", isFooter && "text-white")}>only</span>
         <span className={cn("aes-brand-wordmark", isFooter && "text-white")}>
-          A E S T H E T I C S
+          A E S T H E T I C
         </span>
       </div>
       {isHero && (
