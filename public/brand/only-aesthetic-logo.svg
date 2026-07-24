@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" role="img" aria-labelledby="oaTitle oaDesc" fill="none">
+  <title id="oaTitle">Only Aesthetic</title>
+  <desc id="oaDesc">Curated objects · intentional living</desc>
+  <defs>
+    <!-- Top arc: left ? right over the top -->
+    <path id="oaTopArc" d="M 78 260 A 182 182 0 0 1 442 260" />
+    <!-- Bottom arc: left ? right under the bottom (letters stay upright) -->
+    <path id="oaBottomArc" d="M 78 260 A 182 182 0 0 0 442 260" />
+  </defs>
+
+  <g fill="#121212">
+    <text
+      font-family="system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+      font-size="17"
+      font-weight="500"
+      letter-spacing="0.32em"
+      text-anchor="middle"
+    >
+      <textPath href="#oaTopArc" startOffset="50%">CURATED OBJECTS</textPath>
+    </text>
+
+    <text
+      font-family="system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+      font-size="17"
+      font-weight="500"
+      letter-spacing="0.26em"
+      text-anchor="middle"
+    >
+      <textPath href="#oaBottomArc" startOffset="50%">INTENTIONAL LIVING</textPath>
+    </text>
+
+    <circle cx="78" cy="260" r="3.5" />
+    <circle cx="442" cy="260" r="3.5" />
+
+    <text
+      x="260"
+      y="268"
+      text-anchor="middle"
+      font-family="Georgia, 'Times New Roman', 'Bodoni MT', Didot, serif"
+      font-size="40"
+      font-weight="400"
+      letter-spacing="0.02em"
+    >only aesthetic</text>
+  </g>
+
+  <g fill="#b58e4a">
+    <path d="M260 148 L266.8 178.5 L298 185 L266.8 191.5 L260 222 L253.2 191.5 L222 185 L253.2 178.5 Z" />
+    <rect x="258.5" y="292" width="3" height="36" rx="1.5" />
+  </g>
+</svg>
