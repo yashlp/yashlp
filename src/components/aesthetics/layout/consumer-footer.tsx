@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { footerReveal } from "@/lib/aesthetics/motion";
 import { useAesReducedMotion } from "@/components/aesthetics/motion/use-reduced-motion";
+import { useBrandSettings } from "@/components/aesthetics/hooks/use-brand-settings";
 
 export function ConsumerFooter() {
   const reduced = useAesReducedMotion();
+  const brand = useBrandSettings();
 
   return (
     <div className="aes-footer-approach">
@@ -101,10 +103,10 @@ export function ConsumerFooter() {
               </li>
               <li>
                 <a
-                  href="mailto:hello@onlyaesthetics.app"
+                  href={`mailto:${brand.supportEmail}`}
                   className="inline-flex min-h-11 items-center text-white hover:opacity-85"
                 >
-                  hello@onlyaesthetics.app
+                  {brand.supportEmail}
                 </a>
               </li>
             </ul>
@@ -112,7 +114,7 @@ export function ConsumerFooter() {
         </div>
 
         <div className="aes-footer-content border-t border-white/20 px-4 py-6 text-center text-xs text-white">
-          © {new Date().getFullYear()} Only Aesthetics ·{" "}
+          © {new Date().getFullYear()} {brand.siteName} ·{" "}
           <Link href="/aesthetics/privacy" className="text-white hover:opacity-85">
             Privacy
           </Link>

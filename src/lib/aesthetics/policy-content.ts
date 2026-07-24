@@ -1,12 +1,21 @@
+import { DEFAULT_BRAND_NAME, DEFAULT_SUPPORT_EMAIL } from "@/lib/commerce/brand-defaults";
+
 export type PolicyPage = {
   title: string;
   body: string;
 };
 
-export const DEFAULT_POLICY_CONTENT: Record<string, PolicyPage> = {
-  privacy: {
-    title: "Privacy Policy",
-    body: `We collect only what we need to fulfill orders, support your account, and improve Only Aesthetics.
+export function buildPolicyContent(input?: {
+  siteName?: string;
+  supportEmail?: string;
+}): Record<string, PolicyPage> {
+  const brand = input?.siteName?.trim() || DEFAULT_BRAND_NAME;
+  const email = input?.supportEmail?.trim() || DEFAULT_SUPPORT_EMAIL;
+
+  return {
+    privacy: {
+      title: "Privacy Policy",
+      body: `We collect only what we need to fulfill orders, support your account, and improve ${brand}.
 
 **What we collect**
 - Contact and shipping details you provide at checkout
@@ -25,16 +34,16 @@ export const DEFAULT_POLICY_CONTENT: Record<string, PolicyPage> = {
 
 **Your choices**
 - Update account details from My account
-- Email hello@onlyaesthetics.app for access, correction, or deletion requests
+- Email ${email} for access, correction, or deletion requests
 
 **Contact**
-hello@onlyaesthetics.app
+${email}
 
 Last updated: July 2026`,
-  },
-  shipping_returns: {
-    title: "Shipping & Returns",
-    body: `**Shipping**
+    },
+    shipping_returns: {
+      title: "Shipping & Returns",
+      body: `**Shipping**
 - Free standard shipping on orders over ₹999
 - Flat rate of ₹49 on orders below ₹999
 - Standard delivery: 3–7 business days across India (metro areas often faster)
@@ -48,67 +57,46 @@ Last updated: July 2026`,
 - Protective packaging designed for fragile objects
 - Gift wrap is available at checkout where offered
 
-**Returns — eligibility**
-- Unused items in original packaging within 7 days of delivery
-- Defective or damaged items reported within 48 hours of delivery with clear photos
+**Returns**
+- Most unused items can be returned within 7 days of delivery
+- Email ${email} with your order number (or start a return from My account when signed in)
+- Refunds are issued to the original payment method after inspection
 
-**Returns — process**
-1. Email hello@onlyaesthetics.app with your order number (or start a return from My account when signed in)
-2. We’ll share a prepaid label when the return is approved
-3. Refunds go to the original payment method within 5–7 business days after inspection
+Contact: ${email}`,
+    },
+    faq: {
+      title: "FAQ",
+      body: `**Where do you ship?**
+India only for now.
 
-**Non-returnable**
-- Final-sale / clearance items marked as such
-- Personalized or made-to-order pieces
-- Items showing use, wear, or missing packaging
+**How long does delivery take?**
+Usually 3–7 business days after dispatch.
 
-**Delays**
-- Weather and courier events can add 1–2 days — we’ll keep you updated by email
-
-Contact: hello@onlyaesthetics.app`,
-  },
-  faqs: {
-    title: "FAQ",
-    body: `**Do I need an account to checkout?**
-No — guest checkout is available. Create an account if you want favourites, faster reorders, and reviews.
-
-**How do payments work?**
-We accept online payments only (UPI, cards, net banking, wallets) via Razorpay. Cash on delivery is not available.
-
-**Are products ready to ship?**
-Many pieces are currently available by pre-order. Timelines are shown at checkout so you know when to expect your order.
-
-**How long does shipping take?**
-Standard delivery is typically 3–7 business days across India. Free shipping applies on orders above ₹999.
-
-**How do returns work?**
-Unused items can be returned within 7 days of delivery. See Shipping & Returns for full details.
-
-**Can I leave a product review?**
-Yes — sign in, open the product page, and share your experience (photo optional). Reviews appear after a quick moderation check.
-
-**How do I track an order?**
-Use the confirmation email, or check My account when you’re signed in.
+**Can I return an item?**
+Yes — see Shipping & Returns. Email ${email} if you need help.
 
 **How do I contact you?**
-Email hello@onlyaesthetics.app — we usually reply within one business day.`,
-  },
-  terms: {
-    title: "Terms of Service",
-    body: `By shopping at Only Aesthetics you agree to these terms.
+Email ${email} — we usually reply within one business day.`,
+    },
+    terms: {
+      title: "Terms of Service",
+      body: `By shopping at ${brand} you agree to these terms.
 
 **Orders**
-- Orders are confirmed once online payment succeeds
-- Product colours may vary slightly by screen
-- We may cancel or refund orders if stock is unavailable
+- Placing an order is an offer to buy; we confirm by email when payment succeeds
+- Prices are in INR and include applicable taxes shown at checkout
 
 **Accounts**
 - You’re responsible for keeping login details secure
-- Reviews must reflect genuine experiences with our products
+- We may refuse or cancel orders that look fraudulent
 
-**Intellectual property**
-- Product photography and site content belong to Only Aesthetics and our makers
+**Content**
+- Product photography and site content belong to ${brand} and our makers
 
-Contact: hello@onlyaesthetics.app`,
-  },
-};
+Contact: ${email}`,
+    },
+  };
+}
+
+/** Static fallback for metadata / offline pages */
+export const DEFAULT_POLICY_CONTENT = buildPolicyContent();

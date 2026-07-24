@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PolicyPageView } from "@/components/aesthetics/content/policy-page";
 
 export const metadata: Metadata = {
-  title: "FAQ | Only Aesthetics",
+  title: "FAQ | Only Aesthetic",
   description: "Answers about checkout, shipping, pre-orders, returns, and payments.",
 };
 

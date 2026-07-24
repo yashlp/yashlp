@@ -1,5 +1,5 @@
 /**
- * Only Aesthetics — Signature Motion System
+ * Only Aesthetic — Signature Motion System
  * Calm, gallery-like presets. Prefer 200–500ms.
  * Prefer transform + opacity (GPU) — avoid filter/blur on touch devices.
  */

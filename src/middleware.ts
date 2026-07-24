@@ -34,7 +34,7 @@ function indiaBlockedResponse(request: NextRequest) {
   if (path.startsWith("/api/")) {
     return NextResponse.json(
       {
-        error: "Only Aesthetics is available in India only",
+        error: "Only Aesthetic is available in India only",
         code: "INDIA_ONLY",
       },
       { status: 403 }
@@ -56,7 +56,7 @@ export function middleware(request: NextRequest) {
     return withPathHeader(request);
   }
 
-  // Dedicated Only Aesthetics Vercel project: keep CivicLens off this hostname.
+  // Dedicated Only Aesthetic Vercel project: keep CivicLens off this hostname.
   if (isAestheticsOnlyDeploy()) {
     if (path === "/") {
       const url = request.nextUrl.clone();
@@ -66,7 +66,7 @@ export function middleware(request: NextRequest) {
     if (isCivicPath(path)) {
       if (path.startsWith("/api/")) {
         return NextResponse.json(
-          { error: "Not available on Only Aesthetics", code: "AESTHETICS_ONLY" },
+          { error: "Not available on Only Aesthetic", code: "AESTHETICS_ONLY" },
           { status: 404 }
         );
       }

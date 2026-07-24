@@ -32,7 +32,7 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
       <aside className="hidden w-64 shrink-0 border-r border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-card,#fcfbf8)] lg:block">
         <div className="p-6">
           <Link href="/aesthetics" className="aes-gallery-title text-xl">
-            Only Aesthetics
+            Only Aesthetic
           </Link>
           <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--gallery-blue,#2c5aa0)]">
             Maker studio

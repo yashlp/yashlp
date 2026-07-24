@@ -35,7 +35,7 @@ export default function PlatformAdminAuthLayout({ children }: { children: React.
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-[var(--aes-ivory)]">
         <div className="aes-skeleton h-10 w-48 rounded-lg" />
-        <p className="text-sm text-[var(--aes-charcoal-muted)]">Loading Only Aesthetics admin…</p>
+        <p className="text-sm text-[var(--aes-charcoal-muted)]">Loading Only Aesthetic admin…</p>
       </div>
     );
   }

@@ -55,7 +55,7 @@ export default function LoginPage() {
       .then((r) => r.json())
       .then((d) => {
         if (!d.user) return;
-        // CivicLens admins use /civic-admin — never Only Aesthetics /admin.
+        // CivicLens admins use /civic-admin — never Only Aesthetic /admin.
         if (d.user.role === "admin") router.replace("/civic-admin");
         else if (nextPath) router.replace(nextPath);
         else router.replace("/");

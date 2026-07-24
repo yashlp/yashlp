@@ -42,7 +42,7 @@ export function PlatformAdminShell({ admin, children }: Props) {
       <div className="border-b border-white/10 px-5 py-5">
         <p className="aes-display text-base font-semibold tracking-wide sm:text-lg">
           <span className="text-white/70">only </span>
-          <span className="text-[var(--aes-royal)]">A E S T H E T I C S</span>
+          <span className="text-[var(--aes-royal)]">A E S T H E T I C</span>
         </p>
         <p className="aes-mono mt-1 text-[10px] uppercase tracking-wider text-white/50">D2C Admin Portal</p>
         <p className="mt-2 text-[11px] text-white/35">Separate from CivicLens</p>
@@ -98,7 +98,7 @@ export function PlatformAdminShell({ admin, children }: Props) {
         <div>
           <p className="text-sm font-semibold">
             <span className="text-white/60">only </span>
-            <span className="text-[var(--aes-royal)]">AESTHETICS</span>
+            <span className="text-[var(--aes-royal)]">AESTHETIC</span>
           </p>
           <p className="aes-mono text-[9px] uppercase tracking-wider text-white/40">Admin</p>
         </div>
