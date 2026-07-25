@@ -223,7 +223,7 @@
 }
 
 .oa-logo-wrap--nav {
-  width: clamp(2.75rem, 8vw, 3.5rem);
+  width: clamp(4.75rem, 12vw, 6.75rem);
 }
 
 .oa-logo-wrap--hero {
@@ -232,7 +232,7 @@
 }
 
 .oa-logo-wrap--footer {
-  width: clamp(7rem, 24vw, 10rem);
+  width: clamp(10rem, 32vw, 14rem);
   margin-inline: auto;
 }
 

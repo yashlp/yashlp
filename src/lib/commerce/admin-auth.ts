@@ -59,15 +59,11 @@ export async function adminLogin(
     throw new Error("Too many failed attempts. Try again in 15 minutes.");
   }
 
-  if (admin.mfaEnabled || process.env.COMMERCE_ADMIN_REQUIRE_OTP === "true") {
-    await createAdminOtp(admin.id);
-    return { requiresOtp: true, adminId: admin.id };
-  }
-
+  // Password-only admin access (OTP/MFA disabled for store admin portal).
   const meta = await getRequestMeta();
   await prisma.commerceAdmin.update({
     where: { id: admin.id },
-    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress },
+    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress, mfaEnabled: false },
   });
   await createAdminSession(admin.id, meta);
   await logLoginAttempt(normalized, true, admin.id);
@@ -79,7 +75,7 @@ export async function adminLogin(
       email: admin.email,
       name: admin.name,
       role: admin.role,
-      mfaEnabled: admin.mfaEnabled,
+      mfaEnabled: false,
     },
   };
 }

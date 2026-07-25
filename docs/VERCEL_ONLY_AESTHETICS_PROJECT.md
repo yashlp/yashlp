@@ -39,7 +39,7 @@ Minimum required:
 | `SESSION_SECRET` | New secret — do not reuse CivicLens |
 | `NEXT_PUBLIC_SITE_URL` | `https://onlyaesthetic.in` |
 | `COMMERCE_ADMIN_EMAIL` / `COMMERCE_ADMIN_PASSWORD` | Store admin |
-| `COMMERCE_ADMIN_REQUIRE_OTP` | `true` |
+| `COMMERCE_ADMIN_REQUIRE_OTP` | `false` (unused — admin login is password-only) |
 | `ALLOW_DEMO_OTP` | `false` |
 | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | Live keys |
 | `RESEND_API_KEY` / `COMMERCE_FROM_EMAIL` | Verified sender |

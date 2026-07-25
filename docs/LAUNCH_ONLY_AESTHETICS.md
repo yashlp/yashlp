@@ -52,7 +52,7 @@ Also set:
 ```text
 PRODUCT_SURFACE=aesthetics
 NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
-COMMERCE_ADMIN_REQUIRE_OTP=true
+COMMERCE_ADMIN_REQUIRE_OTP=false
 ALLOW_DEMO_OTP=false
 INDIA_ONLY_STOREFRONT=true
 ```
@@ -79,7 +79,7 @@ Point `onlyaesthetic.in` to Render/Railway/Fly (or Vercel project **onlyaestheti
 | `NEXT_PUBLIC_SITE_URL` | Yes | `https://onlyaesthetic.in` |
 | `COMMERCE_ADMIN_EMAIL` | Yes | Admin login |
 | `COMMERCE_ADMIN_PASSWORD` | Yes | Strong password |
-| `COMMERCE_ADMIN_REQUIRE_OTP` | Yes | `true` |
+| `COMMERCE_ADMIN_REQUIRE_OTP` | No | unused — admin login is password-only |
 | `ALLOW_DEMO_OTP` | Yes | `false` |
 | `RAZORPAY_KEY_ID` | Yes | Live `rzp_live_…` |
 | `RAZORPAY_KEY_SECRET` | Yes | Live secret |

@@ -34,14 +34,14 @@ async function main() {
       name,
       role: "SUPER_ADMIN",
       isActive: true,
-      mfaEnabled: process.env.COMMERCE_ADMIN_REQUIRE_OTP === "true",
+      mfaEnabled: false,
     },
     create: {
       email: adminEmail,
       name,
       role: "SUPER_ADMIN",
       passwordHash,
-      mfaEnabled: process.env.COMMERCE_ADMIN_REQUIRE_OTP === "true",
+      mfaEnabled: false,
     },
   });
 
