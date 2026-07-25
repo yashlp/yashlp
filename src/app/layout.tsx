@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { RootShell } from "@/components/root-shell";
+import { isAestheticsOnlyDeploy } from "@/lib/commerce/aesthetics-surface";
 import { isCommercePlatformPath } from "@/lib/commerce-platform-routes";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -37,17 +38,40 @@ const civicMetadata: Metadata = {
 };
 
 const aestheticsMetadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://onlyaesthetic.in"),
   title: {
     default: "Only Aesthetic",
     template: "%s · Only Aesthetic",
   },
-  description: "Only Aesthetic — premium direct-to-consumer beauty & lifestyle.",
+  description:
+    "Because Details Matter. Curated design objects from independent makers — shipped across India.",
   applicationName: "Only Aesthetic",
+  openGraph: {
+    title: "Only Aesthetic — Because Details Matter",
+    description:
+      "Curated home, wellness, and lifestyle objects from independent makers. India only.",
+    siteName: "Only Aesthetic",
+    type: "website",
+    locale: "en_IN",
+    images: [
+      { url: "/brand/only-aesthetic-logo.png", width: 1024, height: 1024, alt: "Only Aesthetic" },
+    ],
+  },
+  icons: {
+    icon: [
+      { url: "/brand/only-aesthetic-favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/only-aesthetic-logo.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/brand/only-aesthetic-favicon-180.png", sizes: "180x180", type: "image/png" }],
+  },
   robots: { index: true, follow: true },
 };
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Store project / onlyaesthetic.in — never CivicLens titles or OG tags
+  if (isAestheticsOnlyDeploy()) {
+    return aestheticsMetadata;
+  }
   const pathname = (await headers()).get("x-pathname") ?? "";
   if (isCommercePlatformPath(pathname)) {
     return aestheticsMetadata;

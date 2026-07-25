@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { isAestheticsOnlyRequest } from "@/lib/commerce/aesthetics-surface";
 import { isCommercePath, isIndiaRequest } from "@/lib/commerce/geo";
 
+/** CivicLens routes — blocked / redirected on Only Aesthetic hosts */
 const CIVIC_PATH_PREFIXES = [
   "/civic-admin",
   "/api/civic-admin",
@@ -10,19 +11,29 @@ const CIVIC_PATH_PREFIXES = [
   "/api/incidents",
   "/api/payments",
   "/api/reports",
+  "/api/geocode",
   "/reports",
   "/report",
   "/ask",
   "/compare",
   "/login",
   "/map",
+  "/insights",
+  "/profile",
+  "/try",
+  "/content-policy",
+  "/logo-preview",
 ];
+
+function requestWithPath(request: NextRequest, pathname: string) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
+  return { request: { headers: requestHeaders } };
+}
 
 function withPathHeader(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", path);
-  return NextResponse.next({ request: { headers: requestHeaders } });
+  return NextResponse.next(requestWithPath(request, path));
 }
 
 function indiaBlockedResponse(request: NextRequest) {
@@ -38,7 +49,8 @@ function indiaBlockedResponse(request: NextRequest) {
   }
   const url = request.nextUrl.clone();
   url.pathname = "/aesthetics/india-only";
-  return NextResponse.rewrite(url);
+  // Keep commerce pathname so metadata/shell never fall back to CivicLens
+  return NextResponse.rewrite(url, requestWithPath(request, "/aesthetics/india-only"));
 }
 
 function isCivicPath(path: string) {
@@ -49,6 +61,12 @@ function isStaticAsset(path: string) {
   return /\.(?:png|jpe?g|gif|webp|svg|ico|avif|woff2?|ttf|css|js|map|txt|xml|json)$/i.test(
     path
   );
+}
+
+function redirectToStore(request: NextRequest, pathname = "/aesthetics") {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+  return NextResponse.redirect(url);
 }
 
 export function middleware(request: NextRequest) {
@@ -65,14 +83,20 @@ export function middleware(request: NextRequest) {
     return withPathHeader(request);
   }
 
-  // Store project / onlyaesthetic* hosts: keep CivicLens off this hostname.
+  // Store project / onlyaesthetic* hosts: CivicLens must never appear.
   const host = request.headers.get("host");
   if (isAestheticsOnlyRequest(host)) {
     if (path === "/") {
+      // Rewrite (not redirect) so the public URL can stay on the apex domain
       const url = request.nextUrl.clone();
       url.pathname = "/aesthetics";
-      return NextResponse.redirect(url);
+      return NextResponse.rewrite(url, requestWithPath(request, "/aesthetics"));
     }
+
+    // Civic root legal pages → store legal pages
+    if (path === "/privacy") return redirectToStore(request, "/aesthetics/privacy");
+    if (path === "/terms") return redirectToStore(request, "/aesthetics/terms");
+
     if (isCivicPath(path)) {
       if (path.startsWith("/api/")) {
         return NextResponse.json(
@@ -80,9 +104,20 @@ export function middleware(request: NextRequest) {
           { status: 404 }
         );
       }
-      const url = request.nextUrl.clone();
-      url.pathname = "/aesthetics";
-      return NextResponse.redirect(url);
+      return redirectToStore(request, "/aesthetics");
+    }
+
+    // Any other non-store path → store home (keeps CivicLens pages unreachable)
+    const allowed =
+      path.startsWith("/aesthetics") ||
+      path.startsWith("/admin") ||
+      path.startsWith("/api/commerce") ||
+      path.startsWith("/api/admin") ||
+      path.startsWith("/seller") ||
+      path === "/robots.txt" ||
+      path === "/sitemap.xml";
+    if (!allowed) {
+      return redirectToStore(request, "/aesthetics");
     }
   }
 

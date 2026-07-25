@@ -1,17 +1,20 @@
 import { headers } from "next/headers";
 import { AppShell } from "@/components/app-shell";
+import { isAestheticsOnlyDeploy } from "@/lib/commerce/aesthetics-surface";
 import { isCommercePlatformPath } from "@/lib/commerce-platform-routes";
 
 /**
- * Skips CivicLens chrome for commerce/admin routes so the first paint is Only
- * Aesthetics (never a CivicLens terms gate / loading screen over the storefront).
+ * Skips CivicLens chrome for commerce/admin routes and for aesthetics-only deploys
+ * so onlyaesthetic.in never shows CivicLens UI.
  */
 export async function RootShell({ children }: { children: React.ReactNode }) {
+  if (isAestheticsOnlyDeploy()) {
+    return <>{children}</>;
+  }
+
   const h = await headers();
   const pathname = h.get("x-pathname") || h.get("x-invoke-path") || "";
 
-  // Only Aesthetic commerce UI — never wrap with CivicLens chrome.
-  // CivicLens admin lives at /civic-admin and uses CivicLens AppShell.
   if (
     isCommercePlatformPath(pathname) ||
     pathname.startsWith("/aesthetics") ||
