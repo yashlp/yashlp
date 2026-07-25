@@ -82,6 +82,11 @@ export function ConsumerFooter() {
             <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-white">Help</p>
             <ul className="space-y-1 text-sm text-white">
               <li>
+                <Link href="/aesthetics/contact" className="inline-flex min-h-11 items-center text-white hover:opacity-85">
+                  Contact us
+                </Link>
+              </li>
+              <li>
                 <Link href="/aesthetics/faq" className="inline-flex min-h-11 items-center text-white hover:opacity-85">
                   FAQ
                 </Link>

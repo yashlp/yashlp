@@ -95,6 +95,31 @@ export async function sendAdminOtpEmail(email: string, code: string) {
   });
 }
 
+/** Customer Contact Us form → customer care inbox */
+export async function sendContactFormEmail(input: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  message: string;
+}) {
+  const brand = await getBrandSettings().catch(() => null);
+  const siteName = brand?.siteName || DEFAULT_BRAND_NAME;
+  const to =
+    process.env.COMMERCE_SUPPORT_EMAIL?.trim() ||
+    process.env.SUPPORT_EMAIL_TO?.trim() ||
+    brand?.supportEmail ||
+    DEFAULT_SUPPORT_EMAIL;
+  const fullName = `${input.firstName} ${input.lastName}`.trim();
+
+  return sendCommerceEmail({
+    to,
+    replyTo: input.email,
+    subject: `Contact form — ${fullName} · ${siteName}`,
+    text: `New message from the website contact form.\n\nName: ${fullName}\nEmail: ${input.email}\n\nMessage:\n${input.message}\n`,
+    html: `<p>New message from the website contact form.</p><p><strong>Name:</strong> ${fullName}<br/><strong>Email:</strong> <a href="mailto:${input.email}">${input.email}</a></p><p><strong>Message</strong></p><pre style="font-family:inherit;white-space:pre-wrap">${input.message}</pre>`,
+  });
+}
+
 export async function sendShipmentEmail(input: {
   to: string;
   name: string;
