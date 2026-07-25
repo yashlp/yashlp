@@ -89,7 +89,6 @@ function ProductImage({
 
   return (
     <div className={cn("group/img relative overflow-hidden rounded-2xl aes-gallery-spotlight", className)}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <motion.img
         src={product.images[0]}
         alt={product.name}

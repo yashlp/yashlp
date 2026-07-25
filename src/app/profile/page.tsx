@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Award, LogOut, Mail, RefreshCw, Shield, UserRound } from "lucide-react";
-import Link from "next/link";
 import { MAX_NAME_CHANGES, nameChangesRemaining } from "@/lib/random-name";
 
 type User = {

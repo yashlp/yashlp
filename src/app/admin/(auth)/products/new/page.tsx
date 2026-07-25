@@ -110,10 +110,11 @@ export default function NewProductPage() {
   const brands = sellers.find((s) => s.id === form.sellerId)?.brands || [];
 
   useEffect(() => {
-    if (form.sellerId && !form.brandId && brands[0]) {
-      setForm((f) => ({ ...f, brandId: brands[0].id }));
+    const sellerBrands = sellers.find((s) => s.id === form.sellerId)?.brands || [];
+    if (form.sellerId && !form.brandId && sellerBrands[0]) {
+      setForm((f) => ({ ...f, brandId: sellerBrands[0].id }));
     }
-  }, [form.sellerId, form.brandId, brands]);
+  }, [form.sellerId, form.brandId, sellers]);
 
   return (
     <div className="max-w-2xl">

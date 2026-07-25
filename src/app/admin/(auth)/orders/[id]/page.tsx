@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/aesthetics/ui/button";
@@ -41,15 +41,18 @@ export default function OrderDetailPage() {
   const [shipError, setShipError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  function load() {
+  const load = useCallback(() => {
+    if (!id) return;
     fetch(`/api/admin/orders/${id}`).then((r) => r.json()).then((d) => {
       setOrder(d.order);
       setCourier(d.order?.courier || "");
       setTracking(d.order?.trackingNumber || "");
     });
-  }
+  }, [id]);
 
-  useEffect(() => { if (id) load(); }, [id]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   async function updateStatus(status: string) {
     setShipError("");
