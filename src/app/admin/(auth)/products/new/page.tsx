@@ -107,8 +107,6 @@ export default function NewProductPage() {
     }
   }
 
-  const brands = sellers.find((s) => s.id === form.sellerId)?.brands || [];
-
   useEffect(() => {
     const sellerBrands = sellers.find((s) => s.id === form.sellerId)?.brands || [];
     if (form.sellerId && !form.brandId && sellerBrands[0]) {
