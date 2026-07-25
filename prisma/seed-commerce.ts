@@ -392,8 +392,8 @@ async function upsertProduct(
     isNewArrival: Boolean(p.newArrival),
     isTrending: Boolean(p.trending),
     publishedAt: new Date(),
-    rating: 4.6 + Math.random() * 0.3,
-    reviewCount: 12 + Math.floor(Math.random() * 40),
+    rating: 0,
+    reviewCount: 0,
   };
 
   const product = await prisma.commerceProduct.upsert({

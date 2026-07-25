@@ -8,6 +8,7 @@ import { Button } from "@/components/aesthetics/ui/button";
 import { Input } from "@/components/aesthetics/ui/input";
 import { useCustomer } from "@/components/aesthetics/providers/customer-provider";
 import { useBrandSettings } from "@/components/aesthetics/hooks/use-brand-settings";
+import { ContactForm } from "@/components/aesthetics/contact/contact-form";
 import { formatInr } from "@/lib/aesthetics/format-inr";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +44,6 @@ export default function AccountPage() {
   const [returns, setReturns] = useState<ReturnRow[]>([]);
   const [refundOrderId, setRefundOrderId] = useState("");
   const [refundReason, setRefundReason] = useState("");
-  const [contactMessage, setContactMessage] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -225,7 +225,7 @@ export default function AccountPage() {
             <div className="aes-panel p-6">
               <h2 className="font-bold text-[var(--aes-ink)]">Contact us</h2>
               <p className="mt-2 text-sm text-[var(--aes-ink-muted)]">
-                For orders, returns, and refunds, email{" "}
+                Messages go to{" "}
                 <a
                   href={`mailto:${brand.supportEmail}?subject=${encodeURIComponent("Refund / order help")}`}
                   className="text-[var(--aes-pink)]"
@@ -246,23 +246,13 @@ export default function AccountPage() {
                 ) : null}
                 .
               </p>
-              <form
-                className="mt-4 space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setMessage("Message noted. Our team will reply within 24 hours.");
-                  setContactMessage("");
-                }}
-              >
-                <textarea
-                  className="aes-input min-h-[120px] w-full"
-                  placeholder="Your message about refunds or orders"
-                  value={contactMessage}
-                  onChange={(e) => setContactMessage(e.target.value)}
-                  required
+              <div className="mt-4">
+                <ContactForm
+                  defaultEmail={customer.email || ""}
+                  defaultFirstName={(customer.name || "").split(" ")[0] || ""}
+                  defaultLastName={(customer.name || "").split(" ").slice(1).join(" ")}
                 />
-                <Button type="submit">Send message</Button>
-              </form>
+              </div>
             </div>
           </div>
         )}

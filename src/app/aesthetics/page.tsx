@@ -10,17 +10,25 @@ import { TestimonialsSection } from "@/components/aesthetics/home/testimonials-s
 import { ContactSection } from "@/components/aesthetics/home/contact-section";
 import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { productService } from "@/lib/commerce/services/product.service";
+import { reviewService } from "@/lib/commerce/services/review.service";
 
 export default async function AestheticsHomePage() {
   let featured: Awaited<ReturnType<typeof productService.listPublished>> = [];
   let newArrivals: typeof featured = [];
+  let reviews: Awaited<ReturnType<typeof reviewService.listStorefront>> = [];
 
   try {
     const data = await catalogService.getHomepageData();
     featured = data.featured;
     newArrivals = data.newArrivals;
   } catch {
-    // Database not seeded
+    // Database not ready
+  }
+
+  try {
+    reviews = await reviewService.listStorefront(24);
+  } catch {
+    reviews = [];
   }
 
   return (
@@ -46,7 +54,7 @@ export default async function AestheticsHomePage() {
         <AboutBanner />
         <LifestyleSection />
         <FunctionFunSection />
-        <TestimonialsSection />
+        <TestimonialsSection reviews={reviews} />
         <ContactSection />
         {!featured.length && (
           <section className="aes-bg-sand px-4 py-20 text-center sm:px-6">

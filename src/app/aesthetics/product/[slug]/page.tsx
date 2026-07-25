@@ -7,6 +7,8 @@ import { Badge } from "@/components/aesthetics/ui/badge";
 import { productService } from "@/lib/commerce/services/product.service";
 import { formatInr } from "@/lib/aesthetics/format-inr";
 import { ProductActions } from "./product-actions";
+import { ProductReviews } from "@/components/aesthetics/shop/product-reviews";
+import { reviewService } from "@/lib/commerce/services/review.service";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -16,6 +18,21 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const related = await productService.getRelated(product.id, product.category, product.tags);
+  const approvedReviews = await reviewService.listForProduct(product.id).catch(() => []);
+  const reviewRows = approvedReviews.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    title: r.title,
+    body: r.body,
+    customerName: r.customer?.name || "Customer",
+    createdAt: r.createdAt.toISOString(),
+  }));
+  // Prefer live approved count over seeded fake reviewCount
+  const liveCount = reviewRows.length;
+  const liveRating =
+    liveCount === 0
+      ? 0
+      : Math.round((reviewRows.reduce((s, r) => s + r.rating, 0) / liveCount) * 10) / 10;
 
   return (
     <ConsumerPage room="ivory">
@@ -72,12 +89,14 @@ export default async function ProductPage({ params }: Props) {
               ))}
             </div>
             <h1 className="aes-gallery-title mt-5">{product.name}</h1>
-            <div className="mt-3 flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm text-[var(--gallery-muted,#6f6a63)]">
-                <Star className="h-4 w-4 fill-[var(--gallery-luxury,#b58e4a)] text-[var(--gallery-luxury,#b58e4a)]" />
-                {product.rating} ({product.reviewCount} reviews)
+            {liveCount > 0 ? (
+              <div className="mt-3 flex items-center gap-3">
+                <div className="flex items-center gap-1 text-sm text-[var(--gallery-muted,#6f6a63)]">
+                  <Star className="h-4 w-4 fill-[var(--gallery-luxury,#b58e4a)] text-[var(--gallery-luxury,#b58e4a)]" />
+                  {liveRating} ({liveCount} review{liveCount === 1 ? "" : "s"})
+                </div>
               </div>
-            </div>
+            ) : null}
             <div className="mt-6 flex items-baseline gap-3">
               <span className="text-3xl font-semibold text-[var(--gallery-ink,#1e1e1c)]">{formatInr(product.price)}</span>
               {product.compareAtPrice && (
@@ -111,6 +130,14 @@ export default async function ProductPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        <ProductReviews
+          productId={product.id}
+          productSlug={product.slug}
+          initialReviews={reviewRows}
+          rating={liveRating}
+          reviewCount={liveCount}
+        />
 
         {related.length > 0 && (
           <section className="mt-20 rounded-[2rem] border border-[var(--gallery-border,#ddd7cf)] bg-[var(--gallery-bg-secondary,#ece8e1)] px-4 py-14 sm:px-8">

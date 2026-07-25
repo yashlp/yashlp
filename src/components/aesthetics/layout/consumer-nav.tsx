@@ -16,6 +16,7 @@ const NAV = [
   { href: "/aesthetics/shop", label: "Shop" },
   { href: "/aesthetics/collections", label: "Collections" },
   { href: "/aesthetics/about", label: "About us" },
+  { href: "/aesthetics/contact", label: "Contact us" },
   { href: "/aesthetics/wishlist", label: "Favourites" },
 ];
 
