@@ -162,7 +162,7 @@ SUPPORT_REPLY_TO=customercare@onlyaesthetic.in
 
 Then **Deployments → Redeploy** (required).
 
-Without `PRODUCT_SURFACE=aesthetics`, the homepage stays CivicLens.
+Without `PRODUCT_SURFACE=aesthetics`, set it now — it forces Only Aesthetic metadata and blocks every CivicLens route on this project.
 
 `COMMERCE_SUPPORT_EMAIL` is shown on the homepage Contact section, footer, policies, and refunds.
 
