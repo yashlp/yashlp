@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, Camera, CheckCircle, X, Zap } from "lucide-react";
@@ -29,7 +29,7 @@ type Category = {
   description: string;
 };
 
-export default function ReportPage() {
+function ReportPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -517,5 +517,19 @@ export default function ReportPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ReportPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-dvh items-center justify-center bg-orange-50 text-sm text-stone-500">
+          Loading…
+        </div>
+      }
+    >
+      <ReportPageContent />
+    </Suspense>
   );
 }
