@@ -6,7 +6,12 @@ import { BrandLoader } from "@/components/aesthetics/layout/brand-loader";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://onlyaesthetic.in"),
-  title: { default: "Only Aesthetic", template: "%s · Only Aesthetic" },
+  // absolute: ignore any parent CivicLens title template
+  title: {
+    absolute: "Only Aesthetic",
+    default: "Only Aesthetic",
+    template: "%s · Only Aesthetic",
+  },
   description:
     "Because Details Matter. Curated design objects from independent makers — shipped across India.",
   applicationName: "Only Aesthetic",

@@ -121,10 +121,18 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Public read APIs must work worldwide so the storefront shell never crashes
+  const indiaExemptApi =
+    path === "/api/commerce/brand" ||
+    path === "/api/commerce/auth/me" ||
+    path.startsWith("/api/commerce/catalog") ||
+    path.startsWith("/api/commerce/products") ||
+    path.startsWith("/api/commerce/shipping/shiprocket-webhook");
+
   if (
     isCommercePath(path) &&
     path !== "/aesthetics/india-only" &&
-    !path.startsWith("/api/commerce/shipping/shiprocket-webhook") &&
+    !indiaExemptApi &&
     !isIndiaRequest(request)
   ) {
     return indiaBlockedResponse(request);

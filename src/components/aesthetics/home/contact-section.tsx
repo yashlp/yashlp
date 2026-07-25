@@ -1,9 +1,15 @@
+import { DEFAULT_SUPPORT_EMAIL, getConfiguredSupportEmail } from "@/lib/commerce/brand-defaults";
 import { getBrandSettings } from "@/lib/commerce/brand-settings";
 
 /** Homepage contact — customer care email for orders, help, and refunds */
 export async function ContactSection() {
-  const brand = await getBrandSettings();
-  const email = brand.supportEmail;
+  let email = getConfiguredSupportEmail() || DEFAULT_SUPPORT_EMAIL;
+  try {
+    const brand = await getBrandSettings();
+    email = brand.supportEmail || email;
+  } catch {
+    // keep env / default email
+  }
 
   return (
     <section className="aes-bg-sand px-4 py-16 sm:px-6 sm:py-20" aria-labelledby="oa-contact-heading">
