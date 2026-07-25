@@ -7,7 +7,7 @@ function digitsOnly(phone: string): string {
 /** MSG91 legacy SendOTP API — sends our generated OTP via SMS. */
 async function sendMsg91Otp(phone: string, code: string): Promise<SmsDispatchResult> {
   const authKey = process.env.SMS_API_KEY;
-  const sender = process.env.SMS_SENDER_ID ?? "CIVCLN";
+  const sender = process.env.SMS_SENDER_ID ?? "ONLYAE";
   if (!authKey) return { ok: false, error: "SMS_API_KEY is not configured" };
 
   const mobile = digitsOnly(phone);

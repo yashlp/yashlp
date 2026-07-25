@@ -1,13 +1,24 @@
 import { createHash } from "crypto";
 import { prisma } from "@/lib/db";
+import { isDemoOtpAllowed, isProduction, isSmsConfigured } from "@/lib/env";
+import { sendSmsOtp } from "@/lib/sms";
 import { hashPassword, verifyPassword } from "./password";
 import { createCustomerSession } from "./customer-session";
 import { sendSignupOtpEmail } from "./commerce-email";
 
 const OTP_EXPIRY_MIN = 10;
+const DEMO_OTP = "123456";
 
 function normalizePhone(phone: string) {
   return phone.replace(/\D/g, "");
+}
+
+/** MSG91 expects digits; prefer 91XXXXXXXXXX for Indian mobiles */
+function smsMobile(phone: string) {
+  const digits = normalizePhone(phone);
+  if (digits.length === 10) return `91${digits}`;
+  if (digits.startsWith("91") && digits.length === 12) return digits;
+  return digits;
 }
 
 function normalizeEmail(email: string) {
@@ -190,18 +201,48 @@ export async function sendPhoneOtp(phone: string) {
   const normalized = normalizePhone(phone);
   if (normalized.length < 10) throw new Error("Enter a valid phone number");
 
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const smsReady = isSmsConfigured();
+  const demoOk = isDemoOtpAllowed();
+
+  if (isProduction() && !smsReady && !demoOk) {
+    throw new Error(
+      "Mobile OTP is not configured yet. Add MSG91 SMS keys in Vercel, or set ALLOW_DEMO_OTP=true for testing."
+    );
+  }
+
+  const code = smsReady
+    ? String(Math.floor(100000 + Math.random() * 900000))
+    : demoOk
+      ? DEMO_OTP
+      : String(Math.floor(100000 + Math.random() * 900000));
+
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MIN * 60 * 1000);
 
   await prisma.commerceCustomerPhoneOtp.create({
     data: { phone: normalized, codeHash: hashOtp(code), expiresAt },
   });
 
-  if (process.env.NODE_ENV !== "production") {
-    console.info(`[Aesthetics OTP] ${normalized}: ${code}`);
+  if (smsReady) {
+    const sent = await sendSmsOtp(smsMobile(normalized), code);
+    if (!sent.ok) {
+      throw new Error(sent.error || "Could not send verification SMS. Please try again.");
+    }
+    return { phone: normalized, delivered: true as const };
   }
 
-  return { phone: normalized, devCode: process.env.NODE_ENV !== "production" ? code : undefined };
+  // Dev / demo fallback (no SMS provider)
+  if (!isProduction() || demoOk) {
+    console.info(`[Only Aesthetic phone OTP] ${normalized}: ${code}`);
+    return {
+      phone: normalized,
+      delivered: false as const,
+      demo: demoOk,
+      ...(isProduction() ? {} : { devCode: code }),
+      ...(demoOk && isProduction() ? { hint: "Demo OTP is 123456 (ALLOW_DEMO_OTP=true)" } : {}),
+    };
+  }
+
+  throw new Error("Could not send verification SMS. Please try again.");
 }
 
 export async function verifyPhoneOtp(phone: string, code: string) {
