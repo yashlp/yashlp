@@ -45,10 +45,23 @@ function isCivicPath(path: string) {
   return CIVIC_PATH_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 }
 
+function isStaticAsset(path: string) {
+  return /\.(?:png|jpe?g|gif|webp|svg|ico|avif|woff2?|ttf|css|js|map|txt|xml|json)$/i.test(
+    path
+  );
+}
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  if (path.startsWith("/_next/") || path === "/favicon.ico") {
+  // Never geo-block or rewrite brand / mood image files
+  if (
+    path.startsWith("/_next/") ||
+    path === "/favicon.ico" ||
+    path.startsWith("/brand/") ||
+    path.startsWith("/oa/") ||
+    isStaticAsset(path)
+  ) {
     return withPathHeader(request);
   }
 

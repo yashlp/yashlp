@@ -1,17 +1,13 @@
-# Only Aesthetic — single go-live link
+# Only Aesthetic — single default link
 
-**Default preview (all updates):** wait for Vercel after this PR deploys, then use the Preview URL posted on this PR for project **onlyaesthetic**.
-
-Until that preview is ready, production storefront:
+**Use this link only** (all updates: oa. logo, mood images, domain prep, Shiprocket):
 
 ```text
-https://onlyaesthetics-omega.vercel.app/aesthetics
+https://onlyaesthetic-git-cursor-only-9d7652-yashshahcsu-6917s-projects.vercel.app/aesthetics
 ```
 
-Custom domain (after GoDaddy DNS + Vercel Domains):
+PR: https://github.com/yashlp/yashlp/pull/33
 
-```text
-https://onlyaesthetic.in
-```
+Ignore older preview URLs from closed PRs.
 
-Do **not** use older preview links from previous PRs.
+After merge + DNS: `https://onlyaesthetic.in`

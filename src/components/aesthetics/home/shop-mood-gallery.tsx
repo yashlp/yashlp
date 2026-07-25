@@ -2,52 +2,52 @@ import Link from "next/link";
 
 export const SHOP_MOOD_IMAGES = [
   {
-    src: "/aesthetics/shop-mood/01-bedroom-nightstand.jpg",
+    src: "/oa/shop-mood/01-bedroom-nightstand.jpg",
     alt: "Bedroom nightstand with mushroom lamp and greenery",
     label: "Bedroom calm",
   },
   {
-    src: "/aesthetics/shop-mood/02-living-corner.jpg",
+    src: "/oa/shop-mood/02-living-corner.jpg",
     alt: "Living room corner with bouclé sofa and arched lamp",
     label: "Living soft",
   },
   {
-    src: "/aesthetics/shop-mood/03-desk-office.jpg",
+    src: "/oa/shop-mood/03-desk-office.jpg",
     alt: "Sunlit desk with lamp, notebook, and coffee",
     label: "Work light",
   },
   {
-    src: "/aesthetics/shop-mood/04-kitchen-counter.jpg",
+    src: "/oa/shop-mood/04-kitchen-counter.jpg",
     alt: "Marble kitchen counter with pour-over and kettle",
     label: "Morning ritual",
   },
   {
-    src: "/aesthetics/shop-mood/05-bookshelf.jpg",
+    src: "/oa/shop-mood/05-bookshelf.jpg",
     alt: "Styled wooden bookshelf with lamp and ceramics",
     label: "Shelf edit",
   },
   {
-    src: "/aesthetics/shop-mood/06-bathroom-vanity.jpg",
+    src: "/oa/shop-mood/06-bathroom-vanity.jpg",
     alt: "Bathroom vanity with apothecary bottles and candle",
     label: "Bath quiet",
   },
   {
-    src: "/aesthetics/shop-mood/07-window-nook.jpg",
+    src: "/oa/shop-mood/07-window-nook.jpg",
     alt: "Window reading nook with pillows and knit throw",
     label: "Window nook",
   },
   {
-    src: "/aesthetics/shop-mood/08-art-side-table.jpg",
+    src: "/oa/shop-mood/08-art-side-table.jpg",
     alt: "Side table with flowers, candle, and wall art",
     label: "Art corner",
   },
   {
-    src: "/aesthetics/shop-mood/09-pendant-nightstand.jpg",
+    src: "/oa/shop-mood/09-pendant-nightstand.jpg",
     alt: "Bedroom nightstand under a dome pendant light",
     label: "Night glow",
   },
   {
-    src: "/aesthetics/shop-mood/10-console-mirror.jpg",
+    src: "/oa/shop-mood/10-console-mirror.jpg",
     alt: "Console table with wavy mirror and tall greenery",
     label: "Entry calm",
   },
