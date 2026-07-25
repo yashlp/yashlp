@@ -83,8 +83,9 @@ Point `onlyaesthetic.in` to Render/Railway/Fly (or Vercel project **onlyaestheti
 | `ALLOW_DEMO_OTP` | Yes | `false` |
 | `RAZORPAY_KEY_ID` | Yes | Live `rzp_live_…` |
 | `RAZORPAY_KEY_SECRET` | Yes | Live secret |
-| `RESEND_API_KEY` | Yes | OTP + order emails |
-| `COMMERCE_FROM_EMAIL` | Yes | Verified Resend sender |
+| `RAZORPAY_WEBHOOK_SECRET` | Recommended | Webhook backup for paid → confirm + email |
+| `RESEND_API_KEY` | Yes | OTP + **order confirmation** emails |
+| `COMMERCE_FROM_EMAIL` | Yes | Verified Resend sender (domain `onlyaesthetic.in`) |
 | `BLOB_READ_WRITE_TOKEN` | Yes | Blob on this project |
 | `INDIA_ONLY_STOREFRONT` | Yes | `true` |
 | `PURGE_DEMO_CATALOG` | Once | Then remove |
@@ -97,5 +98,6 @@ Point `onlyaesthetic.in` to Render/Railway/Fly (or Vercel project **onlyaestheti
 - [ ] `https://onlyaesthetic.in` opens the store (not WordPress / not CivicLens)
 - [ ] Email OTP signup works
 - [ ] Razorpay payment completes
+- [ ] Customer receives **order confirmation email** after payment clears (needs Resend)
 - [ ] Order in `/admin/orders`
 - [ ] CivicLens still works on old `yashlp` project

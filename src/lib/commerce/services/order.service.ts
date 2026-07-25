@@ -125,7 +125,7 @@ export const orderService = {
         shippingAddress: input.guest.shippingAddress,
         shippingCity: input.guest.city?.trim() || null,
         shippingState: input.guest.state?.trim() || null,
-        customerNotes: `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`,
+        customerNotes: `Guest: ${input.guest.name}\nEmail: ${input.guest.email}\nPhone: ${input.guest.phone}`,
         items: {
           create: pricedItems.map((item) => ({
             productId: item.productId,
@@ -148,15 +148,76 @@ export const orderService = {
 
     if (status === "CONFIRMED") {
       await this.decrementStock(order.id);
-      void sendOrderConfirmationEmail({
+      const emailResult = await sendOrderConfirmationEmail({
         to: input.guest.email,
         name: input.guest.name,
         orderNumber: order.orderNumber,
         totalInr: order.total,
+        shippingAddress: input.guest.shippingAddress,
       });
+      if (!emailResult.ok) {
+        console.error("[order-confirm-email]", order.orderNumber, emailResult.error);
+      }
     }
 
     return order;
+  },
+
+  resolveCustomerContact(order: {
+    customerNotes?: string | null;
+    customer?: { email?: string | null; name?: string | null; phone?: string | null } | null;
+  }) {
+    const notes = order.customerNotes || "";
+    const emailFromNotes =
+      notes.match(/^Email:\s*(.+)$/im)?.[1]?.trim() ||
+      notes.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0] ||
+      null;
+    const nameFromNotes =
+      notes.match(/^Guest:\s*(.+)$/im)?.[1]?.trim() ||
+      notes.match(/Guest:\s*([^|\n]+)/)?.[1]?.trim() ||
+      null;
+    const phoneFromNotes = notes.match(/^Phone:\s*(.+)$/im)?.[1]?.trim() || null;
+
+    return {
+      email: order.customer?.email || emailFromNotes || null,
+      name: order.customer?.name || nameFromNotes || "there",
+      phone: order.customer?.phone || phoneFromNotes || null,
+    };
+  },
+
+  async sendConfirmationForOrder(orderId: string) {
+    const order = await prisma.commerceOrder.findUnique({
+      where: { id: orderId },
+      include: {
+        customer: { select: CUSTOMER_SAFE_SELECT },
+        items: { include: { product: { select: { name: true, sku: true } } } },
+      },
+    });
+    if (!order) return { ok: false as const, error: "Order not found" };
+
+    const contact = this.resolveCustomerContact(order);
+    if (!contact.email) return { ok: false as const, error: "No customer email on order" };
+
+    const itemSummary = order.items
+      .map((item) => {
+        const label = item.product?.name || item.productId;
+        return `• ${label} × ${item.quantity}`;
+      })
+      .join("\n");
+
+    const result = await sendOrderConfirmationEmail({
+      to: contact.email,
+      name: contact.name,
+      orderNumber: order.orderNumber,
+      totalInr: order.total,
+      itemSummary,
+      shippingAddress: order.shippingAddress || undefined,
+    });
+
+    if (!result.ok) {
+      console.error("[order-confirm-email]", order.orderNumber, result.error);
+    }
+    return result;
   },
 
   async decrementStock(orderId: string) {
@@ -184,11 +245,26 @@ export const orderService = {
       where: { id: orderId },
       include: { payments: true },
     });
-    if (order.status !== "PENDING") return order;
+    if (order.status !== "PENDING") {
+      // Already cleared (e.g. browser verify + webhook race) — do not re-send email
+      return { order, emailSent: false as const, alreadyConfirmed: true as const };
+    }
+
+    const pending = order.payments.find((p) => p.status === "PENDING");
+    let metadata = pending?.metadata || null;
+    try {
+      const parsed = metadata ? (JSON.parse(metadata) as Record<string, unknown>) : {};
+      metadata = JSON.stringify({
+        ...parsed,
+        razorpayPaymentId: providerPaymentId,
+      });
+    } catch {
+      metadata = JSON.stringify({ razorpayPaymentId: providerPaymentId });
+    }
 
     await prisma.commercePayment.updateMany({
       where: { orderId, status: "PENDING" },
-      data: { status: "SUCCESS", providerPaymentId },
+      data: { status: "SUCCESS", providerPaymentId, metadata },
     });
 
     await prisma.commerceOrder.update({
@@ -198,24 +274,17 @@ export const orderService = {
 
     await this.decrementStock(orderId);
     const confirmed = await this.getById(orderId);
-    if (!confirmed) return order;
-
-    const emailMatch = confirmed.customerNotes?.match(/[\w.+-]+@[\w.-]+\.\w+/);
-    const guestEmail = emailMatch?.[0];
-    const guestName = confirmed.customerNotes?.match(/Guest:\s*([^|]+)/)?.[1]?.trim();
-    const to = confirmed.customer?.email || guestEmail;
-    const name = confirmed.customer?.name || guestName || "there";
-
-    if (to) {
-      void sendOrderConfirmationEmail({
-        to,
-        name,
-        orderNumber: confirmed.orderNumber,
-        totalInr: confirmed.total,
-      });
+    if (!confirmed) {
+      return { order, emailSent: false as const, alreadyConfirmed: false as const };
     }
 
-    return confirmed;
+    const emailResult = await this.sendConfirmationForOrder(orderId);
+    return {
+      order: confirmed,
+      emailSent: emailResult.ok,
+      alreadyConfirmed: false as const,
+      emailError: emailResult.ok ? undefined : emailResult.error,
+    };
   },
 
   async updateStatus(
