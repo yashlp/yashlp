@@ -14,6 +14,20 @@ function pick(map: Record<string, string>, key: string, fallback: string) {
   return v || fallback;
 }
 
+/** Old placeholder support emails → current customer-care inbox */
+const LEGACY_SUPPORT_EMAILS = new Set([
+  "yash.shah.lp2@gmail.com",
+  "hello@onlyaesthetics.in",
+  "hello@onlyaesthetics.app",
+  "hello@onlyaesthetic.in",
+]);
+
+function resolveSupportEmail(raw: string | undefined) {
+  const v = raw?.trim() || "";
+  if (!v || LEGACY_SUPPORT_EMAILS.has(v.toLowerCase())) return DEFAULT_SUPPORT_EMAIL;
+  return v;
+}
+
 export async function getBrandSettings(): Promise<BrandSettings> {
   const rows = await prisma.commerceSetting.findMany({
     where: {
@@ -29,7 +43,7 @@ export async function getBrandSettings(): Promise<BrandSettings> {
   return {
     siteName,
     companyName: pick(map, "company_name", siteName),
-    supportEmail: pick(map, "support_email", DEFAULT_SUPPORT_EMAIL),
+    supportEmail: resolveSupportEmail(map.support_email),
     supportPhone: pick(map, "support_phone", ""),
     siteUrl: pick(
       map,
