@@ -1,20 +1,15 @@
 # Only Aesthetic — single default link
 
-**Use this preview link** (oa. logo + 10 Shop now mood images + domain prep + Shiprocket):
-
-```text
-https://onlyaesthetic-git-cursor-only-9d7652-yashshahcsu-6917s-projects.vercel.app/aesthetics
-```
-
-PR: https://github.com/yashlp/yashlp/pull/33
-
-- Log in with Vercel if the preview asks for SSO.
-- Ignore older preview URLs from closed PRs.
-
-**Public store link** (no login) after merging PR #33:
+**Use this link only** (oa. logo + 10 Shop now mood images + domain prep + Shiprocket):
 
 ```text
 https://onlyaesthetics-omega.vercel.app/aesthetics
 ```
 
-After merge + DNS: `https://onlyaesthetic.in`
+Hard-refresh (Ctrl/Cmd+Shift+R) if you still see an older version.
+
+Merged go-live work: https://github.com/yashlp/yashlp/pull/33
+
+Ignore older preview URLs (they often require Vercel login).
+
+After DNS: `https://onlyaesthetic.in`
