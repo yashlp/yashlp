@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isAestheticsOnlyRequest } from "@/lib/commerce/aesthetics-surface";
-import { isCommercePath, isIndiaRequest } from "@/lib/commerce/geo";
+import { isIndiaRequest } from "@/lib/commerce/geo";
 
 /** CivicLens routes — blocked / redirected on Only Aesthetic hosts */
 const CIVIC_PATH_PREFIXES = [
@@ -121,25 +121,15 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Public read + auth APIs must work so login/OTP is not blocked by geo
-  const indiaExemptApi =
-    path === "/api/commerce/brand" ||
-    path === "/api/commerce/auth/me" ||
-    path === "/api/commerce/auth/logout" ||
-    path === "/api/commerce/auth/login" ||
-    path === "/api/commerce/auth/register" ||
-    path.startsWith("/api/commerce/auth/phone/") ||
-    path.startsWith("/api/commerce/auth/email/") ||
-    path.startsWith("/api/commerce/catalog") ||
-    path.startsWith("/api/commerce/products") ||
-    path.startsWith("/api/commerce/shipping/shiprocket-webhook");
+  // India geo: browse + login work worldwide; checkout/payments stay India-only.
+  const indiaCheckoutOnly =
+    path.startsWith("/aesthetics/checkout") ||
+    path.startsWith("/api/commerce/checkout") ||
+    path.startsWith("/api/commerce/orders") ||
+    path.startsWith("/api/commerce/payments") ||
+    path.startsWith("/api/commerce/razorpay");
 
-  if (
-    isCommercePath(path) &&
-    path !== "/aesthetics/india-only" &&
-    !indiaExemptApi &&
-    !isIndiaRequest(request)
-  ) {
+  if (indiaCheckoutOnly && !isIndiaRequest(request)) {
     return indiaBlockedResponse(request);
   }
 
