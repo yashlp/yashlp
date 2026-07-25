@@ -57,12 +57,12 @@ Last updated: July 2026`,
 - Protective packaging designed for fragile objects
 - Gift wrap is available at checkout where offered
 
-**Returns**
+**Returns & refunds**
 - Most unused items can be returned within 7 days of delivery
-- Email ${email} with your order number (or start a return from My account when signed in)
+- Email ${email} with your order number for returns and refunds (or start a return from My account when signed in)
 - Refunds are issued to the original payment method after inspection
 
-Contact: ${email}`,
+Refunds & contact: ${email}`,
     },
     faq: {
       title: "FAQ",
@@ -73,10 +73,10 @@ India only for now.
 Usually 3–7 business days after dispatch.
 
 **Can I return an item?**
-Yes — see Shipping & Returns. Email ${email} if you need help.
+Yes — see Shipping & Returns. Email ${email} for returns and refunds.
 
 **How do I contact you?**
-Email ${email} — we usually reply within one business day.`,
+Email ${email} for orders, shipping, returns, and refunds — we usually reply within one business day.`,
     },
     terms: {
       title: "Terms of Service",

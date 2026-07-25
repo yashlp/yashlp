@@ -11,7 +11,7 @@ const TEXT_FIELDS = [
   { key: "site_url", label: "Website URL (update after you buy a domain)", group: "general" },
   { key: "company_gst", label: "GST number", group: "tax" },
   { key: "company_address", label: "Business address", group: "company" },
-  { key: "support_email", label: "Customer support email (all queries)", group: "contact" },
+  { key: "support_email", label: "Customer care email (orders, contact & refunds)", group: "contact" },
   { key: "support_phone", label: "Support phone", group: "contact" },
   { key: "gst_rate", label: "GST rate (%)", group: "tax" },
   { key: "razorpay_enabled", label: "Razorpay enabled (true/false)", group: "payments" },

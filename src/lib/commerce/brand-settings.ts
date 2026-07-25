@@ -3,11 +3,17 @@ import {
   DEFAULT_BRAND_NAME,
   DEFAULT_BRAND_SETTINGS,
   DEFAULT_SUPPORT_EMAIL,
+  getConfiguredSupportEmail,
   type BrandSettings,
 } from "./brand-defaults";
 
 export type { BrandSettings };
-export { DEFAULT_BRAND_NAME, DEFAULT_SUPPORT_EMAIL, DEFAULT_BRAND_SETTINGS };
+export {
+  DEFAULT_BRAND_NAME,
+  DEFAULT_SUPPORT_EMAIL,
+  DEFAULT_BRAND_SETTINGS,
+  getConfiguredSupportEmail,
+};
 
 function pick(map: Record<string, string>, key: string, fallback: string) {
   const v = map[key]?.trim();
@@ -23,8 +29,15 @@ const LEGACY_SUPPORT_EMAILS = new Set([
 ]);
 
 function resolveSupportEmail(raw: string | undefined) {
+  // Env wins (Vercel COMMERCE_SUPPORT_EMAIL / SUPPORT_EMAIL_TO)
+  const fromEnv =
+    process.env.COMMERCE_SUPPORT_EMAIL?.trim() ||
+    process.env.SUPPORT_EMAIL_TO?.trim() ||
+    process.env.SUPPORT_REPLY_TO?.trim();
+  if (fromEnv) return fromEnv;
+
   const v = raw?.trim() || "";
-  if (!v || LEGACY_SUPPORT_EMAILS.has(v.toLowerCase())) return DEFAULT_SUPPORT_EMAIL;
+  if (!v || LEGACY_SUPPORT_EMAILS.has(v.toLowerCase())) return getConfiguredSupportEmail();
   return v;
 }
 

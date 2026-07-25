@@ -225,8 +225,11 @@ export default function AccountPage() {
             <div className="aes-panel p-6">
               <h2 className="font-bold text-[var(--aes-ink)]">Contact us</h2>
               <p className="mt-2 text-sm text-[var(--aes-ink-muted)]">
-                Email{" "}
-                <a href={`mailto:${brand.supportEmail}`} className="text-[var(--aes-pink)]">
+                For orders, returns, and refunds, email{" "}
+                <a
+                  href={`mailto:${brand.supportEmail}?subject=${encodeURIComponent("Refund / order help")}`}
+                  className="text-[var(--aes-pink)]"
+                >
                   {brand.supportEmail}
                 </a>
                 {brand.supportPhone ? (
@@ -240,8 +243,8 @@ export default function AccountPage() {
                       {brand.supportPhone}
                     </a>
                   </>
-                ) : null}{" "}
-                for refund support.
+                ) : null}
+                .
               </p>
               <form
                 className="mt-4 space-y-4"
