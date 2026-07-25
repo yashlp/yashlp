@@ -1,15 +1,30 @@
 # Only Aesthetic — single default link
 
-**Use this link only** (oa. logo + 10 Shop now mood images + domain prep + Shiprocket):
+**Use this link only:**
+
+```text
+https://onlyaesthetic.in
+```
+
+Store path (same site):
+
+```text
+https://onlyaesthetic.in/aesthetics
+```
+
+This domain is Only Aesthetic only — CivicLens routes redirect to the store.
+
+Fallback while DNS/SSL settles:
 
 ```text
 https://onlyaesthetics-omega.vercel.app/aesthetics
 ```
 
-Hard-refresh (Ctrl/Cmd+Shift+R) if you still see an older version.
+Vercel project: **onlyaesthetic** (not `yashlp` / CivicLens)
 
-Merged go-live work: https://github.com/yashlp/yashlp/pull/33
+Required env:
 
-Ignore older preview URLs (they often require Vercel login).
-
-After DNS: `https://onlyaesthetic.in`
+```text
+PRODUCT_SURFACE=aesthetics
+NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
+```
