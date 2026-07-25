@@ -121,10 +121,15 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Public read APIs must work worldwide so the storefront shell never crashes
+  // Public read + auth APIs must work so login/OTP is not blocked by geo
   const indiaExemptApi =
     path === "/api/commerce/brand" ||
     path === "/api/commerce/auth/me" ||
+    path === "/api/commerce/auth/logout" ||
+    path === "/api/commerce/auth/login" ||
+    path === "/api/commerce/auth/register" ||
+    path.startsWith("/api/commerce/auth/phone/") ||
+    path.startsWith("/api/commerce/auth/email/") ||
     path.startsWith("/api/commerce/catalog") ||
     path.startsWith("/api/commerce/products") ||
     path.startsWith("/api/commerce/shipping/shiprocket-webhook");

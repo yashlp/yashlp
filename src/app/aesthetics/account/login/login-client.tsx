@@ -67,6 +67,8 @@ export default function AccountLoginClient() {
       if (!res.ok) throw new Error(data.error || "Could not send code");
       setOtpSent(true);
       if (data.devCode) setDevCode(data.devCode);
+      if (data.hint) setDevCode((prev) => prev || "123456");
+      if (data.demo && !data.devCode) setDevCode("123456");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send code");
     } finally {
