@@ -27,7 +27,7 @@ const SETTINGS = [
   { key: "free_delivery_enabled", value: "false", group: "shipping" },
   { key: "gst_rate", value: "18", group: "tax" },
   { key: "cod_enabled", value: "false", group: "payments" },
-  { key: "support_email", value: "yash.shah.lp2@gmail.com", group: "contact" },
+  { key: "support_email", value: "customercare@onlyaesthetic.in", group: "contact" },
   { key: "support_phone", value: "", group: "contact" },
   { key: "site_name", value: "Only Aesthetic", group: "general" },
   { key: "site_url", value: "https://onlyaesthetic.in", group: "general" },
@@ -49,8 +49,13 @@ const DEFAULT_MIGRATIONS: { key: string; from: string[]; to: string; group: stri
   },
   {
     key: "support_email",
-    from: ["hello@onlyaesthetics.in", "hello@onlyaesthetics.app", "hello@onlyaesthetic.in"],
-    to: "yash.shah.lp2@gmail.com",
+    from: [
+      "hello@onlyaesthetics.in",
+      "hello@onlyaesthetics.app",
+      "hello@onlyaesthetic.in",
+      "yash.shah.lp2@gmail.com",
+    ],
+    to: "customercare@onlyaesthetic.in",
     group: "contact",
   },
 ];

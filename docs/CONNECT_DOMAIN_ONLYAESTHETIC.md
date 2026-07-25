@@ -169,7 +169,7 @@ Without `PRODUCT_SURFACE=aesthetics`, the homepage stays CivicLens.
 2. Go to **Settings**
 3. Set:
    - **Website URL** = `https://onlyaesthetic.in`
-   - **Support email** = `yash.shah.lp2@gmail.com`
+   - **Support email** = `customercare@onlyaesthetic.in`
    - **Store display name** = `Only Aesthetic`
 4. Save
 

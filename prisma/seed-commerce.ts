@@ -743,7 +743,7 @@ async function main() {
     { key: "free_shipping_threshold", value: "999", group: "shipping" },
     { key: "gst_rate", value: "18", group: "tax" },
     { key: "cod_enabled", value: "true", group: "payments" },
-    { key: "support_email", value: "hello@onlyaesthetics.in", group: "contact" },
+    { key: "support_email", value: "customercare@onlyaesthetic.in", group: "contact" },
     { key: "support_whatsapp", value: "+919876543210", group: "contact" },
     { key: "site_name", value: "Only Aesthetics", group: "general" },
   ];

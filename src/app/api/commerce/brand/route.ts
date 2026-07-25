@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEFAULT_SUPPORT_EMAIL } from "@/lib/commerce/brand-defaults";
 import { getBrandSettings } from "@/lib/commerce/brand-settings";
 
 export async function GET() {
@@ -10,7 +11,7 @@ export async function GET() {
       brand: {
         siteName: "Only Aesthetic",
         companyName: "Only Aesthetic",
-        supportEmail: "yash.shah.lp2@gmail.com",
+        supportEmail: DEFAULT_SUPPORT_EMAIL,
         supportPhone: "",
         siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://onlyaesthetic.in",
       },

@@ -1,5 +1,5 @@
 export const DEFAULT_BRAND_NAME = "Only Aesthetic";
-export const DEFAULT_SUPPORT_EMAIL = "yash.shah.lp2@gmail.com";
+export const DEFAULT_SUPPORT_EMAIL = "customercare@onlyaesthetic.in";
 
 export type BrandSettings = {
   siteName: string;
