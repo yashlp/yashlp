@@ -155,11 +155,16 @@ Project **onlyaesthetic** → **Settings → Environment Variables** → Product
 ```text
 PRODUCT_SURFACE=aesthetics
 NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
+COMMERCE_SUPPORT_EMAIL=customercare@onlyaesthetic.in
+SUPPORT_EMAIL_TO=customercare@onlyaesthetic.in
+SUPPORT_REPLY_TO=customercare@onlyaesthetic.in
 ```
 
 Then **Deployments → Redeploy** (required).
 
 Without `PRODUCT_SURFACE=aesthetics`, the homepage stays CivicLens.
+
+`COMMERCE_SUPPORT_EMAIL` is shown on the homepage Contact section, footer, policies, and refunds.
 
 ---
 
