@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { ORDER_STATUSES } from "../constants";
-import { sendOrderConfirmationEmail } from "../commerce-email";
+import { sendOrderConfirmationEmail, sendDeliveryUpdateEmail } from "../commerce-email";
 
 function orderNumber() {
   return `AES-${Date.now().toString(36).toUpperCase()}`;
@@ -244,7 +244,7 @@ export const orderService = {
       }
     }
 
-    return prisma.commerceOrder.update({
+    const updated = await prisma.commerceOrder.update({
       where: { id: orderId },
       data: {
         status,
@@ -260,6 +260,33 @@ export const orderService = {
         returns: true,
       },
     });
+
+    // Shipped email is sent from shipping.service; OFD + delivered use the shared template here
+    if (status === "OUT_FOR_DELIVERY" || status === "DELIVERED") {
+      const notes = updated.customerNotes || "";
+      const email =
+        updated.customer?.email ||
+        notes.match(/^Email:\s*(.+)$/im)?.[1]?.trim() ||
+        notes.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0] ||
+        null;
+      const name =
+        updated.customer?.name ||
+        notes.match(/^Guest:\s*(.+)$/im)?.[1]?.trim() ||
+        notes.match(/Guest:\s*([^|\n]+)/)?.[1]?.trim() ||
+        "there";
+      if (email) {
+        void sendDeliveryUpdateEmail({
+          to: email,
+          name,
+          orderNumber: updated.orderNumber,
+          status,
+          courier: updated.courier || undefined,
+          trackingNumber: updated.trackingNumber || undefined,
+        }).catch((err) => console.error("[delivery-email]", updated.orderNumber, err));
+      }
+    }
+
+    return updated;
   },
 
   async getById(id: string) {
