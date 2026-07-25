@@ -129,8 +129,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+const EMPTY_CART: CartContextValue = {
+  cart: [],
+  wishlist: [],
+  prefs: createPreferenceState(),
+  addToCart: () => undefined,
+  removeFromCart: () => undefined,
+  updateQuantity: () => undefined,
+  clearCart: () => undefined,
+  toggleWishlist: () => false,
+  isWishlisted: () => false,
+  recordPass: () => undefined,
+  recordView: () => undefined,
+  cartTotal: 0,
+  cartCount: 0,
+};
+
 export function useCart() {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
-  return ctx;
+  // Soft fallback — never crash nav/footer if provider is missing
+  return ctx ?? EMPTY_CART;
 }

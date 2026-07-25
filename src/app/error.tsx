@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function Error({
   error,
@@ -14,21 +15,26 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-[#fffaf7] px-4 text-center">
-      <p className="text-4xl">⚠️</p>
-      <h1 className="mt-4 text-xl font-bold text-stone-900">Something went wrong</h1>
-      <p className="mt-2 max-w-md text-sm text-stone-500">
-        If the page stays blank, stop every dev server (Ctrl+C), then run{" "}
-        <code className="rounded bg-orange-100 px-1.5 py-0.5 text-orange-800">npm run dev</code>
-        {" "}and hard-refresh (Ctrl+Shift+R).
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-[#fff5e1] px-4 text-center">
+      <h1 className="mt-2 text-xl font-bold text-stone-900">Something went wrong</h1>
+      <p className="mt-3 max-w-md text-sm text-stone-600">
+        Please try again. If this keeps happening, open the store homepage or refresh the page.
       </p>
-      <button
-        type="button"
-        onClick={reset}
-        className="mt-6 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700"
-      >
-        Try again
-      </button>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={reset}
+          className="rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#152a45]"
+        >
+          Try again
+        </button>
+        <Link
+          href="/aesthetics"
+          className="rounded-xl border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+        >
+          Go to Only Aesthetic
+        </Link>
+      </div>
     </div>
   );
 }

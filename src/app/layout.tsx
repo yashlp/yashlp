@@ -8,7 +8,20 @@ import { isCommercePlatformPath } from "@/lib/commerce-platform-routes";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://yashlp.vercel.app";
+function siteLooksLikeOnlyAesthetic() {
+  if (process.env.PRODUCT_SURFACE === "aesthetics") return true;
+  if (isAestheticsOnlyDeploy()) return true;
+  const hints = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+  ];
+  return hints.some((h) => !!h && /onlyaesthetic/i.test(h));
+}
+
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (siteLooksLikeOnlyAesthetic() ? "https://onlyaesthetic.in" : "https://yashlp.vercel.app");
 
 const civicMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -67,16 +80,18 @@ const aestheticsMetadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+// Build-time default for the Only Aesthetic Vercel project — avoids CivicLens tab titles
+const buildDefaultMetadata = siteLooksLikeOnlyAesthetic() ? aestheticsMetadata : civicMetadata;
+
 export async function generateMetadata(): Promise<Metadata> {
-  // Store project / onlyaesthetic.in — never CivicLens titles or OG tags
-  if (isAestheticsOnlyDeploy()) {
+  if (siteLooksLikeOnlyAesthetic()) {
     return aestheticsMetadata;
   }
   const pathname = (await headers()).get("x-pathname") ?? "";
-  if (isCommercePlatformPath(pathname)) {
+  if (isCommercePlatformPath(pathname) || pathname.startsWith("/aesthetics")) {
     return aestheticsMetadata;
   }
-  return civicMetadata;
+  return buildDefaultMetadata;
 }
 
 export const viewport: Viewport = {

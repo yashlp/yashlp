@@ -53,6 +53,14 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
 
 export function useCustomer() {
   const ctx = useContext(CustomerContext);
-  if (!ctx) throw new Error("useCustomer must be used within CustomerProvider");
+  // Soft fallback — never crash the storefront shell if a tree omits the provider
+  if (!ctx) {
+    return {
+      customer: null,
+      loading: false,
+      refresh: async () => undefined,
+      logout: async () => undefined,
+    };
+  }
   return ctx;
 }
