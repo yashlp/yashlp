@@ -12,29 +12,28 @@
   --aes-royal-deep: #152a45;
   --aes-royal-light: #2f4f73;
 
-  /* Soft cream / beige from oa. logo system */
-  --aes-cream: #fdfcfb;
-  --aes-cream-deep: #ece4db;
-  --aes-sand: #f7f3ee;
-  --aes-sand-deep: #e8dfd4;
+  --aes-cream: #fff5e1;
+  --aes-cream-deep: #ffe4b8;
+  --aes-sand: #fff9ee;
+  --aes-sand-deep: #ffe8c8;
   --aes-white: #ffffff;
   --aes-ink: #121212;
   --aes-ink-muted: #4a4a4a;
   --aes-ink-soft: #767676;
 
-  /* Section washes — quiet luxury neutrals to blend with logo */
-  --aes-bg-base: #fdfcfb;
-  --aes-bg-blush: #f6ebe6;
-  --aes-bg-blush-deep: #ead5cc;
-  --aes-bg-lavender: #efeae6;
-  --aes-bg-lavender-deep: #e0d7cf;
-  --aes-bg-peach: #f3ebe3;
-  --aes-bg-peach-deep: #e5d8cc;
-  --aes-bg-sand: #f7f3ee;
-  --aes-bg-warm: #f3ebe3;
-  --aes-bg-testimonial: #f6ebe6;
-  --aes-bg-bundle: #efeae6;
-  --aes-bg-mint: #eef3ef;
+  /* Joy Rush–style section washes */
+  --aes-bg-base: #fff5e1;
+  --aes-bg-blush: #ffcfe0;
+  --aes-bg-blush-deep: #ff9ec4;
+  --aes-bg-lavender: #d4c4ff;
+  --aes-bg-lavender-deep: #b388ff;
+  --aes-bg-peach: #ffd9a8;
+  --aes-bg-peach-deep: #ffb347;
+  --aes-bg-sand: #fff3d6;
+  --aes-bg-warm: #ffe8b0;
+  --aes-bg-testimonial: #ffe8f2;
+  --aes-bg-bundle: #e4d4ff;
+  --aes-bg-mint: #c8f5e8;
   --aes-bg-dark: #121212;
 
   --aes-pink: #ff2a5f;
@@ -76,17 +75,19 @@
   --aes-charcoal-muted: var(--aes-ink-muted);
 
   --aes-gradient-hero:
-    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(236, 228, 219, 0.9), transparent 55%),
-    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(247, 243, 238, 0.95), transparent 50%),
-    linear-gradient(180deg, #fdfcfb 0%, #f7f3ee 48%, #fdfcfb 100%);
+    radial-gradient(ellipse 75% 60% at 90% 10%, rgba(255, 90, 140, 0.35), transparent 52%),
+    radial-gradient(ellipse 65% 55% at 8% 22%, rgba(155, 109, 255, 0.3), transparent 48%),
+    radial-gradient(ellipse 55% 50% at 50% 100%, rgba(255, 179, 71, 0.32), transparent 52%),
+    linear-gradient(180deg, #fff5e1 0%, #ffe8f2 42%, #fff5e1 100%);
   --aes-gradient-site:
-    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(236, 228, 219, 0.65), transparent 55%),
-    radial-gradient(ellipse 65% 50% at 0% 20%, rgba(243, 235, 227, 0.55), transparent 50%),
+    radial-gradient(ellipse 85% 65% at 100% 0%, rgba(255, 90, 140, 0.28), transparent 52%),
+    radial-gradient(ellipse 70% 55% at 0% 18%, rgba(155, 109, 255, 0.24), transparent 48%),
+    radial-gradient(ellipse 55% 45% at 50% 100%, rgba(255, 179, 71, 0.26), transparent 52%),
     var(--aes-bg-base);
   --aes-gradient-peach: linear-gradient(180deg, var(--aes-bg-peach) 0%, var(--aes-bg-warm) 100%);
   --aes-gradient-lavender: linear-gradient(180deg, var(--aes-bg-lavender) 0%, var(--aes-bg-blush) 100%);
-  --aes-gradient-bundle: linear-gradient(135deg, #efeae6 0%, #f6ebe6 45%, #f3ebe3 100%);
-  --aes-gradient-brand: linear-gradient(120deg, #ece4db, #e8dfd4, #f7f3ee);
+  --aes-gradient-bundle: linear-gradient(135deg, #e4d4ff 0%, #ffcfe0 45%, #ffd9a8 100%);
+  --aes-gradient-brand: linear-gradient(120deg, var(--aes-pink), var(--aes-orange), var(--aes-lavender));
 
   --aes-border: rgba(26, 26, 26, 0.1);
   --aes-border-light: rgba(255, 255, 255, 0.2);
