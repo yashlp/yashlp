@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isAestheticsOnlyRequest } from "@/lib/commerce/aesthetics-surface";
 import { isCommercePath, isIndiaRequest } from "@/lib/commerce/geo";
-
-/** Separate Vercel project for the store — set PRODUCT_SURFACE=aesthetics */
-function isAestheticsOnlyDeploy() {
-  return process.env.PRODUCT_SURFACE === "aesthetics";
-}
 
 const CIVIC_PATH_PREFIXES = [
   "/civic-admin",
@@ -49,15 +45,29 @@ function isCivicPath(path: string) {
   return CIVIC_PATH_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 }
 
+function isStaticAsset(path: string) {
+  return /\.(?:png|jpe?g|gif|webp|svg|ico|avif|woff2?|ttf|css|js|map|txt|xml|json)$/i.test(
+    path
+  );
+}
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  if (path.startsWith("/_next/") || path === "/favicon.ico") {
+  // Never geo-block or rewrite brand / mood image files
+  if (
+    path.startsWith("/_next/") ||
+    path === "/favicon.ico" ||
+    path.startsWith("/brand/") ||
+    path.startsWith("/oa/") ||
+    isStaticAsset(path)
+  ) {
     return withPathHeader(request);
   }
 
-  // Dedicated Only Aesthetic Vercel project: keep CivicLens off this hostname.
-  if (isAestheticsOnlyDeploy()) {
+  // Store project / onlyaesthetic* hosts: keep CivicLens off this hostname.
+  const host = request.headers.get("host");
+  if (isAestheticsOnlyRequest(host)) {
     if (path === "/") {
       const url = request.nextUrl.clone();
       url.pathname = "/aesthetics";
@@ -76,7 +86,12 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if (isCommercePath(path) && path !== "/aesthetics/india-only" && !isIndiaRequest(request)) {
+  if (
+    isCommercePath(path) &&
+    path !== "/aesthetics/india-only" &&
+    !path.startsWith("/api/commerce/shipping/shiprocket-webhook") &&
+    !isIndiaRequest(request)
+  ) {
     return indiaBlockedResponse(request);
   }
 

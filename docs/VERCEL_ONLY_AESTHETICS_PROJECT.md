@@ -1,7 +1,9 @@
-# Create a separate Vercel project for Only Aesthetics
+# Create a separate Vercel project for Only Aesthetic
 
 CivicLens stays on the existing project (**yashlp**).  
-Only Aesthetics gets a **new** project so env vars never mix.
+Only Aesthetic gets a **new** project so env vars never mix.
+
+Domain: **onlyaesthetic.in** — see [CONNECT_DOMAIN_ONLYAESTHETIC.md](./CONNECT_DOMAIN_ONLYAESTHETIC.md).
 
 Cursor cannot create the Vercel project (needs your Vercel login). Follow these clicks:
 
@@ -35,7 +37,7 @@ Minimum required:
 | `PRODUCT_SURFACE` | `aesthetics` — hides CivicLens routes on this deploy |
 | `DATABASE_URL` | Prefer a **separate Neon database** from CivicLens |
 | `SESSION_SECRET` | New secret — do not reuse CivicLens |
-| `NEXT_PUBLIC_SITE_URL` | `https://onlyaesthetics.in` |
+| `NEXT_PUBLIC_SITE_URL` | `https://onlyaesthetic.in` |
 | `COMMERCE_ADMIN_EMAIL` / `COMMERCE_ADMIN_PASSWORD` | Store admin |
 | `COMMERCE_ADMIN_REQUIRE_OTP` | `true` |
 | `ALLOW_DEMO_OTP` | `false` |
@@ -50,19 +52,19 @@ Then **Redeploy** Production.
 
 ## 3. Domain
 
-On project **only-aesthetics** (not yashlp):
+On project **onlyaesthetics** / **only-aesthetics** (not yashlp):
 
-1. **Settings → Domains** → add `onlyaesthetics.in` + `www.onlyaesthetics.in`
-2. At your registrar, point DNS to the records Vercel shows
-3. Remove WordPress DNS so the domain stops serving PHP
+1. **Settings → Domains** → add `onlyaesthetic.in` + `www.onlyaesthetic.in`
+2. At your registrar, point DNS to the records Vercel shows (full guide: [CONNECT_DOMAIN_ONLYAESTHETIC.md](./CONNECT_DOMAIN_ONLYAESTHETIC.md))
+3. Remove any old WordPress / parking DNS
 
 ---
 
 ## 4. Keep CivicLens separate
 
-| | CivicLens project (`yashlp`) | Only Aesthetics (`only-aesthetics`) |
+| | CivicLens project (`yashlp`) | Only Aesthetic (`onlyaesthetics`) |
 |--|--|--|
-| Domain | `yashlp.vercel.app` / CivicLens domain | `onlyaesthetics.in` |
+| Domain | `yashlp.vercel.app` / CivicLens domain | `onlyaesthetic.in` |
 | Env | CivicLens SMS, reports, Stripe, etc. | Commerce + Razorpay + Resend + Blob only |
 | `PRODUCT_SURFACE` | unset / anything else | `aesthetics` |
 | Admin | `/civic-admin` | `/admin` |
@@ -71,6 +73,6 @@ On project **only-aesthetics** (not yashlp):
 
 ## 5. After deploy
 
-- Storefront: `https://onlyaesthetics.in/aesthetics` (or `/` which redirects there)
-- Admin: `https://onlyaesthetics.in/admin/login`
-- Checklist: `https://onlyaesthetics.in/admin/launch`
+- Storefront: `https://onlyaesthetic.in/aesthetics` (or `/` which redirects there)
+- Admin: `https://onlyaesthetic.in/admin/login`
+- Checklist: `https://onlyaesthetic.in/admin/launch`

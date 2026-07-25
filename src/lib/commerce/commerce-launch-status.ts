@@ -1,3 +1,4 @@
+import { isAestheticsOnlyDeploy } from "@/lib/commerce/aesthetics-surface";
 import { isCommerceEmailConfigured } from "@/lib/commerce/commerce-email";
 import { isObjectStorageConfigured } from "@/lib/commerce/object-storage";
 import { isRazorpayConfigured } from "@/lib/payments/config";
@@ -41,7 +42,10 @@ function indiaOnlyOn() {
 
 function customDomainOk() {
   const url = getSiteUrl();
-  return url.includes("onlyaesthetics.in") && !url.includes("vercel.app");
+  return (
+    (url.includes("onlyaesthetic.in") || url.includes("onlyaesthetics.in")) &&
+    !url.includes("vercel.app")
+  );
 }
 
 export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
@@ -132,24 +136,25 @@ export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
     },
     {
       id: "domain",
-      label: "Custom domain onlyaesthetics.in",
+      label: "Custom domain onlyaesthetic.in",
       status: customDomainOk() ? "ok" : "warn",
       detail: customDomainOk()
         ? `NEXT_PUBLIC_SITE_URL=${getSiteUrl()}`
-        : "You: create Vercel project only-aesthetics, point onlyaesthetics.in DNS there (leave CivicLens/yashlp alone)",
+        : "You: add onlyaesthetic.in in Vercel Domains + set NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in",
       required: false,
       youMustDo: !customDomainOk(),
     },
     {
       id: "product_surface",
       label: "Aesthetics-only deploy mode",
-      status: process.env.PRODUCT_SURFACE === "aesthetics" ? "ok" : "warn",
-      detail:
-        process.env.PRODUCT_SURFACE === "aesthetics"
+      status: isAestheticsOnlyDeploy() ? "ok" : "warn",
+      detail: isAestheticsOnlyDeploy()
+        ? process.env.PRODUCT_SURFACE === "aesthetics"
           ? "PRODUCT_SURFACE=aesthetics — CivicLens routes blocked on this project"
-          : "You: on project only-aesthetics set PRODUCT_SURFACE=aesthetics (do not set this on CivicLens)",
+          : "Store hostname auto-detected (onlyaesthetic*) — CivicLens blocked"
+        : "You: on project onlyaesthetic set PRODUCT_SURFACE=aesthetics (or deploy on onlyaesthetic* URL)",
       required: true,
-      youMustDo: process.env.PRODUCT_SURFACE !== "aesthetics",
+      youMustDo: !isAestheticsOnlyDeploy(),
     },
     {
       id: "site_url",
@@ -157,7 +162,7 @@ export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
       status: process.env.NEXT_PUBLIC_SITE_URL ? "ok" : "warn",
       detail: process.env.NEXT_PUBLIC_SITE_URL
         ? `NEXT_PUBLIC_SITE_URL=${process.env.NEXT_PUBLIC_SITE_URL}`
-        : "You: set NEXT_PUBLIC_SITE_URL=https://onlyaesthetics.in on only-aesthetics",
+        : "You: set NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in",
       required: false,
       youMustDo: !process.env.NEXT_PUBLIC_SITE_URL,
     },

@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   description:
     "Because Details Matter. Curated design objects from independent makers — shipped across India.",
   applicationName: "Only Aesthetic",
+  icons: {
+    icon: [
+      { url: "/brand/only-aesthetic-favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/only-aesthetic-logo.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/brand/only-aesthetic-favicon-180.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     title: "Only Aesthetic — Because Details Matter",
     description:
@@ -17,6 +24,7 @@ export const metadata: Metadata = {
     siteName: "Only Aesthetic",
     type: "website",
     locale: "en_IN",
+    images: [{ url: "/brand/only-aesthetic-logo.png", width: 1024, height: 1024, alt: "Only Aesthetic" }],
   },
 };
 
@@ -25,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#fff5e1",
+  themeColor: "#fdfcfb",
 };
 
 export default function AestheticsLayout({ children }: { children: React.ReactNode }) {

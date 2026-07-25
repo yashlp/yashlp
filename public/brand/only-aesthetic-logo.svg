@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" role="img" aria-labelledby="oaTitle">
+  <title id="oaTitle">Only Aesthetic</title>
+  <!-- Transparent background -->
+  <text
+    x="200"
+    y="150"
+    text-anchor="middle"
+    font-family="Georgia, 'Brush Script MT', 'Segoe Script', cursive"
+    font-size="96"
+    font-style="italic"
+    fill="#121212"
+  >oa.</text>
+  <text
+    x="200"
+    y="230"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+    font-size="22"
+    font-weight="500"
+    letter-spacing="0.42em"
+    fill="#121212"
+  >ONLY AESTHETIC</text>
+  <line x1="155" y1="258" x2="245" y2="258" stroke="#121212" stroke-width="1.5" />
+  <text
+    x="200"
+    y="300"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+    font-size="13"
+    font-weight="500"
+    letter-spacing="0.38em"
+    fill="#121212"
+  >CURATED OBJECTS</text>
+  <text
+    x="200"
+    y="328"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+    font-size="13"
+    font-weight="500"
+    letter-spacing="0.32em"
+    fill="#121212"
+  >INTENTIONAL LIVING</text>
+</svg>

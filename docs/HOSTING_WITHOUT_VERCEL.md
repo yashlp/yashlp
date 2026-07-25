@@ -1,6 +1,8 @@
-# Host Only Aesthetics WITHOUT Vercel
+# Host Only Aesthetic WITHOUT Vercel
 
 You do **not** need Vercel credits. Use any of these (pick one).
+
+Domain: **onlyaesthetic.in** — also see [CONNECT_DOMAIN_ONLYAESTHETIC.md](./CONNECT_DOMAIN_ONLYAESTHETIC.md) if using Vercel.
 
 | Rank | Platform | Cost to start | Best for |
 |------|----------|---------------|----------|
@@ -32,7 +34,7 @@ Or: **New → Web Service** → repo → **Docker** → root Dockerfile.
 2. Select `yashlp/yashlp`
 3. Railway uses `railway.toml` + `Dockerfile`
 4. Variables → paste aesthetics env (below)
-5. Settings → generate domain, then attach `onlyaesthetics.in`
+5. Settings → generate domain, then attach `onlyaesthetic.in`
 
 ---
 
@@ -44,7 +46,7 @@ Copy from [`.env.only-aesthetics.example`](../.env.only-aesthetics.example), plu
 PRODUCT_SURFACE=aesthetics
 DATABASE_URL=postgresql://...neon...
 SESSION_SECRET=...
-NEXT_PUBLIC_SITE_URL=https://onlyaesthetics.in
+NEXT_PUBLIC_SITE_URL=https://onlyaesthetic.in
 COMMERCE_ADMIN_EMAIL=...
 COMMERCE_ADMIN_PASSWORD=...
 COMMERCE_ADMIN_REQUIRE_OTP=true
@@ -53,7 +55,7 @@ INDIA_ONLY_STOREFRONT=true
 RAZORPAY_KEY_ID=rzp_live_...
 RAZORPAY_KEY_SECRET=...
 RESEND_API_KEY=re_...
-COMMERCE_FROM_EMAIL=Only Aesthetics <hello@onlyaesthetics.in>
+COMMERCE_FROM_EMAIL=Only Aesthetic <onboarding@resend.dev>
 
 # Cloudflare R2 (free) — replace Vercel Blob
 S3_BUCKET=only-aesthetics
@@ -74,7 +76,7 @@ S3_REGION=auto
 
 ## Domain
 
-Point `onlyaesthetics.in` DNS to Render/Railway/Fly (CNAME they show).  
+Point `onlyaesthetic.in` DNS to Render/Railway/Fly (CNAME they show).  
 Leave the old CivicLens Vercel project alone.
 
 ---
