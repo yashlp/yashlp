@@ -20,8 +20,8 @@ export function OnlyAestheticMark({
 }: OnlyAestheticMarkProps) {
   const src =
     tone === "light"
-      ? "/brand/only-aesthetic-logo-light.png"
-      : "/brand/only-aesthetic-logo.png";
+      ? "/brand/only-aesthetic-logo-light.png?v=oa2"
+      : "/brand/only-aesthetic-logo.png?v=oa2";
 
   return (
     // eslint-disable-next-line @next/next/no-img-element

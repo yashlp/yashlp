@@ -72,7 +72,7 @@ export function ShopMoodGallery() {
             <div className="aspect-square overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={item.src}
+                src={`${item.src}?v=oa2`}
                 alt={item.alt}
                 width={900}
                 height={900}
