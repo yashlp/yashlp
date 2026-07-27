@@ -4,18 +4,25 @@ import { useEffect, useId, useState } from "react";
 import { X } from "lucide-react";
 
 const NOTE_TITLE = "A note from the beginning";
-const NOTE_LINES = ["We're just getting started.", "Every piece is currently available by pre-order."];
+const NOTE_LINES = [
+  "We're just getting started.",
+  "If you love what you see, please share Only Aesthetics and help us grow.",
+];
+
+const SHARE_URL = "https://onlyaesthetic.in";
+const SHARE_MESSAGE =
+  "✨ We're just getting started. If you love what you see, please share Only Aesthetics and help us grow. 🤍";
 
 const DETAIL_BODY = [
+  SHARE_MESSAGE,
   "Only Aesthetic is still early — a small shop built around mood, makers, and objects worth living with.",
-  "Right now, every piece you see can be reserved by pre-order. That lets us make (or source) with care instead of rushing stock onto shelves that don't deserve it.",
-  "When you pre-order, you're holding a place in the next batch. We'll keep you updated as your order moves from studio to doorstep.",
   "Thank you for being here at the start. The collection will grow — slowly, and on purpose.",
 ];
 
 export function HangingNoteBoard() {
   const titleId = useId();
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -30,6 +37,31 @@ export function HangingNoteBoard() {
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  async function handleShare() {
+    const shareData = {
+      title: "Only Aesthetic",
+      text: SHARE_MESSAGE,
+      url: SHARE_URL,
+    };
+
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch {
+      // User cancelled or share failed — fall through to clipboard.
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${SHARE_MESSAGE}\n${SHARE_URL}`);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.open(SHARE_URL, "_blank", "noopener,noreferrer");
+    }
+  }
 
   return (
     <>
@@ -84,6 +116,23 @@ export function HangingNoteBoard() {
               {DETAIL_BODY.map((para) => (
                 <p key={para.slice(0, 24)}>{para}</p>
               ))}
+            </div>
+            <div className="aes-hanging-note__share">
+              <a
+                href={SHARE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="aes-hanging-note__share-link"
+              >
+                {SHARE_URL.replace("https://", "")}
+              </a>
+              <button
+                type="button"
+                className="aes-hanging-note__share-btn aes-touch"
+                onClick={handleShare}
+              >
+                {copied ? "Link copied" : "Share Only Aesthetics"}
+              </button>
             </div>
             <p className="aes-hanging-note__dialog-signoff">— Only Aesthetic</p>
           </div>
