@@ -10,15 +10,17 @@ const mediaUrlSchema = z
 
 export const productCreateSchema = z.object({
   name: z.string().min(1).max(200),
-  slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/),
-  sellerId: z.string().min(1),
-  brandId: z.string().min(1),
-  categoryId: z.string().min(1),
+  slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, "Slug can only use lowercase letters, numbers, and hyphens"),
+  /** Optional — server assigns Only Aesthetic platform seller when omitted */
+  sellerId: z.string().min(1).optional(),
+  /** Optional — server assigns Only Aesthetic platform brand when omitted */
+  brandId: z.string().min(1).optional(),
+  categoryId: z.string().min(1, "Choose a category"),
   sku: z.string().optional(),
   barcode: z.string().optional(),
   shortDescription: z.string().max(500).optional(),
-  description: z.string().min(1),
-  price: z.number().positive(),
+  description: z.string().min(1, "Description is required"),
+  price: z.number().positive("Selling price must be greater than 0"),
   compareAtPrice: z.number().positive().optional(),
   mrp: z.number().positive().optional(),
   taxRate: z.number().min(0).max(100).optional(),
@@ -46,7 +48,7 @@ export const productCreateSchema = z.object({
   isNewArrival: z.boolean().optional(),
   isRecommended: z.boolean().optional(),
   /** 2–4 product photos required */
-  images: z.array(mediaUrlSchema).min(2).max(4),
+  images: z.array(mediaUrlSchema).min(2, "Upload at least 2 product photos").max(4, "Maximum 4 product photos"),
   /** Optional single product video */
   videos: z.array(mediaUrlSchema).max(1).optional(),
   // D2C inventory

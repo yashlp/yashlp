@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { mapProduct } from "../mappers";
 import { toJsonArray } from "../mappers";
+import { ensurePlatformSellerBrand } from "../ensure-platform-seller";
 import type { z } from "zod";
 import type { productCreateSchema, productUpdateSchema } from "../validators";
 
@@ -86,7 +87,13 @@ export const productService = {
   },
 
   async create(data: ProductCreateInput) {
-    const { images, videos, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
+    const { images, videos, materials, tags, colors, specifications, purchaseDate, sellerId, brandId, ...rest } =
+      data;
+    const platform =
+      sellerId && brandId ? { sellerId, brandId } : await ensurePlatformSellerBrand();
+    const resolvedSellerId = sellerId || platform.sellerId;
+    const resolvedBrandId = brandId || platform.brandId;
+
     const mediaCreate = [
       ...images.map((url, i) => ({ type: "IMAGE" as const, url, sortOrder: i })),
       ...(videos || []).map((url, i) => ({
@@ -98,6 +105,8 @@ export const productService = {
     const product = await prisma.commerceProduct.create({
       data: {
         ...rest,
+        sellerId: resolvedSellerId,
+        brandId: resolvedBrandId,
         purchaseDate: purchaseDate ? new Date(purchaseDate) : undefined,
         materials: toJsonArray(materials),
         tags: toJsonArray(tags),

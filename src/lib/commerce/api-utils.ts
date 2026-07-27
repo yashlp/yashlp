@@ -11,7 +11,16 @@ export function commerceApiError(error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
   if (error instanceof ZodError) {
-    return NextResponse.json({ error: "Validation failed", details: error.flatten() }, { status: 400 });
+    const flat = error.flatten();
+    const firstField = Object.entries(flat.fieldErrors).find(([, msgs]) => msgs?.length)?.[1]?.[0];
+    const firstForm = flat.formErrors[0];
+    return NextResponse.json(
+      {
+        error: firstField || firstForm || "Validation failed",
+        details: flat,
+      },
+      { status: 400 }
+    );
   }
   if (error instanceof Error) {
     const msg = error.message;

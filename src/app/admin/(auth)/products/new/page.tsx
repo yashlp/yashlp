@@ -10,6 +10,15 @@ import {
   type ProductMediaValue,
 } from "@/components/aesthetics/admin/product-media-uploader";
 
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 180);
+}
+
 export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
@@ -66,39 +75,62 @@ export default function NewProductPage() {
       setError("Maximum 4 product photos.");
       return;
     }
+    if (!form.categoryId) {
+      setError("Choose a category.");
+      return;
+    }
+    if (!form.price || Number(form.price) <= 0) {
+      setError("Enter a selling price greater than 0.");
+      return;
+    }
+
+    const slug = slugify(form.slug || form.name);
+    if (!slug) {
+      setError("Product name must include letters or numbers for the URL slug.");
+      return;
+    }
+
     setSaving(true);
     try {
+      const payload: Record<string, unknown> = {
+        name: form.name.trim(),
+        slug,
+        sku: form.sku || undefined,
+        barcode: form.barcode || undefined,
+        description: form.description.trim(),
+        price: Number(form.price),
+        mrp: form.mrp ? Number(form.mrp) : undefined,
+        purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
+        stock: Number(form.stock) || 0,
+        minStock: Number(form.minStock) || 0,
+        warehouseLocation: form.warehouseLocation || undefined,
+        supplierId: form.supplierId || undefined,
+        categoryId: form.categoryId,
+        images: media.images,
+        videos: media.videos,
+        tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+        mood: form.mood || undefined,
+        status: "PUBLISHED",
+        approvalStatus: "APPROVED",
+        purchaseDate: new Date().toISOString(),
+      };
+      if (form.sellerId) payload.sellerId = form.sellerId;
+      if (form.brandId) payload.brandId = form.brandId;
+
       const res = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
-          sku: form.sku || undefined,
-          barcode: form.barcode || undefined,
-          description: form.description,
-          price: Number(form.price),
-          mrp: form.mrp ? Number(form.mrp) : undefined,
-          purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
-          stock: Number(form.stock),
-          minStock: Number(form.minStock),
-          warehouseLocation: form.warehouseLocation || undefined,
-          supplierId: form.supplierId || undefined,
-          categoryId: form.categoryId,
-          sellerId: form.sellerId,
-          brandId: form.brandId,
-          images: media.images,
-          videos: media.videos,
-          tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-          mood: form.mood || undefined,
-          status: "DRAFT",
-          approvalStatus: "PENDING",
-          purchaseDate: new Date().toISOString(),
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Failed to create product");
+        const fieldErrors = data.details?.fieldErrors as Record<string, string[]> | undefined;
+        const firstDetail = fieldErrors
+          ? Object.entries(fieldErrors)
+              .map(([field, msgs]) => `${field}: ${msgs?.[0] || "invalid"}`)
+              .join(" · ")
+          : "";
+        setError(data.error || firstDetail || "Failed to create product");
         return;
       }
       router.push("/admin/inventory");
