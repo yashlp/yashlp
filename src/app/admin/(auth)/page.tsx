@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/aesthetics/ui/card";
-import { ADMIN_QUICK_START } from "@/lib/commerce/admin-nav";
+import { ADMIN_QUICK_ACTIONS } from "@/lib/commerce/admin-nav";
 
 type DashboardStats = {
   sales: { today: number; week: number; month: number; year: number };
@@ -25,6 +25,17 @@ type DashboardStats = {
   topCities: { city: string; orders: number; revenue: number }[];
   chart: { date: string; revenue: number; orders: number }[];
   recentOrders: { id: string; orderNumber: string; total: number; status: string }[];
+  taskWidgets: {
+    newOrdersToday: number;
+    ordersAwaitingPacking: number;
+    ordersAwaitingPickup: number;
+    todayProfit: number;
+    bestSellerToday: { id: string; name: string; slug: string; sold: number } | null;
+    lowStockTop5: { id: string; name: string; stock: number; minStock: number; slug: string }[];
+    failedPayments: number;
+    newReviewsAwaitingApproval: number;
+    revenueVsYesterdayPct: number;
+  };
 };
 
 function formatInr(n: number) {
@@ -56,15 +67,15 @@ export default function AdminDashboardPage() {
       <p className="mt-1 text-[var(--aes-charcoal-muted)]">Only Aesthetic — direct-to-consumer operations</p>
 
       <Card hover={false} className="mt-8 border-[var(--aes-royal)]/20 bg-[var(--aes-cream)]">
-        <h2 className="font-semibold text-[var(--aes-charcoal)]">Quick start after login</h2>
+        <h2 className="font-semibold text-[var(--aes-charcoal)]">Quick actions</h2>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-          {ADMIN_QUICK_START.map((item) => (
+          {ADMIN_QUICK_ACTIONS.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
                 className="block rounded-xl border border-[var(--aes-border)] bg-white px-4 py-3 transition hover:border-[var(--aes-royal)] hover:shadow-sm"
               >
-                <span className="font-medium text-[var(--aes-royal)]">{item.label}</span>
+                <span className="font-medium text-[var(--aes-royal)]">➕ {item.label}</span>
                 <span className="mt-0.5 block text-sm text-[var(--aes-charcoal-muted)]">— {item.hint}</span>
               </Link>
             </li>
@@ -74,10 +85,10 @@ export default function AdminDashboardPage() {
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Today's revenue", value: formatInr(stats.sales.today) },
-          { label: "Today's orders", value: String(stats.orders.today) },
-          { label: "Pending orders", value: String(stats.orders.pending) },
-          { label: "Orders to pack", value: String(stats.orders.toPack) },
+          { label: "🛒 New Orders (Today)", value: String(stats.taskWidgets.newOrdersToday) },
+          { label: "📦 Orders Awaiting Packing", value: String(stats.taskWidgets.ordersAwaitingPacking) },
+          { label: "🚚 Orders Awaiting Pickup", value: String(stats.taskWidgets.ordersAwaitingPickup) },
+          { label: "💰 Today's Profit", value: formatInr(stats.taskWidgets.todayProfit) },
         ].map(({ label, value }) => (
           <Card key={label} hover={false}>
             <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">{label}</p>
@@ -87,14 +98,45 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Orders shipped</p><p className="text-2xl font-semibold">{stats.orders.shipped}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Packed</p><p className="text-2xl font-semibold">{stats.orders.packed}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Returns</p><p className="text-2xl font-semibold">{stats.returns.pending}</p></Card>
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Refund requests</p><p className="text-2xl font-semibold">{stats.refunds.pending}</p></Card>
+        <Card hover={false}>
+          <p className="text-sm text-[var(--aes-dusty)]">🔥 Best Seller Today</p>
+          <p className="mt-1 text-base font-semibold">
+            {stats.taskWidgets.bestSellerToday?.name || "No sales yet"}
+          </p>
+          {stats.taskWidgets.bestSellerToday && (
+            <p className="text-xs text-[var(--aes-charcoal-muted)]">{stats.taskWidgets.bestSellerToday.sold} sold</p>
+          )}
+        </Card>
+        <Card hover={false}>
+          <p className="text-sm text-[var(--aes-dusty)]">❌ Failed Payments</p>
+          <p className="text-2xl font-semibold">{stats.taskWidgets.failedPayments}</p>
+        </Card>
+        <Card hover={false}>
+          <p className="text-sm text-[var(--aes-dusty)]">⭐ Reviews Awaiting Approval</p>
+          <p className="text-2xl font-semibold">{stats.taskWidgets.newReviewsAwaitingApproval}</p>
+        </Card>
+        <Card hover={false}>
+          <p className="text-sm text-[var(--aes-dusty)]">📈 Revenue vs Yesterday</p>
+          <p className="text-2xl font-semibold">{stats.taskWidgets.revenueVsYesterdayPct.toFixed(1)}%</p>
+        </Card>
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card hover={false}><p className="text-sm text-[var(--aes-dusty)]">Low stock alerts</p><p className="text-2xl font-semibold text-red-600">{stats.inventory.lowStock}</p></Card>
+        <Card hover={false}>
+          <p className="text-sm text-[var(--aes-dusty)]">⚠️ Low Stock (Top 5)</p>
+          <ul className="mt-2 space-y-1 text-sm">
+            {stats.taskWidgets.lowStockTop5.length === 0 ? (
+              <li className="text-[var(--aes-charcoal-muted)]">No low stock alerts</li>
+            ) : (
+              stats.taskWidgets.lowStockTop5.map((p) => (
+                <li key={p.id} className="flex justify-between">
+                  <span className="truncate">{p.name}</span>
+                  <span className="text-red-600">{p.stock}</span>
+                </li>
+              ))
+            )}
+          </ul>
+        </Card>
         <Card hover={false}>
           <p className="aes-mono text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Inventory value (at cost)</p>
           <p className="mt-2 text-2xl font-semibold">{formatInr(stats.inventory.value)}</p>

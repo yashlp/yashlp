@@ -96,6 +96,7 @@ export const shippingService = {
       include: {
         customer: { select: { name: true, email: true, phone: true } },
         items: { include: { product: { select: { name: true, sku: true } } } },
+        payments: { select: { provider: true, status: true } },
       },
     });
 
@@ -114,7 +115,8 @@ export const shippingService = {
         phone: order.customer?.phone || undefined,
       });
 
-      const paymentMethod = "Prepaid" as const;
+      const paymentProvider = order.payments.find((p) => p.status === "SUCCESS")?.provider;
+      const paymentMethod = paymentProvider === "cod" ? ("COD" as const) : ("Prepaid" as const);
 
       const result = await createShiprocketShipment({
         orderNumber: order.orderNumber,

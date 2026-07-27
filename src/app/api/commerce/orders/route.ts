@@ -7,6 +7,7 @@ import {
   computeTax,
   getShippingConfig,
 } from "@/lib/commerce/shipping-config";
+import { prisma } from "@/lib/db";
 
 function isDemoPaymentAllowed() {
   return process.env.ALLOW_DEMO_PAYMENT === "true" && process.env.NODE_ENV !== "production";
@@ -21,6 +22,13 @@ export async function POST(req: NextRequest) {
         { error: "Online payment is required. Please complete payment via Razorpay." },
         { status: 400 }
       );
+    }
+    if (body.paymentMethod === "cod") {
+      const codSetting = await prisma.commerceSetting.findUnique({ where: { key: "cod_enabled" } });
+      const codEnabled = codSetting ? codSetting.value.toLowerCase() === "true" : true;
+      if (!codEnabled) {
+        return NextResponse.json({ error: "Cash on Delivery is currently unavailable." }, { status: 400 });
+      }
     }
 
     if (body.country.toUpperCase() !== "IN") {

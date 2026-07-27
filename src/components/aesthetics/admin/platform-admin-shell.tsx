@@ -12,14 +12,38 @@ type Props = {
   children: React.ReactNode;
 };
 
+type AdminSearchResult = {
+  id: string;
+  label: string;
+  href: string;
+  type: string;
+};
+
 export function PlatformAdminShell({ admin, children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<AdminSearchResult[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const t = window.setTimeout(() => {
+      fetch(`/api/admin/search?q=${encodeURIComponent(searchQuery.trim())}`, { credentials: "include" })
+        .then((r) => r.json())
+        .then((d) => setSearchResults(d.results || []))
+        .catch(() => setSearchResults([]));
+    }, 180);
+    return () => window.clearTimeout(t);
+  }, [searchQuery]);
 
   useEffect(() => {
     document.body.classList.add("only-aesthetics-admin");
@@ -134,6 +158,30 @@ export function PlatformAdminShell({ admin, children }: Props) {
         )}
 
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pb-24 md:p-8 md:pb-8 lg:p-10">
+          <div className="relative mb-6">
+            <input
+              value={searchQuery}
+              onFocus={() => setSearchOpen(true)}
+              onBlur={() => setTimeout(() => setSearchOpen(false), 120)}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="aes-input w-full"
+              placeholder="Search orders, products, customers, suppliers"
+            />
+            {searchOpen && searchResults.length > 0 && (
+              <div className="absolute z-20 mt-2 w-full rounded-xl border border-[var(--aes-border)] bg-white shadow-xl">
+                {searchResults.map((result) => (
+                  <Link
+                    key={result.id}
+                    href={result.href}
+                    className="flex items-center justify-between border-b border-[var(--aes-border)] px-3 py-2 text-sm last:border-0 hover:bg-[var(--aes-ivory)]"
+                  >
+                    <span>{result.label}</span>
+                    <span className="aes-mono text-[10px] uppercase text-[var(--aes-dusty)]">{result.type}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
           {children}
         </main>
       </div>

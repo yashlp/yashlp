@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { commercePaymentService } from "@/lib/commerce/services/commerce-payment.service";
 import { isRazorpayConfigured } from "@/lib/payments/config";
+import { prisma } from "@/lib/db";
 
 function isDemoPaymentAllowed() {
   return process.env.ALLOW_DEMO_PAYMENT === "true" && process.env.NODE_ENV !== "production";
 }
 
 export async function GET() {
+  const codSetting = await prisma.commerceSetting.findUnique({ where: { key: "cod_enabled" } });
+  const codEnabled = codSetting ? codSetting.value.toLowerCase() === "true" : true;
   return NextResponse.json({
     razorpay: isRazorpayConfigured(),
     demo: isDemoPaymentAllowed(),
-    cod: false,
+    cod: codEnabled,
     currency: "INR",
   });
 }

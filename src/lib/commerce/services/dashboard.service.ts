@@ -22,8 +22,11 @@ export const dashboardService = {
     const monthStart = startOfMonth(now);
     const yearStart = startOfYear(now);
 
+    const yesterdayStart = subDays(todayStart, 1);
+
     const [
       today,
+      yesterday,
       week,
       month,
       year,
@@ -39,10 +42,18 @@ export const dashboardService = {
       activeSuppliers,
       products,
       topProducts,
+      topProductsToday,
       recentOrders,
       topCategories,
+      failedPayments,
+      pendingReviews,
+      todayOrdersWithItems,
     ] = await Promise.all([
       sumOrders({ createdAt: { gte: todayStart }, status: { not: "CANCELLED" } }),
+      sumOrders({
+        createdAt: { gte: yesterdayStart, lt: todayStart },
+        status: { not: "CANCELLED" },
+      }),
       sumOrders({ createdAt: { gte: weekStart }, status: { not: "CANCELLED" } }),
       sumOrders({ createdAt: { gte: monthStart }, status: { not: "CANCELLED" } }),
       sumOrders({ createdAt: { gte: yearStart }, status: { not: "CANCELLED" } }),
@@ -66,6 +77,18 @@ export const dashboardService = {
         orderBy: { _sum: { quantity: "desc" } },
         take: 5,
       }),
+      prisma.commerceOrderItem.groupBy({
+        by: ["productId"],
+        where: {
+          order: {
+            createdAt: { gte: todayStart },
+            status: { not: "CANCELLED" },
+          },
+        },
+        _sum: { quantity: true },
+        orderBy: { _sum: { quantity: "desc" } },
+        take: 1,
+      }),
       prisma.commerceOrder.findMany({
         take: 10,
         orderBy: { createdAt: "desc" },
@@ -87,6 +110,25 @@ export const dashboardService = {
         orderBy: { _sum: { total: "desc" } },
         take: 20,
       }),
+      prisma.commercePayment.count({
+        where: { status: "FAILED", createdAt: { gte: todayStart } },
+      }),
+      prisma.commerceReview.count({
+        where: { status: "PENDING" },
+      }),
+      prisma.commerceOrder.findMany({
+        where: {
+          createdAt: { gte: todayStart },
+          status: { not: "CANCELLED" },
+        },
+        include: {
+          items: {
+            include: {
+              product: { select: { purchaseCost: true } },
+            },
+          },
+        },
+      }),
     ]);
 
     const published = products.filter((p) => p.status === "PUBLISHED");
@@ -101,6 +143,13 @@ export const dashboardService = {
       where: { id: { in: topProductIds } },
       select: { id: true, name: true, slug: true },
     });
+    const bestSellerTodayId = topProductsToday[0]?.productId;
+    const bestSellerToday = bestSellerTodayId
+      ? await prisma.commerceProduct.findUnique({
+          where: { id: bestSellerTodayId },
+          select: { id: true, name: true, slug: true },
+        })
+      : null;
 
     const categoryProducts = await prisma.commerceProduct.findMany({
       where: { id: { in: topCategories.map((c) => c.productId) } },
@@ -152,9 +201,34 @@ export const dashboardService = {
       .sort((a, b) => b.orders - a.orders || b.revenue - a.revenue)
       .slice(0, 5);
 
+    const todayRevenue = today._sum.total || 0;
+    const yesterdayRevenue = yesterday._sum.total || 0;
+    const revenueVsYesterdayPct =
+      yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 : 0;
+
+    const todayCogs = todayOrdersWithItems.reduce(
+      (sum, order) =>
+        sum +
+        order.items.reduce(
+          (itemSum, item) => itemSum + (item.product.purchaseCost || 0) * item.quantity,
+          0
+        ),
+      0
+    );
+    const todayProfit = todayRevenue - todayCogs;
+    const lowStockTop5 = (
+      await prisma.commerceProduct.findMany({
+        where: { status: "PUBLISHED" },
+        select: { id: true, name: true, stock: true, minStock: true, slug: true },
+      })
+    )
+      .filter((p) => isLowStock(p.stock, p.minStock))
+      .sort((a, b) => a.stock - b.stock)
+      .slice(0, 5);
+
     return {
       sales: {
-        today: today._sum.total || 0,
+        today: todayRevenue,
         week: week._sum.total || 0,
         month: month._sum.total || 0,
         year: year._sum.total || 0,
@@ -180,6 +254,22 @@ export const dashboardService = {
       })),
       bestCategories,
       topCities,
+      taskWidgets: {
+        newOrdersToday: today._count,
+        ordersAwaitingPacking: ordersToPack,
+        ordersAwaitingPickup: ordersPacked,
+        todayProfit,
+        bestSellerToday: bestSellerToday
+          ? {
+              ...bestSellerToday,
+              sold: topProductsToday[0]?._sum.quantity || 0,
+            }
+          : null,
+        lowStockTop5,
+        failedPayments,
+        newReviewsAwaitingApproval: pendingReviews,
+        revenueVsYesterdayPct,
+      },
       chart: last7Days,
       recentOrders,
     };

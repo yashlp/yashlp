@@ -6,10 +6,13 @@ import { Card } from "@/components/aesthetics/ui/card";
 import { Input } from "@/components/aesthetics/ui/input";
 
 const PAGE_KEYS = [
-  { key: "homepage_tagline", label: "Homepage tagline", type: "TEXT" },
+  { key: "homepage_banner", label: "Homepage banners", type: "TEXT" },
+  { key: "hero_carousel", label: "Hero carousel", type: "TEXT" },
+  { key: "announcements", label: "Announcements", type: "TEXT" },
+  { key: "blog_index", label: "Blogs", type: "PAGE" },
   { key: "about", label: "About Us", type: "PAGE" },
   { key: "contact", label: "Contact", type: "PAGE" },
-  { key: "faqs", label: "FAQs", type: "PAGE" },
+  { key: "faqs", label: "FAQ", type: "PAGE" },
   { key: "privacy", label: "Privacy Policy", type: "PAGE" },
   { key: "terms", label: "Terms & Conditions", type: "PAGE" },
   { key: "refund_policy", label: "Refund Policy", type: "PAGE" },

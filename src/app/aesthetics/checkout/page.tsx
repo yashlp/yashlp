@@ -42,6 +42,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [demoAllowed, setDemoAllowed] = useState(false);
+  const [codEnabled, setCodEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod" | "demo">("razorpay");
   const [rates, setRates] = useState<ShippingRates>({
     flatRate: 49,
     freeThreshold: 999,
@@ -66,12 +68,16 @@ export default function CheckoutPage() {
       .then((d) => {
         const enabled = Boolean(d.razorpay);
         const demo = Boolean(d.demo);
+        const cod = Boolean(d.cod);
         setRazorpayEnabled(enabled);
         setDemoAllowed(demo);
+        setCodEnabled(cod);
+        setPaymentMethod(enabled ? "razorpay" : cod ? "cod" : demo ? "demo" : "razorpay");
       })
       .catch(() => {
         setRazorpayEnabled(false);
         setDemoAllowed(false);
+        setCodEnabled(false);
       });
 
     fetch("/api/commerce/shipping")
@@ -116,10 +122,10 @@ export default function CheckoutPage() {
   const tax = Math.round(cartTotal * (rates.gstRatePercent / 100) * 100) / 100;
   const total = cartTotal + shipping + tax;
 
-  const canPay = razorpayEnabled || demoAllowed;
+  const canPay = razorpayEnabled || demoAllowed || codEnabled;
 
   async function placeOrder() {
-    const method = razorpayEnabled ? "razorpay" : "demo";
+    const method = paymentMethod;
     const res = await fetch("/api/commerce/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -196,7 +202,7 @@ export default function CheckoutPage() {
 
       const order = await placeOrder();
 
-      if (razorpayEnabled) {
+      if (paymentMethod === "razorpay") {
         await openRazorpay(order);
       }
 
@@ -297,21 +303,47 @@ export default function CheckoutPage() {
                   </p>
                   <p className="mt-2">{form.email} · {form.phone}</p>
                 </div>
-                <div className="space-y-2 border-t border-[var(--aes-border)] pt-4">
-                  <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment — online only (India)</p>
-                  {razorpayEnabled ? (
-                    <p className="text-sm text-[var(--aes-ink-muted)]">UPI · Cards · Net Banking · Wallets (Razorpay)</p>
-                  ) : demoAllowed ? (
-                    <p className="text-sm text-amber-800">
-                      Razorpay is not configured — demo checkout is enabled for this environment only.
-                    </p>
-                  ) : (
-                    <p className="text-sm text-amber-800">Online payment is not available on this environment.</p>
+                <div className="space-y-3 border-t border-[var(--aes-border)] pt-4">
+                  <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment method</p>
+                  <label className="flex cursor-pointer items-center justify-between rounded-xl border border-[var(--aes-border)] p-3 text-sm">
+                    <span>Online (UPI · Cards · Net Banking · Wallets)</span>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === "razorpay"}
+                      onChange={() => setPaymentMethod("razorpay")}
+                      disabled={!razorpayEnabled}
+                    />
+                  </label>
+                  <label className="flex cursor-pointer items-center justify-between rounded-xl border border-[var(--aes-border)] p-3 text-sm">
+                    <span>Cash on Delivery (COD)</span>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === "cod"}
+                      onChange={() => setPaymentMethod("cod")}
+                      disabled={!codEnabled}
+                    />
+                  </label>
+                  {demoAllowed && (
+                    <label className="flex cursor-pointer items-center justify-between rounded-xl border border-[var(--aes-border)] p-3 text-sm">
+                      <span>Demo checkout (staging only)</span>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        checked={paymentMethod === "demo"}
+                        onChange={() => setPaymentMethod("demo")}
+                      />
+                    </label>
                   )}
                 </div>
                 {error && <p className="text-sm text-red-600">{error}</p>}
                 <Button type="submit" className="w-full py-4" disabled={loading || !canPay}>
-                  {loading ? "Placing order…" : `Pay ${formatInr(total)}`}
+                  {loading
+                    ? "Placing order…"
+                    : paymentMethod === "cod"
+                      ? `Place COD order · ${formatInr(total)}`
+                      : `Pay ${formatInr(total)}`}
                 </Button>
               </form>
             )}

@@ -8,7 +8,7 @@ export const analyticsService = {
     const monthStart = startOfMonth(now);
     const lastMonthStart = startOfMonth(subMonths(now, 1));
 
-    const [orders, lastMonthOrders, products, orderItems, customers, cityOrders] = await Promise.all([
+    const [orders, lastMonthOrders, products, orderItems, customers, cityOrders, allMonthOrders, refunds] = await Promise.all([
       prisma.commerceOrder.findMany({
         where: { status: { notIn: ["CANCELLED"] }, createdAt: { gte: monthStart } },
         include: { items: { include: { product: { select: { purchaseCost: true } } } } },
@@ -39,6 +39,14 @@ export const analyticsService = {
         },
         orderBy: { createdAt: "desc" },
         take: 2000,
+      }),
+      prisma.commerceOrder.findMany({
+        where: { createdAt: { gte: monthStart } },
+        select: { id: true, status: true },
+      }),
+      prisma.commerceRefund.findMany({
+        where: { createdAt: { gte: monthStart } },
+        select: { status: true, amount: true },
       }),
     ]);
 
@@ -71,6 +79,10 @@ export const analyticsService = {
 
     const repeatCustomers = customers.filter((c) => c._count.orders > 1).length;
     const repeatRate = customers.length > 0 ? Math.round((repeatCustomers / customers.length) * 100) : 0;
+    const conversionRate =
+      allMonthOrders.length > 0
+        ? Math.round((orders.length / allMonthOrders.length) * 1000) / 10
+        : 0;
 
     const cityMap = new Map<string, { city: string; orders: number; revenue: number }>();
     for (const order of cityOrders) {
@@ -90,6 +102,40 @@ export const analyticsService = {
     const citiesWithData = cityMap.size;
     const unknownCityOrders = cityOrders.length - [...cityMap.values()].reduce((s, c) => s + c.orders, 0);
 
+    const monthOrderItems = await prisma.commerceOrderItem.findMany({
+      where: { order: { createdAt: { gte: monthStart }, status: { not: "CANCELLED" } } },
+      include: {
+        product: {
+          select: {
+            supplier: { select: { id: true, brandName: true } },
+            collectionItems: { select: { collection: { select: { id: true, title: true } } } },
+          },
+        },
+      },
+    });
+    const byCollection = new Map<string, { name: string; revenue: number }>();
+    const bySupplier = new Map<string, { name: string; revenue: number }>();
+    for (const item of monthOrderItems) {
+      for (const ci of item.product.collectionItems) {
+        const key = ci.collection.id;
+        const prev = byCollection.get(key) || { name: ci.collection.title, revenue: 0 };
+        prev.revenue += item.total;
+        byCollection.set(key, prev);
+      }
+      if (item.product.supplier) {
+        const key = item.product.supplier.id;
+        const prev = bySupplier.get(key) || { name: item.product.supplier.brandName, revenue: 0 };
+        prev.revenue += item.total;
+        bySupplier.set(key, prev);
+      }
+    }
+    const salesByCollection = [...byCollection.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+    const salesBySupplier = [...bySupplier.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+
+    const refundRequested = refunds.filter((r) => r.status === "PENDING").length;
+    const refundProcessed = refunds.filter((r) => r.status === "APPROVED" || r.status === "COMPLETED").length;
+    const refundAmount = refunds.reduce((sum, r) => sum + r.amount, 0);
+
     return {
       revenue,
       grossProfit,
@@ -101,8 +147,16 @@ export const analyticsService = {
       slowMoving,
       repeatRate,
       repeatCustomers,
+      conversionRate,
       totalCustomers: customers.length,
       topCities,
+      salesByCollection,
+      salesBySupplier,
+      refundAnalysis: {
+        requested: refundRequested,
+        processed: refundProcessed,
+        amount: refundAmount,
+      },
       cityInsights: {
         citiesTracked: citiesWithData,
         ordersWithCity: cityOrderTotal,
