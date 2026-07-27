@@ -8,14 +8,16 @@ import { EmptyState, EMPTY_COPY } from "@/components/aesthetics/motion";
 import { formatInr } from "@/lib/aesthetics/format-inr";
 
 export default function CartPage() {
-  const { cart, cartTotal, removeFromCart, updateQuantity, cartCount } = useCart();
+  const { cart, cartTotal, removeFromCart, updateQuantity, cartCount, hydrated } = useCart();
 
   return (
     <ConsumerPage cartCount={cartCount} room="calm">
       <main className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
         <p className="aes-gallery-eyebrow">Checkout prep</p>
         <h1 className="aes-gallery-title mt-3">Your cart</h1>
-        {cart.length === 0 ? (
+        {!hydrated ? (
+          <p className="mt-10 text-sm text-[var(--aes-ink-muted)]">Loading cart…</p>
+        ) : cart.length === 0 ? (
           <EmptyState
             {...EMPTY_COPY.cart}
             actionHref="/aesthetics/shop"

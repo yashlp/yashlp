@@ -78,7 +78,7 @@ export default function PlatformAdminLoginPage() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading} aria-busy={loading}>
             {loading ? "Please wait…" : "Sign in"}
           </Button>
         </form>

@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { Product } from "@/lib/aesthetics/types";
 import {
   createPreferenceState,
@@ -24,14 +31,82 @@ type CartContextValue = {
   recordView: (product: Product, seconds: number) => void;
   cartTotal: number;
   cartCount: number;
+  hydrated: boolean;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
+
+const CART_STORAGE_KEY = "oa_cart_v1";
+const WISHLIST_STORAGE_KEY = "oa_wishlist_v1";
+
+function readJson<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as T;
+    return parsed ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson(key: string, value: unknown) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Quota / private mode — ignore
+  }
+}
+
+function sanitizeCart(items: unknown): CartItem[] {
+  if (!Array.isArray(items)) return [];
+  return items
+    .filter((item): item is CartItem => {
+      if (!item || typeof item !== "object") return false;
+      const row = item as CartItem;
+      return (
+        typeof row.id === "string" &&
+        typeof row.name === "string" &&
+        typeof row.price === "number" &&
+        typeof row.quantity === "number" &&
+        row.quantity > 0
+      );
+    })
+    .map((item) => ({ ...item, quantity: Math.min(99, Math.max(1, Math.floor(item.quantity))) }));
+}
+
+function sanitizeWishlist(items: unknown): Product[] {
+  if (!Array.isArray(items)) return [];
+  return items.filter((item): item is Product => {
+    if (!item || typeof item !== "object") return false;
+    const row = item as Product;
+    return typeof row.id === "string" && typeof row.name === "string" && typeof row.price === "number";
+  });
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [prefs, setPrefs] = useState<PreferenceState>(createPreferenceState);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setCart(sanitizeCart(readJson(CART_STORAGE_KEY, [])));
+    setWishlist(sanitizeWishlist(readJson(WISHLIST_STORAGE_KEY, [])));
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    writeJson(CART_STORAGE_KEY, cart);
+  }, [cart, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    writeJson(WISHLIST_STORAGE_KEY, wishlist);
+  }, [wishlist, hydrated]);
 
   const addToCart = useCallback((product: Product) => {
     setCart((c) => {
@@ -108,6 +183,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       recordView,
       cartTotal,
       cartCount,
+      hydrated,
     }),
     [
       cart,
@@ -123,6 +199,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       recordView,
       cartTotal,
       cartCount,
+      hydrated,
     ]
   );
 
@@ -143,6 +220,7 @@ const EMPTY_CART: CartContextValue = {
   recordView: () => undefined,
   cartTotal: 0,
   cartCount: 0,
+  hydrated: true,
 };
 
 export function useCart() {

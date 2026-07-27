@@ -35,7 +35,7 @@ type ShippingRates = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartTotal, cartCount, removeFromCart, clearCart } = useCart();
+  const { cart, cartTotal, cartCount, removeFromCart, clearCart, hydrated } = useCart();
   const brand = useBrandSettings();
   const [step, setStep] = useState<CheckoutStep>("identity");
   const [loading, setLoading] = useState(false);
@@ -217,6 +217,16 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!hydrated) {
+    return (
+      <ConsumerPage cartCount={cartCount} room="calm">
+        <main className="mx-auto max-w-lg px-4 py-12">
+          <p className="text-sm text-[var(--aes-ink-muted)]">Loading checkout…</p>
+        </main>
+      </ConsumerPage>
+    );
   }
 
   if (!cart.length) {
