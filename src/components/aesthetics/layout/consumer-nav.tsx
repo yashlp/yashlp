@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/aesthetics/shop", label: "Shop" },
-  { href: "/aesthetics/collections", label: "Collections" },
+  { href: "/aesthetics/collections", label: "Categories" },
   { href: "/aesthetics/about", label: "About us" },
   { href: "/aesthetics/contact", label: "Contact us" },
   { href: "/aesthetics/wishlist", label: "Favourites" },

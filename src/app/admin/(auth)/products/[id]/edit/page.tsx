@@ -79,6 +79,10 @@ export default function EditProductPage() {
       setError("Upload at least 2 product photos.");
       return;
     }
+    if (!form.categoryId) {
+      setError("Choose a category.");
+      return;
+    }
     setSaving(true);
     try {
       const res = await fetch(`/api/admin/products/${id}`, {
@@ -182,10 +186,24 @@ export default function EditProductPage() {
             <ProductMediaUploader value={media} onChange={setMedia} disabled={saving} />
           </section>
 
-          <select className="aes-input w-full" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}>
-            <option value="">Category</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <div>
+            <label className="aes-mono mb-2 block text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
+              Category <span className="text-red-600">*</span>
+            </label>
+            <select
+              className="aes-input w-full"
+              value={form.categoryId}
+              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+              required
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <select className="aes-input w-full" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
             {["DRAFT", "PUBLISHED", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"].map((s) => <option key={s} value={s}>{s}</option>)}
           </select>

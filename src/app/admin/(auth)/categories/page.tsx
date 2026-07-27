@@ -42,11 +42,14 @@ export default function AdminCategoriesPage() {
   return (
     <div>
       <h1 className="aes-display text-3xl font-semibold italic">Categories</h1>
+      <p className="mt-1 max-w-xl text-sm text-[var(--aes-charcoal-muted)]">
+        Categories power storefront “Shop by category” (Collections). Assign one when you add a product.
+      </p>
       <Card className="mt-8 max-w-lg space-y-3">
         <form onSubmit={create} className="space-y-3">
-          <Input placeholder="Category name" value={name} onChange={(e) => setName(e.target.value)} required />
-          <Input placeholder="Slug" value={slug} onChange={(e) => setSlug(e.target.value)} />
-          <Button type="submit">Create category</Button>
+          <Input placeholder="Category name (e.g. Lighting)" value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input placeholder="Slug (optional — auto from name)" value={slug} onChange={(e) => setSlug(e.target.value)} />
+          <Button type="submit">Add category</Button>
         </form>
       </Card>
       <div className="mt-8 space-y-2">

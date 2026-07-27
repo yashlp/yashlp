@@ -19,8 +19,8 @@ export const productCreateSchema = z.object({
   sellerId: z.string().min(1).optional(),
   /** Optional — server assigns Only Aesthetic platform brand when omitted */
   brandId: z.string().min(1).optional(),
-  /** Optional — server assigns a default category when omitted */
-  categoryId: z.string().min(1).optional(),
+  /** Required for storefront browse; server still falls back if omitted by older clients */
+  categoryId: z.string().min(1, "Choose a category").optional(),
   sku: z.string().optional(),
   barcode: z.string().optional(),
   shortDescription: z.string().max(500).optional(),

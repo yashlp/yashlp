@@ -10,8 +10,21 @@ export const categoryService = {
     const categories = await prisma.commerceCategory.findMany({
       where: { isHidden: false },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      include: {
+        _count: {
+          select: {
+            products: {
+              where: { status: "PUBLISHED", approvalStatus: "APPROVED" },
+            },
+          },
+        },
+      },
     });
-    return categories.map(mapCategory);
+    return categories.map((c) => ({
+      ...mapCategory(c),
+      productCount: c._count.products,
+      imageUrl: c.imageUrl,
+    }));
   },
 
   async listAdmin() {
