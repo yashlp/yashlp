@@ -53,6 +53,7 @@ export type Product = {
   mood: ProductMood;
   materials: string[];
   colors: string[];
+  dimensions?: string;
   vibe: string;
   description: string;
   images: string[];

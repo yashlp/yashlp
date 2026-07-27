@@ -768,6 +768,16 @@
   color: var(--gallery-ink);
 }
 
+/* Product detail title — slightly smaller than page heroes */
+.aes-product-title {
+  font-family: var(--aes-font-brand);
+  font-weight: 500;
+  font-size: clamp(1.45rem, 3.2vw, 2rem);
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  color: var(--gallery-ink);
+}
+
 .aes-gallery-lead {
   max-width: 32rem;
   font-size: 0.9375rem;
@@ -1402,7 +1412,7 @@
   }
 
   .group:hover .aes-hover-ink {
-    color: var(--aes-pink);
+    color: var(--gallery-ink, var(--aes-ink));
   }
 
   .aes-quickadd-hover-reveal {

@@ -22,6 +22,7 @@ export function mapProduct(p: ProductWithRelations): Product {
     mood: (p.mood as ProductMood) || "calm",
     materials: parseJsonArray<string>(p.materials),
     colors: parseJsonArray<string>(p.colors),
+    dimensions: p.dimensions || undefined,
     vibe: p.shortDescription || "",
     description: p.description,
     images: p.media.filter((m) => m.type === "IMAGE").sort((a, b) => a.sortOrder - b.sortOrder).map((m) => m.url),

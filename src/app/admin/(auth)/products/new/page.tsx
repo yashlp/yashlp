@@ -30,6 +30,7 @@ export default function NewProductPage() {
     mood: "",
     roomMood: "",
     dimensions: "",
+    materials: "",
   });
   const [media, setMedia] = useState<ProductMediaValue>({ images: [], videos: [] });
   const [error, setError] = useState("");
@@ -97,6 +98,12 @@ export default function NewProductPage() {
       if (form.stock !== "") payload.stock = Number(form.stock) || 0;
       if (form.categoryId) payload.categoryId = form.categoryId;
       if (form.dimensions.trim()) payload.dimensions = form.dimensions.trim();
+      if (form.materials.trim()) {
+        payload.materials = form.materials
+          .split(",")
+          .map((m) => m.trim())
+          .filter(Boolean);
+      }
       if (form.roomMood) payload.roomMood = form.roomMood;
 
       const res = await fetch("/api/admin/products", {
@@ -241,6 +248,16 @@ export default function NewProductPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Materials</label>
+                <Input
+                  placeholder="e.g. Acrylic, wood base, LED"
+                  value={form.materials}
+                  onChange={(e) => setForm({ ...form, materials: e.target.value })}
+                />
+                <p className="mt-1 text-xs text-[var(--aes-dusty)]">Comma-separated. Shows on the product page.</p>
               </div>
 
               <div>

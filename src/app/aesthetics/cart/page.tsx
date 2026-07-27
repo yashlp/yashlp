@@ -36,7 +36,7 @@ export default function CartPage() {
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/aesthetics/product/${item.slug}`}
-                      className="font-bold text-[var(--aes-ink)] hover:text-[var(--aes-pink)]"
+                      className="font-bold text-[var(--aes-ink)] hover:text-[var(--aes-ink)]"
                     >
                       {item.name}
                     </Link>

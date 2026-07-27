@@ -227,7 +227,7 @@ export function ProductCard({
             ) : (
               <Link
                 href={`/aesthetics/product/${product.slug}`}
-                className="aes-touch inline-flex min-h-11 items-center text-[10px] font-bold uppercase tracking-wider text-[var(--aes-pink)]"
+                className="aes-touch inline-flex min-h-11 items-center text-[10px] font-bold uppercase tracking-wider text-[var(--aes-ink-muted)] transition hover:text-[var(--aes-ink)]"
               >
                 View
               </Link>
