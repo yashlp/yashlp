@@ -9,13 +9,18 @@ const mediaUrlSchema = z
   .refine(isAllowedMediaUrl, { message: "Invalid media URL" });
 
 export const productCreateSchema = z.object({
-  name: z.string().min(1).max(200),
-  slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, "Slug can only use lowercase letters, numbers, and hyphens"),
+  name: z.string().max(200).optional(),
+  slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-z0-9-]*$/, "Slug can only use lowercase letters, numbers, and hyphens")
+    .optional(),
   /** Optional — server assigns Only Aesthetic platform seller when omitted */
   sellerId: z.string().min(1).optional(),
   /** Optional — server assigns Only Aesthetic platform brand when omitted */
   brandId: z.string().min(1).optional(),
-  categoryId: z.string().min(1, "Choose a category"),
+  /** Optional — server assigns a default category when omitted */
+  categoryId: z.string().min(1).optional(),
   sku: z.string().optional(),
   barcode: z.string().optional(),
   shortDescription: z.string().max(500).optional(),
@@ -29,14 +34,15 @@ export const productCreateSchema = z.object({
   minStock: z.number().int().min(0).optional(),
   maxStock: z.number().int().min(0).optional(),
   materials: z.array(z.string()).optional(),
-  dimensions: z.string().optional(),
+  dimensions: z.string().max(200).optional(),
   weight: z.string().optional(),
   countryOfOrigin: z.string().optional(),
   warranty: z.string().optional(),
   returnEligible: z.boolean().optional(),
   specifications: z.record(z.string()).optional(),
   tags: z.array(z.string()).optional(),
-  mood: z.string().optional(),
+  mood: z.string({ required_error: "Choose a mood" }).min(1, "Choose a mood"),
+  roomMood: z.string().optional(),
   colors: z.array(z.string()).optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),

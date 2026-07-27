@@ -87,12 +87,53 @@ export const productService = {
   },
 
   async create(data: ProductCreateInput) {
-    const { images, videos, materials, tags, colors, specifications, purchaseDate, sellerId, brandId, ...rest } =
-      data;
+    const {
+      images,
+      videos,
+      materials,
+      tags,
+      colors,
+      specifications,
+      purchaseDate,
+      sellerId,
+      brandId,
+      categoryId,
+      name,
+      slug,
+      roomMood,
+      ...rest
+    } = data;
+
     const platform =
       sellerId && brandId ? { sellerId, brandId } : await ensurePlatformSellerBrand();
     const resolvedSellerId = sellerId || platform.sellerId;
     const resolvedBrandId = brandId || platform.brandId;
+
+    let resolvedCategoryId = categoryId;
+    if (!resolvedCategoryId) {
+      const existing = await prisma.commerceCategory.findFirst({ orderBy: { sortOrder: "asc" } });
+      if (existing) {
+        resolvedCategoryId = existing.id;
+      } else {
+        const created = await prisma.commerceCategory.create({
+          data: { name: "Home", slug: "home", sortOrder: 0 },
+        });
+        resolvedCategoryId = created.id;
+      }
+    }
+
+    const { defaultProductName, slugifyProduct } = await import("../product-form-options");
+    const resolvedName = (name?.trim() || defaultProductName(rest.description)).slice(0, 200);
+    let resolvedSlug =
+      slugifyProduct(slug || resolvedName) || `piece-${Date.now().toString(36)}`;
+
+    const slugTaken = await prisma.commerceProduct.findUnique({ where: { slug: resolvedSlug } });
+    if (slugTaken) {
+      resolvedSlug = `${resolvedSlug}-${Date.now().toString(36)}`.slice(0, 200);
+    }
+
+    const mergedTags = [...(tags || [])];
+    if (roomMood?.trim()) mergedTags.push(`room:${roomMood.trim()}`);
 
     const mediaCreate = [
       ...images.map((url, i) => ({ type: "IMAGE" as const, url, sortOrder: i })),
@@ -105,11 +146,14 @@ export const productService = {
     const product = await prisma.commerceProduct.create({
       data: {
         ...rest,
+        name: resolvedName,
+        slug: resolvedSlug,
         sellerId: resolvedSellerId,
         brandId: resolvedBrandId,
+        categoryId: resolvedCategoryId,
         purchaseDate: purchaseDate ? new Date(purchaseDate) : undefined,
         materials: toJsonArray(materials),
-        tags: toJsonArray(tags),
+        tags: toJsonArray(mergedTags),
         colors: toJsonArray(colors),
         specifications: specifications ? JSON.stringify(specifications) : undefined,
         approvalStatus: rest.approvalStatus || "PENDING",
