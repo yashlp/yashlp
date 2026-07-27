@@ -7,6 +7,9 @@ import {
   type CommerceAdminUser,
 } from "./admin-session";
 import { sendAdminOtpEmail } from "./commerce-email";
+import { notifyAdminOtpSms } from "./commerce-sms";
+import { isMsg91Configured } from "@/lib/sms";
+import { isProduction } from "@/lib/env";
 
 const OTP_EXPIRY_MIN = 10;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -98,9 +101,26 @@ export async function createAdminOtp(adminId: string) {
     console.info(`[Commerce Admin OTP] ${admin.email}: ${code}`);
   }
 
-  const sent = await sendAdminOtpEmail(admin.email, code);
-  if (!sent.ok && process.env.NODE_ENV === "production") {
-    throw new Error(`Could not send admin OTP email: ${sent.error}`);
+  const emailResult = await sendAdminOtpEmail(admin.email, code);
+  const smsResult = await notifyAdminOtpSms(code);
+
+  const emailOk = emailResult.ok;
+  const smsOk = smsResult.ok;
+  const smsConfigured = Boolean(process.env.COMMERCE_ADMIN_PHONE?.trim()) && isMsg91Configured();
+
+  if (isProduction() && !emailOk && !smsOk) {
+    const parts = [
+      !emailOk ? `email: ${emailResult.error}` : null,
+      smsConfigured ? `sms: ${smsResult.error}` : "sms: COMMERCE_ADMIN_PHONE / MSG91 not set",
+    ].filter(Boolean);
+    throw new Error(`Could not send admin OTP (${parts.join("; ")})`);
+  }
+
+  if (!emailOk) {
+    console.error("[admin-otp] email failed", emailResult.error);
+  }
+  if (!smsResult.skipped && !smsOk) {
+    console.error("[admin-otp] sms failed", smsResult.error);
   }
 }
 

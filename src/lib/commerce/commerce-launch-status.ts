@@ -3,6 +3,8 @@ import { isCommerceEmailConfigured } from "@/lib/commerce/commerce-email";
 import { isObjectStorageConfigured } from "@/lib/commerce/object-storage";
 import { isRazorpayConfigured } from "@/lib/payments/config";
 import { getSiteUrl } from "@/lib/payments/config";
+import { isSmsConfigured } from "@/lib/env";
+import { isMsg91Configured } from "@/lib/sms";
 
 export type CommerceLaunchCheck = {
   id: string;
@@ -101,6 +103,18 @@ export function getCommerceLaunchStatus(): CommerceLaunchCheck[] {
         : "You: verify domain in Resend and set RESEND_API_KEY + COMMERCE_FROM_EMAIL",
       required: true,
       youMustDo: !isCommerceEmailConfigured(),
+    },
+    {
+      id: "msg91",
+      label: "MSG91 SMS (OTP + order alerts)",
+      status: isMsg91Configured() || isSmsConfigured() ? "ok" : prod ? "fail" : "warn",
+      detail: isMsg91Configured()
+        ? process.env.SMS_FLOW_ORDER_CONFIRM?.trim()
+          ? "MSG91 Auth Key + order confirm Flow set"
+          : "MSG91 Auth Key set — add SMS_FLOW_ORDER_CONFIRM / delivery Flow ids for purchase & shipping SMS"
+        : "You: set SMS_PROVIDER=msg91, SMS_API_KEY, SMS_SENDER_ID (see docs/MOBILE_OTP_MSG91.md)",
+      required: true,
+      youMustDo: !(isMsg91Configured() || isSmsConfigured()),
     },
     {
       id: "blob",

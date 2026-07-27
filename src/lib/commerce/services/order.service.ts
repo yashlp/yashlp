@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { ORDER_STATUSES } from "../constants";
 import { sendOrderConfirmationEmail } from "../commerce-email";
+import { notifyDeliverySms, notifyOrderConfirmSms } from "../commerce-sms";
 
 function orderNumber() {
   return `AES-${Date.now().toString(36).toUpperCase()}`;
@@ -30,6 +31,67 @@ const CUSTOMER_SAFE_SELECT = {
 } as const;
 
 const RESTOCK_FROM_STATUSES = new Set(["CONFIRMED", "PACKED", "READY_TO_SHIP"]);
+
+function resolveOrderContact(order: {
+  customerNotes?: string | null;
+  customer?: { email?: string | null; name?: string | null; phone?: string | null } | null;
+}) {
+  const notes = order.customerNotes || "";
+  // Structured: Guest: Name\nEmail: …\nPhone: …
+  const emailFromNotes =
+    notes.match(/^Email:\s*(.+)$/im)?.[1]?.trim() ||
+    notes.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0] ||
+    null;
+  const nameFromNotes =
+    notes.match(/^Guest:\s*(.+)$/im)?.[1]?.trim() ||
+    notes.match(/Guest:\s*([^|\n]+)/)?.[1]?.trim() ||
+    null;
+  const phoneFromNotes =
+    notes.match(/^Phone:\s*(.+)$/im)?.[1]?.trim() ||
+    notes.split("|").map((p) => p.trim()).find((p) => /^\+?\d{10,15}$/.test(p.replace(/\s/g, ""))) ||
+    null;
+
+  return {
+    email: order.customer?.email || emailFromNotes || null,
+    name: order.customer?.name || nameFromNotes || "there",
+    phone: order.customer?.phone || phoneFromNotes || null,
+  };
+}
+
+async function notifyOrderConfirmed(order: {
+  id: string;
+  orderNumber: string;
+  total: number;
+  customerNotes?: string | null;
+  customer?: { email?: string | null; name?: string | null; phone?: string | null } | null;
+  guestEmail?: string;
+  guestName?: string;
+  guestPhone?: string;
+}) {
+  const contact = resolveOrderContact(order);
+  const email = order.guestEmail || contact.email;
+  const name = order.guestName || contact.name;
+  const phone = order.guestPhone || contact.phone;
+
+  if (email) {
+    const emailResult = await sendOrderConfirmationEmail({
+      to: email,
+      name,
+      orderNumber: order.orderNumber,
+      totalInr: order.total,
+    });
+    if (!emailResult.ok) {
+      console.error("[order-confirm-email]", order.orderNumber, emailResult.error);
+    }
+  }
+
+  await notifyOrderConfirmSms({
+    phone,
+    name,
+    orderNumber: order.orderNumber,
+    totalInr: order.total,
+  });
+}
 
 async function hasSuccessfulPayment(orderId: string) {
   const paid = await prisma.commercePayment.findFirst({
@@ -125,7 +187,7 @@ export const orderService = {
         shippingAddress: input.guest.shippingAddress,
         shippingCity: input.guest.city?.trim() || null,
         shippingState: input.guest.state?.trim() || null,
-        customerNotes: `Guest: ${input.guest.name} | ${input.guest.email} | ${input.guest.phone}`,
+        customerNotes: `Guest: ${input.guest.name}\nEmail: ${input.guest.email}\nPhone: ${input.guest.phone}`,
         items: {
           create: pricedItems.map((item) => ({
             productId: item.productId,
@@ -148,11 +210,13 @@ export const orderService = {
 
     if (status === "CONFIRMED") {
       await this.decrementStock(order.id);
-      void sendOrderConfirmationEmail({
-        to: input.guest.email,
-        name: input.guest.name,
+      await notifyOrderConfirmed({
+        id: order.id,
         orderNumber: order.orderNumber,
-        totalInr: order.total,
+        total: order.total,
+        guestEmail: input.guest.email,
+        guestName: input.guest.name,
+        guestPhone: input.guest.phone,
       });
     }
 
@@ -200,20 +264,7 @@ export const orderService = {
     const confirmed = await this.getById(orderId);
     if (!confirmed) return order;
 
-    const emailMatch = confirmed.customerNotes?.match(/[\w.+-]+@[\w.-]+\.\w+/);
-    const guestEmail = emailMatch?.[0];
-    const guestName = confirmed.customerNotes?.match(/Guest:\s*([^|]+)/)?.[1]?.trim();
-    const to = confirmed.customer?.email || guestEmail;
-    const name = confirmed.customer?.name || guestName || "there";
-
-    if (to) {
-      void sendOrderConfirmationEmail({
-        to,
-        name,
-        orderNumber: confirmed.orderNumber,
-        totalInr: confirmed.total,
-      });
-    }
+    await notifyOrderConfirmed(confirmed);
 
     return confirmed;
   },
@@ -244,7 +295,7 @@ export const orderService = {
       }
     }
 
-    return prisma.commerceOrder.update({
+    const updated = await prisma.commerceOrder.update({
       where: { id: orderId },
       data: {
         status,
@@ -260,6 +311,20 @@ export const orderService = {
         returns: true,
       },
     });
+
+    if (status === "SHIPPED" || status === "OUT_FOR_DELIVERY" || status === "DELIVERED") {
+      const contact = resolveOrderContact(updated);
+      void notifyDeliverySms({
+        phone: contact.phone,
+        name: contact.name,
+        orderNumber: updated.orderNumber,
+        status,
+        courier: updated.courier,
+        trackingNumber: updated.trackingNumber,
+      }).catch((err) => console.error("[delivery-sms]", updated.orderNumber, err));
+    }
+
+    return updated;
   },
 
   async getById(id: string) {
