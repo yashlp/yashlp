@@ -7,6 +7,7 @@ import {
   FileText,
   FolderOpen,
   LayoutDashboard,
+  LayoutGrid,
   Megaphone,
   Package,
   Receipt,
@@ -56,6 +57,7 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     items: [
       { href: "/admin/catalog", label: "Catalog", icon: Boxes, description: "Products, collections, inventory" },
       { href: "/admin/products", label: "Products", icon: Package, description: "Add & edit catalog" },
+      { href: "/admin/categories", label: "Categories", icon: LayoutGrid, description: "Shop browse categories" },
       { href: "/admin/collections", label: "Collections", icon: FolderOpen, description: "Curated product groups" },
       { href: "/admin/inventory", label: "Inventory", icon: Warehouse, description: "Stock, SKU, cost, reorder" },
       { href: "/admin/suppliers", label: "Suppliers", icon: Users, description: "Vendor contacts & rating" },

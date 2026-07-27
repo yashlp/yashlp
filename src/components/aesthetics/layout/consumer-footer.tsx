@@ -57,7 +57,7 @@ export function ConsumerFooter() {
               </li>
               <li>
                 <Link href="/aesthetics/collections" className="inline-flex min-h-11 items-center text-white hover:opacity-85">
-                  Collections
+                  Categories
                 </Link>
               </li>
               <li>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Card } from "@/components/aesthetics/ui/card";
@@ -66,6 +67,10 @@ export default function NewProductPage() {
       setError("Choose a mood.");
       return;
     }
+    if (!form.categoryId) {
+      setError("Choose a category so the product appears in storefront browse.");
+      return;
+    }
     if (!form.price || Number(form.price) <= 0) {
       setError("Enter a selling price greater than 0.");
       return;
@@ -96,7 +101,7 @@ export default function NewProductPage() {
         payload.slug = slugifyProduct(form.name);
       }
       if (form.stock !== "") payload.stock = Number(form.stock) || 0;
-      if (form.categoryId) payload.categoryId = form.categoryId;
+      payload.categoryId = form.categoryId;
       if (form.dimensions.trim()) payload.dimensions = form.dimensions.trim();
       if (form.materials.trim()) {
         payload.materials = form.materials
@@ -132,7 +137,7 @@ export default function NewProductPage() {
     <div className="max-w-2xl">
       <h1 className="aes-display text-3xl font-semibold italic">Add product</h1>
       <p className="mt-1 text-sm text-[var(--aes-charcoal-muted)]">
-        Only description, mood, price, and 2+ photos are required. Everything else is optional.
+        Description, mood, category, price, and 2+ photos are required. Everything else is optional.
       </p>
 
       <Card className="mt-8 space-y-4">
@@ -179,6 +184,31 @@ export default function NewProductPage() {
 
           <div>
             <label className="aes-mono mb-2 block text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
+              Category <span className="text-red-600">*</span>
+            </label>
+            <select
+              className="aes-input"
+              value={form.categoryId}
+              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+              required
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-[var(--aes-charcoal-muted)]">
+              Shown on Collections / shop-by-category.{" "}
+              <Link href="/admin/categories" className="underline underline-offset-2 hover:text-[var(--aes-ink)]">
+                Add or manage categories
+              </Link>
+            </p>
+          </div>
+
+          <div>
+            <label className="aes-mono mb-2 block text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
               Selling price (₹) <span className="text-red-600">*</span>
             </label>
             <Input
@@ -216,22 +246,6 @@ export default function NewProductPage() {
                   value={form.stock}
                   onChange={(e) => setForm({ ...form, stock: e.target.value })}
                 />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Category</label>
-                <select
-                  className="aes-input"
-                  value={form.categoryId}
-                  onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                >
-                  <option value="">Optional</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>
