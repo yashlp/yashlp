@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { ORDER_STATUSES } from "../constants";
 import { sendOrderConfirmationEmail } from "../commerce-email";
+import { ensureGuestCustomer } from "../guest-customer";
 
 function orderNumber() {
   return `AES-${Date.now().toString(36).toUpperCase()}`;
@@ -99,8 +100,12 @@ export const orderService = {
       email: string;
       phone: string;
       shippingAddress: string;
+      line1: string;
+      line2?: string;
       city?: string;
       state?: string;
+      postalCode?: string;
+      country?: string;
     };
     customerId?: string;
   }) {
@@ -112,10 +117,24 @@ export const orderService = {
 
     const status = input.paymentMethod === "razorpay" ? "PENDING" : "CONFIRMED";
 
+    const customerId =
+      input.customerId ||
+      (await ensureGuestCustomer({
+        name: input.guest.name,
+        email: input.guest.email,
+        phone: input.guest.phone,
+        line1: input.guest.line1,
+        line2: input.guest.line2,
+        city: input.guest.city,
+        state: input.guest.state,
+        postalCode: input.guest.postalCode,
+        country: input.guest.country,
+      }));
+
     const order = await prisma.commerceOrder.create({
       data: {
         orderNumber: orderNumber(),
-        customerId: input.customerId,
+        customerId,
         status,
         subtotal,
         tax,

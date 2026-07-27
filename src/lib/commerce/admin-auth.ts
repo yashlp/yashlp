@@ -10,6 +10,26 @@ import { sendAdminOtpEmail } from "./commerce-email";
 
 const OTP_EXPIRY_MIN = 10;
 const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_WINDOW_MS = 15 * 60 * 1000;
+
+function isAdminOtpRequired(adminMfaEnabled: boolean) {
+  if (process.env.COMMERCE_ADMIN_REQUIRE_OTP === "false") return false;
+  if (process.env.COMMERCE_ADMIN_REQUIRE_OTP === "true" || adminMfaEnabled) return true;
+  return process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+}
+
+async function assertNotLockedOut(email: string) {
+  const recentFails = await prisma.commerceLoginAttempt.count({
+    where: {
+      email,
+      success: false,
+      createdAt: { gte: new Date(Date.now() - LOCKOUT_WINDOW_MS) },
+    },
+  });
+  if (recentFails >= MAX_FAILED_ATTEMPTS) {
+    throw new Error("Too many failed attempts. Try again in 15 minutes.");
+  }
+}
 
 export async function logLoginAttempt(
   email: string,
@@ -35,6 +55,8 @@ export async function adminLogin(
   password: string
 ): Promise<{ requiresOtp: true; adminId: string } | { requiresOtp: false; admin: CommerceAdminUser }> {
   const normalized = email.toLowerCase().trim();
+  await assertNotLockedOut(normalized);
+
   const admin = await prisma.commerceAdmin.findUnique({ where: { email: normalized } });
 
   if (!admin || !admin.isActive) {
@@ -48,22 +70,15 @@ export async function adminLogin(
     throw new Error("Invalid email or password");
   }
 
-  const recentFails = await prisma.commerceLoginAttempt.count({
-    where: {
-      email: normalized,
-      success: false,
-      createdAt: { gte: new Date(Date.now() - 15 * 60 * 1000) },
-    },
-  });
-  if (recentFails >= MAX_FAILED_ATTEMPTS) {
-    throw new Error("Too many failed attempts. Try again in 15 minutes.");
+  if (isAdminOtpRequired(admin.mfaEnabled)) {
+    await createAdminOtp(admin.id);
+    return { requiresOtp: true, adminId: admin.id };
   }
 
-  // Password-only admin access (OTP/MFA disabled for store admin portal).
   const meta = await getRequestMeta();
   await prisma.commerceAdmin.update({
     where: { id: admin.id },
-    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress, mfaEnabled: false },
+    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress },
   });
   await createAdminSession(admin.id, meta);
   await logLoginAttempt(normalized, true, admin.id);
@@ -75,7 +90,7 @@ export async function adminLogin(
       email: admin.email,
       name: admin.name,
       role: admin.role,
-      mfaEnabled: false,
+      mfaEnabled: admin.mfaEnabled,
     },
   };
 }
@@ -127,7 +142,7 @@ export async function verifyAdminOtp(adminId: string, code: string): Promise<Com
 
   await prisma.commerceAdmin.update({
     where: { id: admin.id },
-    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress },
+    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress, mfaEnabled: true },
   });
   await createAdminSession(admin.id, meta);
   await logLoginAttempt(admin.email, true, admin.id, "otp_verified");
@@ -137,7 +152,7 @@ export async function verifyAdminOtp(adminId: string, code: string): Promise<Com
     email: admin.email,
     name: admin.name,
     role: admin.role,
-    mfaEnabled: admin.mfaEnabled,
+    mfaEnabled: true,
   };
 }
 

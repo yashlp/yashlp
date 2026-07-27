@@ -154,11 +154,30 @@ try {
   await page.goto(`${BASE}/admin/login`, { waitUntil: "networkidle" });
   await page.locator('input[type="email"]').fill(env.COMMERCE_ADMIN_EMAIL || "");
   await page.locator('input[type="password"]').fill(env.COMMERCE_ADMIN_PASSWORD || "");
-  await Promise.all([
-    page.waitForResponse((r) => r.url().includes("/api/admin/auth/login"), { timeout: 10000 }).catch(() => null),
-    page.getByRole("button", { name: /sign in/i }).click(),
-  ]);
-  await page.waitForTimeout(1500);
+  const loginResPromise = page.waitForResponse(
+    (r) => r.url().includes("/api/admin/auth/login") && r.request().method() === "POST",
+    { timeout: 10000 }
+  );
+  await page.getByRole("button", { name: /sign in/i }).click();
+  const loginRes = await loginResPromise.catch(() => null);
+  const loginData = loginRes ? await loginRes.json().catch(() => ({})) : {};
+
+  if (loginData.requiresOtp) {
+    ok("Admin login requires OTP");
+    const code = env.ALLOW_DEMO_OTP === "true" ? "123456" : "";
+    if (!code) {
+      fail("Admin OTP verification", "ALLOW_DEMO_OTP not enabled for smoke test");
+    } else {
+      await page.getByPlaceholder(/6-digit/i).fill(code);
+      await Promise.all([
+        page.waitForResponse((r) => r.url().includes("/api/admin/auth/verify-otp"), { timeout: 10000 }),
+        page.getByRole("button", { name: /verify code/i }).click(),
+      ]);
+      ok("Admin OTP verified");
+    }
+  }
+
+  await page.waitForTimeout(1200);
   const url = page.url();
   if (url.includes("/admin") && !url.includes("/login")) {
     ok("Admin login succeeds", url);
