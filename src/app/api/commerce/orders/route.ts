@@ -50,14 +50,69 @@ export async function POST(req: NextRequest) {
     const tax = computeTax(subtotal, shippingConfig);
     const total = subtotal + shipping + tax;
 
+    let resolvedAddress = {
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      line1: body.line1,
+      line2: body.line2,
+      city: body.city,
+      state: body.state,
+      postalCode: body.postalCode,
+      country: body.country,
+    };
+
+    if (customer && body.addressId) {
+      const selected = await prisma.commerceCustomerAddress.findFirst({
+        where: { id: body.addressId, customerId: customer.id },
+      });
+      if (!selected) {
+        return NextResponse.json({ error: "Selected address was not found." }, { status: 400 });
+      }
+      resolvedAddress = {
+        ...resolvedAddress,
+        phone: selected.phone || body.phone,
+        line1: selected.line1,
+        line2: selected.line2 || undefined,
+        city: selected.city,
+        state: selected.state || undefined,
+        postalCode: selected.postalCode,
+        country: selected.country || body.country,
+      };
+    }
+
+    if (customer && body.saveAddress) {
+      const isDefault = Boolean(body.setDefaultAddress);
+      if (isDefault) {
+        await prisma.commerceCustomerAddress.updateMany({
+          where: { customerId: customer.id, isDefault: true },
+          data: { isDefault: false },
+        });
+      }
+      await prisma.commerceCustomerAddress.create({
+        data: {
+          customerId: customer.id,
+          label: body.addressLabel?.trim() || "Address",
+          line1: resolvedAddress.line1.trim(),
+          line2: resolvedAddress.line2?.trim() || null,
+          city: resolvedAddress.city.trim(),
+          state: resolvedAddress.state?.trim() || null,
+          postalCode: resolvedAddress.postalCode.trim(),
+          country: resolvedAddress.country.toUpperCase(),
+          phone: resolvedAddress.phone.trim(),
+          isDefault,
+        },
+      });
+    }
+
     const shippingAddress = [
-      body.name,
-      body.line1,
-      body.line2,
-      `${body.city}${body.state ? `, ${body.state}` : ""} ${body.postalCode}`,
-      body.country,
-      `Phone: ${body.phone}`,
-      `Email: ${body.email}`,
+      resolvedAddress.name,
+      resolvedAddress.line1,
+      resolvedAddress.line2,
+      `${resolvedAddress.city}${resolvedAddress.state ? `, ${resolvedAddress.state}` : ""} ${resolvedAddress.postalCode}`,
+      resolvedAddress.country,
+      `Phone: ${resolvedAddress.phone}`,
+      `Email: ${resolvedAddress.email}`,
     ]
       .filter(Boolean)
       .join("\n");
@@ -70,16 +125,16 @@ export async function POST(req: NextRequest) {
       total,
       paymentMethod: body.paymentMethod,
       guest: {
-        name: body.name,
-        email: body.email,
-        phone: body.phone,
+        name: resolvedAddress.name,
+        email: resolvedAddress.email,
+        phone: resolvedAddress.phone,
         shippingAddress,
-        line1: body.line1,
-        line2: body.line2,
-        city: body.city,
-        state: body.state,
-        postalCode: body.postalCode,
-        country: body.country,
+        line1: resolvedAddress.line1,
+        line2: resolvedAddress.line2,
+        city: resolvedAddress.city,
+        state: resolvedAddress.state,
+        postalCode: resolvedAddress.postalCode,
+        country: resolvedAddress.country,
       },
       customerId: customer?.id,
     });
@@ -91,14 +146,14 @@ export async function POST(req: NextRequest) {
         total: order.total,
         status: order.status,
         paymentMethod: body.paymentMethod,
-        guest: { name: body.name, email: body.email, phone: body.phone },
+        guest: { name: resolvedAddress.name, email: resolvedAddress.email, phone: resolvedAddress.phone },
         address: {
-          line1: body.line1,
-          line2: body.line2,
-          city: body.city,
-          state: body.state,
-          postalCode: body.postalCode,
-          country: body.country,
+          line1: resolvedAddress.line1,
+          line2: resolvedAddress.line2,
+          city: resolvedAddress.city,
+          state: resolvedAddress.state,
+          postalCode: resolvedAddress.postalCode,
+          country: resolvedAddress.country,
         },
       },
     });

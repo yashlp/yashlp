@@ -20,7 +20,52 @@ export type CommerceCustomerUser = {
   name: string | null;
 };
 
+export type CommerceCustomerAddressItem = {
+  id: string;
+  label: string | null;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
+  phone: string | null;
+  isDefault: boolean;
+};
+
 export type CommerceCustomerWithAddress = CommerceCustomerUser & {
+  address: CommerceCustomerAddressItem | null;
+  addresses: CommerceCustomerAddressItem[];
+  defaultAddressId: string | null;
+};
+
+function mapAddress(addr: {
+  id: string;
+  label: string | null;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
+  phone: string | null;
+  isDefault: boolean;
+}): CommerceCustomerAddressItem {
+  return {
+    id: addr.id,
+    label: addr.label,
+    line1: addr.line1,
+    line2: addr.line2,
+    city: addr.city,
+    state: addr.state,
+    postalCode: addr.postalCode,
+    country: addr.country,
+    phone: addr.phone,
+    isDefault: addr.isDefault,
+  };
+}
+
+export type LegacyCommerceCustomerWithAddress = CommerceCustomerUser & {
   address: {
     line1: string;
     line2: string | null;
@@ -48,9 +93,7 @@ async function loadCustomerFromSession(token: string) {
           name: true,
           status: true,
           addresses: {
-            where: { isDefault: true },
-            take: 1,
-            orderBy: { updatedAt: "desc" },
+            orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
           },
         },
       },
@@ -122,23 +165,16 @@ export async function getCommerceCustomerWithAddress(): Promise<CommerceCustomer
   const session = await loadCustomerFromSession(token);
   if (!session?.customer || session.customer.status !== "ACTIVE") return null;
 
-  const addr = session.customer.addresses[0];
+  const addresses = session.customer.addresses.map(mapAddress);
+  const addr = addresses.find((a) => a.isDefault) || addresses[0] || null;
   return {
     id: session.customer.id,
     email: session.customer.email,
     phone: session.customer.phone,
     name: session.customer.name,
-    address: addr
-      ? {
-          line1: addr.line1,
-          line2: addr.line2,
-          city: addr.city,
-          state: addr.state,
-          postalCode: addr.postalCode,
-          country: addr.country,
-          phone: addr.phone,
-        }
-      : null,
+    address: addr,
+    addresses,
+    defaultAddressId: addr?.id || null,
   };
 }
 
