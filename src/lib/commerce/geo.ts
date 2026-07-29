@@ -20,8 +20,8 @@ export function isIndiaOnlyEnforced(): boolean {
 export function isIndiaRequest(req: NextRequest): boolean {
   if (!isIndiaOnlyEnforced()) return true;
   const country = getRequestCountry(req);
-  // Unknown geo (local dev / missing header) — allow; production Vercel sets the header.
-  if (!country) return process.env.NODE_ENV !== "production";
+  // Unknown geo header: allow so checkout is not blocked by proxy/header gaps.
+  if (!country) return true;
   return country === INDIA_COUNTRY;
 }
 

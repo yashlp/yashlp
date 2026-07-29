@@ -58,6 +58,7 @@ export default function CheckoutPage() {
   const [demoAllowed, setDemoAllowed] = useState(false);
   const [codEnabled, setCodEnabled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod" | "demo">("razorpay");
+  const [paymentCapabilityError, setPaymentCapabilityError] = useState("");
   const [rates, setRates] = useState<ShippingRates>({
     flatRate: 49,
     freeThreshold: 999,
@@ -84,7 +85,17 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     fetch("/api/commerce/payments/create")
-      .then((r) => r.json())
+      .then(async (r) => {
+        const payload = await r.json();
+        if (!r.ok) {
+          const message =
+            payload?.code === "INDIA_ONLY"
+              ? "Checkout is currently available in India only."
+              : payload?.error || "Payment options are unavailable right now.";
+          throw new Error(message);
+        }
+        return payload;
+      })
       .then((d) => {
         const enabled = Boolean(d.razorpay);
         const demo = Boolean(d.demo);
@@ -93,11 +104,13 @@ export default function CheckoutPage() {
         setDemoAllowed(demo);
         setCodEnabled(cod);
         setPaymentMethod(enabled ? "razorpay" : cod ? "cod" : demo ? "demo" : "razorpay");
+        setPaymentCapabilityError("");
       })
-      .catch(() => {
+      .catch((err) => {
         setRazorpayEnabled(false);
         setDemoAllowed(false);
         setCodEnabled(false);
+        setPaymentCapabilityError(err instanceof Error ? err.message : "Payment options are unavailable right now.");
       });
 
     fetch("/api/commerce/shipping")
@@ -422,6 +435,9 @@ export default function CheckoutPage() {
                 </div>
                 <div className="space-y-3 border-t border-[var(--aes-border)] pt-4">
                   <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment method</p>
+                  {paymentCapabilityError && (
+                    <p className="text-sm text-red-600">{paymentCapabilityError}</p>
+                  )}
                   <label className="flex cursor-pointer items-center justify-between rounded-xl border border-[var(--aes-border)] p-3 text-sm">
                     <span>Online (UPI · Cards · Net Banking · Wallets)</span>
                     <input
