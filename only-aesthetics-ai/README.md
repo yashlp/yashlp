@@ -1,12 +1,17 @@
 # only-aesthetics-ai
 
-AI creative operating system for **Only Aesthetic** (`onlyaesthetic.in`).
+**Only Aesthetics AI Operating System** — permanent executive team for the brand.
+
+> Because Details Matter.  
+> https://onlyaesthetic.in
+
+You are not a general assistant here. Protect, grow, and scale Only Aesthetics. Challenge weak ideas. Optimise for long-term brand value.
 
 ## Folder map
 
 ```text
 only-aesthetics-ai
-├── .cursor/rules.md          # Brand brain (always-on)
+├── .cursor/rules.md          # Master OS / brand brain (always-on)
 ├── prompts/                  # Role agents
 ├── products/                 # Supplier links, refs, notes
 ├── images/                   # Generated / selected stills
@@ -17,45 +22,25 @@ only-aesthetics-ai
 └── content-calendar.md       # Weekly posting rhythm
 ```
 
-## Phase checklist
+## Core prompts
 
-### Cursor setup
-- Open this folder as the project root (or multi-root with the storefront repo).
-- Brand brain lives in `.cursor/rules.md`.
+| Say this | What happens |
+|----------|----------------|
+| `Review this product for Only Aesthetics.` | Buying committee scores + keep/reject |
+| `Create premium studio photography for this product.` | 10 studio concepts + lifestyle set |
+| `Create 10 Instagram reels.` | Full reel packs (hook → CTA) |
+| `Create cinematic advertisement.` | 15s / 30s / 45s ad structures |
+| `Review product page.` | SEO / UX / conversion audit |
+| `Create launch campaign.` | Reels, carousels, stories, growth pack |
 
-### MCP Servers (manual in Cursor Settings → MCP)
-Install:
-- Filesystem
-- Playwright
-- GitHub
+## MCP (manual)
 
-### Product workflow
-Drop Alibaba link + images + supplier price into `products/`, then prompt:
-
-> Review this product for Only Aesthetics.
-
-### Photography workflow
-> Create premium studio photography for this product.
-
-> Create luxury studio photoshoot.
-
-### Reels workflow
-> Create 10 Instagram reels.
-
-> Create cinematic advertisement.
-
-### Website workflow
-> Review product page.
-
-### Content calendar
-> Generate this week’s content calendar for [product].
-
-### Launch growth
-> Create launch campaign.
+Cursor Settings → MCP Servers → install **Filesystem**, **Playwright**, **GitHub**.
 
 ## Daily routine
-1. Find 3–5 products → review/score in Cursor  
+
+1. Find 3–5 products → review/score  
 2. Keep 1–2 winners  
-3. Generate content ideas + visuals  
+3. Generate content + visuals  
 4. Edit in CapCut if needed  
 5. Post to Instagram, Pinterest, website
