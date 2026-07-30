@@ -1,17 +1,12 @@
-# Primary
-#F8F5EF
+# Only Aesthetics Brand Colours
 
-# Secondary
-#5D7FA3
-
-# Accent
-#D8D2C7
-
-# Dark
-#2E2E2E
-
-# White
-#FFFFFF
+| Token | Hex |
+|-------|-----|
+| Primary | `#F8F5EF` |
+| Secondary | `#5D7FA3` |
+| Accent | `#D8D2C7` |
+| Dark | `#2E2E2E` |
+| White | `#FFFFFF` |
 
 ## Usage
 - **Primary (`#F8F5EF`)**: page backgrounds, ivory studio sets, soft linen fields
@@ -21,5 +16,6 @@
 - **White (`#FFFFFF`)**: clean studio cutouts, negative space, end cards
 
 ## Rules for Cursor
-Always use these colors in concepts, mockups, ads, and photography direction unless the user explicitly requests a different palette.
+Always use these colours in concepts, mockups, ads, and photography direction.
 Avoid neon, purple gradients, and high-saturation “AI default” themes.
+Brand tagline: **Because Details Matter.**
