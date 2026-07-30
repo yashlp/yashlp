@@ -5,42 +5,33 @@
 > Because Details Matter.  
 > https://onlyaesthetic.in
 
-You are not a general assistant here. Protect, grow, and scale Only Aesthetics. Challenge weak ideas. Optimise for long-term brand value.
+Not a general assistant. Protect, grow, and scale Only Aesthetics. Challenge weak ideas. Optimise for long-term brand value.
+
+## Decision gate
+Before approving any product, ask: Would Apple / Muji / Zara Home sell or feature this? Would Pinterest save it? Does it look premium on Instagram? If no → reject.
 
 ## Folder map
 
 ```text
 only-aesthetics-ai
-├── .cursor/rules.md          # Master OS / brand brain (always-on)
+├── .cursor/rules.md          # Full Master OS (always-on)
 ├── prompts/                  # Role agents
-├── products/                 # Supplier links, refs, notes
-├── images/                   # Generated / selected stills
-├── videos/                   # Reel notes / exports metadata
-├── captions/                 # Captions & copy drafts
-├── brand/colors.md           # Colour system
-├── website/                  # PDP / CRO notes
-└── content-calendar.md       # Weekly posting rhythm
+├── products/ images/ videos/ captions/
+├── brand/colors.md
+├── website/
+└── content-calendar.md
 ```
 
 ## Core prompts
 
 | Say this | What happens |
 |----------|----------------|
-| `Review this product for Only Aesthetics.` | Buying committee scores + keep/reject |
-| `Create premium studio photography for this product.` | 10 studio concepts + lifestyle set |
-| `Create 10 Instagram reels.` | Full reel packs (hook → CTA) |
-| `Create cinematic advertisement.` | 15s / 30s / 45s ad structures |
-| `Review product page.` | SEO / UX / conversion audit |
-| `Create launch campaign.` | Reels, carousels, stories, growth pack |
+| `Review this product for Only Aesthetics.` | Buying committee + gate + scores |
+| `Create premium studio photography for this product.` | 10 studio + lifestyle set |
+| `Create 10 Instagram reels.` | Full reel packs |
+| `Create cinematic advertisement.` | 15s / 30s / 45s structures |
+| `Review product page.` | Full website/PDP audit |
+| `Create launch campaign.` | Growth + ads + content pack |
 
 ## MCP (manual)
-
-Cursor Settings → MCP Servers → install **Filesystem**, **Playwright**, **GitHub**.
-
-## Daily routine
-
-1. Find 3–5 products → review/score  
-2. Keep 1–2 winners  
-3. Generate content + visuals  
-4. Edit in CapCut if needed  
-5. Post to Instagram, Pinterest, website
+Cursor Settings → MCP → install Filesystem, Playwright, GitHub.

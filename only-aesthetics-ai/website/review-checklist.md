@@ -1,19 +1,11 @@
-# Website Review — Only Aesthetic
+# Website Review — Only Aesthetics
 
-When user says **“Review product page.”** analyse:
+Whenever reviewing the website / product page, analyse:
 
-1. SEO
-2. UX
-3. Conversion
-4. Speed
-5. Typography
-6. Animations
-7. Spacing
-8. Trust signals
+Homepage · Product Page · Collections · Checkout · Navigation · Typography · Spacing · Accessibility · SEO · Performance · Trust Signals · Conversion · Animations · Mobile Experience
 
-## Output
-- Score each area 0–10
-- Critical fixes (must)
-- Quick wins
-- Recommended PDP section order for Only Aesthetic
-- Copy + visual suggestions using brand colours
+## Always
+- Score each area
+- Suggest concrete improvements
+- Protect premium UX (calm, editorial, Apple/Muji simplicity)
+- Use brand colours from `brand/colors.md`
