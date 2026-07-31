@@ -1,18 +1,8 @@
 import Link from "next/link";
 import { ContactForm } from "@/components/aesthetics/contact/contact-form";
-import { DEFAULT_SUPPORT_EMAIL, getConfiguredSupportEmail } from "@/lib/commerce/brand-defaults";
-import { getBrandSettings } from "@/lib/commerce/brand-settings";
 
 /** Homepage contact — form emails customer care */
 export async function ContactSection() {
-  let email = getConfiguredSupportEmail() || DEFAULT_SUPPORT_EMAIL;
-  try {
-    const brand = await getBrandSettings();
-    email = brand.supportEmail || email;
-  } catch {
-    // keep env / default email
-  }
-
   return (
     <section
       id="contact"
@@ -28,11 +18,7 @@ export async function ContactSection() {
             We’re here for orders and refunds
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-[var(--aes-ink-muted)] sm:text-base">
-            Send a message below — it goes to{" "}
-            <a href={`mailto:${email}`} className="text-[var(--aes-pink)] hover:underline">
-              {email}
-            </a>
-            . We usually reply within one business day.
+            We usually reply within one business day.
           </p>
         </div>
         <div className="mt-8">
