@@ -8,7 +8,6 @@ const VALUES = [
   { title: "Details matter", body: "Every object is chosen for craft, material honesty, and the small details that elevate a room." },
   { title: "Small-batch makers", body: "We partner with independent studios — not mass-market factories — so each piece feels personal." },
   { title: "Maker-vetted", body: "Our team reviews makers for quality, ethics, and consistency before anything reaches the shop." },
-  { title: "Mood-first edits", body: "Collections are built around how a space should feel — calm, cozy, focused, or romantic." },
   { title: "Ships with care", body: "Pan-India delivery with protective packaging. Free shipping on orders above ₹999." },
 ];
 
@@ -20,7 +19,7 @@ export function AboutContent() {
       <EditorialReveal className="mt-6">
         <EditorialItem>
           <p className="aes-gallery-lead mx-auto text-center">
-            Details matter · Small-batch makers · Maker-vetted · Mood-first edits · Ships with care
+            Details matter · Small-batch makers · Maker-vetted · Ships with care
           </p>
         </EditorialItem>
       </EditorialReveal>
@@ -30,7 +29,7 @@ export function AboutContent() {
           <p className="text-base leading-relaxed text-[var(--aes-ink-muted)] sm:text-lg">
             We are a direct-to-consumer brand based in India, curating objects from independent makers
             for homes that value intention over excess. Every product is selected for material quality,
-            thoughtful design, and the mood it brings to your space.
+            thoughtful design, and how it lives in your space.
           </p>
         </EditorialItem>
         <EditorialItem>

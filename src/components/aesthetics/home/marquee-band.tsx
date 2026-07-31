@@ -1,7 +1,6 @@
 const BENEFITS = [
   "Small-batch makers",
   "Maker-vetted",
-  "Mood-first edits",
   "Ships with care",
   "Details matter",
 ];
