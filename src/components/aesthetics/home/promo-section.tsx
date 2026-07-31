@@ -15,9 +15,9 @@ const PROMOS = [
     image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80",
   },
   {
-    title: "Collections",
-    subtitle: "Curated edits for every mood",
-    href: "/aesthetics/collections",
+    title: "Featured picks",
+    subtitle: "Pieces we’re loving right now",
+    href: "/aesthetics/shop",
     image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80",
   },
 ];

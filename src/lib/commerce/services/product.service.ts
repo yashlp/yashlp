@@ -180,7 +180,18 @@ export const productService = {
   },
 
   async update(id: string, data: ProductUpdateInput) {
-    const { images, videos, materials, tags, colors, specifications, purchaseDate, ...rest } = data;
+    const {
+      images,
+      videos,
+      materials,
+      tags,
+      colors,
+      specifications,
+      purchaseDate,
+      roomMood: _roomMood,
+      ...rest
+    } = data;
+    void _roomMood;
 
     if (images || videos) {
       await prisma.commerceProductMedia.deleteMany({ where: { productId: id } });

@@ -17,7 +17,7 @@ export function FunctionFunSection() {
               We&apos;re the joy-enhancing alternative to endless scrolling — curated objects from
               independent makers that match your better-for-you lifestyle, not a generic algorithm.
             </p>
-            <Link href="/aesthetics/collections" className="aes-btn aes-btn-light mt-8 inline-flex px-8 py-3.5">
+            <Link href="/aesthetics/about" className="aes-btn aes-btn-light mt-8 inline-flex px-8 py-3.5">
               Learn more
             </Link>
           </div>

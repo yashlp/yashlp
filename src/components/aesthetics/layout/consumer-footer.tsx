@@ -25,7 +25,7 @@ export function ConsumerFooter() {
           <div className="mx-auto max-w-7xl text-center">
             <BrandLogo variant="footer" href="/aesthetics" />
             <p className="mx-auto mt-6 max-w-md text-[11px] tracking-wide text-white">
-              Details matter · Small-batch makers · Maker-vetted · Mood-first edits · Ships with care
+              Details matter · Small-batch makers · Maker-vetted · Ships with care
             </p>
             <form
               className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
@@ -53,11 +53,6 @@ export function ConsumerFooter() {
               <li>
                 <Link href="/aesthetics/shop" className="inline-flex min-h-11 items-center text-white hover:opacity-85">
                   All products
-                </Link>
-              </li>
-              <li>
-                <Link href="/aesthetics/collections" className="inline-flex min-h-11 items-center text-white hover:opacity-85">
-                  Collections
                 </Link>
               </li>
               <li>

@@ -1,5 +1,4 @@
 import type { ProductMood } from "@/lib/aesthetics/types";
-import { SHOP_MOOD_IMAGES } from "@/components/aesthetics/home/shop-mood-gallery";
 
 /** Core mood filters used across the storefront */
 export const PRODUCT_MOOD_OPTIONS: { value: ProductMood; label: string; hint: string }[] = [
@@ -9,13 +8,6 @@ export const PRODUCT_MOOD_OPTIONS: { value: ProductMood; label: string; hint: st
   { value: "earthy", label: "Earthy", hint: "Natural, grounded, tactile" },
   { value: "modern", label: "Modern", hint: "Clean lines, contemporary" },
 ];
-
-/** Room moods shown on the homepage gallery */
-export const ROOM_MOOD_OPTIONS = SHOP_MOOD_IMAGES.map((m) => ({
-  value: m.label,
-  label: m.label,
-  image: m.src,
-}));
 
 export type DimensionHint = {
   label: string;

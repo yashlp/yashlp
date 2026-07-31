@@ -107,8 +107,8 @@ export default function ShopPage() {
         ) : displayProducts.length === 0 ? (
           <EmptyState
             {...(isSearching ? EMPTY_COPY.search : EMPTY_COPY.products)}
-            actionHref="/aesthetics/collections"
-            actionLabel="Browse collections"
+            actionHref="/aesthetics/shop"
+            actionLabel="Browse shop"
           />
         ) : (
           <div className={`${isSearching ? "mt-10" : ""} grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-4`}>

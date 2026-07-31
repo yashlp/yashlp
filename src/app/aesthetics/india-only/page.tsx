@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { ConsumerPage } from "@/components/aesthetics/layout/consumer-page";
-import { ShopMoodGallery } from "@/components/aesthetics/home/shop-mood-gallery";
 
 export default function IndiaOnlyPage() {
   return (
@@ -23,8 +22,6 @@ export default function IndiaOnlyPage() {
             Shop now
           </Link>
         </div>
-
-        <ShopMoodGallery />
 
         <p className="mt-10 text-xs text-[var(--aes-ink-soft)]">
           Visiting from India?{" "}

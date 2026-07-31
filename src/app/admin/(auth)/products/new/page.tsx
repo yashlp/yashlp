@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/aesthetics/ui/button";
 import { Card } from "@/components/aesthetics/ui/card";
@@ -11,24 +11,18 @@ import {
 } from "@/components/aesthetics/admin/product-media-uploader";
 import {
   PRODUCT_MOOD_OPTIONS,
-  ROOM_MOOD_OPTIONS,
   dimensionHintForProduct,
   slugifyProduct,
 } from "@/lib/commerce/product-form-options";
 
-type Category = { id: string; name: string; slug?: string };
-
 export default function NewProductPage() {
   const router = useRouter();
-  const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({
     name: "",
     description: "",
     price: "",
     stock: "",
-    categoryId: "",
     mood: "",
-    roomMood: "",
     dimensions: "",
     materials: "",
   });
@@ -36,22 +30,13 @@ export default function NewProductPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/categories")
-      .then((r) => r.json())
-      .then((d) => setCategories(d.categories || []));
-  }, []);
-
-  const selectedCategory = categories.find((c) => c.id === form.categoryId);
   const dimensionHint = useMemo(
     () =>
       dimensionHintForProduct({
-        categorySlug: selectedCategory?.slug,
-        categoryName: selectedCategory?.name,
         productName: form.name,
         description: form.description,
       }),
-    [selectedCategory, form.name, form.description]
+    [form.name, form.description]
   );
 
   async function submit(e: React.FormEvent) {
@@ -96,7 +81,6 @@ export default function NewProductPage() {
         payload.slug = slugifyProduct(form.name);
       }
       if (form.stock !== "") payload.stock = Number(form.stock) || 0;
-      if (form.categoryId) payload.categoryId = form.categoryId;
       if (form.dimensions.trim()) payload.dimensions = form.dimensions.trim();
       if (form.materials.trim()) {
         payload.materials = form.materials
@@ -104,7 +88,6 @@ export default function NewProductPage() {
           .map((m) => m.trim())
           .filter(Boolean);
       }
-      if (form.roomMood) payload.roomMood = form.roomMood;
 
       const res = await fetch("/api/admin/products", {
         method: "POST",
@@ -216,38 +199,6 @@ export default function NewProductPage() {
                   value={form.stock}
                   onChange={(e) => setForm({ ...form, stock: e.target.value })}
                 />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Category</label>
-                <select
-                  className="aes-input"
-                  value={form.categoryId}
-                  onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                >
-                  <option value="">Optional</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Room vibe (homepage moods)</label>
-                <select
-                  className="aes-input"
-                  value={form.roomMood}
-                  onChange={(e) => setForm({ ...form, roomMood: e.target.value })}
-                >
-                  <option value="">Optional</option>
-                  {ROOM_MOOD_OPTIONS.map((m) => (
-                    <option key={m.value} value={m.value}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { HangingNoteBoard } from "@/components/aesthetics/home/hanging-note-board";
-import { ShopMoodGallery } from "@/components/aesthetics/home/shop-mood-gallery";
 
 export function HeroSection() {
   return (
@@ -25,8 +24,6 @@ export function HeroSection() {
             Shop now
           </Link>
         </div>
-
-        <ShopMoodGallery />
       </div>
     </section>
   );

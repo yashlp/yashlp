@@ -4,7 +4,6 @@ const VALUES = [
   { title: "Details matter", body: "Every object is chosen for craft, material honesty, and the small details that elevate a room." },
   { title: "Small-batch makers", body: "We partner with independent studios — not mass-market factories — so each piece feels personal." },
   { title: "Maker-vetted", body: "Our team reviews makers for quality, ethics, and consistency before anything reaches the shop." },
-  { title: "Mood-first edits", body: "Collections are built around how a space should feel — calm, cozy, focused, or romantic." },
   { title: "Ships with care", body: "Pan-India delivery with protective packaging. Free shipping on orders above ₹999." },
 ];
 

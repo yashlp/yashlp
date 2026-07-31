@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/aesthetics/ui/button";
@@ -10,16 +10,39 @@ import {
   ProductMediaUploader,
   type ProductMediaValue,
 } from "@/components/aesthetics/admin/product-media-uploader";
+import {
+  PRODUCT_MOOD_OPTIONS,
+  dimensionHintForProduct,
+  slugifyProduct,
+} from "@/lib/commerce/product-form-options";
+
+function parseMaterials(raw: unknown): string {
+  if (!raw) return "";
+  if (Array.isArray(raw)) return raw.filter(Boolean).join(", ");
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean).join(", ");
+    } catch {
+      // plain string
+    }
+    return raw;
+  }
+  return "";
+}
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [suppliers, setSuppliers] = useState<{ id: string; brandName: string; mobile: string | null; email: string | null }[]>([]);
   const [form, setForm] = useState({
-    name: "", slug: "", sku: "", barcode: "", description: "", shortDescription: "",
-    price: "", mrp: "", purchaseCost: "", stock: "", minStock: "", warehouseLocation: "",
-    supplierId: "", categoryId: "", purchaseDate: "", status: "DRAFT",
+    name: "",
+    description: "",
+    price: "",
+    stock: "",
+    mood: "",
+    dimensions: "",
+    materials: "",
+    status: "PUBLISHED",
   });
   const [media, setMedia] = useState<ProductMediaValue>({ images: [], videos: [] });
   const [error, setError] = useState("");
@@ -27,87 +50,101 @@ export default function EditProductPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      fetch(`/api/admin/products/${id}`).then((r) => r.json()),
-      fetch("/api/admin/categories").then((r) => r.json()),
-      fetch("/api/admin/suppliers").then((r) => r.json()),
-    ]).then(([prod, cats, sups]) => {
-      const p = prod.product;
-      if (!p) return;
-      setForm({
-        name: p.name || "",
-        slug: p.slug || "",
-        sku: p.sku || "",
-        barcode: p.barcode || "",
-        description: p.description || "",
-        shortDescription: p.shortDescription || "",
-        price: String(p.price || ""),
-        mrp: p.mrp ? String(p.mrp) : "",
-        purchaseCost: p.purchaseCost ? String(p.purchaseCost) : "",
-        stock: String(p.stock ?? 0),
-        minStock: String(p.minStock ?? 5),
-        warehouseLocation: p.warehouseLocation || "",
-        supplierId: p.supplierId || "",
-        categoryId: p.categoryId || "",
-        purchaseDate: p.purchaseDate ? p.purchaseDate.slice(0, 10) : "",
-        status: p.status || "DRAFT",
-      });
-      const images = (p.media || [])
-        .filter((m: { type: string }) => m.type === "IMAGE")
-        .map((m: { url: string }) => m.url)
-        .slice(0, 4);
-      const videos = (p.media || [])
-        .filter((m: { type: string }) => m.type === "VIDEO")
-        .map((m: { url: string }) => m.url)
-        .slice(0, 1);
-      setMedia({ images, videos });
-      setCategories(cats.categories || []);
-      setSuppliers(sups.suppliers || []);
-      setLoading(false);
-    });
+    fetch(`/api/admin/products/${id}`)
+      .then((r) => r.json())
+      .then((prod) => {
+        const p = prod.product;
+        if (!p) return;
+        setForm({
+          name: p.name || "",
+          description: p.description || "",
+          price: String(p.price || ""),
+          stock: p.stock != null ? String(p.stock) : "",
+          mood: p.mood || "",
+          dimensions: p.dimensions || "",
+          materials: parseMaterials(p.materials),
+          status: p.status || "PUBLISHED",
+        });
+        const images = (p.media || [])
+          .filter((m: { type: string }) => m.type === "IMAGE")
+          .map((m: { url: string }) => m.url)
+          .slice(0, 4);
+        const videos = (p.media || [])
+          .filter((m: { type: string }) => m.type === "VIDEO")
+          .map((m: { url: string }) => m.url)
+          .slice(0, 1);
+        setMedia({ images, videos });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [id]);
 
-  const cost = Number(form.purchaseCost) || 0;
-  const price = Number(form.price) || 0;
-  const margin = cost > 0 && price > 0 ? Math.round(((price - cost) / price) * 100) : null;
-  const supplier = suppliers.find((s) => s.id === form.supplierId);
+  const dimensionHint = useMemo(
+    () =>
+      dimensionHintForProduct({
+        productName: form.name,
+        description: form.description,
+      }),
+    [form.name, form.description]
+  );
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (!form.description.trim()) {
+      setError("Description is required.");
+      return;
+    }
+    if (!form.mood) {
+      setError("Choose a mood.");
+      return;
+    }
+    if (!form.price || Number(form.price) <= 0) {
+      setError("Enter a selling price greater than 0.");
+      return;
+    }
     if (media.images.length < 2) {
       setError("Upload at least 2 product photos.");
       return;
     }
+    if (media.images.length > 4) {
+      setError("Maximum 4 product photos.");
+      return;
+    }
+
     setSaving(true);
     try {
+      const name = form.name.trim() || undefined;
       const res = await fetch(`/api/admin/products/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          slug: form.slug,
-          sku: form.sku || undefined,
-          barcode: form.barcode || undefined,
-          description: form.description,
-          shortDescription: form.shortDescription || undefined,
+          name,
+          slug: name ? slugifyProduct(name) : undefined,
+          description: form.description.trim(),
+          mood: form.mood,
           price: Number(form.price),
-          mrp: form.mrp ? Number(form.mrp) : undefined,
-          purchaseCost: form.purchaseCost ? Number(form.purchaseCost) : undefined,
-          stock: Number(form.stock),
-          minStock: Number(form.minStock),
-          warehouseLocation: form.warehouseLocation || undefined,
-          supplierId: form.supplierId || undefined,
-          categoryId: form.categoryId,
+          stock: form.stock !== "" ? Number(form.stock) || 0 : undefined,
+          dimensions: form.dimensions.trim() || undefined,
+          materials: form.materials
+            .split(",")
+            .map((m) => m.trim())
+            .filter(Boolean),
           status: form.status,
-          purchaseDate: form.purchaseDate ? new Date(form.purchaseDate).toISOString() : undefined,
           images: media.images,
-          videos: media.videos,
+          videos: media.videos.length ? media.videos : [],
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Save failed");
+        const fieldErrors = data.details?.fieldErrors as Record<string, string[]> | undefined;
+        const firstDetail = fieldErrors
+          ? Object.entries(fieldErrors)
+              .map(([field, msgs]) => `${field}: ${msgs?.[0] || "invalid"}`)
+              .join(" · ")
+          : "";
+        setError(data.error || firstDetail || "Save failed");
         return;
       }
       router.push("/admin/inventory");
@@ -125,77 +162,148 @@ export default function EditProductPage() {
   if (loading) return <div className="aes-skeleton h-40 rounded-2xl" />;
 
   return (
-    <div className="max-w-3xl">
-      <Link href="/admin/inventory" className="text-sm text-[var(--aes-royal)]">← Inventory</Link>
+    <div className="max-w-2xl">
+      <Link href="/admin/inventory" className="text-sm text-[var(--aes-royal)]">
+        ← Inventory
+      </Link>
       <h1 className="aes-display mt-4 text-3xl font-semibold italic">Edit product</h1>
+      <p className="mt-1 text-sm text-[var(--aes-charcoal-muted)]">
+        Same fields as Add product — update photos, description, mood, price, and optional details.
+      </p>
 
-      <Card className="mt-8">
-        <form onSubmit={save} className="space-y-6">
-          <section>
-            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Product details</p>
-            <div className="space-y-3">
-              <Input placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input placeholder="SKU" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
-                <Input placeholder="Barcode" value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
-              </div>
-              <Input placeholder="URL slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
-              <textarea className="aes-input min-h-24 w-full" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-            </div>
-          </section>
-
-          <section>
-            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Pricing & margin</p>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Input type="number" placeholder="Purchase cost (₹)" value={form.purchaseCost} onChange={(e) => setForm({ ...form, purchaseCost: e.target.value })} />
-              <Input type="number" placeholder="Selling price (₹)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-              <Input type="number" placeholder="MRP (₹)" value={form.mrp} onChange={(e) => setForm({ ...form, mrp: e.target.value })} />
-            </div>
-            {margin != null && <p className="mt-2 text-sm text-[var(--aes-royal)]">Profit margin: {margin}%</p>}
-          </section>
-
-          <section>
-            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Inventory</p>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Input type="number" placeholder="Stock qty" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-              <Input type="number" placeholder="Reorder level" value={form.minStock} onChange={(e) => setForm({ ...form, minStock: e.target.value })} />
-              <Input placeholder="Warehouse location" value={form.warehouseLocation} onChange={(e) => setForm({ ...form, warehouseLocation: e.target.value })} />
-            </div>
-            <Input type="date" className="mt-3" value={form.purchaseDate} onChange={(e) => setForm({ ...form, purchaseDate: e.target.value })} />
-          </section>
-
-          <section>
-            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Supplier</p>
-            <select className="aes-input w-full" value={form.supplierId} onChange={(e) => setForm({ ...form, supplierId: e.target.value })}>
-              <option value="">Select supplier</option>
-              {suppliers.map((s) => <option key={s.id} value={s.id}>{s.brandName}</option>)}
-            </select>
-            {supplier && (
-              <p className="mt-2 text-sm text-[var(--aes-charcoal-muted)]">
-                Contact: {supplier.mobile || supplier.email || "—"}
-              </p>
-            )}
-          </section>
-
-          <section className="rounded-2xl border border-[var(--aes-border)] bg-[var(--aes-ivory)]/40 p-4">
-            <p className="aes-mono mb-3 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">Media</p>
+      <Card className="mt-8 space-y-4">
+        <form onSubmit={save} className="space-y-5">
+          <div>
+            <label className="aes-mono mb-2 block text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
+              Photos <span className="text-red-600">*</span>
+            </label>
             <ProductMediaUploader value={media} onChange={setMedia} disabled={saving} />
-          </section>
+            <p className="mt-2 text-xs text-[var(--aes-charcoal-muted)]">Minimum 2, maximum 4 photos. Video optional.</p>
+          </div>
 
-          <select className="aes-input w-full" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}>
-            <option value="">Category</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-          <select className="aes-input w-full" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-            {["DRAFT", "PUBLISHED", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"].map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <div>
+            <label className="aes-mono mb-2 block text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
+              Description <span className="text-red-600">*</span>
+            </label>
+            <textarea
+              className="aes-input min-h-28"
+              placeholder="What is this piece, and how does it feel in a room?"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="aes-mono mb-2 block text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
+              Mood <span className="text-red-600">*</span>
+            </label>
+            <select
+              className="aes-input"
+              value={form.mood}
+              onChange={(e) => setForm({ ...form, mood: e.target.value })}
+              required
+            >
+              <option value="">Select mood</option>
+              {PRODUCT_MOOD_OPTIONS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label} — {m.hint}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="aes-mono mb-2 block text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
+              Selling price (₹) <span className="text-red-600">*</span>
+            </label>
+            <Input
+              type="number"
+              min={1}
+              step="1"
+              placeholder="e.g. 2499"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="border-t border-[var(--aes-border)] pt-5">
+            <p className="aes-mono mb-4 text-[10px] uppercase tracking-wider text-[var(--aes-dusty)]">
+              Optional details
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Product name</label>
+                <Input
+                  placeholder="Optional — we can title it from the description"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Stock quantity</label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="Optional"
+                  value={form.stock}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Materials</label>
+                <Input
+                  placeholder="e.g. Acrylic, wood base, LED"
+                  value={form.materials}
+                  onChange={(e) => setForm({ ...form, materials: e.target.value })}
+                />
+                <p className="mt-1 text-xs text-[var(--aes-dusty)]">Comma-separated. Shows on the product page.</p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">
+                  {dimensionHint.label}
+                </label>
+                <Input
+                  placeholder={dimensionHint.placeholder}
+                  value={form.dimensions}
+                  onChange={(e) => setForm({ ...form, dimensions: e.target.value })}
+                />
+                <p className="mt-2 text-xs text-[var(--aes-charcoal-muted)]">{dimensionHint.tip}</p>
+                <p className="mt-1 text-xs text-[var(--aes-dusty)]">
+                  Suggested fields: {dimensionHint.fields.join(" · ")}
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm text-[var(--aes-charcoal-muted)]">Visibility</label>
+                <select
+                  className="aes-input"
+                  value={form.status}
+                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                >
+                  {["PUBLISHED", "DRAFT", "HIDDEN", "ARCHIVED", "OUT_OF_STOCK"].map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={saving || media.images.length < 2}>
               {saving ? "Saving…" : "Save changes"}
             </Button>
-            <Button type="button" variant="secondary" onClick={remove} disabled={saving}>Delete product</Button>
+            <Button type="button" variant="secondary" onClick={remove} disabled={saving}>
+              Delete product
+            </Button>
           </div>
         </form>
       </Card>

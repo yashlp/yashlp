@@ -25,9 +25,9 @@ export function TranquilitySection() {
             <p className="aes-serif mt-6 text-lg italic leading-relaxed text-[var(--aes-sand)]/75">
               From deeply calming aromatics to sculptural ceramics — each piece is chosen to create a haven of relaxation in your home.
             </p>
-            <Link href="/aesthetics/collections" className="mt-10 inline-block">
+            <Link href="/aesthetics/shop" className="mt-10 inline-block">
               <Button variant="light" size="lg">
-                Explore collections
+                Explore the shop
               </Button>
             </Link>
           </div>
