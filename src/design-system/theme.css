@@ -983,8 +983,8 @@
 .aes-hanging-note__pendulum {
   pointer-events: auto;
   transform-origin: top center;
-  animation: aes-hang-sway 5.6s ease-in-out infinite;
-  will-change: transform;
+  /* One gentle sway cycle, then rest — infinite sway was a major jank source on phones */
+  animation: aes-hang-sway 4.8s ease-in-out 1 both;
 }
 
 .aes-hanging-note__strings {
@@ -1258,6 +1258,9 @@
 
   .aes-hanging-note__pendulum {
     animation-name: aes-hang-sway-desktop;
+    animation-duration: 4.8s;
+    animation-iteration-count: 1;
+    animation-fill-mode: both;
   }
 }
 

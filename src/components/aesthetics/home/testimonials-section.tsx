@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,13 @@ function ReviewCard({ review }: { review: StorefrontReview }) {
       >
         {review.productImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={review.productImage} alt="" className="h-full w-full object-cover" />
+          <img
+            src={review.productImage}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span className="flex h-full w-full items-center justify-center text-[10px] text-[var(--aes-ink-soft)]">
             OA
@@ -69,14 +76,32 @@ function ReviewCard({ review }: { review: StorefrontReview }) {
   );
 }
 
-/** Auto-scrolling marquee: cards move left → right. Hidden when there are no real reviews. */
+/** Auto-scrolling marquee: cards move left → right. Pauses off-screen to keep the page smooth. */
 export function TestimonialsSection({ reviews }: Props) {
+  const rootRef = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(true);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   if (!reviews.length) return null;
 
   const loop = [...reviews, ...reviews];
 
   return (
-    <section className="aes-bg-testimonial overflow-hidden px-4 py-16 sm:px-6 sm:py-20" aria-label="Customer reviews">
+    <section
+      ref={rootRef}
+      className="aes-bg-testimonial overflow-hidden px-4 py-16 sm:px-6 sm:py-20"
+      aria-label="Customer reviews"
+    >
       <div className="mx-auto max-w-7xl">
         <h2 className="aes-section-title text-center text-[var(--aes-ink)]">Customer reviews</h2>
         <p className="mx-auto mt-3 max-w-md text-center text-sm text-[var(--aes-ink-muted)]">
@@ -86,7 +111,12 @@ export function TestimonialsSection({ reviews }: Props) {
         <div className="relative mt-12">
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-[var(--aes-bg-testimonial,#f6f1ec)] to-transparent sm:w-16" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-[var(--aes-bg-testimonial,#f6f1ec)] to-transparent sm:w-16" />
-          <div className="oa-reviews-marquee flex w-max gap-4 hover:[animation-play-state:paused]">
+          <div
+            className={cn(
+              "oa-reviews-marquee flex w-max gap-4 hover:[animation-play-state:paused]",
+              !inView && "[animation-play-state:paused]"
+            )}
+          >
             {loop.map((review, i) => (
               <ReviewCard key={`${review.id}-${i}`} review={review} />
             ))}

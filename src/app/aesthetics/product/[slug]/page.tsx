@@ -13,6 +13,8 @@ import { reviewService } from "@/lib/commerce/services/review.service";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const revalidate = 60;
+
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await productService.getBySlug(slug);

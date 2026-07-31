@@ -10,7 +10,7 @@ type Props = {
   products: Product[];
 };
 
-const AUTO_PX_PER_FRAME = 0.9;
+const AUTO_PX_PER_FRAME = 0.55;
 const RESUME_AFTER_MS = 1800;
 const DRAG_CLICK_THRESHOLD = 8;
 
@@ -27,6 +27,7 @@ export function ShopNowProducts({ products }: Props) {
     startScroll: number;
     moved: boolean;
   } | null>(null);
+  const visibleRef = useRef(true);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   // Dedupe by id — never render the same product twice
@@ -61,16 +62,33 @@ export function ShopNowProducts({ products }: Props) {
   }, []);
 
   useEffect(() => {
-    // Only auto-scroll when there are more products than fit on screen
+    const el = scrollerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.15 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [uniqueProducts.length]);
+
+  useEffect(() => {
     if (reducedMotion || uniqueProducts.length < 2) return;
 
-    const tick = () => {
-      const el = scrollerRef.current;
-      if (el && !pausedRef.current) {
-        const max = el.scrollWidth - el.clientWidth;
-        if (max > 4) {
-          if (el.scrollLeft >= max - 1) el.scrollLeft = 0;
-          else el.scrollLeft += AUTO_PX_PER_FRAME;
+    let last = 0;
+    const tick = (now: number) => {
+      // Cap work ~30fps — enough for gentle motion, cheaper on phones
+      if (now - last >= 32) {
+        last = now;
+        const el = scrollerRef.current;
+        if (el && visibleRef.current && !pausedRef.current) {
+          const max = el.scrollWidth - el.clientWidth;
+          if (max > 4) {
+            if (el.scrollLeft >= max - 1) el.scrollLeft = 0;
+            else el.scrollLeft += AUTO_PX_PER_FRAME;
+          }
         }
       }
       rafRef.current = requestAnimationFrame(tick);

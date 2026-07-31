@@ -92,7 +92,7 @@ function ProductImage({
       <motion.img
         src={product.images[0]}
         alt={product.name}
-        className="h-full w-full object-cover will-change-transform"
+        className="h-full w-full object-cover"
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         draggable={false}

@@ -12,8 +12,8 @@ import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { productService } from "@/lib/commerce/services/product.service";
 import { reviewService } from "@/lib/commerce/services/review.service";
 
-/** Always fetch live catalog so newly uploaded products appear immediately. */
-export const dynamic = "force-dynamic";
+/** Fetch catalog at most once a minute; product create/update already revalidates. */
+export const revalidate = 60;
 
 export default async function AestheticsHomePage() {
   let featured: Awaited<ReturnType<typeof productService.listPublished>> = [];
