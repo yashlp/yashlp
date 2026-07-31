@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/aesthetics/layout/brand-logo";
 import { HangingNoteBoard } from "@/components/aesthetics/home/hanging-note-board";
+import { ShopNowProducts } from "@/components/aesthetics/home/shop-now-products";
+import type { Product } from "@/lib/aesthetics/types";
 
-export function HeroSection() {
+type HeroSectionProps = {
+  products?: Product[];
+};
+
+export function HeroSection({ products = [] }: HeroSectionProps) {
   return (
     <section className="aes-bg-hero aes-hero relative px-4 pb-12 pt-4 sm:px-6 sm:pb-16 sm:pt-10">
       <HangingNoteBoard />
@@ -25,6 +31,8 @@ export function HeroSection() {
           </Link>
         </div>
       </div>
+
+      <ShopNowProducts products={products} />
     </section>
   );
 }

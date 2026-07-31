@@ -1,19 +1,31 @@
 import { prisma } from "@/lib/db";
 import { mapBrand, mapCollection, mapProduct } from "../mappers";
 
+const productCardInclude = { brand: true, category: true, media: true } as const;
+const publishedWhere = { status: "PUBLISHED" as const, approvalStatus: "APPROVED" as const };
+
 export const catalogService = {
   async getHomepageData() {
-    const [featured, newArrivals, collections, brands] = await Promise.all([
+    const [featuredTagged, newArrivalTagged, latest, collections, brands] = await Promise.all([
       prisma.commerceProduct.findMany({
-        where: { status: "PUBLISHED", approvalStatus: "APPROVED", isFeatured: true },
-        include: { brand: true, category: true, media: true },
+        where: { ...publishedWhere, isFeatured: true },
+        include: productCardInclude,
         take: 8,
         orderBy: { updatedAt: "desc" },
       }),
       prisma.commerceProduct.findMany({
-        where: { status: "PUBLISHED", approvalStatus: "APPROVED", isNewArrival: true },
-        include: { brand: true, category: true, media: true },
+        where: { ...publishedWhere, isNewArrival: true },
+        include: productCardInclude,
         take: 8,
+        orderBy: { createdAt: "desc" },
+      }),
+      // Always load newest published products so Shop now / homepage rails stay filled
+      // even when admin create never flipped isFeatured / isNewArrival.
+      prisma.commerceProduct.findMany({
+        where: publishedWhere,
+        include: productCardInclude,
+        take: 12,
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
       }),
       prisma.commerceCollection.findMany({
         where: { isPublished: true, isFeatured: true },
@@ -27,9 +39,13 @@ export const catalogService = {
       }),
     ]);
 
+    const featured = featuredTagged.length ? featuredTagged : latest.slice(0, 8);
+    const newArrivals = newArrivalTagged.length ? newArrivalTagged : latest.slice(0, 8);
+
     return {
       featured: featured.map(mapProduct),
       newArrivals: newArrivals.map(mapProduct),
+      latest: latest.map(mapProduct),
       collections: collections.map((c) => mapCollection(c)),
       brands: brands.map(mapBrand),
     };

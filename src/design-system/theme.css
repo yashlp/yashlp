@@ -1502,12 +1502,39 @@
   animation-play-state: paused;
 }
 
+/* Homepage Shop now products — slides left → right; pause on hover so clicks are easy */
+@keyframes oa-products-ltr {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.oa-products-marquee {
+  animation: oa-products-ltr 40s linear infinite;
+}
+
+.oa-products-marquee:hover {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .oa-reviews-marquee {
     animation: none;
     flex-wrap: wrap;
     width: 100% !important;
     max-width: 80rem;
+    margin-inline: auto;
+    justify-content: center;
+  }
+
+  .oa-products-marquee {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100% !important;
+    max-width: 72rem;
     margin-inline: auto;
     justify-content: center;
   }

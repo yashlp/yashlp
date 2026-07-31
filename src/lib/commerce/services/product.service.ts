@@ -158,6 +158,8 @@ export const productService = {
         specifications: specifications ? JSON.stringify(specifications) : undefined,
         approvalStatus: rest.approvalStatus || "PENDING",
         status: rest.status || "DRAFT",
+        // Newly published pieces show in New arrivals / Shop now rails by default
+        isNewArrival: rest.isNewArrival ?? (rest.status === "PUBLISHED" ? true : false),
         publishedAt: rest.status === "PUBLISHED" ? new Date() : undefined,
         media: mediaCreate.length ? { create: mediaCreate } : undefined,
       },

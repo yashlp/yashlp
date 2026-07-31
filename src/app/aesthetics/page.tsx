@@ -15,12 +15,14 @@ import { reviewService } from "@/lib/commerce/services/review.service";
 export default async function AestheticsHomePage() {
   let featured: Awaited<ReturnType<typeof productService.listPublished>> = [];
   let newArrivals: typeof featured = [];
+  let latest: typeof featured = [];
   let reviews: Awaited<ReturnType<typeof reviewService.listStorefront>> = [];
 
   try {
     const data = await catalogService.getHomepageData();
     featured = data.featured;
     newArrivals = data.newArrivals;
+    latest = data.latest;
   } catch {
     // Database not ready
   }
@@ -31,11 +33,13 @@ export default async function AestheticsHomePage() {
     reviews = [];
   }
 
+  const shopNowProducts = latest.length ? latest : featured.length ? featured : newArrivals;
+
   return (
     <>
       <ConsumerNav />
       <main className="relative">
-        <HeroSection />
+        <HeroSection products={shopNowProducts.slice(0, 12)} />
         <ProductRow
           title="Pieces as stunning"
           titleLine2="as they are intentional"
@@ -56,7 +60,7 @@ export default async function AestheticsHomePage() {
         <FunctionFunSection />
         <TestimonialsSection reviews={reviews} />
         <ContactSection />
-        {!featured.length && (
+        {!shopNowProducts.length && (
           <section className="aes-bg-sand px-4 py-20 text-center sm:px-6">
             <p className="text-lg font-medium text-[var(--aes-ink-muted)]">
               New products are on the way — check back soon.

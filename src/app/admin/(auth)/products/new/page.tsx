@@ -74,6 +74,7 @@ export default function NewProductPage() {
         videos: media.videos.length ? media.videos : undefined,
         status: "PUBLISHED",
         approvalStatus: "APPROVED",
+        isNewArrival: true,
       };
 
       if (form.name.trim()) {
