@@ -3,6 +3,7 @@ import { productService } from "@/lib/commerce/services/product.service";
 import { productUpdateSchema } from "@/lib/commerce/validators";
 import { writeAuditLog } from "@/lib/commerce/audit";
 import { commerceApiError, withAdminAuth } from "@/lib/commerce/api-utils";
+import { revalidateStorefrontCatalog } from "@/lib/commerce/revalidate-storefront";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -28,6 +29,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
       await writeAuditLog(admin.id, "UPDATE", "PRODUCT", id, body as Record<string, unknown>);
       return updated;
     });
+    revalidateStorefrontCatalog();
     return NextResponse.json({ product });
   } catch (error) {
     return commerceApiError(error);
@@ -41,6 +43,7 @@ export async function DELETE(_req: NextRequest, { params }: Props) {
       await productService.delete(id);
       await writeAuditLog(admin.id, "DELETE", "PRODUCT", id);
     });
+    revalidateStorefrontCatalog();
     return NextResponse.json({ ok: true });
   } catch (error) {
     return commerceApiError(error);

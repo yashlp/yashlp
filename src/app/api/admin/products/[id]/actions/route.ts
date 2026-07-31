@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { productService } from "@/lib/commerce/services/product.service";
 import { writeAuditLog } from "@/lib/commerce/audit";
 import { commerceApiError, withAdminAuth } from "@/lib/commerce/api-utils";
+import { revalidateStorefrontCatalog } from "@/lib/commerce/revalidate-storefront";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest, { params }: Props) {
       return result;
     });
 
+    revalidateStorefrontCatalog();
     return NextResponse.json({ product });
   } catch (error) {
     return commerceApiError(error);

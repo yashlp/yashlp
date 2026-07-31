@@ -6,25 +6,24 @@ const publishedWhere = { status: "PUBLISHED" as const, approvalStatus: "APPROVED
 
 export const catalogService = {
   async getHomepageData() {
-    const [featuredTagged, newArrivalTagged, latest, collections, brands] = await Promise.all([
+    const [featured, newArrivals, latest, collections, brands] = await Promise.all([
       prisma.commerceProduct.findMany({
         where: { ...publishedWhere, isFeatured: true },
         include: productCardInclude,
-        take: 8,
+        take: 24,
         orderBy: { updatedAt: "desc" },
       }),
       prisma.commerceProduct.findMany({
         where: { ...publishedWhere, isNewArrival: true },
         include: productCardInclude,
-        take: 8,
+        take: 24,
         orderBy: { createdAt: "desc" },
       }),
-      // Always load newest published products so Shop now / homepage rails stay filled
-      // even when admin create never flipped isFeatured / isNewArrival.
+      // Every published product for Shop now — newest first; no artificial duplicates
       prisma.commerceProduct.findMany({
         where: publishedWhere,
         include: productCardInclude,
-        take: 12,
+        take: 100,
         orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
       }),
       prisma.commerceCollection.findMany({
@@ -38,9 +37,6 @@ export const catalogService = {
         orderBy: { name: "asc" },
       }),
     ]);
-
-    const featured = featuredTagged.length ? featuredTagged : latest.slice(0, 8);
-    const newArrivals = newArrivalTagged.length ? newArrivalTagged : latest.slice(0, 8);
 
     return {
       featured: featured.map(mapProduct),

@@ -14,7 +14,7 @@ const AUTO_PX_PER_FRAME = 0.9;
 const RESUME_AFTER_MS = 1800;
 const DRAG_CLICK_THRESHOLD = 8;
 
-/** Live products under Shop now: LTR auto-scroll + finger swipe / mouse drag. */
+/** Live products under Shop now: each product once + finger swipe / mouse drag + gentle auto-scroll. */
 export function ShopNowProducts({ products }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,12 +29,8 @@ export function ShopNowProducts({ products }: Props) {
   } | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  const loop =
-    products.length === 0
-      ? []
-      : products.length === 1
-        ? [...products, ...products, ...products, ...products]
-        : [...products, ...products, ...products];
+  // Dedupe by id — never render the same product twice
+  const uniqueProducts = Array.from(new Map(products.map((p) => [p.id, p])).values());
 
   const clearResume = useCallback(() => {
     if (resumeTimer.current) {
@@ -65,13 +61,14 @@ export function ShopNowProducts({ products }: Props) {
   }, []);
 
   useEffect(() => {
-    if (reducedMotion || !loop.length) return;
+    // Only auto-scroll when there are more products than fit on screen
+    if (reducedMotion || uniqueProducts.length < 2) return;
 
     const tick = () => {
       const el = scrollerRef.current;
       if (el && !pausedRef.current) {
         const max = el.scrollWidth - el.clientWidth;
-        if (max > 0) {
+        if (max > 4) {
           if (el.scrollLeft >= max - 1) el.scrollLeft = 0;
           else el.scrollLeft += AUTO_PX_PER_FRAME;
         }
@@ -84,10 +81,9 @@ export function ShopNowProducts({ products }: Props) {
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
       clearResume();
     };
-  }, [clearResume, loop.length, reducedMotion]);
+  }, [clearResume, reducedMotion, uniqueProducts.length]);
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    // Touch: native overflow scroll handles fingers — only pause auto-scroll.
     if (e.pointerType === "touch") {
       pauseAuto();
       return;
@@ -143,7 +139,7 @@ export function ShopNowProducts({ products }: Props) {
     }
   }
 
-  if (!products.length) return null;
+  if (!uniqueProducts.length) return null;
 
   return (
     <div
@@ -176,9 +172,9 @@ export function ShopNowProducts({ products }: Props) {
           onMouseEnter={pauseAuto}
           onMouseLeave={scheduleResume}
         >
-          {loop.map((product, i) => (
+          {uniqueProducts.map((product, i) => (
             <Link
-              key={`${product.id}-${i}`}
+              key={product.id}
               href={`/aesthetics/product/${product.slug}`}
               onClick={onLinkClick}
               draggable={false}

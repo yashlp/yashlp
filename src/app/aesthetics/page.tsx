@@ -12,16 +12,17 @@ import { catalogService } from "@/lib/commerce/services/catalog.service";
 import { productService } from "@/lib/commerce/services/product.service";
 import { reviewService } from "@/lib/commerce/services/review.service";
 
+/** Always fetch live catalog so newly uploaded products appear immediately. */
+export const dynamic = "force-dynamic";
+
 export default async function AestheticsHomePage() {
   let featured: Awaited<ReturnType<typeof productService.listPublished>> = [];
-  let newArrivals: typeof featured = [];
   let latest: typeof featured = [];
   let reviews: Awaited<ReturnType<typeof reviewService.listStorefront>> = [];
 
   try {
     const data = await catalogService.getHomepageData();
     featured = data.featured;
-    newArrivals = data.newArrivals;
     latest = data.latest;
   } catch {
     // Database not ready
@@ -33,26 +34,19 @@ export default async function AestheticsHomePage() {
     reviews = [];
   }
 
-  const shopNowProducts = latest.length ? latest : featured.length ? featured : newArrivals;
-
   return (
     <>
       <ConsumerNav />
       <main className="relative">
-        <HeroSection products={shopNowProducts.slice(0, 12)} />
+        {/* All published products, each once — updates as soon as you upload */}
+        <HeroSection products={latest} />
+        {/* Featured rail only when products are explicitly marked featured (avoids Shop now duplicates) */}
         <ProductRow
           title="Pieces as stunning"
           titleLine2="as they are intentional"
           titleStyle="upper"
-          products={featured.slice(0, 5)}
+          products={featured}
           bg="blush"
-          quickAdd
-        />
-        <ProductRow
-          title="New arrivals"
-          titleStyle="upper"
-          products={newArrivals.slice(0, 5)}
-          bg="lavender"
           quickAdd
         />
         <AboutBanner />
@@ -60,7 +54,7 @@ export default async function AestheticsHomePage() {
         <FunctionFunSection />
         <TestimonialsSection reviews={reviews} />
         <ContactSection />
-        {!shopNowProducts.length && (
+        {!latest.length && (
           <section className="aes-bg-sand px-4 py-20 text-center sm:px-6">
             <p className="text-lg font-medium text-[var(--aes-ink-muted)]">
               New products are on the way — check back soon.

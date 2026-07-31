@@ -3,6 +3,7 @@ import { productService } from "@/lib/commerce/services/product.service";
 import { productCreateSchema } from "@/lib/commerce/validators";
 import { writeAuditLog } from "@/lib/commerce/audit";
 import { commerceApiError, withAdminAuth } from "@/lib/commerce/api-utils";
+import { revalidateStorefrontCatalog } from "@/lib/commerce/revalidate-storefront";
 
 export async function GET(req: NextRequest) {
   try {
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest) {
       await writeAuditLog(admin.id, "CREATE", "PRODUCT", product.id, { name: product.name });
       return product;
     });
+    revalidateStorefrontCatalog();
     return NextResponse.json({ product: result }, { status: 201 });
   } catch (error) {
     return commerceApiError(error);
