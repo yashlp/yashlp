@@ -1,6 +1,6 @@
-# Wedding Guest List
+# Shah Family Guest List
 
-Simple shared guest list for Mehndi, Haldi, Paherwani, Ganpati Stapna, Sangeet, and Wedding.
+Shared guest list for the Shah family wedding functions: Mehndi, Haldi, Paherwani, Ganpati Stapna, Sangeet, and Wedding.
 
 ## Use
 
@@ -12,4 +12,6 @@ Open `index.html` (or `/wedding-guests/` when deployed).
 - Edit / delete guests
 - Download Excel or CSV at the bottom
 
-Data syncs live through the shared spreadsheet room `shah-wedding-guestlist-2026`.
+Data syncs live through the shared spreadsheet rooms:
+- Data: `shah-wedding-guestlist-2026`
+- Readable view: `shah-wedding-guestlist-readable-2026`

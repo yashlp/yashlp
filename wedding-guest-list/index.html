@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wedding Guest List</title>
+  <title>Shah Family Guest List</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -370,8 +370,8 @@
 <body>
   <div class="wrap">
     <header>
-      <h1 class="brand">Wedding Guest List</h1>
-      <p>Add guests once, pick every event they will attend, and share this page with family.</p>
+      <h1 class="brand">Shah Family Guest List</h1>
+      <p>Shah family wedding guests — add names once, pick every event they will attend, and share with family.</p>
     </header>
 
     <div class="status">
@@ -423,7 +423,7 @@
     </section>
 
     <section class="panel download-panel">
-      <h2>Download spreadsheet</h2>
+      <h2>Download Shah Family spreadsheet</h2>
       <p>Excel is divided by event with clear headings, family member counts, and totals for each function. Re-download anytime after family adds more names.</p>
       <div class="actions" style="justify-content:center">
         <button class="btn-primary" type="button" id="downloadXlsx">Download Excel (.xlsx)</button>
@@ -581,8 +581,8 @@
 
     function buildPrettySpreadsheetCsv() {
       const lines = [];
-      lines.push(["WEDDING GUEST LIST"]);
-      lines.push(["Easy readable view — updated for everyone"]);
+      lines.push(["SHAH FAMILY GUEST LIST"]);
+      lines.push(["Shah family wedding — easy readable view, updated for everyone"]);
       lines.push(["Last updated", new Date().toLocaleString()]);
       lines.push([]);
       lines.push(["*** EVENT SUMMARY ***"]);
@@ -804,7 +804,7 @@
 
     function downloadCsv() {
       const blob = new Blob([buildPrettySpreadsheetCsv()], { type: "text/csv;charset=utf-8" });
-      triggerDownload(blob, "Wedding_Guest_List.csv");
+      triggerDownload(blob, "Shah_Family_Guest_List.csv");
     }
 
     function styleSheet(ws, opts = {}) {
@@ -819,8 +819,8 @@
 
       // ===== Summary sheet =====
       const summary = [
-        ["WEDDING GUEST LIST"],
-        ["Clear event-wise guest count"],
+        ["SHAH FAMILY GUEST LIST"],
+        ["Shah family wedding — clear event-wise guest count"],
         ["Generated", now],
         [],
         ["EVENT SUMMARY"],
@@ -846,7 +846,7 @@
 
       // ===== All Guests master =====
       const allRows = [
-        ["ALL GUESTS — MASTER LIST"],
+        ["SHAH FAMILY — ALL GUESTS MASTER LIST"],
         ["Put Y under every event that guest will attend"],
         [],
         ["No.", "Guest / Family Name", "No. of Family Members", ...EVENTS],
@@ -918,7 +918,7 @@
       styleSheet(readableWs, { cols: [{ wch: 28 }, { wch: 34 }, { wch: 22 }, { wch: 28 }] });
       XLSX.utils.book_append_sheet(wb, readableWs, "All Events View");
 
-      XLSX.writeFile(wb, "Wedding_Guest_List.xlsx");
+      XLSX.writeFile(wb, "Shah_Family_Guest_List.xlsx");
     }
 
     function triggerDownload(blob, filename) {
