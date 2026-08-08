@@ -141,6 +141,29 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
+  // Shah Family Guest List needs EtherCalc sync + Excel CDN + Google Fonts.
+  if (path.startsWith("/wedding-guests")) {
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "img-src 'self' data: blob:",
+        "connect-src 'self' https://ethercalc.net",
+        "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+      ].join("; ")
+    );
+    response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    return response;
+  }
+
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
