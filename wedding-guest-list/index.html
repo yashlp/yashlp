@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shah Family Guest List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f7f0e8;
+      --ink: #2a1810;
+      --muted: #6b5344;
+      --card: rgba(255, 252, 247, 0.92);
+      --line: #e4d2c0;
+      --accent: #9a3412;
+      --accent-dark: #7c2d12;
+      --gold: #b45309;
+      --ok: #166534;
+      --danger: #991b1b;
+      --shadow: 0 10px 30px rgba(74, 40, 20, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, #fde68a55, transparent 35%),
+        radial-gradient(circle at 90% 10%, #fdba7455, transparent 40%),
+        linear-gradient(180deg, #fff7ed 0%, var(--bg) 45%, #f5e6d3 100%);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(920px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1.5rem 0 3rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+    header .brand {
+      font-family: Fraunces, Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin: 0;
+      color: var(--accent-dark);
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0.4rem 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .status {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin: 0.9rem 0 1.25rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .pill {
+      background: #fffaf3;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.3rem 0.75rem;
+    }
+    .pill.live { color: var(--ok); border-color: #86efac; background: #f0fdf4; }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.15rem 1.2rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .panel h2 {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.35rem;
+      margin: 0 0 0.85rem;
+      color: var(--accent-dark);
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 0.35rem;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      border: 1px solid #d6bda6;
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    input:focus {
+      outline: 2px solid #fdba74;
+      border-color: var(--gold);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1.6fr 0.7fr;
+      gap: 0.8rem;
+      margin-bottom: 0.9rem;
+    }
+    @media (max-width: 640px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    .events {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.55rem;
+      margin: 0.35rem 0 1rem;
+    }
+    @media (max-width: 640px) {
+      .events { grid-template-columns: 1fr 1fr; }
+    }
+    .event-opt {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 0.65rem 0.7rem;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .event-opt:has(input:checked) {
+      border-color: var(--accent);
+      background: #fff1e8;
+      color: var(--accent-dark);
+    }
+    .event-opt input { width: 1rem; height: 1rem; accent-color: var(--accent); }
+
+    .actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 0.8rem 1.1rem;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-secondary {
+      background: #fff;
+      color: var(--accent-dark);
+      border: 1px solid var(--line);
+    }
+    .btn-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+    .btn-small {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.85rem;
+      border-radius: 9px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.9rem;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.45rem 0.8rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .tab.active {
+      background: var(--accent-dark);
+      color: #fff;
+      border-color: var(--accent-dark);
+    }
+    .tab .count {
+      display: inline-block;
+      margin-left: 0.35rem;
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 0.05rem 0.4rem;
+      font-size: 0.8rem;
+    }
+    .tab:not(.active) .count {
+      background: #f3e7db;
+      color: var(--accent-dark);
+    }
+
+    .totals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin-bottom: 0.9rem;
+    }
+    .total-card {
+      background: linear-gradient(135deg, #fff7ed, #ffedd5);
+      border: 1px solid #f0d2b0;
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+    }
+    .total-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .total-card strong {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.7rem;
+      color: var(--accent-dark);
+    }
+
+    .event-banner {
+      background: linear-gradient(135deg, #9a3412, #b45309);
+      color: #fff;
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.85rem;
+    }
+    .event-banner h3 {
+      margin: 0;
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.35rem;
+    }
+    .event-banner p {
+      margin: 0.25rem 0 0;
+      opacity: 0.95;
+      font-size: 0.95rem;
+    }
+
+    .sheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .sheet-table th {
+      text-align: left;
+      background: #fff1e8;
+      color: var(--accent-dark);
+      font-size: 0.88rem;
+      padding: 0.7rem 0.75rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .sheet-table td {
+      padding: 0.7rem 0.75rem;
+      border-bottom: 1px solid #f0e4d8;
+      vertical-align: middle;
+    }
+    .sheet-table tr:last-child td { border-bottom: 0; }
+    .sheet-table .name {
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+    .sheet-table .num {
+      font-weight: 700;
+      color: var(--accent-dark);
+      text-align: center;
+      width: 7rem;
+    }
+    .sheet-table .sno {
+      width: 3rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .sheet-table .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      background: #ffedd5;
+      border-radius: 999px;
+      padding: 0.15rem 0.45rem;
+    }
+    .sheet-table .row-actions {
+      display: flex;
+      gap: 0.35rem;
+      justify-content: flex-end;
+    }
+    .sheet-total {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+      background: #fff7ed;
+      border: 1px solid #f0d2b0;
+      border-radius: 12px;
+      padding: 0.75rem 0.9rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 1.4rem 0.5rem;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      background: #fffaf5;
+    }
+    @media (max-width: 640px) {
+      .sheet-table .hide-mobile { display: none; }
+      .sheet-table .num { width: 4.5rem; }
+    }
+
+    .download-panel {
+      text-align: center;
+    }
+    .download-panel p {
+      color: var(--muted);
+      margin: 0 0 0.9rem;
+    }
+    .hint {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0.6rem 0 0;
+    }
+    .error {
+      color: var(--danger);
+      font-weight: 600;
+      margin: 0.4rem 0 0;
+      min-height: 1.2em;
+    }
+    dialog {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.1rem;
+      width: min(520px, calc(100% - 2rem));
+      box-shadow: var(--shadow);
+    }
+    dialog::backdrop { background: rgba(42, 24, 16, 0.35); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1 class="brand">Shah Family Guest List</h1>
+      <p>Shah family wedding guests — add names once, pick every event they will attend, and share with family.</p>
+    </header>
+
+    <div class="status">
+      <span class="pill live" id="syncStatus">Live · saving for everyone</span>
+      <span class="pill" id="overallTotal">Total people: 0</span>
+      <span class="pill" id="partyTotal">Guest parties: 0</span>
+    </div>
+
+    <section class="panel">
+      <h2>Add a guest</h2>
+      <form id="addForm">
+        <div class="row">
+          <div>
+            <label for="guestName">Guest / family name</label>
+            <input id="guestName" type="text" placeholder="e.g. kamlesh shah" required autocomplete="name" />
+          </div>
+          <div>
+            <label for="familyMembers">Family members</label>
+            <input id="familyMembers" type="number" min="0" step="1" value="1" required />
+          </div>
+        </div>
+
+        <label>Events (select all that apply)</label>
+        <div class="events" id="eventChecks"></div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit">Add guest</button>
+          <button class="btn-secondary" type="button" id="resetForm">Clear</button>
+        </div>
+        <p class="error" id="formError"></p>
+        <p class="hint">Tip: one guest can be on Mehndi + Haldi + Wedding. Totals update for each selected event.</p>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Guests by event</h2>
+      <div class="tabs" id="tabs"></div>
+      <div class="totals">
+        <div class="total-card">
+          <span>People in this event</span>
+          <strong id="eventPeople">0</strong>
+        </div>
+        <div class="total-card">
+          <span>Guest parties</span>
+          <strong id="eventParties">0</strong>
+        </div>
+      </div>
+      <div class="guest-list" id="guestList"></div>
+    </section>
+
+    <section class="panel download-panel">
+      <h2>Download Shah Family spreadsheet</h2>
+      <p>Excel is divided by event with clear headings, family member counts, and totals for each function. Re-download anytime after family adds more names.</p>
+      <div class="actions" style="justify-content:center">
+        <button class="btn-primary" type="button" id="downloadXlsx">Download Excel (.xlsx)</button>
+        <button class="btn-secondary" type="button" id="downloadCsv">Download CSV</button>
+        <button class="btn-secondary" type="button" id="openSheet">Open live spreadsheet</button>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="editDialog">
+    <form method="dialog" id="editForm">
+      <h2 style="font-family:Fraunces,Georgia,serif;margin:0 0 0.8rem;color:var(--accent-dark)">Edit guest</h2>
+      <input type="hidden" id="editId" />
+      <div class="row">
+        <div>
+          <label for="editName">Guest / family name</label>
+          <input id="editName" type="text" required />
+        </div>
+        <div>
+          <label for="editMembers">Family members</label>
+          <input id="editMembers" type="number" min="0" step="1" required />
+        </div>
+      </div>
+      <label>Events</label>
+      <div class="events" id="editEventChecks"></div>
+      <div class="actions">
+        <button class="btn-primary" value="save" id="saveEdit">Save</button>
+        <button class="btn-secondary" value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const EVENTS = ["Mehndi", "Haldi", "Paherwani", "Ganpati Stapna", "Sangeet", "Wedding"];
+    const ROOM = "shah-wedding-guestlist-2026";
+    const PRETTY_ROOM = "shah-wedding-guestlist-readable-2026";
+    const SHEET_URL = `https://ethercalc.net/${PRETTY_ROOM}`;
+    const DATA_SHEET_URL = `https://ethercalc.net/${ROOM}`;
+    const CSV_URL = `https://ethercalc.net/_/${ROOM}/csv`;
+    const PUT_URL = `https://ethercalc.net/_/${ROOM}`;
+    const PRETTY_PUT_URL = `https://ethercalc.net/_/${PRETTY_ROOM}`;
+
+    let guests = [];
+    let activeEvent = "Mehndi";
+    let saving = false;
+    let saveTimer = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function uid() {
+      return "g" + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+    }
+
+    function renderEventChecks(containerId, selected = ["Mehndi"]) {
+      const root = $(containerId);
+      root.innerHTML = EVENTS.map((event) => `
+        <label class="event-opt">
+          <input type="checkbox" value="${event}" ${selected.includes(event) ? "checked" : ""} />
+          <span>${event}</span>
+        </label>
+      `).join("");
+    }
+
+    function selectedEvents(containerId) {
+      return [...$(containerId).querySelectorAll('input[type="checkbox"]:checked')].map((el) => el.value);
+    }
+
+    function parseCsv(text) {
+      const lines = text.replace(/\r/g, "").trim().split("\n");
+      if (lines.length <= 1) return [];
+      const out = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i];
+        if (!row.trim()) continue;
+        // simple CSV split supporting quoted fields lightly
+        const cols = [];
+        let cur = "", inQ = false;
+        for (let c = 0; c < row.length; c++) {
+          const ch = row[c];
+          if (ch === '"') { inQ = !inQ; continue; }
+          if (ch === "," && !inQ) { cols.push(cur); cur = ""; continue; }
+          cur += ch;
+        }
+        cols.push(cur);
+        const [id, name, members, events] = cols;
+        if (!name) continue;
+        out.push({
+          id: id || uid(),
+          name: name.trim(),
+          members: Number(members || 0),
+          events: (events || "").split(/[|;]/).map((e) => e.trim()).filter(Boolean),
+        });
+      }
+      return out;
+    }
+
+    function toCsv(list) {
+      const header = "id,Guest Name,Family Members,Events";
+      const rows = list.map((g) => {
+        const name = /[,"]/.test(g.name) ? `"${g.name.replace(/"/g, '""')}"` : g.name;
+        return `${g.id},${name},${g.members},${g.events.join(";")}`;
+      });
+      return [header, ...rows].join("\n") + "\n";
+    }
+
+    async function loadGuests() {
+      $("syncStatus").textContent = "Syncing…";
+      const res = await fetch(CSV_URL + "?t=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error("Could not load guest list");
+      const text = await res.text();
+      guests = parseCsv(text);
+      $("syncStatus").textContent = "Live · saved for everyone";
+      $("syncStatus").classList.add("live");
+      render();
+    }
+
+    async function saveGuests() {
+      if (saving) return;
+      saving = true;
+      $("syncStatus").textContent = "Saving…";
+      try {
+        // merge with latest server copy by id to reduce overwrites
+        const res = await fetch(CSV_URL + "?t=" + Date.now(), { cache: "no-store" });
+        let server = [];
+        if (res.ok) server = parseCsv(await res.text());
+        const map = new Map(server.map((g) => [g.id, g]));
+        for (const g of guests) map.set(g.id, g);
+        // preserve deletions: guests is source of truth for known ids after local delete
+        const localIds = new Set(guests.map((g) => g.id));
+        // Keep server guests that weren't loaded? Prefer local full list as truth.
+        const merged = guests.map((g) => map.get(g.id) || g);
+        // Actually use local list as authoritative after user actions
+        const payload = toCsv(guests);
+        const put = await fetch(PUT_URL, {
+          method: "PUT",
+          headers: { "Content-Type": "text/csv" },
+          body: payload,
+        });
+        if (!put.ok) throw new Error("Save failed");
+        await syncPrettySpreadsheet();
+        $("syncStatus").textContent = "Live · saved for everyone";
+      } catch (err) {
+        console.error(err);
+        $("syncStatus").textContent = "Save error — retrying";
+        $("syncStatus").classList.remove("live");
+      } finally {
+        saving = false;
+      }
+    }
+
+    function csvEscape(value) {
+      const s = String(value ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }
+
+    function buildPrettySpreadsheetCsv() {
+      const lines = [];
+      lines.push(["SHAH FAMILY GUEST LIST"]);
+      lines.push(["Shah family wedding — easy readable view, updated for everyone"]);
+      lines.push(["Last updated", new Date().toLocaleString()]);
+      lines.push([]);
+      lines.push(["*** EVENT SUMMARY ***"]);
+      lines.push(["Event Name", "Guest Families", "Total Members"]);
+      EVENTS.forEach((event) => {
+        const { people, parties } = eventStats(event);
+        lines.push([event, parties, people]);
+      });
+      lines.push([]);
+      lines.push(["Grand total families", guests.length]);
+      lines.push(["Grand total members (all guest rows)", guests.reduce((s, g) => s + (Number(g.members) || 0), 0)]);
+      lines.push([]);
+
+      EVENTS.forEach((event) => {
+        const { list, people, parties } = eventStats(event);
+        lines.push([`*** ${event.toUpperCase()} ***`]);
+        lines.push(["Event Name", event]);
+        lines.push(["Guest Families", parties]);
+        lines.push(["Total Members", people]);
+        lines.push([]);
+        lines.push(["No.", "Guest / Family Name", "No. of Family Members", "Also Attending"]);
+        if (!list.length) {
+          lines.push(["", "(no guests yet)", "", ""]);
+        } else {
+          list.forEach((g, i) => {
+            const also = g.events.filter((e) => e !== event).join(", ");
+            lines.push([i + 1, g.name, g.members, also || "-"]);
+          });
+        }
+        lines.push([]);
+        lines.push(["", `TOTAL FOR ${event.toUpperCase()}`, people, `${parties} families`]);
+        lines.push([]);
+        lines.push([]);
+      });
+
+      return lines.map((row) => row.map(csvEscape).join(",")).join("\n") + "\n";
+    }
+
+    async function syncPrettySpreadsheet() {
+      const pretty = buildPrettySpreadsheetCsv();
+      await fetch(PRETTY_PUT_URL, {
+        method: "PUT",
+        headers: { "Content-Type": "text/csv" },
+        body: pretty,
+      });
+    }
+
+    function queueSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveGuests, 250);
+    }
+
+    function eventStats(event) {
+      const list = guests.filter((g) => g.events.includes(event));
+      const people = list.reduce((sum, g) => sum + (Number(g.members) || 0), 0);
+      return { list, people, parties: list.length };
+    }
+
+    function renderTabs() {
+      $("tabs").innerHTML = EVENTS.map((event) => {
+        const { people } = eventStats(event);
+        return `<button type="button" class="tab ${event === activeEvent ? "active" : ""}" data-event="${event}">
+          ${event}<span class="count">${people}</span>
+        </button>`;
+      }).join("");
+      $("tabs").querySelectorAll(".tab").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          activeEvent = btn.dataset.event;
+          render();
+        });
+      });
+    }
+
+    function renderList() {
+      const { list, people, parties } = eventStats(activeEvent);
+      $("eventPeople").textContent = people;
+      $("eventParties").textContent = parties;
+      if (!list.length) {
+        $("guestList").innerHTML = `
+          <div class="event-banner">
+            <h3>${activeEvent}</h3>
+            <p>No guests yet · Total members: 0</p>
+          </div>
+          <div class="empty">No guests for ${activeEvent} yet. Add someone above and tick this event.</div>`;
+        return;
+      }
+      $("guestList").innerHTML = `
+        <div class="event-banner">
+          <h3>${activeEvent}</h3>
+          <p>${parties} guest ${parties === 1 ? "family" : "families"} · <strong>${people} total members</strong></p>
+        </div>
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th class="sno">#</th>
+              <th>Guest / Family Name</th>
+              <th class="num">Family Members</th>
+              <th class="hide-mobile">Also Attending</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map((g, i) => {
+              const other = g.events.filter((e) => e !== activeEvent);
+              return `
+              <tr data-id="${g.id}">
+                <td class="sno">${i + 1}</td>
+                <td class="name">${escapeHtml(g.name)}</td>
+                <td class="num">${g.members}</td>
+                <td class="hide-mobile">
+                  <div class="tags">${other.length ? other.map((e) => `<span class="tag">${e}</span>`).join("") : "<span style='color:#9a7b66'>—</span>"}</div>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="btn-secondary btn-small btn-edit">Edit</button>
+                    <button type="button" class="btn-danger btn-small btn-delete">Delete</button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+        <div class="sheet-total">
+          <span>TOTAL for ${activeEvent}</span>
+          <span>${parties} families · ${people} members</span>
+        </div>`;
+
+      $("guestList").querySelectorAll(".btn-edit").forEach((btn) => {
+        btn.addEventListener("click", () => openEdit(btn.closest("tr").dataset.id));
+      });
+      $("guestList").querySelectorAll(".btn-delete").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.closest("tr").dataset.id;
+          if (!confirm("Remove this guest from the list?")) return;
+          guests = guests.filter((g) => g.id !== id);
+          render();
+          queueSave();
+        });
+      });
+    }
+
+    function renderTotals() {
+      const people = guests.reduce((sum, g) => sum + (Number(g.members) || 0), 0);
+      $("overallTotal").textContent = `Total people (all rows): ${people}`;
+      $("partyTotal").textContent = `Guest parties: ${guests.length}`;
+    }
+
+    function render() {
+      renderTabs();
+      renderList();
+      renderTotals();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function openEdit(id) {
+      const g = guests.find((x) => x.id === id);
+      if (!g) return;
+      $("editId").value = g.id;
+      $("editName").value = g.name;
+      $("editMembers").value = g.members;
+      renderEventChecks("editEventChecks", g.events);
+      $("editDialog").showModal();
+    }
+
+    $("addForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      $("formError").textContent = "";
+      const name = $("guestName").value.trim();
+      const members = Number($("familyMembers").value);
+      const events = selectedEvents("eventChecks");
+      if (!name) {
+        $("formError").textContent = "Please enter a guest name.";
+        return;
+      }
+      if (!Number.isFinite(members) || members < 0) {
+        $("formError").textContent = "Family members must be 0 or more.";
+        return;
+      }
+      if (!events.length) {
+        $("formError").textContent = "Select at least one event.";
+        return;
+      }
+      guests.push({ id: uid(), name, members, events });
+      activeEvent = events[0];
+      $("guestName").value = "";
+      $("familyMembers").value = "1";
+      renderEventChecks("eventChecks", ["Mehndi"]);
+      render();
+      queueSave();
+      $("guestName").focus();
+    });
+
+    $("resetForm").addEventListener("click", () => {
+      $("addForm").reset();
+      $("familyMembers").value = "1";
+      renderEventChecks("eventChecks", ["Mehndi"]);
+      $("formError").textContent = "";
+    });
+
+    $("saveEdit").addEventListener("click", (e) => {
+      e.preventDefault();
+      const id = $("editId").value;
+      const name = $("editName").value.trim();
+      const members = Number($("editMembers").value);
+      const events = selectedEvents("editEventChecks");
+      if (!name || !events.length || !Number.isFinite(members) || members < 0) return;
+      guests = guests.map((g) => g.id === id ? { ...g, name, members, events } : g);
+      $("editDialog").close();
+      render();
+      queueSave();
+    });
+
+    function downloadCsv() {
+      const blob = new Blob([buildPrettySpreadsheetCsv()], { type: "text/csv;charset=utf-8" });
+      triggerDownload(blob, "Shah_Family_Guest_List.csv");
+    }
+
+    function styleSheet(ws, opts = {}) {
+      const colWidths = opts.cols || [{ wch: 8 }, { wch: 34 }, { wch: 22 }, { wch: 28 }];
+      ws["!cols"] = colWidths;
+      if (opts.merges) ws["!merges"] = opts.merges;
+    }
+
+    function downloadXlsx() {
+      const wb = XLSX.utils.book_new();
+      const now = new Date().toLocaleString();
+
+      // ===== Summary sheet =====
+      const summary = [
+        ["SHAH FAMILY GUEST LIST"],
+        ["Shah family wedding — clear event-wise guest count"],
+        ["Generated", now],
+        [],
+        ["EVENT SUMMARY"],
+        ["Event Name", "Guest Families", "Total Members"],
+      ];
+      EVENTS.forEach((event) => {
+        const { people, parties } = eventStats(event);
+        summary.push([event, parties, people]);
+      });
+      summary.push([]);
+      summary.push(["GRAND TOTAL", guests.length, guests.reduce((s, g) => s + (Number(g.members) || 0), 0)]);
+      summary.push([]);
+      summary.push(["How to read this file"]);
+      summary.push(["1. Open an event tab (Mehndi, Haldi, etc.)"]);
+      summary.push(["2. Each row = one guest/family name + number of family members"]);
+      summary.push(["3. TOTAL at the bottom = people coming to that event"]);
+      const summaryWs = XLSX.utils.aoa_to_sheet(summary);
+      styleSheet(summaryWs, {
+        cols: [{ wch: 22 }, { wch: 16 }, { wch: 16 }],
+        merges: [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }, { s: { r: 4, c: 0 }, e: { r: 4, c: 2 } }],
+      });
+      XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+
+      // ===== All Guests master =====
+      const allRows = [
+        ["SHAH FAMILY — ALL GUESTS MASTER LIST"],
+        ["Put Y under every event that guest will attend"],
+        [],
+        ["No.", "Guest / Family Name", "No. of Family Members", ...EVENTS],
+      ];
+      const headerRow = 4; // 1-based later for formulas; aoa row index 3 is header
+      guests.forEach((g, i) => {
+        allRows.push([
+          i + 1,
+          g.name,
+          g.members,
+          ...EVENTS.map((e) => (g.events.includes(e) ? "Y" : "")),
+        ]);
+      });
+      const firstData = 5;
+      const lastData = firstData + Math.max(guests.length, 1) - 1;
+      allRows.push([]);
+      allRows.push(["", "TOTAL MEMBERS (all rows)", guests.reduce((s, g) => s + (Number(g.members) || 0), 0)]);
+      allRows.push(["", "TOTAL FAMILIES", guests.length]);
+      const allWs = XLSX.utils.aoa_to_sheet(allRows);
+      styleSheet(allWs, {
+        cols: [{ wch: 6 }, { wch: 32 }, { wch: 22 }, ...EVENTS.map(() => ({ wch: 14 }))],
+        merges: [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }],
+      });
+      XLSX.utils.book_append_sheet(wb, allWs, "All Guests");
+
+      // ===== One clear sheet per event =====
+      EVENTS.forEach((event) => {
+        const { list, people, parties } = eventStats(event);
+        const rows = [
+          [`EVENT: ${event}`],
+          ["Guest Families", parties],
+          ["Total Members", people],
+          [],
+          ["No.", "Guest / Family Name", "No. of Family Members", "Also Attending"],
+        ];
+        if (!list.length) {
+          rows.push(["", "(no guests added yet)", "", ""]);
+        } else {
+          list.forEach((g, i) => {
+            const also = g.events.filter((e) => e !== event).join(", ");
+            rows.push([i + 1, g.name, g.members, also || "—"]);
+          });
+        }
+        rows.push([]);
+        rows.push(["", `TOTAL FOR ${event.toUpperCase()}`, people, `${parties} families`]);
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        styleSheet(ws, {
+          cols: [{ wch: 6 }, { wch: 34 }, { wch: 22 }, { wch: 28 }],
+          merges: [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }],
+        });
+        XLSX.utils.book_append_sheet(wb, ws, event.slice(0, 31));
+      });
+
+      // ===== Full readable single sheet =====
+      const readable = [];
+      buildPrettySpreadsheetCsv().trim().split("\n").forEach((line) => {
+        const cols = [];
+        let cur = "", inQ = false;
+        for (let c = 0; c < line.length; c++) {
+          const ch = line[c];
+          if (ch === '"') { inQ = !inQ; continue; }
+          if (ch === "," && !inQ) { cols.push(cur); cur = ""; continue; }
+          cur += ch;
+        }
+        cols.push(cur);
+        readable.push(cols);
+      });
+      const readableWs = XLSX.utils.aoa_to_sheet(readable);
+      styleSheet(readableWs, { cols: [{ wch: 28 }, { wch: 34 }, { wch: 22 }, { wch: 28 }] });
+      XLSX.utils.book_append_sheet(wb, readableWs, "All Events View");
+
+      XLSX.writeFile(wb, "Shah_Family_Guest_List.xlsx");
+    }
+
+    function triggerDownload(blob, filename) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    $("downloadCsv").addEventListener("click", downloadCsv);
+    $("downloadXlsx").addEventListener("click", downloadXlsx);
+    $("openSheet").addEventListener("click", () => window.open(SHEET_URL, "_blank"));
+
+    renderEventChecks("eventChecks", ["Mehndi"]);
+    renderEventChecks("editEventChecks", []);
+    render();
+    loadGuests()
+      .then(() => syncPrettySpreadsheet())
+      .catch((err) => {
+        console.error(err);
+        $("syncStatus").textContent = "Could not load list";
+        $("syncStatus").classList.remove("live");
+      });
+    setInterval(() => {
+      if (!saving && !document.querySelector("dialog[open]")) {
+        loadGuests().catch(() => {});
+      }
+    }, 8000);
+  </script>
+</body>
+</html>
