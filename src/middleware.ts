@@ -150,10 +150,10 @@ export function middleware(request: NextRequest) {
       "Content-Security-Policy",
       [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: blob:",
-        "connect-src 'self' https://ethercalc.net",
+        "connect-src 'self' https://ethercalc.net https://cdn.jsdelivr.net",
         "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com",
         "frame-ancestors 'none'",
         "base-uri 'self'",
