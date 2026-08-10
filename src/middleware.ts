@@ -122,11 +122,13 @@ export function middleware(request: NextRequest) {
   }
 
   // India geo: browse + login work worldwide; checkout/payments stay India-only.
+  // Razorpay webhooks originate outside India — never geo-block them.
   const indiaCheckoutOnly =
     path.startsWith("/aesthetics/checkout") ||
     path.startsWith("/api/commerce/checkout") ||
     path.startsWith("/api/commerce/orders") ||
-    path.startsWith("/api/commerce/payments") ||
+    (path.startsWith("/api/commerce/payments") &&
+      !path.startsWith("/api/commerce/payments/razorpay-webhook")) ||
     path.startsWith("/api/commerce/razorpay");
 
   if (indiaCheckoutOnly && !isIndiaRequest(request)) {

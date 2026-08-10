@@ -66,6 +66,8 @@ export async function sendOrderConfirmationEmail(input: {
   name: string;
   orderNumber: string;
   totalInr: number;
+  itemSummary?: string;
+  shippingAddress?: string;
 }) {
   const brand = await getBrandSettings().catch(() => null);
   const siteName = brand?.siteName || DEFAULT_BRAND_NAME;
@@ -76,11 +78,25 @@ export async function sendOrderConfirmationEmail(input: {
     maximumFractionDigits: 0,
   }).format(input.totalInr);
 
+  const itemsBlock = input.itemSummary?.trim()
+    ? `\nItems:\n${input.itemSummary.trim()}\n`
+    : "";
+  const shipBlock = input.shippingAddress?.trim()
+    ? `\nShip to:\n${input.shippingAddress.trim()}\n`
+    : "";
+
+  const itemsHtml = input.itemSummary?.trim()
+    ? `<p><strong>Items</strong></p><pre style="font-family:inherit;white-space:pre-wrap">${input.itemSummary.trim()}</pre>`
+    : "";
+  const shipHtml = input.shippingAddress?.trim()
+    ? `<p><strong>Ship to</strong></p><pre style="font-family:inherit;white-space:pre-wrap">${input.shippingAddress.trim()}</pre>`
+    : "";
+
   return sendCommerceEmail({
     to: input.to,
-    subject: `Order confirmed — ${input.orderNumber}`,
-    text: `Hi ${input.name},\n\nThank you for your order ${input.orderNumber} (${total}).\n\nWe'll email you when it ships.\nQuestions? ${support}\n\n— ${siteName}`,
-    html: `<p>Hi ${input.name},</p><p>Thank you for your order <strong>${input.orderNumber}</strong> (${total}).</p><p>We'll email you when it ships.</p><p>Questions? <a href="mailto:${support}">${support}</a></p><p>— ${siteName}</p>`,
+    subject: `Order confirmed — ${input.orderNumber} · ${siteName}`,
+    text: `Hi ${input.name},\n\nThank you for your purchase. Payment is confirmed for order ${input.orderNumber} (${total}).\n${itemsBlock}${shipBlock}\nWe'll email you when it ships.\nQuestions? ${support}\n\n— ${siteName}`,
+    html: `<p>Hi ${input.name},</p><p>Thank you for your purchase. Payment is confirmed for order <strong>${input.orderNumber}</strong> (${total}).</p>${itemsHtml}${shipHtml}<p>We'll email you when it ships.</p><p>Questions? <a href="mailto:${support}">${support}</a></p><p>— ${siteName}</p>`,
   });
 }
 
