@@ -24,15 +24,25 @@ export function commerceApiError(error: unknown) {
   }
   if (error instanceof Error) {
     const msg = error.message;
+    // Surface auth / ops errors instead of a generic "Request failed"
     if (
       msg.includes("Invalid") ||
       msg.includes("Cannot") ||
+      msg.includes("Could not") ||
+      msg.includes("Too many") ||
       msg.includes("Missing file") ||
       msg.includes("Unsupported") ||
       msg.includes("must be") ||
-      msg.includes("Upload")
+      msg.includes("Upload") ||
+      msg.includes("sign-in") ||
+      msg.includes("OTP") ||
+      msg.includes("expired") ||
+      msg.includes("not configured") ||
+      msg.includes("verification")
     ) {
-      return NextResponse.json({ error: msg }, { status: 400 });
+      const status =
+        msg.includes("Too many") ? 429 : msg.includes("Invalid") || msg.includes("expired") ? 401 : 400;
+      return NextResponse.json({ error: msg }, { status });
     }
   }
   console.error("[Commerce API]", error);

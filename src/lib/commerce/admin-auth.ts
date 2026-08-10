@@ -6,7 +6,7 @@ import {
   getRequestMeta,
   type CommerceAdminUser,
 } from "./admin-session";
-import { sendAdminOtpEmail } from "./commerce-email";
+import { isCommerceEmailConfigured, sendAdminOtpEmail } from "./commerce-email";
 
 const OTP_EXPIRY_MIN = 10;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -50,6 +50,33 @@ export async function logLoginAttempt(
   });
 }
 
+async function completePasswordLogin(admin: {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  mfaEnabled: boolean;
+}): Promise<{ requiresOtp: false; admin: CommerceAdminUser }> {
+  const meta = await getRequestMeta();
+  await prisma.commerceAdmin.update({
+    where: { id: admin.id },
+    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress },
+  });
+  await createAdminSession(admin.id, meta);
+  await logLoginAttempt(admin.email, true, admin.id);
+
+  return {
+    requiresOtp: false,
+    admin: {
+      id: admin.id,
+      email: admin.email,
+      name: admin.name,
+      role: admin.role,
+      mfaEnabled: admin.mfaEnabled,
+    },
+  };
+}
+
 export async function adminLogin(
   email: string,
   password: string
@@ -71,28 +98,20 @@ export async function adminLogin(
   }
 
   if (isAdminOtpRequired(admin.mfaEnabled)) {
+    // Password is correct — OTP email misconfig used to surface as cryptic "Request failed".
+    // If Resend isn't configured, complete password login so the owner isn't locked out.
+    if (!isCommerceEmailConfigured()) {
+      console.warn(
+        "[Commerce Admin] OTP required but Resend/from-email is not configured; completing password login. Set RESEND_API_KEY + COMMERCE_FROM_EMAIL, or keep COMMERCE_ADMIN_REQUIRE_OTP=false."
+      );
+      return completePasswordLogin(admin);
+    }
+
     await createAdminOtp(admin.id);
     return { requiresOtp: true, adminId: admin.id };
   }
 
-  const meta = await getRequestMeta();
-  await prisma.commerceAdmin.update({
-    where: { id: admin.id },
-    data: { lastLoginAt: new Date(), lastLoginIp: meta.ipAddress },
-  });
-  await createAdminSession(admin.id, meta);
-  await logLoginAttempt(normalized, true, admin.id);
-
-  return {
-    requiresOtp: false,
-    admin: {
-      id: admin.id,
-      email: admin.email,
-      name: admin.name,
-      role: admin.role,
-      mfaEnabled: admin.mfaEnabled,
-    },
-  };
+  return completePasswordLogin(admin);
 }
 
 export async function createAdminOtp(adminId: string) {
@@ -115,7 +134,9 @@ export async function createAdminOtp(adminId: string) {
 
   const sent = await sendAdminOtpEmail(admin.email, code);
   if (!sent.ok && process.env.NODE_ENV === "production") {
-    throw new Error(`Could not send admin OTP email: ${sent.error}`);
+    throw new Error(
+      `Could not send sign-in code: ${sent.error}. Verify RESEND_API_KEY and that COMMERCE_FROM_EMAIL uses a Resend-verified domain, or set COMMERCE_ADMIN_REQUIRE_OTP=false in Vercel to sign in with password only.`
+    );
   }
 }
 

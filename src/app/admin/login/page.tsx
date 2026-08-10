@@ -137,7 +137,11 @@ export default function PlatformAdminLoginPage() {
             </div>
           )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p className="text-sm leading-relaxed text-red-600" role="alert">
+              {error}
+            </p>
+          )}
 
           <Button type="submit" className="w-full" disabled={loading} aria-busy={loading}>
             {loading ? "Please wait…" : adminId ? "Verify code" : "Sign in"}
