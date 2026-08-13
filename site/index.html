@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jagetiya Metals</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,serif;background:#F0EDE8;color:#1A1A1A;min-height:100vh;}
+.hdr{background:#0F2540;padding:0 20px;display:flex;align-items:center;justify-content:space-between;min-height:60px;border-bottom:4px solid #C8960C;flex-wrap:wrap;gap:8px;padding-top:8px;padding-bottom:8px;}
+.hdr-l h1{font-size:17px;font-weight:700;color:#fff;letter-spacing:1px;}
+.hdr-l p{font-size:9px;color:#C8960C;letter-spacing:2px;margin-top:1px;}
+.hdr-r{font-size:10px;color:#8AA0B8;text-align:right;line-height:1.8;}
+.tabs{display:flex;background:#0F2540;border-bottom:3px solid #C8960C;}
+.tbtn{padding:11px 20px;font-size:12px;font-weight:700;color:#8AA0B8;cursor:pointer;border:none;background:transparent;font-family:Georgia,serif;border-bottom:3px solid transparent;margin-bottom:-3px;}
+.tbtn.on{color:#C8960C;border-bottom-color:#C8960C;}
+.tp{display:none;}
+.tp.on{display:block;}
+.panel{background:#1B3A5C;padding:20px;}
+.panel h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;}
+.panel p{font-size:11px;color:#8AAAC8;margin-bottom:14px;}
+.lbl{font-size:13px;letter-spacing:1px;color:#F5C842;margin-bottom:10px;display:block;font-family:Georgia,serif;font-weight:700;}
+.shapes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.shbtn{padding:12px 18px;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.14);border-radius:9px;color:#C8D8E8;font-size:14px;cursor:pointer;font-family:Georgia,serif;font-weight:600;}
+.shbtn.on{background:#2E6DA4;border-color:#4A9FD4;color:#fff;font-weight:700;}
+.irow{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;}
+.fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px;}
+.fg label{font-size:12px;letter-spacing:1px;color:#F5C842;font-family:Georgia,serif;font-weight:700;}
+.fg input{padding:12px 14px;background:rgba(255,255,255,0.09);border:2px solid rgba(255,255,255,0.17);border-radius:7px;color:#fff;font-size:15px;font-family:Georgia,serif;outline:none;}
+.fg input:focus{border-color:#4A9FD4;}
+.fg input::placeholder{color:#4A6A88;}
+.gbtn{padding:12px 26px;height:48px;background:#C8960C;color:#0F2540;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;}
+.rbtn{padding:12px 18px;height:48px;background:transparent;color:#C8D8E8;border:2px solid rgba(255,255,255,0.3);border-radius:9px;font-size:14px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;}
+.res{padding:18px 20px 50px;}
+.sbar{padding:11px 16px;border-radius:8px;font-size:14px;font-weight:600;margin-bottom:14px;border-left:5px solid #2E6DA4;background:#E8EFF8;color:#1B3A5C;}
+.sbar.ok{background:#D5F0E3;color:#1A5C32;border-color:#2E8B57;}
+.sbar.warn{background:#FEF3CD;color:#7D5A00;border-color:#F5A623;}
+.sbar.none{background:#FDEDEC;color:#7B2D26;border-color:#C0392B;}
+.grid{display:flex;flex-direction:column;gap:11px;}
+.card{background:#FFFDF8;border:1.5px solid #D8D3CB;border-radius:10px;overflow:hidden;}
+.ch{padding:10px 15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.gbadge{font-size:15px;font-weight:700;color:#fff;padding:5px 14px;border-radius:6px;}
+.meta{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{padding:3px 10px;border-radius:18px;font-size:12px;font-weight:600;background:#E8E4DC;color:#3A4A5C;font-family:Georgia,serif;}
+.tag.sh{background:#D6EAF8;color:#1A5276;}
+.cb{padding:11px 15px;border-top:1px solid #EDE9E0;}
+.prow{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:#FFF8E7;border:1.5px solid #F9E79F;border-radius:7px;margin-bottom:7px;}
+.plbl{font-size:13px;color:#7D6608;font-family:Georgia,serif;font-weight:600;}
+.pval{font-size:20px;font-weight:700;color:#C8960C;}
+.pval small{font-size:10px;font-weight:400;color:#9A8050;margin-left:2px;}
+.noprice{padding:7px 12px;background:#F0EDE8;border-radius:7px;font-size:11px;color:#9A8A7A;margin-bottom:7px;font-style:italic;}
+.myes{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#D5F0E3;border:1.5px solid #A8DFC0;border-radius:7px;margin-bottom:6px;}
+.myes .ml{font-weight:700;color:#1A5C32;font-size:14px;}
+.myes .ms{font-family:Courier,monospace;font-size:16px;font-weight:700;color:#145A32;margin-left:auto;background:#A8DFC0;padding:4px 12px;border-radius:5px;}
+.mno{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#FDEDEC;border:1.5px solid #F5B7B1;border-radius:7px;margin-bottom:6px;}
+.mno .ml{font-size:13px;color:#922B21;font-weight:600;}
+.mnear{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#FEF9E7;border:1.5px solid #F9E79F;border-radius:7px;margin-bottom:6px;flex-wrap:wrap;}
+.mnear .ml{font-size:13px;color:#7D6608;font-weight:600;}
+.nr{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;}
+.nc{font-family:Courier,monospace;font-size:13px;font-weight:600;background:#F9E79F;color:#7D6608;padding:4px 12px;border-radius:5px;border:1.5px solid #F4D03F;cursor:pointer;}
+.togs{font-size:13px;color:#2E6DA4;cursor:pointer;font-weight:700;margin-top:7px;display:inline-block;}
+.cbox{display:none;margin-top:5px;padding:8px 10px;background:#EDE9E0;border-radius:6px;line-height:2.1;}
+.cbox.on{display:block;}
+.sz{display:inline-block;padding:4px 10px;margin:3px;background:#fff;border:1.5px solid #D8D3CB;border-radius:5px;font-size:13px;font-family:Courier,monospace;cursor:pointer;font-weight:600;}
+.sz.ex{background:#2E8B57;color:#fff;font-weight:700;}
+.sz.nr2{background:#F9E79F;border-color:#F4D03F;}
+.flt{width:100%;border-collapse:collapse;margin-top:5px;font-size:11px;}
+.flt th{background:#EDE9E0;padding:5px 10px;text-align:left;font-weight:700;color:#5A6A7A;border-bottom:2px solid #D8D3CB;font-family:Courier,monospace;font-size:10px;}
+.flt td{padding:5px 10px;border-bottom:1px solid #EDE9E0;}
+.flt tr:last-child td{border-bottom:none;}
+.flt tr.rm td{background:#D5F0E3;}
+.flt tr.rn td{background:#FEF9E7;}
+.we{font-weight:700;color:#1A5C32;font-family:Courier,monospace;}
+.wn{font-weight:600;color:#7D6608;font-family:Courier,monospace;}
+.idlebox{background:#FFFDF8;border:1.5px solid #D8D3CB;border-radius:10px;padding:36px;text-align:center;}
+.idlebox h3{font-size:20px;color:#1B3A5C;margin-bottom:8px;font-weight:700;}
+.idlebox p{color:#5A6A7A;font-size:14px;line-height:1.8;}
+.isteps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.istep{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#E8E4DC;border-radius:8px;font-size:14px;color:#1B3A5C;font-weight:600;}
+.isn{width:24px;height:24px;background:#1B3A5C;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+/* ADMIN */
+.awrap{padding:18px 20px 50px;}
+.ahead{background:#1B3A5C;border-radius:10px;padding:16px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.ahead h2{font-size:16px;font-weight:700;color:#fff;}
+.ahead p{font-size:11px;color:#8AAAC8;margin-top:2px;}
+.abtnrow{display:flex;gap:8px;flex-wrap:wrap;}
+.ebtn{padding:9px 18px;background:#C8960C;color:#0F2540;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;}
+.ibtn{padding:9px 18px;background:#1B3A5C;color:#fff;border:2px solid #4A9FD4;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;}
+.afilter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:flex-end;}
+.afilter .fg input{background:#fff;border-color:#D8D3CB;color:#1A1A1A;}
+.afilter .fg input::placeholder{color:#AAA;}
+.afilter .fg label{color:#1B3A5C;}
+.fbtn{padding:9px 16px;height:42px;background:#1B3A5C;color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer;font-family:Georgia,serif;}
+.cbtn{padding:9px 12px;height:42px;background:transparent;color:#1B3A5C;border:2px solid #D8D3CB;border-radius:7px;font-size:12px;cursor:pointer;font-family:Georgia,serif;}
+.ptw{background:#fff;border-radius:10px;border:1.5px solid #D8D3CB;overflow-x:auto;}
+.ptbl{width:100%;border-collapse:collapse;min-width:600px;}
+.ptbl thead tr{background:#0F2540;}
+.ptbl th{padding:10px 12px;text-align:left;color:#fff;font-size:10px;letter-spacing:1px;font-family:Courier,monospace;white-space:nowrap;}
+.ptbl td{padding:9px 12px;border-bottom:1px solid #EDE9E0;font-size:12px;vertical-align:middle;}
+.ptbl tr:last-child td{border-bottom:none;}
+.ptbl tr.upd td{background:#D5F0E3;}
+.gdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+.piw{display:flex;align-items:center;gap:5px;}
+.piw span{font-size:11px;color:#7A8A9A;font-family:Courier,monospace;}
+.pi{width:90px;padding:5px 8px;border:2px solid #D8D3CB;border-radius:5px;font-size:12px;font-family:Georgia,serif;outline:none;text-align:right;}
+.pi:focus{border-color:#C8960C;}
+.svbtn{padding:5px 12px;background:#1B3A5C;color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;}
+.svbtn.done{background:#2E8B57;}
+.cp{font-family:Courier,monospace;font-size:12px;font-weight:700;color:#C8960C;}
+.cp.na{color:#CCC;font-weight:400;font-style:italic;}
+.ubdg{font-size:9px;background:#D5F0E3;color:#1A5C32;padding:2px 6px;border-radius:8px;font-family:Courier,monospace;display:none;margin-left:4px;}
+.ubdg.on{display:inline;}
+.norows{text-align:center;padding:32px;color:#9A8A9A;font-size:12px;}
+footer{background:#0F2540;color:#5A6A7A;text-align:center;padding:13px;font-size:10px;font-family:Courier,monospace;}
+@media(max-width:560px){.hdr,.panel,.res,.awrap{padding-left:12px;padding-right:12px;}.irow,.afilter{flex-direction:column;}.gbtn,.rbtn,.fbtn,.cbtn{width:100%;}}
+.pin-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,37,64,0.97);z-index:9999;align-items:center;justify-content:center;flex-direction:column;}
+.pin-overlay.show{display:flex;}
+.pin-box{background:#1B3A5C;border-radius:14px;padding:36px 32px;text-align:center;border:2px solid #C8960C;max-width:320px;width:90%;}
+.pin-box h2{font-size:20px;color:#fff;margin-bottom:6px;}
+.pin-box p{font-size:13px;color:#8AAAC8;margin-bottom:22px;}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:22px;}
+.pin-dot{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);transition:all 0.2s;}
+.pin-dot.filled{background:#C8960C;border-color:#C8960C;}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:230px;margin:0 auto;}
+.pin-key{padding:15px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:20px;font-weight:700;cursor:pointer;font-family:Georgia,serif;transition:all 0.15s;}
+.pin-key:hover{background:rgba(255,255,255,0.2);border-color:#4A9FD4;}
+.pin-key.wide{grid-column:span 2;}
+.pin-key.del{background:rgba(200,0,0,0.15);border-color:rgba(200,0,0,0.3);color:#F5B7B1;font-size:14px;}
+.pin-key.del:hover{background:rgba(200,0,0,0.3);}
+.pin-err{color:#F5B7B1;font-size:13px;margin-top:14px;min-height:18px;font-weight:600;}
+.pin-hint{color:#5A7A99;font-size:11px;margin-top:8px;font-family:Courier,monospace;}
+.rem-chip{display:inline-block;padding:5px 13px;margin:3px;background:#fff;border:1.5px solid #D8D3CB;border-radius:5px;font-size:14px;font-family:Courier,monospace;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.rem-chip:hover{background:#FDEDEC;border-color:#C0392B;color:#C0392B;}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-l"><h1>JAGETIYA METALS</h1><p>STOCK SEARCH &amp; PRICE MANAGER</p></div>
+  <div class="hdr-r">+91-9824012344 | Kamlesh@jkmetal.in<br>502/1-A G.I.D.C., Makarpura, Vadodara</div>
+</div>
+<div class="tabs">
+  <button class="tbtn on" id="t1">Search Stock</button>
+  <button class="tbtn" id="t2">Admin - Manage Prices</button>
+  <button class="tbtn" id="t3">Stock Manager</button>
+  <button class="tbtn" id="t4">Chemical Composition</button>
+</div>
+<div class="tp on" id="p1">
+  <div class="panel">
+    <h2>Find Your Stock</h2>
+    <p>Select shape, enter size and / or grade. Shows live price for exact size matches.</p>
+    <span class="lbl">STEP 1 - SELECT SHAPE</span>
+    <div class="shapes" id="shapeRow">
+      <button class="shbtn" data-shape="Round Bar">Round Bar</button>
+      <button class="shbtn" data-shape="Square Bar">Square Bar</button>
+      <button class="shbtn" data-shape="Flat Bar">Flat Bar</button>
+      <button class="shbtn" data-shape="Hex Bar">Hex Bar</button>
+      <button class="shbtn" data-shape="Non-Ferrous">Non-Ferrous</button>
+      <button class="shbtn" data-shape="All">All Shapes</button>
+    </div>
+    <span class="lbl">STEP 2 - ENTER SIZE AND / OR GRADE</span>
+    <div class="irow">
+      <div class="fg" id="fgSize"><label>SIZE (MM)</label><input type="number" id="inSize" placeholder="e.g. 25, 100" min="1" max="600" step="0.1"></div>
+      <div class="fg" id="fgThk" style="display:none"><label>THICKNESS (MM)</label><input type="number" id="inThk" placeholder="e.g. 10, 25" min="1" max="200"></div>
+      <div class="fg" id="fgWid" style="display:none"><label>WIDTH (MM)</label><input type="number" id="inWid" placeholder="e.g. 50, 100" min="1" max="500"></div>
+      <div class="fg"><label>GRADE (OPTIONAL)</label><input type="text" id="inGrade" placeholder="e.g. EN-24, WPS, MS"></div>
+      <button class="gbtn" id="btnSearch">Search</button>
+      <button class="rbtn" id="btnReset">Reset</button>
+    </div>
+  </div>
+  <div class="res">
+    <div class="sbar" id="sbar">Select a shape and enter a size or grade to begin</div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+<div class="tp" id="p2">
+  <div class="awrap">
+    <div class="ahead">
+      <div><h2>Price Manager</h2><p>Set price per kg for each individual size. Saves instantly.</p></div>
+      <div class="abtnrow">
+        <button class="ibtn" id="btnImport">Import CSV</button>
+        <input type="file" id="csvIn" accept=".csv" style="display:none">
+        <button class="ebtn" id="btnExport">Export CSV</button>
+      </div>
+    </div>
+    <div style="background:#0F2540;border-radius:8px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:#8AAAC8;font-family:Georgia,serif;font-weight:700;">CHANGE PIN:</span>
+      <input type="password" id="newPin1" maxlength="4" placeholder="New 4-digit PIN" style="width:120px;padding:7px 10px;border-radius:6px;border:1.5px solid #4A9FD4;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:Georgia,serif;outline:none;text-align:center;">
+      <input type="password" id="newPin2" maxlength="4" placeholder="Confirm PIN" style="width:120px;padding:7px 10px;border-radius:6px;border:1.5px solid #4A9FD4;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:Georgia,serif;outline:none;text-align:center;">
+      <button id="btnChangePin" style="padding:7px 18px;background:#C8960C;color:#0F2540;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:Georgia,serif;">Update PIN</button>
+      <span id="pinChgMsg" style="font-size:12px;color:#A8DFC0;font-family:Georgia,serif;"></span>
+    </div>
+    <div class="afilter">
+      <div class="fg" style="max-width:200px"><label style="color:#1B3A5C">FILTER BY GRADE / SHAPE</label><input type="text" id="af" placeholder="e.g. EN-24, Round Bar"></div>
+      <button class="fbtn" id="btnAF">Filter</button>
+      <button class="cbtn" id="btnAC">Clear</button>
+    </div>
+    <div class="ptw">
+      <table class="ptbl">
+        <thead><tr><th>GRADE</th><th>SHAPE</th><th>SUB-TYPE</th><th>SIZE</th><th>CURRENT PRICE</th><th>UPDATE</th></tr></thead>
+        <tbody id="ptbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<footer>JAGETIYA METALS | GST: 24AGIPS3207M1Z7 | Vadodara, Gujarat, India</footer>
+<script>
+var SL = ["Round Bar","Square Bar","Flat Bar","Hex Bar","Non-Ferrous"];
+
+var DB = {
+"Round Bar":[
+  {g:"EN-8D",s:"Rolled",m:"VSP Make",sz:[16,18,20,22,25,28,32,35,42,45,50,53,56,60,63,65,70,80,85,90]},
+  {g:"EN-8D",s:"Rod",m:"R.L Steel / LSR Make",sz:[85,90,95,100,105,110,115,120,125,130,140,150,160,170,180,200,210]},
+  {g:"EN-8D",s:"Bright Rod",m:"",sz:[8,10,12,14,16,20,25,28,30,32,36,40,50,55,60,63]},
+  {g:"EN-8D / C-45",s:"Rolled Imported",m:"China / Korea",sz:[210,220,230,240,250,260,270,280,290,300,310,320,330,340,350]},
+  {g:"EN-8",s:"Forging Rod",m:"",sz:[310,320,330,340,350,360,370,380,390,400,410,420,430,440,450]},
+  {g:"EN-8",s:"Centerless Grinding",m:"",sz:[12,15,16,20,25,30,35,38,40]},
+  {g:"EN-9",s:"Rod",m:"",sz:[18,20,22,25,28,30,32,36,38,40,42,45,48,50,52,56,60,65,70,75,80,85,90,95,100,110,115,120,125,130,140,150,160,170,180,190,200]},
+  {g:"EN-9",s:"Forging Rod",m:"",sz:[310,320,330,340,350,360,370,380,390,400,410,420,430,440,450]},
+  {g:"EN-19 (4140)",s:"Rod",m:"R.L Steel / Laxcon / LSR",sz:[16,18,20,22,25,28,32,36,40,42,45,50,53,56,60,63,65,70,80,85,90,95,100,105,110,115,120,125,130,140,150,160,170,180,190,200]},
+  {g:"EN-19 (4140)",s:"Imported / Forging Rod",m:"China / Forging",sz:[210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400,410,420,430,440,450]},
+  {g:"EN-24",s:"Rod",m:"R.L Steel / Laxcon / LSR",sz:[16,18,20,22,25,28,32,36,40,42,45,50,53,56,60,63,65,70,80,85,90,95,100,105,110,115,120,125,130,140,150,160,170,180,190,200]},
+  {g:"EN-24",s:"Forging Rod",m:"",sz:[210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400,410,420,430,440,450]},
+  {g:"20MnCr5",s:"Rod",m:"R.L Steel / Laxcon / LSR",sz:[16,18,20,22,25,28,32,36,40,42,45,50,53,56,60,63,65,70,80,85,90,95,100,105,110,115,120,125,130,140,150,160,170,180,190,200]},
+  {g:"20MnCr5",s:"Forging Rod",m:"",sz:[210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400,410,420,430,440,450]},
+  {g:"EN-353",s:"Rod (Rolled)",m:"Super Forge Steel / LSR",sz:[16,18,20,22,25,28,32,36,40,42,45,50,53,56,60,65,70,80,85,90,95,100,105,110,115,120,125,130,140,150,160]},
+  {g:"EN-353",s:"Forging Rod",m:"",sz:[150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350]},
+  {g:"EN-31",s:"Rod (Rolled)",m:"LSR Steel Make",sz:[16,18,20,22,25,28,32,36,40,42,45,50,53,56,60,63,65,70,80,85,90,95,100,105,110,115,120,125,130,140,150,160,170,180,190,200]},
+  {g:"EN-31",s:"Forging / Imported Rod",m:"",sz:[160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400,410,420,430,440,450]},
+  {g:"WPS (D3)",s:"Rod",m:"Super Forge Steel Make",sz:[8,10,13,16,20,22,26,28,32,36,40,45,50,56,60,63,70,75]},
+  {g:"WPS (D3)",s:"Turn Rod Imported",m:"China Make",sz:[80,85,90,100,105,110,115,120,125,130,140,150,160,170,180,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350]},
+  {g:"MS",s:"Bright Rod",m:"Rolling & VSP Make",sz:[4,5,6,12,14.2,15,16,18,19,20,22,22.2,24,25,25.4,27,28.5,30,32,35,36,38,40,42,45,50,55,57,60,63,70,75]},
+  {g:"MS",s:"Black Rod",m:"Rolling & VSP / Imported",sz:[16,20,22,25,28,32,36,40,45,50,53,56,60,63,65,71,75,80,85,90,95,100,105,110,115,120,125,130,140,150,160,170,190,200,210,220,230,240,250,260,270,280,290,300]},
+  {g:"MS",s:"Centerless Grinding",m:"",sz:[12,15,16,20,25,30,35,38,40]}
+],
+"Square Bar":[
+  {g:"EN-8",s:"Square Bar",m:"",sz:[16,20,25,28,32,40,45,50,55,65,75,90,100,125,130,155]},
+  {g:"WPS (D3)",s:"Square Bar",m:"Super Forge Steel Make",sz:[16,20,22,26,28,32,36,40,45,50,56,60,65,80,105,125,130,155]},
+  {g:"MS Bright",s:"Square Bar",m:"",sz:[8,10,12,12.7,14.2,16,19,20,22,25.4,28,30,32,38,40,45,50,63]}
+],
+"Hex Bar":[
+  {g:"MS Bright",s:"Hex Bar",m:"",sz:[12,12.7,14.2,16,17,19,22.2,24,25.4,27,28.5,30,32,36,41,46,50,55,60,65,70,75]}
+],
+"Flat Bar":[
+  {g:"EN-8",s:"Rolled",flat:{6:[25,32,40,50,63,75,100],10:[25,32,40,50,63,75,100,125],12:[25,32,40,50,63,75,100,125],16:[25,32,40,50,63,75,100,125,155],20:[32,40,50,63,75,100,125,155,200],25:[40,50,63,75,100,125,155,200,250],32:[40,50,65,75,100,125,155,200,250],40:[50,65,75,100,125,155,200,250],50:[65,75,100,125,155,200,250]}},
+  {g:"WPS (D3)",s:"Rolled - Super Forge",flat:{6:[25,32,40,50,65,80,105],10:[25,32,40,50,65,80,105],13:[25,32,40,50,65,80,105],16:[32,40,50,65,80,105,130,155],20:[40,50,65,80,105,130,155,200],25:[40,50,65,80,105,130,155,200,250],32:[40,50,65,80,105,130,155,180,200,250,310,355,410]}},
+  {g:"WPS (D3)",s:"Forging",flat:{40:[50,65,80,105,130,155,200,250,310,355,410],50:[65,80,105,130,155,200,250,310,355,410],65:[80,105,130,155,200,250,305,355,410],80:[105,130,155,200,250,305,355,410],105:[130,155,200,250,305,355,410]}},
+  {g:"MS Bright",s:"Rolled",flat:{5:[16,20,25,32,40],6:[16,20,25,32,40,50,63,75,100],8:[16,20,25,32,40,50,60,63,75,100],10:[16,20,25,32,40,50,60,63,75,100,125],12:[16,20,25,32,40,50,63,75,100,125],16:[20,25,32,40,50,63,75,100,125],20:[25,30,32,40,50,60,63,75,100,125],25:[32,40,50,63,75,100,125],32:[40,50,65,75,100]}},
+  {g:"MS Black",s:"Heavy Flat",flat:{32:[40,50,65,75,100,125,150,200],40:[50,65,75,100,125,150,200],50:[65,75,100,125,150,200]}}
+],
+"Non-Ferrous":[
+  {g:"Brass",s:"Rod, Hex, Square, Flat, Sheet",note:1},
+  {g:"Copper",s:"EC Grade",note:1},
+  {g:"Aluminium",s:"HE30 / 6802 Grade",note:1},
+  {g:"SS 304",s:"Stainless Steel Rod",note:1},
+  {g:"SS 304L",s:"Stainless Steel Rod",note:1},
+  {g:"SS 316",s:"Stainless Steel Rod",note:1},
+  {g:"SS 316L",s:"Stainless Steel Rod",note:1},
+  {g:"SS 321",s:"Stainless Steel Rod",note:1},
+  {g:"SS 410",s:"Stainless Steel Rod",note:1},
+  {g:"SS 420",s:"Stainless Steel Rod",note:1},
+  {g:"SS 430F",s:"Stainless Steel Rod",note:1},
+  {g:"SS 431",s:"Stainless Steel Rod",note:1},
+  {g:"SS 440C",s:"Stainless Steel Rod",note:1},
+  {g:"SS 17-4-PH",s:"Stainless Steel Rod",note:1}
+]
+};
+
+function gc(g) {
+  var u = g.toUpperCase();
+  if (u.indexOf("EN-8") !== -1)  return "#1A5276";
+  if (u.indexOf("EN-9") !== -1)  return "#1E8449";
+  if (u.indexOf("EN-19") !== -1) return "#A04000";
+  if (u.indexOf("EN-24") !== -1) return "#922B21";
+  if (u.indexOf("EN-31") !== -1) return "#117A65";
+  if (u.indexOf("EN-35") !== -1) return "#9A7D0A";
+  if (u.indexOf("20MN") !== -1)  return "#6C3483";
+  if (u.indexOf("WPS") !== -1)   return "#C0392B";
+  if (u.indexOf("MS") !== -1)    return "#2C3E50";
+  if (u.indexOf("BRASS") !== -1) return "#7D6608";
+  if (u.indexOf("COPPER") !== -1)return "#935116";
+  if (u.indexOf("ALUM") !== -1)  return "#1A5276";
+  if (u.indexOf("SS") !== -1)    return "#1E8449";
+  return "#2C3E50";
+}
+
+function uniqSort(a) {
+  var o = [];
+  for (var i = 0; i < a.length; i++) { if (o.indexOf(Number(a[i])) === -1) o.push(Number(a[i])); }
+  return o.sort(function(x,y){return x-y;});
+}
+
+function nearest(a, t, n) {
+  var s = uniqSort(a), bl = [], ab = [];
+  for (var i = 0; i < s.length; i++) {
+    var diff = s[i] - t;
+    if (diff < -0.0001) bl.push(s[i]);
+    else if (diff > 0.0001) ab.push(s[i]);
+  }
+  return {b: bl.slice(-n), a: ab.slice(0,n)};
+}
+function hasExact(arr, t) {
+  for (var i = 0; i < arr.length; i++) { if (Math.abs(arr[i]-t) < 0.0001) return true; }
+  return false;
+}
+
+function pkey(g, sh, st, sz) { return g + "|" + sh + "|" + st + "|" + sz; }
+function gp(g, sh, st, sz) {
+  try { var v = localStorage.getItem("jk3_" + pkey(g,sh,st,sz)); return v !== null ? parseFloat(v) : null; } catch(e){return null;}
+}
+function sp(g, sh, st, sz, p) {
+  try { localStorage.setItem("jk3_" + pkey(g,sh,st,sz), p); } catch(e){}
+}
+
+function phtml(g, sh, st, sz) {
+  var p = gp(g, sh, st, String(sz));
+  if (p === null) return '<div class="noprice">No price set for ' + sz + ' mm. Set it in Admin tab.</div>';
+  return '<div class="prow"><span class="plbl">PRICE - ' + sz + ' mm</span><span class="pval">Rs ' + p.toFixed(2) + '<small>/kg</small></span></div>';
+}
+function pfhtml(g, sh, st, t, w) {
+  var p = gp(g, sh, st, t + "x" + w);
+  if (p === null) return "";
+  return ' <b style="color:#C8960C;font-size:10px">Rs ' + p.toFixed(2) + '/kg</b>';
+}
+
+function setSbar(msg, cls) {
+  var el = document.getElementById("sbar");
+  el.className = "sbar" + (cls ? " " + cls : "");
+  el.innerHTML = msg;
+}
+
+var selShape = null, stimer = null;
+
+function showIdle() {
+  setSbar("Select a shape and enter a size or grade to begin", "");
+  document.getElementById("grid").innerHTML =
+    '<div class="idlebox"><h3>Smart Stock Search</h3>' +
+    '<p>Search by size, grade, or both. Shows live prices on exact matches.</p>' +
+    '<div class="isteps">' +
+    '<div class="istep"><div class="isn">1</div>Pick shape</div>' +
+    '<div class="istep"><div class="isn">2</div>Enter size (mm)</div>' +
+    '<div class="istep"><div class="isn">3</div>Add grade (optional)</div>' +
+    '<div class="istep"><div class="isn">4</div>See results + prices</div>' +
+    '</div></div>';
+}
+
+function doSearch() {
+  var sv = parseFloat(document.getElementById("inSize").value);
+  var gv = document.getElementById("inGrade").value.trim().toLowerCase();
+  var tv = parseFloat(document.getElementById("inThk").value);
+  var wv = parseFloat(document.getElementById("inWid").value);
+  var hs = !isNaN(sv) && sv > 0;
+  var hg = gv.length > 0;
+  var ht = !isNaN(tv) && tv > 0;
+  var hw = !isNaN(wv) && wv > 0;
+  if (!selShape && !hs && !hg) { showIdle(); return; }
+  var shapes = (!selShape || selShape === "All") ? SL : [selShape];
+  var cards = [];
+  for (var si = 0; si < shapes.length; si++) {
+    var sh = shapes[si], ents = DB[sh];
+    if (!ents) continue;
+    for (var ei = 0; ei < ents.length; ei++) {
+      var e = ents[ei];
+      if (hg && e.g.toLowerCase().indexOf(gv) === -1) continue;
+      if (e.note) { cards.push(cNF(e)); continue; }
+      if (sh === "Flat Bar") { var fc = cFlat(e, ht?tv:null, hw?wv:null, sh); if (fc) cards.push(fc); continue; }
+      var bc = cBar(e, sh, hs?sv:null);
+      if (bc) cards.push(bc);
+    }
+  }
+  var grid = document.getElementById("grid");
+  if (cards.length === 0) {
+    setSbar("No results found. Try different size, grade, or shape.", "none");
+    grid.innerHTML = '<div class="idlebox"><h3>No Stock Found</h3><p>No matching stock for these criteria.</p></div>';
+    return;
+  }
+  cards.sort(function(a,b){var av=a.ex?0:a.nr?1:2;var bv=b.ex?0:b.nr?1:2;return av-bv;});
+  var ne = 0, nn = 0;
+  for (var ci = 0; ci < cards.length; ci++) { if(cards[ci].ex) ne++; else if(cards[ci].nr) nn++; }
+  var h = "";
+  for (var ci2 = 0; ci2 < cards.length; ci2++) h += cards[ci2].html;
+  grid.innerHTML = h;
+  bindCards();
+  if (ne > 0) setSbar(ne + " exact match" + (ne>1?"es":"") + " found" + (nn>0?" | "+nn+" with nearest":""), "ok");
+  else if (nn > 0) setSbar("Exact size not available. Showing nearest.", "warn");
+  else setSbar(cards.length + " result" + (cards.length>1?"s":"") + " found.", "ok");
+}
+
+function bindCards() {
+  var ncs = document.getElementsByClassName("nc");
+  for (var i = 0; i < ncs.length; i++) {
+    (function(el){
+      el.addEventListener("click", function() {
+        document.getElementById(this.getAttribute("data-f")).value = this.getAttribute("data-v");
+        doSearch();
+      });
+    })(ncs[i]);
+  }
+  var scs = document.getElementsByClassName("sz");
+  for (var j = 0; j < scs.length; j++) {
+    (function(el){
+      el.addEventListener("click", function() {
+        document.getElementById("inSize").value = this.getAttribute("data-v");
+        doSearch();
+      });
+    })(scs[j]);
+  }
+  var tgs = document.getElementsByClassName("togs");
+  for (var k = 0; k < tgs.length; k++) {
+    (function(el){
+      el.addEventListener("click", function() {
+        var box = this.nextSibling;
+        while (box && box.nodeType !== 1) box = box.nextSibling;
+        if (!box) return;
+        if (box.className === "cbox") { box.className = "cbox on"; this.innerHTML = "Hide all sizes"; }
+        else { box.className = "cbox"; this.innerHTML = "Show all sizes (" + box.getAttribute("data-c") + ")"; }
+      });
+    })(tgs[k]);
+  }
+}
+
+function cBar(e, sh, t) {
+  var sz = uniqSort(e.sz), col = gc(e.g), mh = "", ex = false, nr = false;
+  if (t !== null) {
+    if (hasExact(sz, t)) {
+      ex = true;
+      mh = '<div class="myes"><span class="ml">Exact size available</span><span class="ms">' + t + ' mm</span></div>';
+      mh += phtml(e.g, sh, e.s, t);
+    } else {
+      var nb = nearest(sz, t, 3);
+      if (!nb.b.length && !nb.a.length) return null;
+      nr = true;
+      var chips = "";
+      for (var i=0;i<nb.b.length;i++) chips+='<span class="nc" data-f="inSize" data-v="'+nb.b[i]+'">'+nb.b[i]+' (below)</span>';
+      for (var j=0;j<nb.a.length;j++) chips+='<span class="nc" data-f="inSize" data-v="'+nb.a[j]+'">'+nb.a[j]+' (above)</span>';
+      mh='<div class="mno"><span class="ml">Size <b>'+t+' mm</b> not available in this grade</span></div>'+
+         '<div class="mnear"><span class="ml">Nearest available:</span><div class="nr">'+chips+'</div></div>';
+    }
+  }
+  var nb2 = t!==null?nearest(sz,t,2):{b:[],a:[]};
+  var ac = "";
+  for (var k=0;k<sz.length;k++) {
+    var cls="sz";
+    if(t!==null){if(sz[k]===t)cls="sz ex";else if(nb2.b.indexOf(sz[k])!==-1||nb2.a.indexOf(sz[k])!==-1)cls="sz nr2";}
+    ac+='<span class="'+cls+'" data-v="'+sz[k]+'">'+sz[k]+'</span>';
+  }
+  var mk = e.m ? '<span class="tag">'+e.m+'</span>' : "";
+  var html = '<div class="card"><div class="ch" style="background:'+col+'18;border-bottom:2px solid '+col+'44">'+
+    '<span class="gbadge" style="background:'+col+'">'+e.g+'</span>'+
+    '<div class="meta"><span class="tag sh">'+sh+'</span><span class="tag">'+e.s+'</span>'+mk+'</div></div>'+
+    '<div class="cb">'+mh+
+    '<span class="togs">Show all sizes ('+sz.length+')</span>'+
+    '<div class="cbox" data-c="'+sz.length+'">'+ac+'</div>'+
+    '</div></div>';
+  return {html:html,ex:ex,nr:nr};
+}
+
+function cFlat(e, tv, wv, sh) {
+  var fd = e.flat, col = gc(e.g), allT = [], ex=false, nr=false, relT, tn="";
+  for (var k in fd) allT.push(Number(k));
+  allT.sort(function(a,b){return a-b;});
+  relT = allT.slice();
+  if (tv !== null) {
+    if (allT.indexOf(tv)!==-1) { relT=[tv]; }
+    else { var nt=nearest(allT,tv,2); relT=nt.b.concat(nt.a); nr=true;
+      tn='<div class="mno"><span class="ml">Thickness <b>'+tv+' mm</b> not available. Showing nearest.</span></div>'; }
+  }
+  var rows="";
+  for (var ri=0;ri<relT.length;ri++) {
+    var t=relT[ri], ws=fd[t], isnT=(tv!==null&&t!==tv), wh="", rc="";
+    if (wv!==null) {
+      if (ws.indexOf(wv)!==-1&&!isnT){ex=true;rc="rm";}
+      else if(ws.indexOf(wv)===-1){var nw=nearest(ws,wv,2);if((nw.b.length||nw.a.length)&&!isnT){nr=true;rc="rn";}}
+      for(var wi=0;wi<ws.length;wi++){
+        var w=ws[wi];
+        if(w===wv&&!isnT){var fp=pfhtml(e.g,sh,e.s,t,w);wh+='<span class="we">'+w+fp+'</span> ';}
+        else{var nw2=nearest(ws,wv,2);if((nw2.b.indexOf(w)!==-1||nw2.a.indexOf(w)!==-1)&&!isnT)wh+='<span class="wn">'+w+'</span> ';
+          else wh+='<span style="color:#999">'+w+'</span> ';}
+      }
+    } else { wh=ws.join(", "); }
+    var tl=isnT?'<span style="color:#9A7D0A;font-weight:700">'+t+' (nearest)</span>':'<b>'+t+'</b>';
+    rows+='<tr class="'+rc+'"><td>'+tl+' mm</td><td>'+wh+'</td></tr>';
+  }
+  if(!rows) return null;
+  var html='<div class="card"><div class="ch" style="background:'+col+'18;border-bottom:2px solid '+col+'44">'+
+    '<span class="gbadge" style="background:'+col+'">'+e.g+'</span>'+
+    '<div class="meta"><span class="tag sh">Flat Bar</span><span class="tag">'+e.s+'</span></div></div>'+
+    '<div class="cb">'+tn+'<table class="flt"><thead><tr><th>Thickness (mm)</th><th>Widths Available (mm)</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table></div></div>';
+  return{html:html,ex:ex,nr:nr};
+}
+
+function cNF(e) {
+  var col=gc(e.g);
+  var html='<div class="card"><div class="ch" style="background:'+col+'18;border-bottom:2px solid '+col+'44">'+
+    '<span class="gbadge" style="background:'+col+'">'+e.g+'</span>'+
+    '<div class="meta"><span class="tag sh">Non-Ferrous</span></div></div>'+
+    '<div class="cb"><div style="padding:8px 12px;background:#EDE9E0;border-radius:7px;font-size:12px;color:#3A4A5C">'+
+    '<b>Available:</b> '+e.s+'<br><small style="color:#7A8A9A">Contact for specific sizes.</small></div></div></div>';
+  return{html:html,ex:false,nr:false};
+}
+
+// ADMIN PRICE TABLE
+function buildPK() {
+  var rows=[];
+  for(var si=0;si<SL.length;si++){
+    var sh=SL[si],ents=DB[sh];
+    if(!ents) continue;
+    for(var ei=0;ei<ents.length;ei++){
+      var e=ents[ei];
+      if(e.note){rows.push({g:e.g,sh:sh,st:e.s,sz:"N/A"});continue;}
+      if(e.flat){
+        for(var tk in e.flat){var ws=e.flat[tk];
+          for(var wi=0;wi<ws.length;wi++) rows.push({g:e.g,sh:sh,st:e.s,sz:tk+"x"+ws[wi]});
+        }
+      } else if(e.sz){
+        var us=uniqSort(e.sz);
+        for(var ui=0;ui<us.length;ui++) rows.push({g:e.g,sh:sh,st:e.s,sz:String(us[ui])});
+      }
+    }
+  }
+  return rows;
+}
+
+var PK = [];
+
+function renderPT(fv) {
+  PK = buildPK();
+  var fl = fv ? fv.toLowerCase() : "", h="", shown=0;
+  for(var i=0;i<PK.length;i++){
+    var r=PK[i];
+    if(fl && r.g.toLowerCase().indexOf(fl)===-1 && r.sh.toLowerCase().indexOf(fl)===-1 && r.st.toLowerCase().indexOf(fl)===-1) continue;
+    shown++;
+    var col=gc(r.g), p=gp(r.g,r.sh,r.st,r.sz);
+    var cur=p!==null?'<span class="cp">Rs '+p.toFixed(2)+'</span>':'<span class="cp na">not set</span>';
+    h+='<tr id="ar'+i+'">'+
+      '<td><span class="gdot" style="background:'+col+'"></span><b>'+r.g+'</b></td>'+
+      '<td><span class="tag sh" style="font-size:9px">'+r.sh+'</span></td>'+
+      '<td style="font-size:11px;color:#5A6A7A">'+r.st+'</td>'+
+      '<td style="font-family:Courier,monospace;font-size:12px;font-weight:700;color:#1B3A5C">'+r.sz+'</td>'+
+      '<td>'+cur+' <span class="ubdg" id="ub'+i+'">Saved!</span></td>'+
+      '<td><div class="piw"><span>Rs</span>'+
+      '<input class="pi" type="number" id="pi'+i+'" placeholder="0.00" min="0" step="0.01" value="'+(p!==null?p:"")+'">'+
+      '<span>/kg</span><button class="svbtn" data-i="'+i+'">Save</button></div></td></tr>';
+  }
+  if(!shown) h='<tr><td colspan="6" class="norows">No rows match filter.</td></tr>';
+  document.getElementById("ptbody").innerHTML = h;
+  var svs = document.getElementsByClassName("svbtn");
+  for(var b=0;b<svs.length;b++){
+    (function(btn){
+      btn.addEventListener("click",function(){
+        var idx=parseInt(this.getAttribute("data-i")), r2=PK[idx];
+        var val=parseFloat(document.getElementById("pi"+idx).value);
+        if(isNaN(val)||val<0){alert("Please enter a valid price.");return;}
+        sp(r2.g,r2.sh,r2.st,r2.sz,val);
+        var tr=document.getElementById("ar"+idx);
+        if(tr) tr.className="upd";
+        var ub=document.getElementById("ub"+idx);
+        if(ub) ub.className="ubdg on";
+        this.innerHTML="Saved!"; this.className="svbtn done";
+        var t=this;
+        setTimeout(function(){t.innerHTML="Save";t.className="svbtn";if(tr)tr.className="";},1800);
+      });
+    })(svs[b]);
+  }
+}
+
+function doExport() {
+  var all=buildPK(), csv="Grade,Shape,Sub-Type,Size (mm),Price (Rs/kg)\n";
+  for(var i=0;i<all.length;i++){
+    var r=all[i],p=gp(r.g,r.sh,r.st,r.sz);
+    csv+='"'+r.g+'","'+r.sh+'","'+r.st+'","'+r.sz+'",'+(p!==null?p.toFixed(2):"")+("\n");
+  }
+  var blob=new Blob([csv],{type:"text/csv"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="JKMetal_Prices.csv";
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+function parseCSVRow(row) {
+  var res=[],cur="",inQ=false;
+  for(var i=0;i<row.length;i++){
+    var c=row[i];
+    if(c==='"'){inQ=!inQ;}
+    else if(c===','&&!inQ){res.push(cur);cur="";}
+    else{cur+=c;}
+  }
+  res.push(cur);return res;
+}
+
+function doImport(txt) {
+  var lines=txt.split("\n"),cnt=0;
+  for(var i=1;i<lines.length;i++){
+    var ln=lines[i].trim();if(!ln)continue;
+    var cols=parseCSVRow(ln);if(cols.length<5)continue;
+    var g=cols[0].replace(/^"|"$/g,"").trim();
+    var sh=cols[1].replace(/^"|"$/g,"").trim();
+    var st=cols[2].replace(/^"|"$/g,"").trim();
+    var sz=cols[3].replace(/^"|"$/g,"").trim();
+    var pstr=cols[4].replace(/^"|"$/g,"").replace(/[^0-9.]/g,"");
+    var p=parseFloat(pstr);
+    if(!g||!sh||isNaN(p)||p<=0)continue;
+    sp(g,sh,st,sz,p);cnt++;
+  }
+  return cnt;
+}
+
+
+// CUSTOM STORAGE
+var CUST_KEY = "jkcust";
+function loadCust(){try{var v=localStorage.getItem(CUST_KEY);return v?JSON.parse(v):{};}catch(e){return {};}}
+function saveCust(c){try{localStorage.setItem(CUST_KEY,JSON.stringify(c));}catch(e){}}
+
+function applyCustom(){
+  var c=loadCust();
+  if(c.added){for(var key in c.added){var pts=key.split("|"),sh=pts[0],gi=parseInt(pts[1]),sz=c.added[key];if(DB[sh]&&DB[sh][gi]&&DB[sh][gi].sz){for(var s=0;s<sz.length;s++){if(DB[sh][gi].sz.indexOf(sz[s])===-1)DB[sh][gi].sz.push(sz[s]);}}}}
+  if(c.removed){for(var key2 in c.removed){var pts2=key2.split("|"),sh2=pts2[0],gi2=parseInt(pts2[1]),rsz=c.removed[key2];if(DB[sh2]&&DB[sh2][gi2]&&DB[sh2][gi2].sz){DB[sh2][gi2].sz=DB[sh2][gi2].sz.filter(function(x){return rsz.indexOf(x)===-1;});}}}
+  if(c.newGrades){for(var i=0;i<c.newGrades.length;i++){var ng=c.newGrades[i];if(!DB[ng.sh])DB[ng.sh]=[];var exists=false;for(var j=0;j<DB[ng.sh].length;j++){if(DB[ng.sh][j].g===ng.g&&DB[ng.sh][j].s===ng.s){exists=true;break;}}if(!exists)DB[ng.sh].push({g:ng.g,s:ng.s,m:"",sz:ng.sz.slice()});}}
+}
+
+function buildGradeList(){
+  var list=[];
+  for(var si=0;si<SL.length;si++){var sh=SL[si],ents=DB[sh];if(!ents)continue;for(var ei=0;ei<ents.length;ei++){var e=ents[ei];if(e.sz)list.push({label:e.g+" ("+sh+" - "+e.s+")",sh:sh,idx:ei,g:e.g});}}
+  return list;
+}
+
+function showMsg(elId, msg, isOk){
+  var el=document.getElementById(elId);
+  el.style.color=isOk?"#2E8B57":"#C0392B";
+  el.innerHTML=msg;
+  setTimeout(function(){el.innerHTML="";},3000);
+}
+
+function refreshChips(list){
+  var sel=document.getElementById("smGrade2");
+  var idx=parseInt(sel.value);
+  var item=list[idx];
+  var box=document.getElementById("smSizeChips");
+  if(!item||!DB[item.sh]||!DB[item.sh][item.idx]||!DB[item.sh][item.idx].sz){box.innerHTML="No sizes found.";return;}
+  var sizes=uniqSort(DB[item.sh][item.idx].sz);
+  if(sizes.length===0){box.innerHTML="<span style='color:#9A8A9A'>All sizes removed.</span>";return;}
+  var h="";
+  for(var i=0;i<sizes.length;i++){
+    h+='<span data-sh="'+item.sh+'" data-idx="'+item.idx+'" data-sz="'+sizes[i]+'" class="rem-chip">'+sizes[i]+'</span>';
+  }
+  box.innerHTML=h;
+  var chips=document.getElementsByClassName("rem-chip");
+  for(var t=0;t<chips.length;t++){
+    (function(chip){
+      chip.addEventListener("click",function(){
+        var sh=this.getAttribute("data-sh");
+        var eidx=parseInt(this.getAttribute("data-idx"));
+        var sz=parseFloat(this.getAttribute("data-sz"));
+        var ent=DB[sh][eidx];
+        ent.sz=ent.sz.filter(function(x){return Math.abs(x-sz)>0.0001;});
+        var c=loadCust();
+        if(!c.removed)c.removed={};
+        var k=sh+"|"+eidx;
+        if(!c.removed[k])c.removed[k]=[];
+        if(c.removed[k].indexOf(sz)===-1)c.removed[k].push(sz);
+        if(c.added&&c.added[k])c.added[k]=c.added[k].filter(function(x){return Math.abs(x-sz)>0.0001;});
+        saveCust(c);
+        showMsg("smRemMsg","Removed "+sz+" mm from "+ent.g,true);
+        refreshChips(list);
+      });
+    })(chips[t]);
+  }
+}
+
+function populateSMDropdowns(){
+  var list=buildGradeList();
+  var s1=document.getElementById("smGrade1");
+  var s2=document.getElementById("smGrade2");
+  s1.innerHTML="";s2.innerHTML="";
+  for(var i=0;i<list.length;i++){
+    var o1=document.createElement("option");o1.value=i;o1.text=list[i].label;s1.appendChild(o1);
+    var o2=document.createElement("option");o2.value=i;o2.text=list[i].label;s2.appendChild(o2);
+  }
+  refreshChips(list);
+  s2.addEventListener("change",function(){refreshChips(list);});
+  return list;
+}
+
+function initStockManager(){
+  var list=populateSMDropdowns();
+
+  document.getElementById("btnSmAdd").addEventListener("click",function(){
+    var idx=parseInt(document.getElementById("smGrade1").value);
+    var item=list[idx];
+    var szVal=parseFloat(document.getElementById("smAddSize").value);
+    if(!item){showMsg("smAddMsg","Select a grade first.",false);return;}
+    if(isNaN(szVal)||szVal<=0){showMsg("smAddMsg","Enter a valid size in mm.",false);return;}
+    var ent=DB[item.sh][item.idx];
+    if(hasExact(ent.sz,szVal)){showMsg("smAddMsg",szVal+" mm already exists in "+ent.g+".",false);return;}
+    ent.sz.push(szVal);
+    var c=loadCust();
+    if(!c.added)c.added={};
+    var k=item.sh+"|"+item.idx;
+    if(!c.added[k])c.added[k]=[];
+    c.added[k].push(szVal);
+    if(c.removed&&c.removed[k])c.removed[k]=c.removed[k].filter(function(x){return Math.abs(x-szVal)>0.0001;});
+    saveCust(c);
+    document.getElementById("smAddSize").value="";
+    showMsg("smAddMsg","Added "+szVal+" mm to "+ent.g+" successfully!",true);
+    refreshChips(list);
+  });
+
+  document.getElementById("btnNgAdd").addEventListener("click",function(){
+    var gname=document.getElementById("ngName").value.trim();
+    var shape=document.getElementById("ngShape").value;
+    var sub=document.getElementById("ngSub").value.trim();
+    var sizesRaw=document.getElementById("ngSizes").value.trim();
+    if(!gname){showMsg("ngMsg","Enter a grade name.",false);return;}
+    if(!sub){showMsg("ngMsg","Enter a sub-type (e.g. Rod).",false);return;}
+    if(!sizesRaw){showMsg("ngMsg","Enter at least one size.",false);return;}
+    var szArr=[];
+    var parts=sizesRaw.split(",");
+    for(var i=0;i<parts.length;i++){var v=parseFloat(parts[i].trim());if(!isNaN(v)&&v>0)szArr.push(v);}
+    if(szArr.length===0){showMsg("ngMsg","No valid sizes found. Use comma-separated numbers like 16,20,25.",false);return;}
+    var already=false;
+    if(DB[shape]){for(var j=0;j<DB[shape].length;j++){if(DB[shape][j].g===gname&&DB[shape][j].s===sub){already=true;break;}}}
+    if(already){showMsg("ngMsg","This grade already exists. Use Add Size above instead.",false);return;}
+    if(!DB[shape])DB[shape]=[];
+    DB[shape].push({g:gname,s:sub,m:"",sz:szArr.slice()});
+    var c=loadCust();
+    if(!c.newGrades)c.newGrades=[];
+    c.newGrades.push({g:gname,sh:shape,s:sub,sz:szArr.slice()});
+    saveCust(c);
+    document.getElementById("ngName").value="";
+    document.getElementById("ngSub").value="";
+    document.getElementById("ngSizes").value="";
+    showMsg("ngMsg","Grade "+gname+" ("+shape+") added with "+szArr.length+" sizes!",true);
+    list=populateSMDropdowns();
+  });
+}
+
+// PIN
+var PIN_KEY="jkpin";
+var adminUnlocked=false;
+var pinEntry="";
+function getPin(){try{var v=localStorage.getItem(PIN_KEY);return v?v:"1234";}catch(e){return "1234";}}
+function savePin(p){try{localStorage.setItem(PIN_KEY,p);}catch(e){}}
+function updateDots(){for(var i=0;i<4;i++){var d=document.getElementById("pd"+i);if(d)d.className=i<pinEntry.length?"pin-dot filled":"pin-dot";}}
+function pinInput(k){
+  if(pinEntry.length>=4)return;
+  pinEntry+=k;updateDots();
+  document.getElementById("pinErr").innerHTML="";
+  if(pinEntry.length===4){setTimeout(function(){
+    if(pinEntry===getPin()){adminUnlocked=true;document.getElementById("pinOverlay").className="pin-overlay";pinEntry="";updateDots();}
+    else{document.getElementById("pinErr").innerHTML="Incorrect PIN. Try again.";pinEntry="";updateDots();}
+  },200);}
+}
+function pinDel(){if(pinEntry.length>0){pinEntry=pinEntry.slice(0,-1);updateDots();}document.getElementById("pinErr").innerHTML="";}
+function showPinOverlay(){pinEntry="";updateDots();document.getElementById("pinErr").innerHTML="";document.getElementById("pinOverlay").className="pin-overlay show";}
+function initPin(){
+  var keys=document.getElementsByClassName("pin-key");
+  for(var i=0;i<keys.length;i++){(function(btn){btn.addEventListener("click",function(){var k=this.getAttribute("data-k");if(k!==null)pinInput(k);});})(keys[i]);}
+  document.getElementById("pinDel").addEventListener("click",pinDel);
+  document.addEventListener("keydown",function(ev){var o=document.getElementById("pinOverlay");if(o.className.indexOf("show")===-1)return;if(ev.key>="0"&&ev.key<="9")pinInput(ev.key);else if(ev.key==="Backspace")pinDel();});
+}
+
+var SM_PIN = "2604";
+var smUnlocked = false;
+var pin2Entry = "";
+function updateDots2(){
+  for(var i=0;i<4;i++){var d=document.getElementById("p2d"+i);if(d)d.className=i<pin2Entry.length?"pin-dot filled":"pin-dot";}
+}
+function pin2Input(k){
+  if(pin2Entry.length>=4)return;
+  pin2Entry+=k; updateDots2();
+  document.getElementById("pin2Err").innerHTML="";
+  if(pin2Entry.length===4){
+    setTimeout(function(){
+      if(pin2Entry===SM_PIN){
+        smUnlocked=true;
+        document.getElementById("pin2Overlay").className="pin-overlay";
+        pin2Entry=""; updateDots2();
+      } else {
+        document.getElementById("pin2Err").innerHTML="Incorrect PIN. Try again.";
+        pin2Entry=""; updateDots2();
+      }
+    },200);
+  }
+}
+function pin2Del(){
+  if(pin2Entry.length>0){pin2Entry=pin2Entry.slice(0,-1);updateDots2();}
+  document.getElementById("pin2Err").innerHTML="";
+}
+function showPin2Overlay(){
+  pin2Entry=""; updateDots2();
+  document.getElementById("pin2Err").innerHTML="";
+  document.getElementById("pin2Overlay").className="pin-overlay show";
+}
+function initPin2(){
+  var keys2=document.querySelectorAll("[data-k2]");
+  for(var i=0;i<keys2.length;i++){
+    (function(btn){
+      btn.addEventListener("click",function(){pin2Input(this.getAttribute("data-k2"));});
+    })(keys2[i]);
+  }
+  document.getElementById("pin2Del").addEventListener("click",pin2Del);
+}
+
+var CHEM_COMP = {
+    "EN-8D": {"C": "0.36-0.44", "Mn": "0.60-1.00", "Si": "0.15-0.35", "Cr": "0.00-0.20", "Ni": "0.00-0.20", "Mo": "0.00"},
+    "EN-8": {"C": "0.36-0.44", "Mn": "0.60-1.00", "Si": "0.15-0.35", "Cr": "0.00-0.20", "Ni": "0.00-0.20", "Mo": "0.00"},
+    "EN-9": {"C": "0.40-0.50", "Mn": "0.70-1.10", "Si": "0.15-0.35", "Cr": "0.00-0.20", "Ni": "0.00-0.20", "Mo": "0.00"},
+    "EN-19 (4140)": {"C": "0.38-0.43", "Mn": "0.75-1.00", "Si": "0.15-0.35", "Cr": "0.80-1.10", "Ni": "0.00-0.20", "Mo": "0.15-0.25"},
+    "EN-24": {"C": "0.36-0.44", "Mn": "0.60-1.00", "Si": "0.15-0.35", "Cr": "1.00-1.40", "Ni": "1.30-1.70", "Mo": "0.20-0.30"},
+    "EN-36": {"C": "0.30-0.40", "Mn": "0.50-0.80", "Si": "0.20-0.35", "Cr": "1.00-1.30", "Ni": "0.80-1.10", "Mo": "0.20-0.30"},
+    "EN-41B": {"C": "0.35-0.45", "Mn": "0.60-1.00", "Si": "0.15-0.35", "Cr": "1.00-1.40", "Ni": "0.80-1.20", "Mo": "0.20-0.30"},
+    "EN-47": {"C": "0.45-0.55", "Mn": "0.60-1.00", "Si": "0.15-0.35", "Cr": "1.20-1.60", "Ni": "0.80-1.20", "Mo": "0.20-0.30"},
+    "20MnCr5": {"C": "0.17-0.23", "Mn": "1.10-1.40", "Si": "0.15-0.35", "Cr": "0.90-1.20", "Ni": "0.00-0.20", "Mo": "0.00"},
+    "EN-353": {"C": "0.48-0.55", "Mn": "0.50-0.80", "Si": "0.15-0.35", "Cr": "1.00-1.30", "Ni": "0.00-0.20", "Mo": "0.00"},
+    "EN-31": {"C": "0.90-1.05", "Mn": "0.30-0.50", "Si": "0.20-0.35", "Cr": "1.30-1.60", "Ni": "0.00-0.20", "Mo": "0.00"},
+    "WPS (D3)": {"C": "0.65-0.75", "Mn": "0.40-0.60", "Si": "0.25-0.45", "Cr": "0.90-1.10", "Ni": "0.00", "Mo": "0.00"},
+    "MS": {"C": "0.16-0.23", "Mn": "0.35-0.80", "Si": "0.10-0.35", "Cr": "0.00", "Ni": "0.00", "Mo": "0.00"},
+    "St52.3": {"C": "0.22", "Mn": "1.60", "Si": "0.55", "Cr": "0.00", "Ni": "0.00", "Mo": "0.00"},
+    "42CrMo4": {"C": "0.38-0.44", "Mn": "0.60-0.90", "Si": "0.15-0.35", "Cr": "0.90-1.20", "Ni": "0.00", "Mo": "0.15-0.30"},
+    "1018": {"C": "0.15-0.20", "Mn": "0.60-0.90", "Si": "0.10-0.30", "Cr": "0.00", "Ni": "0.00", "Mo": "0.00"},
+    "8620": {"C": "0.18-0.23", "Mn": "0.70-0.90", "Si": "0.15-0.35", "Cr": "0.40-0.60", "Ni": "0.40-0.70", "Mo": "0.15-0.25"},
+    "H11": {"C": "0.35-0.41", "Mn": "0.20-0.50", "Si": "0.80-1.20", "Cr": "4.75-5.50", "Ni": "0.00", "Mo": "1.10-1.60"},
+    "H13": {"C": "0.32-0.45", "Mn": "0.20-0.50", "Si": "0.80-1.20", "Cr": "4.75-5.50", "Ni": "0.00", "Mo": "1.10-1.60"},
+    "SS 304": {"C": "0.08", "Mn": "2.00", "Si": "1.00", "Cr": "18.00-20.00", "Ni": "8.00-10.50", "Mo": "0.00"},
+    "SS 316": {"C": "0.08", "Mn": "2.00", "Si": "1.00", "Cr": "16.00-18.00", "Ni": "10.00-14.00", "Mo": "2.00-3.00"},
+    "Brass": {"C": "0.00", "Mn": "0.00", "Si": "0.00", "Cr": "0.00", "Ni": "0.00", "Mo": "0.00"}
+};
+var chemGrades = Object.keys(CHEM_COMP).sort();
+function renderChemTable(grades){
+  var elem=["C","Mn","Si","Cr","Ni","Mo"];
+  var h='<table style="width:100%;border-collapse:collapse;font-family:Georgia,serif;"><tr style="background:#2E6DA4;color:#fff;">';
+  h+='<th style="padding:10px;text-align:left;border:1px solid #ccc;font-size:13px;font-weight:700;">Element</th>';
+  for(var g=0;g<grades.length;g++)h+='<th style="padding:10px;text-align:center;border:1px solid #ccc;font-size:13px;font-weight:700;">'+grades[g]+'</th>';
+  h+='</tr>';
+  for(var e=0;e<elem.length;e++){
+    h+='<tr style="background:'+(e%2?"#F7F4EE":"#fff")+'">';
+    h+='<td style="padding:10px;border:1px solid #ccc;font-size:13px;font-weight:600;color:#1B3A5C;">'+elem[e]+'</td>';
+    for(var g=0;g<grades.length;g++)h+='<td style="padding:10px;border:1px solid #ccc;text-align:center;font-size:13px;color:#145A32;">'+CHEM_COMP[grades[g]][elem[e]]+'%</td>';
+    h+='</tr>';
+  }
+  h+='</table>';
+  return h;
+}
+function initChemComposition(){
+  var sel=document.getElementById("chemGrade");
+  for(var i=0;i<chemGrades.length;i++){var o=document.createElement("option");o.value=i;o.text=chemGrades[i];sel.appendChild(o);}
+  sel.addEventListener("change",function(){document.getElementById("chemIndividual").innerHTML=renderChemTable([chemGrades[parseInt(this.value)]]);});
+  document.getElementById("chemIndividual").innerHTML=renderChemTable([chemGrades[0]]);
+  var cbox=document.getElementById("chemCheckboxes");
+  for(var i=0;i<chemGrades.length;i++){
+    var lbl=document.createElement("label");
+    lbl.style.display="flex";lbl.style.alignItems="center";lbl.style.gap="8px";lbl.style.padding="8px";lbl.style.cursor="pointer";lbl.style.borderRadius="6px";lbl.style.background="#F7F4EE";lbl.style.fontSize="13px";lbl.style.fontFamily="Georgia,serif";lbl.style.fontWeight="600";lbl.style.color="#1B3A5C";
+    var chk=document.createElement("input");chk.type="checkbox";chk.value=i;chk.style.width="18px";chk.style.height="18px";chk.style.cursor="pointer";
+    var sp=document.createElement("span");sp.textContent=chemGrades[i];
+    lbl.appendChild(chk);lbl.appendChild(sp);cbox.appendChild(lbl);
+  }
+  document.getElementById("btnShowCompare").addEventListener("click",function(){
+    var chks=document.querySelectorAll("#chemCheckboxes input[type='checkbox']");
+    var sel=[];
+    for(var i=0;i<chks.length;i++){if(chks[i].checked)sel.push(chemGrades[parseInt(chks[i].value)]);}
+    if(sel.length===0){document.getElementById("chemCompare").innerHTML='<span style="color:#C0392B;font-size:13px;">Select at least 1 grade.</span>';return;}
+    if(sel.length>3){document.getElementById("chemCompare").innerHTML='<span style="color:#C0392B;font-size:13px;">Max 3 grades allowed.</span>';return;}
+    document.getElementById("chemCompare").innerHTML=renderChemTable(sel);
+  });
+}
+
+window.onload = function() {
+  applyCustom();
+  showIdle();
+  initPin();
+  initPin2();
+
+  // TABS
+  // t1 listener handled above
+  var smInited=false;
+  document.getElementById("t2").addEventListener("click",function(){
+    if(!adminUnlocked){
+      showPinOverlay();
+      var poll=setInterval(function(){
+        if(adminUnlocked){clearInterval(poll);
+          document.getElementById("p2").className="tp on";
+          document.getElementById("p1").className="tp";
+          document.getElementById("p3").className="tp";
+    document.getElementById("p4").className="tp";
+          document.getElementById("t2").className="tbtn on";
+          document.getElementById("t1").className="tbtn";
+          document.getElementById("t3").className="tbtn";
+          renderPT(document.getElementById("af").value.trim());
+        }
+      },200);
+      return;
+    }
+    document.getElementById("p2").className="tp on";
+    document.getElementById("p1").className="tp";
+    document.getElementById("p3").className="tp";
+    document.getElementById("p4").className="tp";
+    document.getElementById("t2").className="tbtn on";
+    document.getElementById("t1").className="tbtn";
+    document.getElementById("t3").className="tbtn";
+    renderPT(document.getElementById("af").value.trim());
+  });
+  document.getElementById("t3").addEventListener("click",function(){
+    if(!smUnlocked){
+      showPin2Overlay();
+      var poll2=setInterval(function(){
+        if(smUnlocked){
+          clearInterval(poll2);
+          document.getElementById("p3").className="tp on";
+          document.getElementById("p1").className="tp";
+          document.getElementById("p2").className="tp";
+          document.getElementById("t3").className="tbtn on";
+          document.getElementById("t1").className="tbtn";
+          document.getElementById("t2").className="tbtn";
+          if(!smInited){initStockManager();smInited=true;}
+          else{populateSMDropdowns();}
+        }
+      },200);
+      return;
+    }
+    document.getElementById("p3").className="tp on";
+    document.getElementById("p1").className="tp";
+    document.getElementById("p2").className="tp";
+    document.getElementById("t3").className="tbtn on";
+    document.getElementById("t1").className="tbtn";
+    document.getElementById("t2").className="tbtn";
+    if(!smInited){initStockManager();smInited=true;}
+    else{populateSMDropdowns();}
+  });
+  var chemInited=false;
+  document.getElementById("t4").addEventListener("click",function(){
+    document.getElementById("p4").className="tp on";
+    document.getElementById("p1").className="tp";
+    document.getElementById("p2").className="tp";
+    document.getElementById("p3").className="tp";
+    document.getElementById("p4").className="tp";
+    document.getElementById("t4").className="tbtn on";
+    document.getElementById("t1").className="tbtn";
+    document.getElementById("t2").className="tbtn";
+    document.getElementById("t3").className="tbtn";
+    if(!chemInited){initChemComposition();chemInited=true;}
+  });
+  document.getElementById("t1").addEventListener("click",function(){
+    document.getElementById("p1").className="tp on";
+    document.getElementById("p2").className="tp";
+    document.getElementById("p3").className="tp";
+    document.getElementById("p4").className="tp";
+    document.getElementById("t1").className="tbtn on";
+    document.getElementById("t2").className="tbtn";
+    document.getElementById("t3").className="tbtn";
+  });
+
+  // SHAPE BUTTONS
+  var sbs=document.getElementById("shapeRow").getElementsByTagName("button");
+  for(var i=0;i<sbs.length;i++){
+    (function(btn){
+      btn.addEventListener("click",function(){
+        var all=document.getElementById("shapeRow").getElementsByTagName("button");
+        for(var k=0;k<all.length;k++) all[k].className="shbtn";
+        this.className="shbtn on";
+        selShape=this.getAttribute("data-shape");
+        var isF=(selShape==="Flat Bar");
+        document.getElementById("fgSize").style.display=isF?"none":"";
+        document.getElementById("fgThk").style.display=isF?"":"none";
+        document.getElementById("fgWid").style.display=isF?"":"none";
+        doSearch();
+      });
+    })(sbs[i]);
+  }
+
+  // SEARCH + RESET
+  document.getElementById("btnSearch").addEventListener("click",doSearch);
+  document.getElementById("btnReset").addEventListener("click",function(){
+    selShape=null;
+    var all=document.getElementById("shapeRow").getElementsByTagName("button");
+    for(var k=0;k<all.length;k++) all[k].className="shbtn";
+    document.getElementById("inSize").value="";
+    document.getElementById("inGrade").value="";
+    document.getElementById("inThk").value="";
+    document.getElementById("inWid").value="";
+    document.getElementById("fgSize").style.display="";
+    document.getElementById("fgThk").style.display="none";
+    document.getElementById("fgWid").style.display="none";
+    showIdle();
+  });
+
+  // LIVE INPUTS
+  var ids=["inSize","inGrade","inThk","inWid"];
+  for(var x=0;x<ids.length;x++){
+    (function(id){
+      var el=document.getElementById(id);
+      if(!el)return;
+      el.addEventListener("input",function(){clearTimeout(stimer);stimer=setTimeout(doSearch,350);});
+      el.addEventListener("keydown",function(ev){if(ev.keyCode===13){clearTimeout(stimer);doSearch();}});
+    })(ids[x]);
+  }
+
+  // ADMIN FILTER
+  document.getElementById("btnAF").addEventListener("click",function(){renderPT(document.getElementById("af").value.trim());});
+  document.getElementById("btnAC").addEventListener("click",function(){document.getElementById("af").value="";renderPT("");});
+  document.getElementById("af").addEventListener("keydown",function(ev){if(ev.keyCode===13)renderPT(this.value.trim());});
+
+  // EXPORT / IMPORT
+  document.getElementById("btnExport").addEventListener("click",doExport);
+  document.getElementById("btnImport").addEventListener("click",function(){document.getElementById("csvIn").click();});
+  document.getElementById("btnChangePin").addEventListener("click",function(){
+    var p1=document.getElementById("newPin1").value.trim();
+    var p2=document.getElementById("newPin2").value.trim();
+    var msg=document.getElementById("pinChgMsg");
+    if(p1.length!==4||isNaN(Number(p1))){msg.style.color="#F5B7B1";msg.innerHTML="PIN must be 4 digits.";return;}
+    if(p1!==p2){msg.style.color="#F5B7B1";msg.innerHTML="PINs do not match.";return;}
+    savePin(p1);
+    document.getElementById("newPin1").value="";
+    document.getElementById("newPin2").value="";
+    msg.style.color="#A8DFC0";msg.innerHTML="PIN updated!";
+    setTimeout(function(){msg.innerHTML="";},3000);
+  });
+  document.getElementById("csvIn").addEventListener("change",function(ev){
+    var file=ev.target.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var cnt=doImport(e.target.result);
+      if(cnt>0){alert("Imported "+cnt+" price(s) successfully!");renderPT(document.getElementById("af").value.trim());}
+      else alert("No valid prices found in CSV.");
+      document.getElementById("csvIn").value="";
+    };
+    reader.readAsText(file);
+  });
+};
+</script>
+
+<div class="tp" id="p3">
+  <div class="awrap">
+    <div class="ahead">
+      <div><h2>Stock Manager</h2><p>Add or remove sizes for any grade. Add entirely new grades. No password needed.</p></div>
+    </div>
+
+    <!-- ADD SIZE TO EXISTING GRADE -->
+    <div style="background:#fff;border-radius:10px;border:1.5px solid #D8D3CB;padding:20px;margin-bottom:16px;">
+      <div style="font-size:16px;font-weight:700;color:#0F2540;margin-bottom:4px;font-family:Georgia,serif;">Add a Size to Existing Grade</div>
+      <div style="font-size:12px;color:#7A8A9A;margin-bottom:16px;">Select a grade then type the new size to add.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1B3A5C;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:5px;">SELECT GRADE</div>
+          <select id="smGrade1" style="padding:10px 12px;border:1.5px solid #D8D3CB;border-radius:7px;font-size:13px;font-family:Georgia,serif;outline:none;background:#F7F4EE;color:#1A1A1A;min-width:220px;cursor:pointer;"></select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1B3A5C;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:5px;">NEW SIZE (mm)</div>
+          <input id="smAddSize" type="number" placeholder="e.g. 47" min="0.1" max="600" step="0.1" style="padding:10px 12px;border:1.5px solid #D8D3CB;border-radius:7px;font-size:14px;font-family:Georgia,serif;outline:none;width:130px;">
+        </div>
+        <button id="btnSmAdd" style="padding:10px 20px;background:#2E8B57;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;">+ Add Size</button>
+      </div>
+      <div id="smAddMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
+    </div>
+
+    <!-- REMOVE SIZE FROM EXISTING GRADE -->
+    <div style="background:#fff;border-radius:10px;border:1.5px solid #D8D3CB;padding:20px;margin-bottom:16px;">
+      <div style="font-size:16px;font-weight:700;color:#0F2540;margin-bottom:4px;font-family:Georgia,serif;">Remove a Size from a Grade</div>
+      <div style="font-size:12px;color:#7A8A9A;margin-bottom:16px;">Select a grade &#8212; all sizes appear below. Tap any size to remove it instantly.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1B3A5C;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:5px;">SELECT GRADE</div>
+          <select id="smGrade2" style="padding:10px 12px;border:1.5px solid #D8D3CB;border-radius:7px;font-size:13px;font-family:Georgia,serif;outline:none;background:#F7F4EE;color:#1A1A1A;min-width:220px;cursor:pointer;"></select>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#C0392B;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:8px;">TAP A SIZE TO REMOVE IT:</div>
+      <div id="smSizeChips" style="padding:12px;background:#F7F4EE;border-radius:8px;line-height:2.2;min-height:50px;">Select a grade above to see all sizes</div>
+      <div id="smRemMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
+    </div>
+
+    <!-- ADD NEW GRADE -->
+    <div style="background:#EBF5FB;border-radius:10px;border:1.5px solid #AED6F1;padding:20px;">
+      <div style="font-size:16px;font-weight:700;color:#0F2540;margin-bottom:4px;font-family:Georgia,serif;">Add a New Grade</div>
+      <div style="font-size:12px;color:#7A8A9A;margin-bottom:16px;">Add a completely new grade that does not exist yet.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1A5276;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:5px;">GRADE NAME</div>
+          <input id="ngName" type="text" placeholder="e.g. EN-36" style="padding:10px 12px;border:1.5px solid #AED6F1;border-radius:7px;font-size:14px;font-family:Georgia,serif;outline:none;width:140px;">
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1A5276;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:5px;">SHAPE</div>
+          <select id="ngShape" style="padding:10px 12px;border:1.5px solid #AED6F1;border-radius:7px;font-size:13px;font-family:Georgia,serif;outline:none;background:#fff;color:#1A1A1A;cursor:pointer;">
+            <option>Round Bar</option>
+            <option>Square Bar</option>
+            <option>Hex Bar</option>
+            <option>Flat Bar</option>
+            <option>Non-Ferrous</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1A5276;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:5px;">SUB-TYPE</div>
+          <input id="ngSub" type="text" placeholder="e.g. Rod" style="padding:10px 12px;border:1.5px solid #AED6F1;border-radius:7px;font-size:14px;font-family:Georgia,serif;outline:none;width:130px;">
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1A5276;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:5px;">SIZES (comma separated)</div>
+          <input id="ngSizes" type="text" placeholder="e.g. 16,20,25,32,40,50" style="padding:10px 12px;border:1.5px solid #AED6F1;border-radius:7px;font-size:14px;font-family:Georgia,serif;outline:none;width:240px;">
+        </div>
+        <button id="btnNgAdd" style="padding:10px 20px;background:#1B3A5C;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;">+ Add Grade</button>
+      </div>
+      <div id="ngMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="pin-overlay" id="pin2Overlay">
+  <div class="pin-box">
+    <h2>Stock Manager</h2>
+    <p>Enter 4-digit PIN to manage stock sizes</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="p2d0"></div>
+      <div class="pin-dot" id="p2d1"></div>
+      <div class="pin-dot" id="p2d2"></div>
+      <div class="pin-dot" id="p2d3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" data-k2="1">1</button>
+      <button class="pin-key" data-k2="2">2</button>
+      <button class="pin-key" data-k2="3">3</button>
+      <button class="pin-key" data-k2="4">4</button>
+      <button class="pin-key" data-k2="5">5</button>
+      <button class="pin-key" data-k2="6">6</button>
+      <button class="pin-key" data-k2="7">7</button>
+      <button class="pin-key" data-k2="8">8</button>
+      <button class="pin-key" data-k2="9">9</button>
+      <button class="pin-key wide" data-k2="0">0</button>
+      <button class="pin-key del" id="pin2Del">DEL</button>
+    </div>
+    <div class="pin-err" id="pin2Err"></div>
+    <div class="pin-hint">Stock Manager PIN: 2604</div>
+  </div>
+</div>
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <h2>Admin Access</h2>
+    <p>Enter your 4-digit PIN to manage prices</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" data-k="1">1</button>
+      <button class="pin-key" data-k="2">2</button>
+      <button class="pin-key" data-k="3">3</button>
+      <button class="pin-key" data-k="4">4</button>
+      <button class="pin-key" data-k="5">5</button>
+      <button class="pin-key" data-k="6">6</button>
+      <button class="pin-key" data-k="7">7</button>
+      <button class="pin-key" data-k="8">8</button>
+      <button class="pin-key" data-k="9">9</button>
+      <button class="pin-key wide" data-k="0">0</button>
+      <button class="pin-key del" id="pinDel">DEL</button>
+    </div>
+    <div class="pin-err" id="pinErr"></div>
+    <div class="pin-hint">Default PIN: 1234 | Change in Admin settings</div>
+  </div>
+</div>
+
+
+<div class="tp" id="p4">
+  <div class="awrap">
+    <div class="ahead"><div><h2>Chemical Composition</h2><p>View composition for individual grades or compare 2-3 grades side by side (C, Mn, Si, Cr, Ni, Mo percentage).</p></div></div>
+    <div style="background:#fff;border-radius:10px;border:1.5px solid #D8D3CB;padding:20px;margin-bottom:16px;">
+      <div style="font-size:16px;font-weight:700;color:#0F2540;margin-bottom:4px;font-family:Georgia,serif;">Individual Grade</div>
+      <select id="chemGrade" style="padding:10px 12px;border:1.5px solid #D8D3CB;border-radius:7px;font-size:14px;font-family:Georgia,serif;outline:none;background:#F7F4EE;color:#1A1A1A;min-width:240px;cursor:pointer;margin-bottom:14px;"></select>
+      <div id="chemIndividual" style="background:#F7F4EE;border-radius:8px;padding:14px;overflow-x:auto;"></div>
+    </div>
+    <div style="background:#fff;border-radius:10px;border:1.5px solid #D8D3CB;padding:20px;">
+      <div style="font-size:16px;font-weight:700;color:#0F2540;margin-bottom:4px;font-family:Georgia,serif;">Compare Grades</div>
+      <div id="chemCheckboxes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px;"></div>
+      <button id="btnShowCompare" style="padding:10px 20px;background:#2E6DA4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;margin-bottom:14px;">Show Comparison</button>
+      <div id="chemCompare" style="overflow-x:auto;"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
