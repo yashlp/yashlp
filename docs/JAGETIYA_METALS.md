@@ -48,4 +48,5 @@ Custom catalog keys use `shape|grade|subtype` (not array indexes) so inserting a
 
 ```bash
 npm run test:metals
+npm run test:metals:e2e   # Chrome headless UI (system Chrome)
 ```
