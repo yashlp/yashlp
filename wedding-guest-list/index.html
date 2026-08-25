@@ -468,7 +468,7 @@
     <section class="panel">
       <div class="list-toolbar">
         <h2>Guests by event</h2>
-        <button class="btn-secondary" type="button" id="toggleEditList">Edit list</button>
+        <button class="btn-secondary" type="button" id="toggleEditList">Edit list to remove members only</button>
       </div>
       <div class="search-wrap">
         <label for="guestSearch" class="sr-only">Search guests</label>
@@ -767,7 +767,7 @@
       $("eventPeople").textContent = people;
       $("eventParties").textContent = parties;
       $("bulkBar").classList.toggle("hidden", !editListMode);
-      $("toggleEditList").textContent = editListMode ? "Done editing" : "Edit list";
+      $("toggleEditList").textContent = editListMode ? "Done removing" : "Edit list to remove members only";
       updateSelectedCount();
 
       if (!searching && !list.length) {
