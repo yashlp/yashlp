@@ -114,6 +114,7 @@ export function middleware(request: NextRequest) {
       path.startsWith("/api/commerce") ||
       path.startsWith("/api/admin") ||
       path.startsWith("/seller") ||
+      path.startsWith("/metals") ||
       path === "/robots.txt" ||
       path === "/sitemap.xml";
     if (!allowed) {

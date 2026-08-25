@@ -46,6 +46,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     const aestheticsOnly = aestheticsOnlyFromEnv();
     return [
+      {
+        source: "/metals",
+        destination: "/metals/index.html",
+        permanent: false,
+      },
+      {
+        source: "/metals/",
+        destination: "/metals/index.html",
+        permanent: false,
+      },
       ...(aestheticsOnly
         ? [
             {
