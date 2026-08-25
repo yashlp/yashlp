@@ -183,6 +183,54 @@
       border-radius: 9px;
     }
 
+    .list-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .list-toolbar h2 { margin: 0; }
+    .search-wrap {
+      margin-bottom: 0.75rem;
+    }
+    .search-wrap input {
+      width: 100%;
+      border: 1px solid #d6bda6;
+      border-radius: 12px;
+      padding: 0.75rem 0.9rem;
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    .bulk-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin: 0 0 0.85rem;
+      padding: 0.7rem 0.85rem;
+      background: #fff7ed;
+      border: 1px solid #f0d2b0;
+      border-radius: 12px;
+    }
+    .bulk-bar.hidden { display: none; }
+    .bulk-bar .selected-count {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+    .sheet-table .check-col {
+      width: 2.5rem;
+      text-align: center;
+    }
+    .sheet-table input[type="checkbox"] {
+      width: 1.05rem;
+      height: 1.05rem;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
     .tabs {
       display: flex;
       gap: 0.45rem;
@@ -357,6 +405,17 @@
       margin: 0.4rem 0 0;
       min-height: 1.2em;
     }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     dialog {
       border: 1px solid var(--line);
       border-radius: 18px;
@@ -407,7 +466,14 @@
     </section>
 
     <section class="panel">
-      <h2>Guests by event</h2>
+      <div class="list-toolbar">
+        <h2>Guests by event</h2>
+        <button class="btn-secondary" type="button" id="toggleEditList">Edit list</button>
+      </div>
+      <div class="search-wrap">
+        <label for="guestSearch" class="sr-only">Search guests</label>
+        <input id="guestSearch" type="search" placeholder="Search guest names…" autocomplete="off" />
+      </div>
       <div class="tabs" id="tabs"></div>
       <div class="totals">
         <div class="total-card">
@@ -418,6 +484,11 @@
           <span>Guest parties</span>
           <strong id="eventParties">0</strong>
         </div>
+      </div>
+      <div class="bulk-bar hidden" id="bulkBar">
+        <button class="btn-danger" type="button" id="deleteSelected">Delete selected</button>
+        <button class="btn-secondary btn-small" type="button" id="selectAllVisible">Select all shown</button>
+        <span class="selected-count" id="selectedCount">0 selected</span>
       </div>
       <div class="guest-list" id="guestList"></div>
     </section>
@@ -471,11 +542,27 @@
     let activeEvent = "Mehndi";
     let saving = false;
     let saveTimer = null;
+    let searchQuery = "";
+    let editListMode = false;
+    let selectedIds = new Set();
 
     const $ = (id) => document.getElementById(id);
 
     function uid() {
       return "g" + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+    }
+
+    function normalizeName(name) {
+      return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+    }
+
+    function findDuplicateName(name, excludeId = null) {
+      const key = normalizeName(name);
+      if (!key) return null;
+      return guests.find((g) => g.id !== excludeId && normalizeName(g.name) === key) || null;
     }
 
     function renderEventChecks(containerId, selected = ["Mehndi"]) {
@@ -659,8 +746,17 @@
 
     function renderList() {
       const { list, people, parties } = eventStats(activeEvent);
+      const q = normalizeName(searchQuery);
+      const filtered = q
+        ? list.filter((g) => normalizeName(g.name).includes(q))
+        : list;
+
       $("eventPeople").textContent = people;
       $("eventParties").textContent = parties;
+      $("bulkBar").classList.toggle("hidden", !editListMode);
+      $("toggleEditList").textContent = editListMode ? "Done editing" : "Edit list";
+      updateSelectedCount();
+
       if (!list.length) {
         $("guestList").innerHTML = `
           <div class="event-banner">
@@ -670,14 +766,29 @@
           <div class="empty">No guests for ${activeEvent} yet. Add someone above and tick this event.</div>`;
         return;
       }
+      if (!filtered.length) {
+        $("guestList").innerHTML = `
+          <div class="event-banner">
+            <h3>${activeEvent}</h3>
+            <p>${parties} guest ${parties === 1 ? "family" : "families"} · <strong>${people} total members</strong></p>
+          </div>
+          <div class="empty">No guests match “${escapeHtml(searchQuery.trim())}”.</div>`;
+        return;
+      }
+
+      const showingNote = q
+        ? ` · showing ${filtered.length} of ${parties}`
+        : "";
+
       $("guestList").innerHTML = `
         <div class="event-banner">
           <h3>${activeEvent}</h3>
-          <p>${parties} guest ${parties === 1 ? "family" : "families"} · <strong>${people} total members</strong></p>
+          <p>${parties} guest ${parties === 1 ? "family" : "families"} · <strong>${people} total members</strong>${showingNote}</p>
         </div>
         <table class="sheet-table">
           <thead>
             <tr>
+              ${editListMode ? '<th class="check-col"><span class="sr-only">Select</span></th>' : ""}
               <th class="sno">#</th>
               <th>Guest / Family Name</th>
               <th class="num">Family Members</th>
@@ -686,10 +797,12 @@
             </tr>
           </thead>
           <tbody>
-            ${list.map((g, i) => {
+            ${filtered.map((g, i) => {
               const other = g.events.filter((e) => e !== activeEvent);
+              const checked = selectedIds.has(g.id) ? "checked" : "";
               return `
               <tr data-id="${g.id}">
+                ${editListMode ? `<td class="check-col"><input type="checkbox" class="row-select" ${checked} aria-label="Select ${escapeHtml(g.name)}" /></td>` : ""}
                 <td class="sno">${i + 1}</td>
                 <td class="name">${escapeHtml(g.name)}</td>
                 <td class="num">${g.members}</td>
@@ -699,7 +812,6 @@
                 <td>
                   <div class="row-actions">
                     <button type="button" class="btn-secondary btn-small btn-edit">Edit</button>
-                    <button type="button" class="btn-danger btn-small btn-delete">Delete</button>
                   </div>
                 </td>
               </tr>`;
@@ -714,15 +826,19 @@
       $("guestList").querySelectorAll(".btn-edit").forEach((btn) => {
         btn.addEventListener("click", () => openEdit(btn.closest("tr").dataset.id));
       });
-      $("guestList").querySelectorAll(".btn-delete").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const id = btn.closest("tr").dataset.id;
-          if (!confirm("Remove this guest from the list?")) return;
-          guests = guests.filter((g) => g.id !== id);
-          render();
-          queueSave();
+      $("guestList").querySelectorAll(".row-select").forEach((box) => {
+        box.addEventListener("change", () => {
+          const id = box.closest("tr").dataset.id;
+          if (box.checked) selectedIds.add(id);
+          else selectedIds.delete(id);
+          updateSelectedCount();
         });
       });
+    }
+
+    function updateSelectedCount() {
+      const n = selectedIds.size;
+      $("selectedCount").textContent = `${n} selected`;
     }
 
     function renderTotals() {
@@ -765,6 +881,10 @@
         $("formError").textContent = "Please enter a guest name.";
         return;
       }
+      if (findDuplicateName(name)) {
+        $("formError").textContent = "This name has already been added.";
+        return;
+      }
       if (!Number.isFinite(members) || members < 0) {
         $("formError").textContent = "Family members must be 0 or more.";
         return;
@@ -790,6 +910,38 @@
       $("formError").textContent = "";
     });
 
+    $("guestSearch").addEventListener("input", () => {
+      searchQuery = $("guestSearch").value;
+      renderList();
+    });
+
+    $("toggleEditList").addEventListener("click", () => {
+      editListMode = !editListMode;
+      if (!editListMode) selectedIds.clear();
+      renderList();
+    });
+
+    $("selectAllVisible").addEventListener("click", () => {
+      $("guestList").querySelectorAll(".row-select").forEach((box) => {
+        box.checked = true;
+        selectedIds.add(box.closest("tr").dataset.id);
+      });
+      updateSelectedCount();
+    });
+
+    $("deleteSelected").addEventListener("click", () => {
+      if (!selectedIds.size) {
+        alert("Select one or more guests to delete.");
+        return;
+      }
+      const n = selectedIds.size;
+      if (!confirm(`Delete ${n} selected guest${n === 1 ? "" : "s"} from the list?`)) return;
+      guests = guests.filter((g) => !selectedIds.has(g.id));
+      selectedIds.clear();
+      render();
+      queueSave();
+    });
+
     $("saveEdit").addEventListener("click", (e) => {
       e.preventDefault();
       const id = $("editId").value;
@@ -797,6 +949,10 @@
       const members = Number($("editMembers").value);
       const events = selectedEvents("editEventChecks");
       if (!name || !events.length || !Number.isFinite(members) || members < 0) return;
+      if (findDuplicateName(name, id)) {
+        alert("This name has already been added.");
+        return;
+      }
       guests = guests.map((g) => g.id === id ? { ...g, name, members, events } : g);
       $("editDialog").close();
       render();
