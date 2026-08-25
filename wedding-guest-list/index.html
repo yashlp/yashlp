@@ -472,7 +472,7 @@
       </div>
       <div class="search-wrap">
         <label for="guestSearch" class="sr-only">Search guests</label>
-        <input id="guestSearch" type="search" placeholder="Search guest names…" autocomplete="off" />
+        <input id="guestSearch" type="search" placeholder="Search by guest name…" autocomplete="off" />
       </div>
       <div class="tabs" id="tabs"></div>
       <div class="totals">
@@ -747,8 +747,10 @@
     function renderList() {
       const { list, people, parties } = eventStats(activeEvent);
       const q = normalizeName(searchQuery);
-      const filtered = q
-        ? list.filter((g) => normalizeName(g.name).includes(q))
+      // Search is guest-name only (never filters by event name).
+      const searching = Boolean(q);
+      const filtered = searching
+        ? guests.filter((g) => normalizeName(g.name).includes(q))
         : list;
 
       $("eventPeople").textContent = people;
@@ -757,7 +759,7 @@
       $("toggleEditList").textContent = editListMode ? "Done editing" : "Edit list";
       updateSelectedCount();
 
-      if (!list.length) {
+      if (!searching && !list.length) {
         $("guestList").innerHTML = `
           <div class="event-banner">
             <h3>${activeEvent}</h3>
@@ -766,24 +768,31 @@
           <div class="empty">No guests for ${activeEvent} yet. Add someone above and tick this event.</div>`;
         return;
       }
-      if (!filtered.length) {
+      if (searching && !filtered.length) {
         $("guestList").innerHTML = `
           <div class="event-banner">
-            <h3>${activeEvent}</h3>
-            <p>${parties} guest ${parties === 1 ? "family" : "families"} · <strong>${people} total members</strong></p>
+            <h3>Guest search</h3>
+            <p>No guests match “${escapeHtml(searchQuery.trim())}”</p>
           </div>
-          <div class="empty">No guests match “${escapeHtml(searchQuery.trim())}”.</div>`;
+          <div class="empty">Try another guest name. Search only looks at guest / family names.</div>`;
         return;
       }
 
-      const showingNote = q
-        ? ` · showing ${filtered.length} of ${parties}`
-        : "";
+      const bannerTitle = searching ? "Guest search" : activeEvent;
+      const bannerSub = searching
+        ? `${filtered.length} guest${filtered.length === 1 ? "" : "s"} matching “${escapeHtml(searchQuery.trim())}”`
+        : `${parties} guest ${parties === 1 ? "family" : "families"} · <strong>${people} total members</strong>`;
+      const eventsHeader = searching ? "Events" : "Also Attending";
+      const totalLabel = searching ? "Matching guests" : `TOTAL for ${activeEvent}`;
+      const matchPeople = filtered.reduce((sum, g) => sum + (Number(g.members) || 0), 0);
+      const totalValue = searching
+        ? `${filtered.length} families · ${matchPeople} members`
+        : `${parties} families · ${people} members`;
 
       $("guestList").innerHTML = `
         <div class="event-banner">
-          <h3>${activeEvent}</h3>
-          <p>${parties} guest ${parties === 1 ? "family" : "families"} · <strong>${people} total members</strong>${showingNote}</p>
+          <h3>${bannerTitle}</h3>
+          <p>${bannerSub}</p>
         </div>
         <table class="sheet-table">
           <thead>
@@ -792,13 +801,15 @@
               <th class="sno">#</th>
               <th>Guest / Family Name</th>
               <th class="num">Family Members</th>
-              <th class="hide-mobile">Also Attending</th>
+              <th class="hide-mobile">${eventsHeader}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             ${filtered.map((g, i) => {
-              const other = g.events.filter((e) => e !== activeEvent);
+              const eventTags = searching
+                ? g.events
+                : g.events.filter((e) => e !== activeEvent);
               const checked = selectedIds.has(g.id) ? "checked" : "";
               return `
               <tr data-id="${g.id}">
@@ -807,7 +818,7 @@
                 <td class="name">${escapeHtml(g.name)}</td>
                 <td class="num">${g.members}</td>
                 <td class="hide-mobile">
-                  <div class="tags">${other.length ? other.map((e) => `<span class="tag">${e}</span>`).join("") : "<span style='color:#9a7b66'>—</span>"}</div>
+                  <div class="tags">${eventTags.length ? eventTags.map((e) => `<span class="tag">${e}</span>`).join("") : "<span style='color:#9a7b66'>—</span>"}</div>
                 </td>
                 <td>
                   <div class="row-actions">
@@ -819,8 +830,8 @@
           </tbody>
         </table>
         <div class="sheet-total">
-          <span>TOTAL for ${activeEvent}</span>
-          <span>${parties} families · ${people} members</span>
+          <span>${totalLabel}</span>
+          <span>${totalValue}</span>
         </div>`;
 
       $("guestList").querySelectorAll(".btn-edit").forEach((btn) => {
