@@ -723,8 +723,19 @@
       saveTimer = setTimeout(saveGuests, 250);
     }
 
+    function compareGuestNames(a, b) {
+      return normalizeName(a.name).localeCompare(normalizeName(b.name), undefined, {
+        sensitivity: "base",
+        numeric: true,
+      });
+    }
+
+    function sortedGuests(list = guests) {
+      return [...list].sort(compareGuestNames);
+    }
+
     function eventStats(event) {
-      const list = guests.filter((g) => g.events.includes(event));
+      const list = sortedGuests(guests.filter((g) => g.events.includes(event)));
       const people = list.reduce((sum, g) => sum + (Number(g.members) || 0), 0);
       return { list, people, parties: list.length };
     }
@@ -750,7 +761,7 @@
       // Search is guest-name only (never filters by event name).
       const searching = Boolean(q);
       const filtered = searching
-        ? guests.filter((g) => normalizeName(g.name).includes(q))
+        ? sortedGuests(guests.filter((g) => normalizeName(g.name).includes(q)))
         : list;
 
       $("eventPeople").textContent = people;
@@ -1117,7 +1128,8 @@
       allHeader.values = ["No.", "Guest / Family Name", "No. of Family Members", ...EVENTS];
       paintHeaderRow(allHeader);
 
-      guests.forEach((g, i) => {
+      const allGuests = sortedGuests();
+      allGuests.forEach((g, i) => {
         const row = all.getRow(5 + i);
         row.values = [i + 1, g.name, g.members, ...EVENTS.map((e) => (g.events.includes(e) ? "Y" : ""))];
         row.eachCell((cell, col) => {
@@ -1131,11 +1143,11 @@
         });
       });
 
-      const allTotal = all.getRow(5 + guests.length + 1);
+      const allTotal = all.getRow(5 + allGuests.length + 1);
       allTotal.values = ["", "TOTAL", grandPeople, ...EVENTS.map(() => "")];
       paintTotalRow(allTotal);
-      all.getCell(`B${5 + guests.length + 2}`).value = `${guests.length} guest families`;
-      all.getCell(`B${5 + guests.length + 2}`).font = excelFont({ bold: true });
+      all.getCell(`B${5 + allGuests.length + 2}`).value = `${allGuests.length} guest families`;
+      all.getCell(`B${5 + allGuests.length + 2}`).font = excelFont({ bold: true });
 
       // ===== One sheet per event =====
       EVENTS.forEach((event) => {
