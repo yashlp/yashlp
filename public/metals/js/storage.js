@@ -17,7 +17,7 @@
   }
 
   function emptyCustom() {
-    return { added: {}, removed: {}, addedFlat: {}, removedFlat: {}, newGrades: [] };
+    return { added: {}, removed: {}, addedFlat: {}, removedFlat: {}, newGrades: [], renamedGrades: [] };
   }
 
   function catalogKey(sh, g, s) {
@@ -61,6 +61,19 @@
     for (var i = 0; i < ents.length; i++) {
       var e = ents[i];
       if (e && e.g === g && String(e.s || "") === String(s || "")) return e;
+    }
+    return null;
+  }
+
+  function findEntryCI(db, sh, g, s, skip) {
+    var ents = db && db[sh];
+    if (!ents) return null;
+    var gl = String(g || "").toLowerCase();
+    var sl = String(s || "").toLowerCase();
+    for (var i = 0; i < ents.length; i++) {
+      var e = ents[i];
+      if (!e || e === skip) continue;
+      if (String(e.g || "").toLowerCase() === gl && String(e.s || "").toLowerCase() === sl) return e;
     }
     return null;
   }
@@ -181,12 +194,15 @@
     if (legacy.newGrades && legacy.newGrades.length) {
       out.newGrades = deepClone(legacy.newGrades);
     }
+    if (legacy.renamedGrades && legacy.renamedGrades.length) {
+      out.renamedGrades = deepClone(legacy.renamedGrades);
+    }
     return out;
   }
 
   function normalizeCustom(raw, builtin) {
     if (!raw || typeof raw !== "object") return emptyCustom();
-    var looksNew = raw.added || raw.removed || raw.addedFlat || raw.removedFlat || raw.newGrades;
+    var looksNew = raw.added || raw.removed || raw.addedFlat || raw.removedFlat || raw.newGrades || raw.renamedGrades;
     var migrated = migrateLegacy(raw, builtin);
     if (!looksNew) return migrated;
     var out = emptyCustom();
@@ -215,7 +231,17 @@
     }
     mergeFlatMap(out.removedFlat, rf);
     if (raw.newGrades && raw.newGrades.length) out.newGrades = deepClone(raw.newGrades);
+    if (raw.renamedGrades && raw.renamedGrades.length) out.renamedGrades = deepClone(raw.renamedGrades);
     return out;
+  }
+
+  function applyRenames(db, list) {
+    (list || []).forEach(function (r) {
+      if (!r || !r.sh || !r.from || !r.to) return;
+      var dest = findEntry(db, r.sh, r.to, r.s);
+      var src = findEntry(db, r.sh, r.from, r.s);
+      if (src && !dest) src.g = r.to;
+    });
   }
 
   function applyNewGrade(db, ng) {
@@ -261,6 +287,7 @@
     var db = deepClone(builtin);
     var c = custom || emptyCustom();
     (c.newGrades || []).forEach(function (ng) { applyNewGrade(db, ng); });
+    applyRenames(db, c.renamedGrades);
     for (var ak in (c.added || {})) {
       var a = parseCatalogKey(ak);
       if (!a) continue;
@@ -443,6 +470,100 @@
     return { ok: true, rec: rec, row: row };
   }
 
+  function rekeyNumMap(map, oldK, newK) {
+    if (!map || !map[oldK] || oldK === newK) return;
+    if (!map[newK]) {
+      map[newK] = map[oldK];
+    } else {
+      (map[oldK] || []).forEach(function (n) { pushUnique(map[newK], n); });
+    }
+    delete map[oldK];
+  }
+
+  function rekeyFlatMap(map, oldK, newK) {
+    if (!map || !map[oldK] || oldK === newK) return;
+    if (!map[newK]) {
+      map[newK] = map[oldK];
+    } else {
+      var wrap = {};
+      wrap[newK] = map[oldK];
+      mergeFlatMap(map, wrap);
+    }
+    delete map[oldK];
+  }
+
+  function eachStoreKey(store, fn) {
+    if (store && store._mem) {
+      Object.keys(store._mem).forEach(fn);
+      return;
+    }
+    if (store && typeof store.length === "number" && typeof store.key === "function") {
+      var keys = [];
+      for (var i = 0; i < store.length; i++) {
+        var k = store.key(i);
+        if (k) keys.push(k);
+      }
+      keys.forEach(fn);
+    }
+  }
+
+  function migratePrices(store, oldG, sh, s, newG) {
+    var moved = 0, skipped = 0;
+    if (!store) return { moved: moved, skipped: skipped };
+    var needle = PRICE_PREFIX + oldG + "|" + sh + "|" + (s || "") + "|";
+    var destHead = PRICE_PREFIX + newG + "|" + sh + "|" + (s || "") + "|";
+    var toMove = [];
+    eachStoreKey(store, function (k) {
+      if (k.indexOf(needle) === 0) toMove.push(k);
+    });
+    for (var i = 0; i < toMove.length; i++) {
+      var srcKey = toMove[i];
+      var rest = srcKey.slice(needle.length);
+      var destKey = destHead + rest;
+      var srcVal = store.getItem(srcKey);
+      var destVal = store.getItem(destKey);
+      if (destVal !== null && destVal !== "") {
+        skipped++;
+        try { store.removeItem(srcKey); } catch (e1) {}
+        continue;
+      }
+      try {
+        store.setItem(destKey, srcVal);
+        store.removeItem(srcKey);
+        moved++;
+      } catch (e2) {}
+    }
+    return { moved: moved, skipped: skipped };
+  }
+
+  function renameGrade(db, custom, store, sh, oldG, s, newG) {
+    var from = String(oldG || "").trim();
+    var to = String(newG || "").trim();
+    if (!to) return { ok: false, error: "Enter a grade name." };
+    if (!from) return { ok: false, error: "Select a grade first." };
+    if (to === from) return { ok: false, error: "Enter a different name." };
+    var ent = findEntry(db, sh, from, s);
+    if (!ent) return { ok: false, error: "Grade not found." };
+    var clash = findEntryCI(db, sh, to, s, ent);
+    if (clash) {
+      return { ok: false, error: "A grade named " + clash.g + " already exists for this shape and sub-type." };
+    }
+    ent.g = to;
+    var oldK = catalogKey(sh, from, s);
+    var newK = catalogKey(sh, to, s);
+    rekeyNumMap(custom.added, oldK, newK);
+    rekeyNumMap(custom.removed, oldK, newK);
+    rekeyFlatMap(custom.addedFlat, oldK, newK);
+    rekeyFlatMap(custom.removedFlat, oldK, newK);
+    (custom.newGrades || []).forEach(function (ng) {
+      if (ng && ng.sh === sh && String(ng.s || "") === String(s || "") && ng.g === from) ng.g = to;
+    });
+    if (!custom.renamedGrades) custom.renamedGrades = [];
+    custom.renamedGrades.push({ sh: sh, s: s || "", from: from, to: to, at: new Date().toISOString() });
+    var prices = migratePrices(store, from, sh, s, to);
+    return { ok: true, from: from, to: to, ent: ent, pricesMoved: prices.moved, pricesSkipped: prices.skipped };
+  }
+
   function listGrades(db, sl) {
     var list = [];
     var shapes = sl || Object.keys(db);
@@ -535,6 +656,7 @@
     catalogKey: catalogKey,
     parseCatalogKey: parseCatalogKey,
     findEntry: findEntry,
+    findEntryCI: findEntryCI,
     hasExact: hasExact,
     uniqNums: uniqNums,
     parseSzList: parseSzList,
@@ -549,6 +671,8 @@
     removeSize: removeSize,
     removeFlatSize: removeFlatSize,
     addNewGrade: addNewGrade,
+    renameGrade: renameGrade,
+    migratePrices: migratePrices,
     listGrades: listGrades,
     flatChips: flatChips,
     pkey: pkey,

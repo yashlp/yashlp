@@ -319,6 +319,65 @@ async function main() {
     assert(price === "61.5", "price persisted: " + price);
     console.log("ok - admin price persist");
 
+    await cdp.eval(`document.getElementById('t3').click()`);
+    await sleep(200);
+    await cdp.eval(`['2','6','0','4'].forEach(d => document.querySelector('#pin2Overlay [data-k2="'+d+'"]').click())`);
+    await sleep(450);
+    await cdp.eval(`
+      document.getElementById('ngName').value='EN-99TEST';
+      document.getElementById('ngShape').value='Round Bar';
+      document.getElementById('ngShape').dispatchEvent(new Event('change'));
+      document.getElementById('ngSub').value='Rod';
+      document.getElementById('ngSizes').value='16,20,25';
+      document.getElementById('btnNgAdd').click();
+    `);
+    await sleep(250);
+    const ngMsg = await cdp.eval("document.getElementById('ngMsg').innerText");
+    assert(ngMsg.toLowerCase().includes("added"), "add grade: " + ngMsg);
+    const blank = await cdp.eval(`(function(){
+      const opts = [...document.querySelectorAll('#smGradeRename option')];
+      const idx = opts.findIndex(o => o.text.includes('EN-99TEST'));
+      document.getElementById('smGradeRename').value=String(idx);
+      document.getElementById('smGradeRename').dispatchEvent(new Event('change'));
+      document.getElementById('smRenameTo').value='';
+      document.getElementById('btnSmRename').click();
+      return document.getElementById('smRenameMsg').innerText;
+    })()`);
+    assert(/enter a grade name/i.test(blank), "blank rename: " + blank);
+    const renamedMsg = await cdp.eval(`(function(){
+      document.getElementById('smRenameTo').value='EN-99RENAMED';
+      document.getElementById('btnSmRename').click();
+      return document.getElementById('smRenameMsg').innerText;
+    })()`);
+    assert(/renamed/i.test(renamedMsg) && renamedMsg.includes("EN-99RENAMED"), "rename msg: " + renamedMsg);
+    const renameShot = await screenshot(cdp, "metals-rename-grade.png");
+    console.log("ok - renamed custom grade", renameShot);
+
+    await cdp.send("Page.navigate", { url: base + "/index.html" });
+    await sleep(700);
+    const overlay3 = await cdp.eval("JSON.parse(localStorage.getItem('jk_catalog_v1')||'{}')");
+    assert((overlay3.newGrades || []).some((g) => g.g === "EN-99RENAMED"), "newGrades persisted rename");
+    assert(!(overlay3.newGrades || []).some((g) => g.g === "EN-99TEST"), "old custom name gone");
+
+    await cdp.eval(`document.getElementById('t3').click()`);
+    await sleep(200);
+    await cdp.eval(`['2','6','0','4'].forEach(d => document.querySelector('#pin2Overlay [data-k2="'+d+'"]').click())`);
+    await sleep(450);
+    const renameOpts = await cdp.eval(`[...document.querySelectorAll('#smGradeRename option')].map(o => o.text)`);
+    assert(renameOpts.some((t) => t.includes("EN-99RENAMED")), "dropdown shows new name");
+    assert(!renameOpts.some((t) => t.includes("EN-99TEST")), "dropdown dropped old name");
+
+    await cdp.eval(`document.getElementById('t1').click()`);
+    await sleep(100);
+    await cdp.eval(`document.querySelector('[data-shape="Round Bar"]').click()`);
+    await cdp.eval(`document.querySelector('#inSize').value='20'; document.querySelector('#inGrade').value='EN-99RENAMED'; document.querySelector('#btnSearch').click();`);
+    await sleep(250);
+    grid = await cdp.eval("document.querySelector('#grid').innerText");
+    assert(grid.includes("EN-99RENAMED"), "search shows renamed grade: " + grid.slice(0, 200));
+    assert(grid.includes("20") || grid.toLowerCase().includes("exact"), "renamed grade kept sizes");
+    await screenshot(cdp, "metals-search-renamed-grade.png");
+    console.log("ok - renamed grade persists in search");
+
     cdp.close();
     console.log("\nAll Chrome UI checks passed");
   } finally {

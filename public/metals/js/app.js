@@ -380,21 +380,47 @@
     }
   }
 
-  function populateSMDropdowns() {
+  function fillSelect(sel, list, keepKey) {
+    sel.innerHTML = "";
+    var chosen = -1;
+    for (var i = 0; i < list.length; i++) {
+      var o = document.createElement("option");
+      o.value = i;
+      o.text = list[i].label;
+      sel.appendChild(o);
+      var k = list[i].sh + "|" + list[i].g + "|" + list[i].s;
+      if (keepKey && k === keepKey) chosen = i;
+    }
+    if (chosen >= 0) sel.value = String(chosen);
+  }
+
+  function gradeKey(item) {
+    if (!item) return "";
+    return item.sh + "|" + item.g + "|" + item.s;
+  }
+
+  function populateSMDropdowns(preferKey) {
     var list = storeApi.listGrades(DB, SL);
     var s1 = document.getElementById("smGrade1");
     var s2 = document.getElementById("smGrade2");
-    var keep1 = s1.value, keep2 = s2.value;
-    s1.innerHTML = ""; s2.innerHTML = "";
-    for (var i = 0; i < list.length; i++) {
-      var o1 = document.createElement("option"); o1.value = i; o1.text = list[i].label; s1.appendChild(o1);
-      var o2 = document.createElement("option"); o2.value = i; o2.text = list[i].label; s2.appendChild(o2);
-    }
-    if (keep1 && Number(keep1) < list.length) s1.value = keep1;
-    if (keep2 && Number(keep2) < list.length) s2.value = keep2;
+    var s3 = document.getElementById("smGradeRename");
+    var keep1 = preferKey || gradeKey(selectedGrade("smGrade1"));
+    var keep2 = preferKey || gradeKey(selectedGrade("smGrade2"));
+    var keep3 = preferKey || gradeKey(selectedGrade("smGradeRename"));
+    fillSelect(s1, list, keep1);
+    fillSelect(s2, list, keep2);
+    fillSelect(s3, list, keep3);
     updateAddFields();
     refreshChips();
+    fillRenameInput();
     return list;
+  }
+
+  function fillRenameInput() {
+    var item = selectedGrade("smGradeRename");
+    var inp = document.getElementById("smRenameTo");
+    if (!inp) return;
+    inp.value = item ? item.g : "";
   }
 
   function updateAddFields() {
@@ -428,6 +454,7 @@
     populateSMDropdowns();
     document.getElementById("smGrade1").addEventListener("change", updateAddFields);
     document.getElementById("smGrade2").addEventListener("change", refreshChips);
+    document.getElementById("smGradeRename").addEventListener("change", fillRenameInput);
     document.getElementById("ngShape").addEventListener("change", updateNgHint);
     updateNgHint();
 
@@ -469,7 +496,22 @@
       document.getElementById("ngSizes").value = "";
       var extra = res.rec.note ? " (note-only)" : (res.rec.flat ? " with flat sizes" : " with " + (res.rec.sz || []).length + " sizes");
       showMsg("ngMsg", "Grade " + res.rec.g + " (" + res.rec.sh + ") added" + extra + "!", true);
-      populateSMDropdowns();
+      populateSMDropdowns(res.rec.sh + "|" + res.rec.g + "|" + res.rec.s);
+    });
+
+    document.getElementById("btnSmRename").addEventListener("click", function () {
+      var item = selectedGrade("smGradeRename");
+      if (!item) { showMsg("smRenameMsg", "Select a grade first.", false); return; }
+      var res = storeApi.renameGrade(DB, custom, store, item.sh, item.g, item.s, document.getElementById("smRenameTo").value);
+      if (!res.ok) { showMsg("smRenameMsg", res.error, false); return; }
+      persist();
+      var extra = res.pricesMoved ? " Moved " + res.pricesMoved + " price(s)." : "";
+      if (res.pricesSkipped) extra += " Kept " + res.pricesSkipped + " existing price(s) on the new name.";
+      showMsg("smRenameMsg", "Renamed " + res.from + " to " + res.to + "." + extra, true);
+      populateSMDropdowns(item.sh + "|" + res.to + "|" + item.s);
+      if (document.getElementById("p2").className.indexOf("on") !== -1) {
+        renderPT(document.getElementById("af").value.trim());
+      }
     });
   }
 

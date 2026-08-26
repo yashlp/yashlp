@@ -19,6 +19,7 @@ function structureTests() {
     "Round Bar", "Square Bar", "Hex Bar", "Flat Bar", "Non-Ferrous", "All Shapes",
     "id=\"t4\"", "id=\"p4\"", "id=\"smAddThickness\"", "id=\"smAddWidth\"",
     "id=\"smSizeLabel\"", "PIN required", "Chemical Composition",
+    "id=\"smGradeRename\"", "id=\"smRenameTo\"", "id=\"btnSmRename\"", "Rename a Grade",
     "js/catalog.js", "js/storage.js", "js/app.js", "css/styles.css",
     "24AGIPS3207M1Z7", "Kamlesh@jkmetal.in",
   ];
