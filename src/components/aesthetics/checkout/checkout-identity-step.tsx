@@ -132,7 +132,7 @@ export function CheckoutIdentityStep({ form, onFormChange, onContinue }: Props) 
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          phone: form.phone,
+          phone: form.phone || undefined,
           password,
           address: {
             line1: form.line1,
@@ -245,13 +245,6 @@ export function CheckoutIdentityStep({ form, onFormChange, onContinue }: Props) 
         </Button>
       </div>
       {emailVerified && <p className="text-sm text-emerald-700">Email verified</p>}
-      <Input
-        type="tel"
-        placeholder="Mobile number"
-        value={form.phone}
-        onChange={(e) => onFormChange({ ...form, phone: e.target.value })}
-        required
-      />
       <Input
         type="password"
         placeholder="Password (min 8 characters)"

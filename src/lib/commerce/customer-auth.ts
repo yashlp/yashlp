@@ -108,7 +108,7 @@ export async function verifyEmailOtp(email: string, code: string, purpose: "SIGN
 export async function registerCustomer(input: {
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   password: string;
   address: {
     line1: string;
@@ -121,14 +121,14 @@ export async function registerCustomer(input: {
   orderId?: string;
 }) {
   const email = normalizeEmail(input.email);
-  const phone = normalizePhone(input.phone);
+  const phone = input.phone ? normalizePhone(input.phone) : null;
 
   if (requireEmailVerification()) {
     await consumeVerifiedEmailOtp(email);
   }
 
   const existing = await prisma.commerceCustomer.findFirst({
-    where: { OR: [{ email }, { phone }] },
+    where: phone ? { OR: [{ email }, { phone }] } : { email },
   });
   if (existing?.passwordHash) {
     throw new Error("An account with this email or phone already exists. Please sign in.");
@@ -142,7 +142,7 @@ export async function registerCustomer(input: {
         data: {
           name: input.name,
           email,
-          phone,
+          phone: phone || existing.phone,
           passwordHash,
           emailVerified: true,
           status: "ACTIVE",
@@ -152,7 +152,7 @@ export async function registerCustomer(input: {
         data: {
           name: input.name,
           email,
-          phone,
+          ...(phone ? { phone } : {}),
           passwordHash,
           emailVerified: true,
           status: "ACTIVE",
@@ -170,6 +170,7 @@ export async function registerCustomer(input: {
       postalCode: input.address.postalCode,
       country: input.address.country || "IN",
       phone,
+      label: "Home",
       isDefault: true,
     },
   });

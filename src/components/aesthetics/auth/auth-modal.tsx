@@ -129,7 +129,7 @@ export function AuthModal({
         body: JSON.stringify({
           name,
           email,
-          phone,
+          phone: phone || undefined,
           password,
           address: {
             line1,
@@ -215,7 +215,7 @@ export function AuthModal({
               </Button>
             </div>
             {emailVerified && <p className="text-sm text-emerald-700">Email verified</p>}
-            <Input type="tel" placeholder="Phone (+91)" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+            <Input type="tel" placeholder="Phone (+91) (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
             <Input type="password" placeholder="Password (min 8 chars)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
             <Input placeholder="Address line 1" value={line1} onChange={(e) => setLine1(e.target.value)} required />
             <Input placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} required />

@@ -33,7 +33,20 @@ type ReturnRow = {
   order: { orderNumber: string; total: number; status: string };
 };
 
-type Tab = "orders" | "refunds" | "contact";
+type AddressRow = {
+  id: string;
+  label: string | null;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
+  phone: string | null;
+  isDefault: boolean;
+};
+
+type Tab = "orders" | "refunds" | "addresses" | "contact";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -44,6 +57,16 @@ export default function AccountPage() {
   const [returns, setReturns] = useState<ReturnRow[]>([]);
   const [refundOrderId, setRefundOrderId] = useState("");
   const [refundReason, setRefundReason] = useState("");
+  const [addresses, setAddresses] = useState<AddressRow[]>([]);
+  const [addressForm, setAddressForm] = useState({
+    label: "Home",
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    phone: "",
+  });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -63,6 +86,10 @@ export default function AccountPage() {
       .then((r) => r.json())
       .then((d) => setReturns(d.returns || []))
       .catch(() => setReturns([]));
+    fetch("/api/commerce/auth/addresses", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setAddresses(d.addresses || []))
+      .catch(() => setAddresses([]));
   }, [customer]);
 
   async function requestRefund(e: React.FormEvent) {
@@ -95,6 +122,62 @@ export default function AccountPage() {
     router.refresh();
   }
 
+  async function reloadAddresses() {
+    const res = await fetch("/api/commerce/auth/addresses", { credentials: "include" });
+    const data = await res.json();
+    setAddresses(data.addresses || []);
+  }
+
+  async function addAddress(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    const res = await fetch("/api/commerce/auth/addresses", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...addressForm,
+        country: "IN",
+        isDefault: addresses.length === 0,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Could not save address");
+      return;
+    }
+    setAddressForm({
+      label: "Home",
+      line1: "",
+      line2: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      phone: "",
+    });
+    setMessage("Address added.");
+    await reloadAddresses();
+  }
+
+  async function setDefaultAddress(id: string) {
+    await fetch(`/api/commerce/auth/addresses/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isDefault: true }),
+    });
+    await reloadAddresses();
+  }
+
+  async function removeAddress(id: string) {
+    await fetch(`/api/commerce/auth/addresses/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    await reloadAddresses();
+  }
+
   if (loading || !customer) {
     return <div className="min-h-dvh aes-site-bg" />;
   }
@@ -102,6 +185,7 @@ export default function AccountPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: "orders", label: "Order history" },
     { id: "refunds", label: "Track refund" },
+    { id: "addresses", label: "Addresses" },
     { id: "contact", label: "Contact us" },
   ];
 
@@ -253,6 +337,60 @@ export default function AccountPage() {
                   defaultLastName={(customer.name || "").split(" ").slice(1).join(" ")}
                 />
               </div>
+            </div>
+          </div>
+        )}
+
+        {tab === "addresses" && (
+          <div className="mt-8 space-y-6">
+            <div className="aes-panel p-6">
+              <h2 className="font-bold text-[var(--aes-ink)]">Saved addresses</h2>
+              <div className="mt-4 space-y-3">
+                {addresses.length === 0 ? (
+                  <p className="text-sm text-[var(--aes-ink-muted)]">No saved addresses yet.</p>
+                ) : (
+                  addresses.map((addr) => (
+                    <div key={addr.id} className="rounded-xl border border-[var(--aes-border)] p-4">
+                      <p className="font-medium text-[var(--aes-ink)]">
+                        {addr.label || "Address"} {addr.isDefault ? "· Default" : ""}
+                      </p>
+                      <p className="mt-1 text-sm text-[var(--aes-ink-muted)]">
+                        {addr.line1}
+                        {addr.line2 ? `, ${addr.line2}` : ""}, {addr.city}
+                        {addr.state ? `, ${addr.state}` : ""} {addr.postalCode}
+                      </p>
+                      <div className="mt-3 flex gap-4 text-sm">
+                        {!addr.isDefault && (
+                          <button type="button" className="text-[var(--aes-pink)] hover:underline" onClick={() => setDefaultAddress(addr.id)}>
+                            Make default
+                          </button>
+                        )}
+                        <button type="button" className="text-[var(--aes-ink-soft)] hover:underline" onClick={() => removeAddress(addr.id)}>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="aes-panel p-6">
+              <h2 className="font-bold text-[var(--aes-ink)]">Add new address</h2>
+              <form onSubmit={addAddress} className="mt-4 space-y-3">
+                <Input placeholder="Label (Home, Office)" value={addressForm.label} onChange={(e) => setAddressForm((p) => ({ ...p, label: e.target.value }))} />
+                <Input placeholder="Address line 1" value={addressForm.line1} onChange={(e) => setAddressForm((p) => ({ ...p, line1: e.target.value }))} required />
+                <Input placeholder="Address line 2 (optional)" value={addressForm.line2} onChange={(e) => setAddressForm((p) => ({ ...p, line2: e.target.value }))} />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input placeholder="City" value={addressForm.city} onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))} required />
+                  <Input placeholder="State" value={addressForm.state} onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))} />
+                </div>
+                <Input placeholder="PIN code" value={addressForm.postalCode} onChange={(e) => setAddressForm((p) => ({ ...p, postalCode: e.target.value }))} required />
+                <Input placeholder="Phone (optional)" value={addressForm.phone} onChange={(e) => setAddressForm((p) => ({ ...p, phone: e.target.value }))} />
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                {message && <p className="text-sm text-green-700">{message}</p>}
+                <Button type="submit">Save address</Button>
+              </form>
             </div>
           </div>
         )}

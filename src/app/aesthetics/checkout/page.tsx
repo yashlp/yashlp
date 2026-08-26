@@ -33,17 +33,32 @@ type ShippingRates = {
   gstRatePercent: number;
 };
 
+type SavedAddress = {
+  id: string;
+  label?: string | null;
+  line1: string;
+  line2?: string | null;
+  city: string;
+  state?: string | null;
+  postalCode: string;
+  country: string;
+  phone?: string | null;
+  isDefault: boolean;
+};
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartTotal, cartCount, removeFromCart, clearCart, hydrated } = useCart();
   const brand = useBrandSettings();
   const [step, setStep] = useState<CheckoutStep>("identity");
+  const [identityMode, setIdentityMode] = useState<"guest" | "signed-in">("guest");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [demoAllowed, setDemoAllowed] = useState(false);
   const [codEnabled, setCodEnabled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod" | "demo">("razorpay");
+  const [paymentCapabilityError, setPaymentCapabilityError] = useState("");
   const [rates, setRates] = useState<ShippingRates>({
     flatRate: 49,
     freeThreshold: 999,
@@ -61,10 +76,26 @@ export default function CheckoutPage() {
     postalCode: "",
     country: "IN",
   });
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [useNewAddress, setUseNewAddress] = useState(true);
+  const [saveAddress, setSaveAddress] = useState(true);
+  const [setDefaultAddress, setSetDefaultAddress] = useState(false);
+  const [addressLabel, setAddressLabel] = useState("Home");
 
   useEffect(() => {
     fetch("/api/commerce/payments/create")
-      .then((r) => r.json())
+      .then(async (r) => {
+        const payload = await r.json();
+        if (!r.ok) {
+          const message =
+            payload?.code === "INDIA_ONLY"
+              ? "Checkout is currently available in India only."
+              : payload?.error || "Payment options are unavailable right now.";
+          throw new Error(message);
+        }
+        return payload;
+      })
       .then((d) => {
         const enabled = Boolean(d.razorpay);
         const demo = Boolean(d.demo);
@@ -73,11 +104,13 @@ export default function CheckoutPage() {
         setDemoAllowed(demo);
         setCodEnabled(cod);
         setPaymentMethod(enabled ? "razorpay" : cod ? "cod" : demo ? "demo" : "razorpay");
+        setPaymentCapabilityError("");
       })
-      .catch(() => {
+      .catch((err) => {
         setRazorpayEnabled(false);
         setDemoAllowed(false);
         setCodEnabled(false);
+        setPaymentCapabilityError(err instanceof Error ? err.message : "Payment options are unavailable right now.");
       });
 
     fetch("/api/commerce/shipping")
@@ -97,6 +130,12 @@ export default function CheckoutPage() {
       .then((me) => {
         if (!me.customer) return;
         const a = me.customer.address;
+        const addresses = (me.customer.addresses || []) as SavedAddress[];
+        setSavedAddresses(addresses);
+        if (a?.id) {
+          setSelectedAddressId(a.id);
+          setUseNewAddress(false);
+        }
         setForm((prev) => ({
           ...prev,
           name: me.customer.name || prev.name,
@@ -109,6 +148,7 @@ export default function CheckoutPage() {
           postalCode: a?.postalCode || prev.postalCode,
           country: a?.country || "IN",
         }));
+        setIdentityMode("signed-in");
         setStep("details");
       })
       .catch(() => undefined);
@@ -132,6 +172,10 @@ export default function CheckoutPage() {
       body: JSON.stringify({
         ...form,
         country: "IN",
+        addressId: identityMode === "signed-in" && !useNewAddress ? selectedAddressId : undefined,
+        saveAddress: identityMode === "signed-in" && useNewAddress ? saveAddress : undefined,
+        setDefaultAddress: identityMode === "signed-in" && useNewAddress ? setDefaultAddress : undefined,
+        addressLabel: identityMode === "signed-in" && useNewAddress ? addressLabel : undefined,
         paymentMethod: method,
         items: cart.map((p) => ({
           productId: p.id,
@@ -252,7 +296,10 @@ export default function CheckoutPage() {
               <CheckoutIdentityStep
                 form={form}
                 onFormChange={setForm}
-                onContinue={() => setStep("details")}
+                onContinue={(mode) => {
+                  setIdentityMode(mode);
+                  setStep("details");
+                }}
               />
             )}
 
@@ -274,6 +321,53 @@ export default function CheckoutPage() {
                     Change account
                   </button>
                 </div>
+                {identityMode === "signed-in" && savedAddresses.length > 0 && (
+                  <div className="space-y-3 rounded-xl border border-[var(--aes-border)] p-4">
+                    <p className="text-sm font-semibold text-[var(--aes-ink)]">Saved addresses</p>
+                    {savedAddresses.map((addr) => (
+                      <label key={addr.id} className="flex gap-2 rounded-lg border border-[var(--aes-border)] p-3 text-sm">
+                        <input
+                          type="radio"
+                          name="savedAddress"
+                          checked={!useNewAddress && selectedAddressId === addr.id}
+                          onChange={() => {
+                            setUseNewAddress(false);
+                            setSelectedAddressId(addr.id);
+                            setForm((prev) => ({
+                              ...prev,
+                              line1: addr.line1,
+                              line2: addr.line2 || "",
+                              city: addr.city,
+                              state: addr.state || "",
+                              postalCode: addr.postalCode,
+                              country: addr.country || "IN",
+                              phone: addr.phone || prev.phone,
+                            }));
+                          }}
+                        />
+                        <span>
+                          <span className="block font-medium text-[var(--aes-ink)]">
+                            {addr.label || "Address"} {addr.isDefault ? "· Default" : ""}
+                          </span>
+                          <span className="block text-[var(--aes-ink-muted)]">
+                            {addr.line1}
+                            {addr.line2 ? `, ${addr.line2}` : ""}, {addr.city}
+                            {addr.state ? `, ${addr.state}` : ""} {addr.postalCode}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                    <label className="flex items-center gap-2 text-sm text-[var(--aes-ink)]">
+                      <input
+                        type="radio"
+                        name="savedAddress"
+                        checked={useNewAddress}
+                        onChange={() => setUseNewAddress(true)}
+                      />
+                      Use a new address
+                    </label>
+                  </div>
+                )}
                 <Input placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                 <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
                 <Input type="tel" placeholder="Mobile number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
@@ -285,6 +379,32 @@ export default function CheckoutPage() {
                 </div>
                 <Input placeholder="PIN code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} required />
                 <Input placeholder="Country" value="India" disabled />
+                {identityMode === "signed-in" && useNewAddress && (
+                  <div className="space-y-3 rounded-xl border border-[var(--aes-border)] p-4">
+                    <p className="text-sm font-semibold text-[var(--aes-ink)]">Save this address</p>
+                    <label className="flex items-center gap-2 text-sm text-[var(--aes-ink)]">
+                      <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} />
+                      Save this address to my account
+                    </label>
+                    {saveAddress && (
+                      <>
+                        <Input
+                          placeholder="Address label (Home, Office, etc.)"
+                          value={addressLabel}
+                          onChange={(e) => setAddressLabel(e.target.value)}
+                        />
+                        <label className="flex items-center gap-2 text-sm text-[var(--aes-ink)]">
+                          <input
+                            type="checkbox"
+                            checked={setDefaultAddress}
+                            onChange={(e) => setSetDefaultAddress(e.target.checked)}
+                          />
+                          Make this my default address
+                        </label>
+                      </>
+                    )}
+                  </div>
+                )}
                 <Button type="submit" className="w-full py-4">
                   Continue to payment
                 </Button>
@@ -315,6 +435,9 @@ export default function CheckoutPage() {
                 </div>
                 <div className="space-y-3 border-t border-[var(--aes-border)] pt-4">
                   <p className="text-sm font-semibold text-[var(--aes-ink)]">Payment method</p>
+                  {paymentCapabilityError && (
+                    <p className="text-sm text-red-600">{paymentCapabilityError}</p>
+                  )}
                   <label className="flex cursor-pointer items-center justify-between rounded-xl border border-[var(--aes-border)] p-3 text-sm">
                     <span>Online (UPI · Cards · Net Banking · Wallets)</span>
                     <input

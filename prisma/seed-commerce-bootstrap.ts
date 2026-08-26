@@ -26,7 +26,7 @@ const SETTINGS = [
   { key: "free_shipping_threshold", value: "999", group: "shipping" },
   { key: "free_delivery_enabled", value: "false", group: "shipping" },
   { key: "gst_rate", value: "18", group: "tax" },
-  { key: "cod_enabled", value: "false", group: "payments" },
+  { key: "cod_enabled", value: "true", group: "payments" },
   { key: "support_email", value: "customercare@onlyaesthetic.in", group: "contact" },
   { key: "support_phone", value: "", group: "contact" },
   { key: "site_name", value: "Only Aesthetic", group: "general" },

@@ -10,6 +10,10 @@ export const checkoutSchema = z.object({
   state: z.string().max(100).optional(),
   postalCode: z.string().min(1).max(20),
   country: z.string().default("IN"),
+  addressId: z.string().optional(),
+  saveAddress: z.boolean().optional(),
+  setDefaultAddress: z.boolean().optional(),
+  addressLabel: z.string().max(40).optional(),
   paymentMethod: z.enum(["cod", "razorpay", "demo"]).default("razorpay"),
   items: z
     .array(
@@ -26,7 +30,7 @@ export const checkoutSchema = z.object({
 export const customerRegisterSchema = z.object({
   name: z.string().min(1).max(120),
   email: z.string().email(),
-  phone: z.string().min(10).max(20),
+  phone: z.string().min(10).max(20).optional(),
   password: z.string().min(8).max(128),
   orderId: z.string().optional(),
   address: z.object({
@@ -42,6 +46,18 @@ export const customerRegisterSchema = z.object({
 export const customerEmailLoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+});
+
+export const customerAddressSchema = z.object({
+  label: z.string().max(40).optional(),
+  line1: z.string().min(1).max(200),
+  line2: z.string().max(200).optional(),
+  city: z.string().min(1).max(100),
+  state: z.string().max(100).optional(),
+  postalCode: z.string().min(1).max(20),
+  country: z.string().default("IN"),
+  phone: z.string().min(10).max(20).optional(),
+  isDefault: z.boolean().optional(),
 });
 
 export const customerPhoneOtpSchema = z.object({
