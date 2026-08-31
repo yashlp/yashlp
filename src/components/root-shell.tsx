@@ -21,7 +21,9 @@ export async function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/api/commerce") ||
     pathname.startsWith("/api/admin") ||
-    pathname.startsWith("/seller")
+    pathname.startsWith("/seller") ||
+    pathname === "/metals" ||
+    pathname.startsWith("/metals/")
   ) {
     return <>{children}</>;
   }
