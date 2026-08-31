@@ -91,7 +91,6 @@ export async function generateMetadata(): Promise<Metadata> {
   if (pathname.startsWith("/metals")) {
     return {
       title: {
-        default: "Jagetiya Metals | Alloy Steel Cut to Size | Vadodara",
         template: "%s | Jagetiya Metals",
       },
       description:

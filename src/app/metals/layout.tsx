@@ -19,7 +19,7 @@ const orbitron = Orbitron({
 
 export const metadata: Metadata = {
   title: {
-    default: "Jagetiya Metals | Alloy Steel Cut to Size | Vadodara",
+    default: "Alloy Steel Cut to Size | Vadodara",
     template: "%s | Jagetiya Metals",
   },
   description:
