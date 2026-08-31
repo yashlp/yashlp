@@ -127,7 +127,7 @@ export const GRADE_CARDS = buildGradeCards();
 export const SHAPE_CARDS = buildShapeCards();
 
 export const CONTACT = {
-  phone: "+91-9824012344",
+  phone: "+91 9558812335",
   email: "Kamlesh@jkmetal.in",
   address: "502/1-A G.I.D.C., Makarpura, Vadodara, Gujarat",
   gst: "24AGIPS3207M1Z7",
