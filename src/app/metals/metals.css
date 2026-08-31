@@ -1,137 +1,778 @@
+/* Jagetiya Metals — NOX-inspired design system */
 .metals-site {
-  --metals-bg: #000000;
-  --metals-surface: #0a0a0a;
-  --metals-border: #262626;
-  --metals-muted: #737373;
-  --metals-text: #fafafa;
-  --metals-accent: #c8960c;
-  --metals-accent-dim: rgba(200, 150, 12, 0.15);
-  background: var(--metals-bg);
-  color: var(--metals-text);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  --nox-bg: #000000;
+  --nox-fg: #fafafa;
+  --nox-muted: #737373;
+  --nox-border: #262626;
+  --nox-border-light: #404040;
+  background: var(--nox-bg);
+  color: var(--nox-fg);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 .metals-site * {
   box-sizing: border-box;
 }
 
-.metals-grain {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
-  background-size: 24px 24px;
+.nox-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-.metals-card {
-  border: 1px solid var(--metals-border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  transition: border-color 0.2s ease, transform 0.2s ease;
+@media (min-width: 1024px) {
+  .nox-container {
+    padding: 0 2.5rem;
+  }
 }
 
-.metals-card:hover {
-  border-color: #404040;
-  transform: translateY(-2px);
+/* News banner */
+.nox-news {
+  border-bottom: 1px solid var(--nox-border);
+  background: #0a0a0a;
+  font-size: 0.75rem;
 }
 
-.metals-tab-active {
+.nox-news-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  color: var(--nox-muted);
+}
+
+.nox-news-label {
+  font-weight: 600;
+  color: var(--nox-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+}
+
+/* Nav */
+.nox-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--nox-border);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.nox-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.nox-logo {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--nox-fg);
+  text-decoration: none;
+}
+
+.nox-nav-links {
+  display: none;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .nox-nav-links {
+    display: flex;
+  }
+}
+
+.nox-nav-links a {
+  font-size: 0.875rem;
+  color: var(--nox-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.nox-nav-links a:hover {
+  color: var(--nox-fg);
+}
+
+/* Get Metal button — NOX stamp style */
+.nox-get-metal {
+  display: inline-flex;
+  align-items: stretch;
+  height: 2.75rem;
+  border: 1px solid #fff;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow: hidden;
+  position: relative;
+  transition: opacity 0.15s;
+}
+
+.nox-get-metal:hover {
+  opacity: 0.92;
+}
+
+.nox-get-metal-lg {
+  height: 3.25rem;
+  font-size: 1rem;
+}
+
+.nox-get-metal-label {
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.nox-get-metal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.nox-get-metal-lg .nox-get-metal-icon {
+  width: 3.25rem;
+  padding: 0;
+}
+
+/* Hero */
+.nox-hero {
+  padding: 4rem 0 5rem;
+  border-bottom: 1px solid var(--nox-border);
+}
+
+@media (min-width: 1024px) {
+  .nox-hero {
+    padding: 6rem 0 7rem;
+  }
+}
+
+.nox-h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #fff;
+  max-width: 14ch;
+}
+
+.nox-hero-sub {
+  margin-top: 1.25rem;
+  font-size: 1.125rem;
+  color: var(--nox-muted);
+  max-width: 32rem;
+  line-height: 1.6;
+}
+
+.nox-hero-cta {
+  margin-top: 2.5rem;
+}
+
+.nox-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--nox-muted);
+  margin-bottom: 0.75rem;
+}
+
+.nox-eyebrow.accent {
+  color: #a3a3a3;
+}
+
+.nox-h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.nox-body {
+  margin-top: 1rem;
+  color: var(--nox-muted);
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+/* Sections */
+.nox-section {
+  padding: 4rem 0;
+  border-bottom: 1px solid var(--nox-border);
+}
+
+@media (min-width: 1024px) {
+  .nox-section {
+    padding: 5rem 0;
+  }
+}
+
+.nox-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Tabs */
+.nox-tabs {
+  display: inline-flex;
+  border: 1px solid var(--nox-border);
+  background: #000;
+  padding: 0;
+}
+
+.nox-tab {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--nox-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  border-right: 1px solid var(--nox-border);
+}
+
+.nox-tab:last-child {
+  border-right: none;
+}
+
+.nox-tab.on {
   background: #171717;
   color: #fff;
 }
 
-.metals-chem-pill {
+/* Catalog */
+.nox-catalog-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .nox-catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .nox-catalog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.nox-catalog-card {
+  border: 1px solid var(--nox-border);
+  background: #0a0a0a;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.nox-catalog-card:hover {
+  border-color: var(--nox-border-light);
+}
+
+.nox-card-tag {
+  font-size: 0.75rem;
+  color: var(--nox-muted);
+}
+
+.nox-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.nox-card-desc {
+  font-size: 0.875rem;
+  color: var(--nox-muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.nox-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.nox-badge {
+  font-family: ui-monospace, monospace;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--nox-border);
+  color: var(--nox-muted);
+}
+
+.nox-chem-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.nox-chem-pill {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 10px;
-  border: 1px solid var(--metals-border);
-  border-radius: 8px;
-  min-width: 64px;
-  background: rgba(0, 0, 0, 0.4);
+  min-width: 3.5rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--nox-border);
+  background: #000;
 }
 
-.metals-chem-pill .symbol {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--metals-muted);
-  letter-spacing: 0.05em;
+.nox-chem-num {
+  font-size: 0.6rem;
+  color: #525252;
+  font-family: ui-monospace, monospace;
 }
 
-.metals-chem-pill .value {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--metals-text);
+.nox-chem-sym {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
 }
 
-.metals-badge {
-  display: inline-block;
-  padding: 3px 8px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--metals-muted);
-  border: 1px solid var(--metals-border);
-  border-radius: 4px;
+.nox-chem-val {
+  font-size: 0.65rem;
+  color: var(--nox-muted);
+  font-family: ui-monospace, monospace;
 }
 
-.metals-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: #fff;
-  color: #000;
+.nox-card-actions {
+  margin-top: 0.5rem;
+}
+
+/* Nest section */
+.nox-nest-grid {
+  display: grid;
+  gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .nox-nest-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.nox-nest-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nox-nest-card {
+  border: 1px solid var(--nox-border);
+  padding: 1.25rem;
+  background: #0a0a0a;
+}
+
+.nox-nest-card h3 {
+  font-size: 0.9rem;
   font-weight: 600;
-  font-size: 14px;
-  border-radius: 6px;
+  color: #fff;
+  margin-bottom: 0.35rem;
+}
+
+.nox-nest-card p {
+  font-size: 0.8rem;
+  color: var(--nox-muted);
+  line-height: 1.5;
+}
+
+.nox-quote {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.nox-quote-section {
+  background: #0a0a0a;
+}
+
+.nox-quote-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* Footer */
+.nox-footer {
+  padding: 2rem 0 3rem;
+}
+
+.nox-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: #525252;
+}
+
+.nox-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.nox-footer-links a {
+  color: var(--nox-muted);
+  text-decoration: none;
+}
+
+.nox-footer-links a:hover {
+  color: #fff;
+}
+
+/* Sheet / drawer */
+.nox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 60;
   border: none;
   cursor: pointer;
-  text-decoration: none;
-  transition: background 0.15s ease;
 }
 
-.metals-btn-primary:hover {
-  background: #e5e5e5;
+.nox-sheet {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 28rem;
+  background: #0a0a0a;
+  border-left: 1px solid var(--nox-border);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow-y: auto;
 }
 
-.metals-btn-ghost {
-  display: inline-flex;
+.nox-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.nox-sheet-eyebrow {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--nox-muted);
+}
+
+.nox-sheet-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 0.25rem;
+}
+
+.nox-sheet-desc {
+  font-size: 0.875rem;
+  color: var(--nox-muted);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.nox-icon-btn {
+  background: transparent;
+  border: 1px solid var(--nox-border);
+  color: #fff;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: transparent;
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid var(--metals-border);
   cursor: pointer;
-  text-decoration: none;
-  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.metals-btn-ghost:hover {
+.nox-sheet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nox-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.nox-field span {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--nox-muted);
+  font-family: ui-monospace, monospace;
+}
+
+.nox-field input,
+.nox-field select {
+  background: #000;
+  border: 1px solid var(--nox-border);
+  color: #fff;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.nox-field input:focus,
+.nox-field select:focus {
   border-color: #525252;
-  background: rgba(255, 255, 255, 0.04);
 }
 
-.metals-news-ticker {
-  background: var(--metals-accent-dim);
-  border-bottom: 1px solid rgba(200, 150, 12, 0.25);
+.nox-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
 }
 
-@keyframes metals-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
+.nox-enquiry-btn {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem;
+  background: #fff;
+  color: #000;
+  border: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nox-enquiry-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.nox-enquiry-arrow {
+  font-size: 1.1rem;
+}
+
+/* Live chat */
+.nox-chat-fab {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.nox-chat-panel {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 80;
+  width: calc(100% - 2rem);
+  max-width: 24rem;
+  height: 32rem;
+  max-height: calc(100vh - 3rem);
+  background: #0a0a0a;
+  border: 1px solid var(--nox-border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+.nox-chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  border-bottom: 1px solid var(--nox-border);
+}
+
+.nox-chat-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  color: #22c55e;
+  font-family: ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.nox-chat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: nox-pulse 2s infinite;
+}
+
+@keyframes nox-pulse {
+  0%,
+  100% {
     opacity: 1;
-    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.4;
   }
 }
 
-.metals-animate-in {
-  animation: metals-fade-up 0.6s ease forwards;
+.nox-chat-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  margin-top: 0.15rem;
+}
+
+.nox-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nox-chat-bubble {
+  max-width: 90%;
+  padding: 0.65rem 0.875rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.nox-chat-bubble p {
+  margin: 0;
+}
+
+.nox-chat-agent {
+  align-self: flex-start;
+  background: #171717;
+  border: 1px solid var(--nox-border);
+  color: #e5e5e5;
+}
+
+.nox-chat-user {
+  align-self: flex-end;
+  background: #fff;
+  color: #000;
+}
+
+.nox-quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.nox-quick-replies button {
+  font-size: 0.7rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--nox-border-light);
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nox-quick-replies button:hover {
+  border-color: #fff;
+}
+
+.nox-typing {
+  color: var(--nox-muted);
+  font-style: italic;
+}
+
+.nox-chat-input {
+  display: flex;
+  border-top: 1px solid var(--nox-border);
+  padding: 0.5rem;
+  gap: 0.35rem;
+}
+
+.nox-chat-input input {
+  flex: 1;
+  background: #000;
+  border: 1px solid var(--nox-border);
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.nox-chat-input button {
+  background: #fff;
+  color: #000;
+  border: none;
+  width: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nox-chat-pay {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--nox-border);
+}
+
+.nox-pay-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #fff;
+  color: #000;
+  border: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nox-pay-btn:disabled {
+  opacity: 0.5;
 }
