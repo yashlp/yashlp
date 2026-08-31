@@ -779,5 +779,24 @@
       };
       reader.readAsText(file);
     });
+
+    // Deep-link from marketing site: ?grade=EN-24&shape=Round%20Bar
+    try {
+      var params = new URLSearchParams(window.location.search || "");
+      var qGrade = params.get("grade");
+      var qShape = params.get("shape");
+      if (qGrade) document.getElementById("inGrade").value = qGrade;
+      if (qShape) {
+        var shapeBtns = document.getElementById("shapeRow").getElementsByTagName("button");
+        for (var si = 0; si < shapeBtns.length; si++) {
+          if (shapeBtns[si].getAttribute("data-shape") === qShape) {
+            shapeBtns[si].click();
+            qShape = null;
+            break;
+          }
+        }
+      }
+      if (qGrade && !qShape) doSearch();
+    } catch (err) { /* ignore */ }
   });
 })();

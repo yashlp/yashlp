@@ -1,6 +1,6 @@
-# Jagetiya Metals — Stock Search & Price Manager
+# Jagetiya Metals
 
-Internal steel stock catalog for Jagetiya Metals (Vadodara). Search round, square, hex, and flat bars, set prices, and add/remove sizes. All custom catalog and price data is stored in the browser (`localStorage`) and survives refresh.
+Marketing site + stock tools for Jagetiya Metals (Vadodara), inspired by modern metals storefronts (shop-by-grade / shop-by-shape) and wired to the live Jagetiya catalog.
 
 ## Open / run
 
@@ -10,15 +10,29 @@ From the repo root:
 npm run dev:fast
 ```
 
-Then open [http://localhost:3000/metals](http://localhost:3000/metals) (or `/metals/index.html`).
+Then open:
 
-You can also serve just this folder:
+- [http://localhost:3000/metals](http://localhost:3000/metals) — marketing site (`index.html`)
+- [http://localhost:3000/metals/stock.html](http://localhost:3000/metals/stock.html) — stock search & price manager
+
+Or serve just this folder:
 
 ```bash
 npx --yes serve public/metals
 ```
 
-## Tabs
+## Marketing site
+
+`public/metals/index.html` presents Jagetiya products in a Nox Metals–style layout:
+
+- Full-bleed hero with brand-first typography
+- **By grade** cards (EN-8, EN-19, EN-24, EN-31, 20MnCr5, WPS/D3, MS, SS 304) with chemistry from `catalog.js`
+- **By shape** cards (Round, Square, Flat, Hex, Non-Ferrous, Forged/Bright)
+- Cutting capacity / certified supply story
+- Enquiry form → `mailto:Kamlesh@jkmetal.in`
+- Deep links into stock search (`?grade=` / `?shape=`)
+
+## Stock tool tabs
 
 | Tab | PIN | What it does |
 | --- | --- | --- |

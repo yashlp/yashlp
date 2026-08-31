@@ -53,7 +53,7 @@ See **[DEPLOY.md](./DEPLOY.md)** for going live on Vercel + Neon.
 
 ## Jagetiya Metals
 
-Stock search and price manager lives at [`/metals`](./public/metals/index.html) when the Next.js app is running (`npm run dev:fast` → [http://localhost:3000/metals](http://localhost:3000/metals)). See [`docs/JAGETIYA_METALS.md`](./docs/JAGETIYA_METALS.md).
+Marketing site + stock tools live at [`/metals`](./public/metals/index.html) when the Next.js app is running (`npm run dev:fast` → [http://localhost:3000/metals](http://localhost:3000/metals)). Stock search is at `/metals/stock.html`. See [`docs/JAGETIYA_METALS.md`](./docs/JAGETIYA_METALS.md).
 
 ## Documentation
 
