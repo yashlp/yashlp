@@ -5,6 +5,12 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { BUILTIN_DB, CHEM_COMP, SHAPES_LIST } from "../src/lib/metals/builtin-catalog";
+import { buildBuiltinChemComp, listUniqueGradesFromDb } from "../src/lib/metals/chem-catalog";
+
+const SYNCED_CHEM_COMP = buildBuiltinChemComp(
+  CHEM_COMP,
+  listUniqueGradesFromDb(BUILTIN_DB)
+);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
@@ -60,7 +66,7 @@ function hasExact(arr, t) {
   return false;
 }
 
-var CHEM_COMP = ${JSON.stringify(CHEM_COMP, null, 4)};
+var CHEM_COMP = ${JSON.stringify(SYNCED_CHEM_COMP, null, 4)};
 
   var BUILTIN_DB = (typeof structuredClone === "function")
     ? structuredClone(DB)

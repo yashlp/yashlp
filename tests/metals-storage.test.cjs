@@ -332,4 +332,39 @@ test("rename re-keys removed sizes and sequential names do not duplicate", () =>
   assert.strictEqual(db3["Round Bar"].filter((e) => e.g === "SEQ-C" && e.s === "Rod").length, 1);
 });
 
+test("new grade stores chemistry overlay and listDbGrades includes it", () => {
+  let custom = S.emptyCustom();
+  let db = S.applyCustom(data.BUILTIN_DB, custom);
+  const r = S.addNewGrade(db, custom, {
+    g: "EN-36",
+    sh: "Round Bar",
+    s: "Rod",
+    sizesRaw: "16,20",
+    chem: { C: "0.40", Mn: "0.80", Si: "0.20", Cr: "0.10", Ni: "0.00", Mo: "0.00" },
+  });
+  assert.ok(r.ok);
+  assert.strictEqual(custom.chemComp["EN-36"].C, "0.40");
+  assert.ok(S.listDbGrades(db, data.SL).includes("EN-36"));
+  const row = S.resolveChem("EN-36", data.CHEM_COMP, custom.chemComp);
+  assert.strictEqual(row.C, "0.40");
+});
+
+test("rename grade migrates chemistry overlay", () => {
+  const mem = S.memoryStore();
+  let custom = S.emptyCustom();
+  let db = S.applyCustom(data.BUILTIN_DB, custom);
+  assert.ok(
+    S.addNewGrade(db, custom, {
+      g: "CHEM-A",
+      sh: "Round Bar",
+      s: "Rod",
+      sizesRaw: "16",
+      chem: { C: "0.11", Mn: "0.22", Si: "0.33", Cr: "0.44", Ni: "0.55", Mo: "0.66" },
+    }).ok
+  );
+  assert.ok(S.renameGrade(db, custom, mem, "Round Bar", "CHEM-A", "Rod", "CHEM-B").ok);
+  assert.ok(!custom.chemComp["CHEM-A"]);
+  assert.strictEqual(custom.chemComp["CHEM-B"].Cr, "0.44");
+});
+
 console.log("\n" + passed + " tests passed");

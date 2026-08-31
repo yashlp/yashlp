@@ -38,8 +38,8 @@ npx --yes serve public/metals
 | --- | --- | --- |
 | Search Stock | none | Shape + size/grade search, nearest sizes, live prices |
 | Admin — Manage Prices | `1234` (changeable) | Per-size Rs/kg, CSV import/export |
-| Stock Manager | `2604` | Add/remove sizes, add grades, and rename grade names |
-| Chemical Composition | none | Grade chemistry; compare up to 3 grades |
+| Stock Manager | `2604` | Add/remove sizes, add grades (with optional chemistry), and rename grade names |
+| Chemical Composition | none | Grade chemistry; compare up to 3 grades (synced with catalog grades) |
 
 Default PINs are product defaults from the original tool, not deployment secrets.
 
@@ -54,6 +54,7 @@ Default PINs are product defaults from the original tool, not deployment secrets
 
 - Prices: `jk3_<grade>|<shape>|<subtype>|<size>`
 - Custom catalog: `jk_catalog_v1` (also mirrored to `jkcust` / `jkcust_v2`)
+- Custom chemistry per grade: `chemComp` inside `jk_catalog_v1` (auto-filled when adding a grade in Stock Manager)
 - Admin PIN: `jkpin`
 
 Custom catalog keys use `shape|grade|subtype` (not array indexes) so inserting a new grade cannot mis-apply sizes.

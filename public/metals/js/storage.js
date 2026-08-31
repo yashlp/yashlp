@@ -11,13 +11,68 @@
   var PRICE_PREFIX = "jk3_";
   var DEFAULT_PIN = "1234";
   var SM_PIN = "2604";
+  var CHEM_ELEMENTS = ["C", "Mn", "Si", "Cr", "Ni", "Mo"];
+
+  function emptyChemRow() {
+    var o = {};
+    for (var ci = 0; ci < CHEM_ELEMENTS.length; ci++) o[CHEM_ELEMENTS[ci]] = "—";
+    return o;
+  }
+
+  function parseChemPayload(payload) {
+    if (!payload || typeof payload !== "object") return emptyChemRow();
+    var row = emptyChemRow();
+    for (var ci = 0; ci < CHEM_ELEMENTS.length; ci++) {
+      var el = CHEM_ELEMENTS[ci];
+      var v = String(payload[el] || "").trim();
+      if (v) row[el] = v;
+    }
+    return row;
+  }
+
+  function mergeChemMaps(builtinChem, customChem) {
+    var out = deepClone(builtinChem || {});
+    for (var g in (customChem || {})) {
+      if (!Object.prototype.hasOwnProperty.call(customChem, g)) continue;
+      out[g] = deepClone(customChem[g]);
+    }
+    return out;
+  }
+
+  function resolveChem(grade, builtinChem, customChem) {
+    var merged = mergeChemMaps(builtinChem, customChem);
+    if (merged[grade]) return merged[grade];
+    var base = String(grade || "").split(" / ")[0];
+    if (merged[base]) return merged[base];
+    if (/^MS\b/i.test(grade) && merged.MS) return merged.MS;
+    if (/^SS\b/i.test(grade)) return merged[grade] || emptyChemRow();
+    return emptyChemRow();
+  }
+
+  function listDbGrades(db, sl) {
+    var seen = {};
+    var out = [];
+    var shapes = sl || Object.keys(db || {});
+    for (var si = 0; si < shapes.length; si++) {
+      var ents = db && db[shapes[si]];
+      if (!ents) continue;
+      for (var ei = 0; ei < ents.length; ei++) {
+        var g = ents[ei].g;
+        if (g && !seen[g]) {
+          seen[g] = true;
+          out.push(g);
+        }
+      }
+    }
+    return out.sort();
+  }
 
   function deepClone(v) {
     return JSON.parse(JSON.stringify(v));
   }
 
   function emptyCustom() {
-    return { added: {}, removed: {}, addedFlat: {}, removedFlat: {}, newGrades: [], renamedGrades: [] };
+    return { added: {}, removed: {}, addedFlat: {}, removedFlat: {}, newGrades: [], renamedGrades: [], chemComp: {} };
   }
 
   function catalogKey(sh, g, s) {
@@ -197,6 +252,7 @@
     if (legacy.renamedGrades && legacy.renamedGrades.length) {
       out.renamedGrades = deepClone(legacy.renamedGrades);
     }
+    if (legacy.chemComp) out.chemComp = deepClone(legacy.chemComp);
     return out;
   }
 
@@ -232,6 +288,7 @@
     mergeFlatMap(out.removedFlat, rf);
     if (raw.newGrades && raw.newGrades.length) out.newGrades = deepClone(raw.newGrades);
     if (raw.renamedGrades && raw.renamedGrades.length) out.renamedGrades = deepClone(raw.renamedGrades);
+    if (raw.chemComp) out.chemComp = deepClone(raw.chemComp);
     return out;
   }
 
@@ -467,6 +524,8 @@
     db[shape].push(row);
     if (!custom.newGrades) custom.newGrades = [];
     custom.newGrades.push(rec);
+    if (!custom.chemComp) custom.chemComp = {};
+    custom.chemComp[gname] = parseChemPayload(payload.chem);
     return { ok: true, rec: rec, row: row };
   }
 
@@ -558,6 +617,10 @@
     (custom.newGrades || []).forEach(function (ng) {
       if (ng && ng.sh === sh && String(ng.s || "") === String(s || "") && ng.g === from) ng.g = to;
     });
+    if (custom.chemComp && custom.chemComp[from]) {
+      if (!custom.chemComp[to]) custom.chemComp[to] = custom.chemComp[from];
+      delete custom.chemComp[from];
+    }
     if (!custom.renamedGrades) custom.renamedGrades = [];
     custom.renamedGrades.push({ sh: sh, s: s || "", from: from, to: to, at: new Date().toISOString() });
     var prices = migratePrices(store, from, sh, s, to);
@@ -682,6 +745,12 @@
     savePin: savePin,
     memoryStore: memoryStore,
     deepClone: deepClone,
-    flatKey: flatKey
+    flatKey: flatKey,
+    CHEM_ELEMENTS: CHEM_ELEMENTS,
+    emptyChemRow: emptyChemRow,
+    parseChemPayload: parseChemPayload,
+    mergeChemMaps: mergeChemMaps,
+    resolveChem: resolveChem,
+    listDbGrades: listDbGrades
   };
 });

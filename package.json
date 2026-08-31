@@ -12,7 +12,7 @@
     "vercel-build": "bash scripts/vercel-build.sh",
     "start": "next start",
     "lint": "next lint",
-    "test:metals": "node tests/metals-storage.test.cjs && node tests/metals-ui.test.cjs && npx tsx tests/metals-chat-flow.test.cjs && node tests/metals-nox-page.test.cjs",
+    "test:metals": "node tests/metals-storage.test.cjs && node tests/metals-ui.test.cjs && npx tsx tests/metals-chat-flow.test.cjs && npx tsx tests/metals-chem-catalog.test.cjs && node tests/metals-nox-page.test.cjs",
     "test:metals:e2e": "node tests/metals-chrome-e2e.cjs",
     "sync:metals-catalog": "npx tsx scripts/sync-metals-catalog.ts",
     "db:push": "prisma db push",

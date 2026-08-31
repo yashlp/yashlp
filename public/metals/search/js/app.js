@@ -16,6 +16,7 @@
 
   function persist() {
     storeApi.saveCustom(store, custom);
+    try { window.dispatchEvent(new CustomEvent("jk-catalog-updated")); } catch (_) {}
   }
 
   function bootCatalog() {
@@ -487,16 +488,29 @@
         g: document.getElementById("ngName").value,
         sh: document.getElementById("ngShape").value,
         s: document.getElementById("ngSub").value,
-        sizesRaw: document.getElementById("ngSizes").value
+        sizesRaw: document.getElementById("ngSizes").value,
+        chem: {
+          C: document.getElementById("ngChemC").value,
+          Mn: document.getElementById("ngChemMn").value,
+          Si: document.getElementById("ngChemSi").value,
+          Cr: document.getElementById("ngChemCr").value,
+          Ni: document.getElementById("ngChemNi").value,
+          Mo: document.getElementById("ngChemMo").value
+        }
       });
       if (!res.ok) { showMsg("ngMsg", res.error, false); return; }
       persist();
       document.getElementById("ngName").value = "";
       document.getElementById("ngSub").value = "";
       document.getElementById("ngSizes").value = "";
+      ["ngChemC", "ngChemMn", "ngChemSi", "ngChemCr", "ngChemNi", "ngChemMo"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.value = "";
+      });
       var extra = res.rec.note ? " (note-only)" : (res.rec.flat ? " with flat sizes" : " with " + (res.rec.sz || []).length + " sizes");
       showMsg("ngMsg", "Grade " + res.rec.g + " (" + res.rec.sh + ") added" + extra + "!", true);
       populateSMDropdowns(res.rec.sh + "|" + res.rec.g + "|" + res.rec.s);
+      refreshChemComposition();
     });
 
     document.getElementById("btnSmRename").addEventListener("click", function () {
@@ -615,9 +629,14 @@
   }
 
   var CHEM_COMP = data.CHEM_COMP;
-  var chemGrades = Object.keys(CHEM_COMP).sort();
+  var chemInited = false;
+
+  function getChemGrades() {
+    return storeApi.listDbGrades(DB, SL);
+  }
+
   function renderChemTable(grades) {
-    var elem = ["C", "Mn", "Si", "Cr", "Ni", "Mo"];
+    var elem = storeApi.CHEM_ELEMENTS;
     var h = '<table style="width:100%;border-collapse:collapse;font-family:Georgia,serif;"><tr style="background:#2E6DA4;color:#fff;">';
     h += '<th style="padding:10px;text-align:left;border:1px solid #ccc;font-size:13px;font-weight:700;">Element</th>';
     for (var g = 0; g < grades.length; g++) h += '<th style="padding:10px;text-align:center;border:1px solid #ccc;font-size:13px;font-weight:700;">' + grades[g] + '</th>';
@@ -625,42 +644,80 @@
     for (var e = 0; e < elem.length; e++) {
       h += '<tr style="background:' + (e % 2 ? "#F7F4EE" : "#fff") + '">';
       h += '<td style="padding:10px;border:1px solid #ccc;font-size:13px;font-weight:600;color:#1B3A5C;">' + elem[e] + '</td>';
-      for (var gi = 0; gi < grades.length; gi++) h += '<td style="padding:10px;border:1px solid #ccc;text-align:center;font-size:13px;color:#145A32;">' + CHEM_COMP[grades[gi]][elem[e]] + '%</td>';
+      for (var gi = 0; gi < grades.length; gi++) {
+        var row = storeApi.resolveChem(grades[gi], CHEM_COMP, custom.chemComp || {});
+        h += '<td style="padding:10px;border:1px solid #ccc;text-align:center;font-size:13px;color:#145A32;">' + (row[elem[e]] || "—") + '%</td>';
+      }
       h += '</tr>';
     }
     h += '</table>';
     return h;
   }
-  var chemInited = false;
-  function initChemComposition() {
-    if (chemInited) return;
-    chemInited = true;
+
+  function refreshChemComposition() {
+    var chemGrades = getChemGrades();
     var sel = document.getElementById("chemGrade");
-    for (var i = 0; i < chemGrades.length; i++) {
-      var o = document.createElement("option"); o.value = i; o.text = chemGrades[i]; sel.appendChild(o);
-    }
-    sel.addEventListener("change", function () {
-      document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[parseInt(this.value, 10)]]);
-    });
-    document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[0]]);
     var cbox = document.getElementById("chemCheckboxes");
+    if (!sel || !cbox) return;
+    var prevSel = sel.value;
+    var checked = {};
+    var chks = cbox.querySelectorAll("input[type='checkbox']");
+    for (var i = 0; i < chks.length; i++) {
+      if (chks[i].checked) checked[chks[i].getAttribute("data-grade")] = true;
+    }
+    sel.innerHTML = "";
+    cbox.innerHTML = "";
     for (var j = 0; j < chemGrades.length; j++) {
+      var o = document.createElement("option");
+      o.value = String(j);
+      o.text = chemGrades[j];
+      sel.appendChild(o);
       var lbl = document.createElement("label");
       lbl.style.display = "flex"; lbl.style.alignItems = "center"; lbl.style.gap = "8px"; lbl.style.padding = "8px";
       lbl.style.cursor = "pointer"; lbl.style.borderRadius = "6px"; lbl.style.background = "#F7F4EE";
       lbl.style.fontSize = "13px"; lbl.style.fontFamily = "Georgia,serif"; lbl.style.fontWeight = "600"; lbl.style.color = "#1B3A5C";
-      var chk = document.createElement("input"); chk.type = "checkbox"; chk.value = j; chk.style.width = "18px"; chk.style.height = "18px"; chk.style.cursor = "pointer";
+      var chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.value = String(j);
+      chk.setAttribute("data-grade", chemGrades[j]);
+      chk.style.width = "18px"; chk.style.height = "18px"; chk.style.cursor = "pointer";
+      if (checked[chemGrades[j]]) chk.checked = true;
       var sp = document.createElement("span"); sp.textContent = chemGrades[j];
       lbl.appendChild(chk); lbl.appendChild(sp); cbox.appendChild(lbl);
     }
+    if (chemGrades.length) {
+      var idx = Math.min(parseInt(prevSel, 10) || 0, chemGrades.length - 1);
+      if (idx < 0) idx = 0;
+      sel.value = String(idx);
+      document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[idx]]);
+    } else {
+      document.getElementById("chemIndividual").innerHTML = '<span style="color:#C0392B;font-size:13px;">No grades in catalog.</span>';
+    }
+  }
+
+  function initChemComposition() {
+    if (chemInited) {
+      refreshChemComposition();
+      return;
+    }
+    chemInited = true;
+    var sel = document.getElementById("chemGrade");
+    sel.addEventListener("change", function () {
+      var chemGrades = getChemGrades();
+      document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[parseInt(this.value, 10)]]);
+    });
     document.getElementById("btnShowCompare").addEventListener("click", function () {
+      var chemGrades = getChemGrades();
       var chks = document.querySelectorAll("#chemCheckboxes input[type='checkbox']");
       var selG = [];
-      for (var i = 0; i < chks.length; i++) { if (chks[i].checked) selG.push(chemGrades[parseInt(chks[i].value, 10)]); }
+      for (var i = 0; i < chks.length; i++) {
+        if (chks[i].checked) selG.push(chks[i].getAttribute("data-grade"));
+      }
       if (selG.length === 0) { document.getElementById("chemCompare").innerHTML = '<span style="color:#C0392B;font-size:13px;">Select at least 1 grade.</span>'; return; }
       if (selG.length > 3) { document.getElementById("chemCompare").innerHTML = '<span style="color:#C0392B;font-size:13px;">Max 3 grades allowed.</span>'; return; }
       document.getElementById("chemCompare").innerHTML = renderChemTable(selG);
     });
+    refreshChemComposition();
   }
 
   function showTab(id) {

@@ -1,4 +1,5 @@
 import { CHEM_COMP, SHAPES_LIST } from "./builtin-catalog";
+import { buildBuiltinChemComp, resolveChemForGrade } from "./chem-catalog";
 import {
   getAllGrades,
   getGradesForShape,
@@ -64,26 +65,15 @@ function slug(s: string) {
 }
 
 function chemFor(grade: string): ChemElement[] {
-  const raw = CHEM_COMP[grade] ?? CHEM_COMP[grade.split(" / ")[0]];
-  if (raw) {
-    return Object.entries(raw)
-      .slice(0, 4)
-      .map(([symbol, value]) => ({
-        num: ELEMENT_NUMS[symbol] ?? 0,
-        symbol,
-        value: `${value}%`,
-      }));
-  }
-  if (grade.startsWith("SS")) {
-    return [
-      { num: 24, symbol: "Cr", value: "16–20%" },
-      { num: 28, symbol: "Ni", value: "8–14%" },
-    ];
-  }
-  return [
-    { num: 29, symbol: "Cu", value: "—" },
-    { num: 30, symbol: "Zn", value: "—" },
-  ];
+  const merged = buildBuiltinChemComp(CHEM_COMP, ALL_GRADES);
+  const raw = resolveChemForGrade(grade, merged);
+  return Object.entries(raw)
+    .slice(0, 4)
+    .map(([symbol, value]) => ({
+      num: ELEMENT_NUMS[symbol] ?? 0,
+      symbol,
+      value: value === "—" ? "—" : `${value}%`,
+    }));
 }
 
 function gradeDescription(grade: string, shapes: string[]): string {
