@@ -821,9 +821,16 @@ button {
   .nav-cta.desktop-only {
     display: none;
   }
+  .nav-cta.mobile-only {
+    display: inline-flex;
+    margin-top: 4px;
+  }
 }
 
 @media (min-width: 961px) {
+  .nav-cta.mobile-only {
+    display: none;
+  }
   .grade-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
