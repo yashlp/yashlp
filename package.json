@@ -12,6 +12,8 @@
     "vercel-build": "bash scripts/vercel-build.sh",
     "start": "next start",
     "lint": "next lint",
+    "test:metals": "node tests/metals-storage.test.cjs && node tests/metals-ui.test.cjs",
+    "test:metals:e2e": "node tests/metals-chrome-e2e.cjs",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-commerce": "tsx prisma/seed-commerce.ts",
