@@ -1,12 +1,33 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { X } from "lucide-react";
 import { useMetals } from "./metals-provider";
-import { ALL_GRADES, SHAPES } from "@/lib/metals/catalog-data";
+import { SHAPES } from "@/lib/metals/catalog-data";
+import {
+  getAllGrades,
+  getGradesForShape,
+  getShapesForGrade,
+  getSizesForGradeAndShape,
+} from "@/lib/metals/catalog-queries";
 
 export function GetMetalSheet() {
   const { sheetOpen, enquiry, setEnquiry, closeGetMetal, submitEnquiry } = useMetals();
+
+  const gradeOptions = useMemo(() => {
+    if (enquiry.shape) return getGradesForShape(enquiry.shape);
+    return getAllGrades();
+  }, [enquiry.shape]);
+
+  const shapeOptions = useMemo(() => {
+    if (enquiry.grade) return getShapesForGrade(enquiry.grade);
+    return [...SHAPES];
+  }, [enquiry.grade]);
+
+  const sizeOptions = useMemo(
+    () => getSizesForGradeAndShape(enquiry.grade, enquiry.shape),
+    [enquiry.grade, enquiry.shape]
+  );
 
   useEffect(() => {
     document.body.style.overflow = sheetOpen ? "hidden" : "";
@@ -14,6 +35,20 @@ export function GetMetalSheet() {
       document.body.style.overflow = "";
     };
   }, [sheetOpen]);
+
+  useEffect(() => {
+    if (!sheetOpen) return;
+    if (enquiry.grade && !shapeOptions.includes(enquiry.shape as (typeof shapeOptions)[number])) {
+      setEnquiry({ shape: shapeOptions[0] ?? enquiry.shape, sizeMm: "" });
+    }
+  }, [sheetOpen, enquiry.grade, enquiry.shape, shapeOptions, setEnquiry]);
+
+  useEffect(() => {
+    if (!sheetOpen || !enquiry.grade || !enquiry.shape) return;
+    if (sizeOptions.length && !sizeOptions.includes(enquiry.sizeMm)) {
+      setEnquiry({ sizeMm: "" });
+    }
+  }, [sheetOpen, enquiry.grade, enquiry.shape, enquiry.sizeMm, sizeOptions, setEnquiry]);
 
   if (!sheetOpen) return null;
 
@@ -23,6 +58,9 @@ export function GetMetalSheet() {
     enquiry.sizeMm.trim() &&
     enquiry.lengthMm.trim() &&
     enquiry.quantityKg.trim();
+
+  const sizeLabel =
+    enquiry.shape === "Flat Bar" ? "Size (thickness × width mm)" : "Size (mm)";
 
   return (
     <>
@@ -46,8 +84,8 @@ export function GetMetalSheet() {
         </div>
 
         <p className="nox-sheet-desc">
-          Tell us what you need. Alloy, dimensions, quantity. We&apos;ll confirm everything in live
-          chat before payment.
+          Select from stocked grades and sizes. We&apos;ll confirm everything in live chat before
+          payment.
         </p>
 
         <form
@@ -58,26 +96,12 @@ export function GetMetalSheet() {
           }}
         >
           <label className="nox-field">
-            <span>Grade</span>
-            <select
-              value={enquiry.grade}
-              onChange={(e) => setEnquiry({ grade: e.target.value })}
-              required
-            >
-              <option value="">Select grade</option>
-              {ALL_GRADES.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="nox-field">
             <span>Shape</span>
             <select
               value={enquiry.shape}
-              onChange={(e) => setEnquiry({ shape: e.target.value })}
+              onChange={(e) =>
+                setEnquiry({ shape: e.target.value, grade: "", sizeMm: "" })
+              }
               required
             >
               {SHAPES.map((s) => (
@@ -88,32 +112,58 @@ export function GetMetalSheet() {
             </select>
           </label>
 
-          <div className="nox-field-row">
-            <label className="nox-field">
-              <span>Size (mm)</span>
-              <input
-                type="number"
-                min="1"
-                step="0.1"
-                placeholder="e.g. 50"
-                value={enquiry.sizeMm}
-                onChange={(e) => setEnquiry({ sizeMm: e.target.value })}
-                required
-              />
-            </label>
-            <label className="nox-field">
-              <span>Length (mm)</span>
-              <input
-                type="number"
-                min="1"
-                step="1"
-                placeholder="e.g. 1000"
-                value={enquiry.lengthMm}
-                onChange={(e) => setEnquiry({ lengthMm: e.target.value })}
-                required
-              />
-            </label>
-          </div>
+          <label className="nox-field">
+            <span>Grade</span>
+            <select
+              value={enquiry.grade}
+              onChange={(e) => setEnquiry({ grade: e.target.value, sizeMm: "" })}
+              required
+            >
+              <option value="">Select grade</option>
+              {gradeOptions.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="nox-field">
+            <span>{sizeLabel}</span>
+            <select
+              value={enquiry.sizeMm}
+              onChange={(e) => setEnquiry({ sizeMm: e.target.value })}
+              required
+              disabled={!enquiry.grade || sizeOptions.length === 0}
+            >
+              <option value="">
+                {!enquiry.grade
+                  ? "Select grade first"
+                  : sizeOptions.length === 0
+                    ? "No sizes listed"
+                    : "Select size"}
+              </option>
+              {sizeOptions.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                  {s !== "Contact for size" ? " mm" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="nox-field">
+            <span>Length (mm)</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              placeholder="e.g. 1000"
+              value={enquiry.lengthMm}
+              onChange={(e) => setEnquiry({ lengthMm: e.target.value })}
+              required
+            />
+          </label>
 
           <label className="nox-field">
             <span>Quantity (kg)</span>

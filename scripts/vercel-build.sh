@@ -36,5 +36,8 @@ else
   fi
 fi
 
+echo "→ sync metals catalog"
+npm run sync:metals-catalog
+
 echo "→ next build"
 npx next build

@@ -12,7 +12,7 @@ import {
   nextStep,
   stepPrompt,
 } from "@/lib/metals/enquiry";
-import { estimatePriceInr } from "@/lib/metals/catalog-data";
+import { estimatePriceInr, parseSizeMm } from "@/lib/metals/catalog-data";
 
 declare global {
   interface Window {
@@ -162,7 +162,7 @@ export function EnquiryChat() {
         const o = orderRef.current;
         const est = estimatePriceInr({
           grade: o.grade || "",
-          sizeMm: parseFloat(o.sizeMm || "0"),
+          sizeMm: parseSizeMm(o.sizeMm || "0"),
           lengthMm: parseFloat(o.lengthMm || "0"),
           quantityKg: parseFloat(o.quantityKg || "0"),
         });
@@ -189,7 +189,7 @@ export function EnquiryChat() {
     setPaying(true);
     const amount = estimatePriceInr({
       grade: o.grade,
-      sizeMm: parseFloat(o.sizeMm || "0"),
+      sizeMm: parseSizeMm(o.sizeMm || "0"),
       lengthMm: parseFloat(o.lengthMm || "0"),
       quantityKg: parseFloat(o.quantityKg || "0"),
     });
