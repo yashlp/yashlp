@@ -147,7 +147,7 @@ export function estimatePriceInr(input: {
   grade: string;
   sizeMm: number;
   lengthMm: number;
-  quantityKg: number;
+  quantityPieces: number;
 }): number {
   const basePerKg: Record<string, number> = {
     "EN-24": 95,
@@ -169,7 +169,7 @@ export function estimatePriceInr(input: {
     }
   }
   const sizeFactor = 1 + Math.min(input.sizeMm, 200) / 400;
-  return Math.round(rate * input.quantityKg * sizeFactor);
+  return Math.round(rate * input.quantityPieces * sizeFactor);
 }
 
 /** Parse size label for pricing (round mm or flat thickness) */

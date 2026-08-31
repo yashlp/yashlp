@@ -119,7 +119,7 @@ export function EnquiryChat() {
             ? "confirm_size"
             : awaitingField === "lengthMm"
               ? "confirm_length"
-              : awaitingField === "quantityKg"
+              : awaitingField === "quantityPieces"
                 ? "confirm_quantity"
                 : awaitingField === "grade"
                   ? "confirm_grade"
@@ -138,7 +138,7 @@ export function EnquiryChat() {
           shape: "shape",
           sizeMm: "size in mm",
           lengthMm: "length in mm",
-          quantityKg: "quantity in kg",
+          quantityPieces: "quantity (pieces)",
         };
         pushAgent(`What ${labels[changeField]} do you need?`);
         return;
@@ -164,7 +164,7 @@ export function EnquiryChat() {
           grade: o.grade || "",
           sizeMm: parseSizeMm(o.sizeMm || "0"),
           lengthMm: parseFloat(o.lengthMm || "0"),
-          quantityKg: parseFloat(o.quantityKg || "0"),
+          quantityPieces: parseFloat(o.quantityPieces || "0"),
         });
         await runAgentStep("summary");
         pushAgent(`Estimated total: ₹${est.toLocaleString("en-IN")} (excl. GST & freight).`);
@@ -185,13 +185,13 @@ export function EnquiryChat() {
 
   async function handlePay() {
     const o = orderRef.current;
-    if (!o.grade || !o.quantityKg) return;
+    if (!o.grade || !o.quantityPieces) return;
     setPaying(true);
     const amount = estimatePriceInr({
       grade: o.grade,
       sizeMm: parseSizeMm(o.sizeMm || "0"),
       lengthMm: parseFloat(o.lengthMm || "0"),
-      quantityKg: parseFloat(o.quantityKg || "0"),
+      quantityPieces: parseFloat(o.quantityPieces || "0"),
     });
 
     try {

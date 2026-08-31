@@ -1,5 +1,19 @@
 # Jagetiya Metals — Stock Search & Price Manager
 
+## Product catalog (single source of truth)
+
+Built-in grades and sizes live in **`src/lib/metals/builtin-catalog.ts`**.
+
+After editing that file, run:
+
+```bash
+npm run sync:metals-catalog
+```
+
+This regenerates `public/metals/js/catalog.js` (stock search) and keeps the **/metals** marketing site (grade cards, Get Metal size dropdown) in sync automatically. `npm run build` runs the sync step too.
+
+---
+
 Internal steel stock catalog for Jagetiya Metals (Vadodara). Search round, square, hex, and flat bars, set prices, and add/remove sizes. All custom catalog and price data is stored in the browser (`localStorage`) and survives refresh.
 
 ## Open / run

@@ -3,7 +3,7 @@ export type EnquiryDraft = {
   shape: string;
   sizeMm: string;
   lengthMm: string;
-  quantityKg: string;
+  quantityPieces: string;
 };
 
 export type ConfirmedOrder = EnquiryDraft & {
@@ -39,8 +39,15 @@ export const EMPTY_ENQUIRY: EnquiryDraft = {
   shape: "Round Bar",
   sizeMm: "",
   lengthMm: "",
-  quantityKg: "",
+  quantityPieces: "",
 };
+
+export function formatQuantity(qty: string | undefined): string {
+  if (!qty?.trim()) return "—";
+  const n = parseInt(qty, 10);
+  if (Number.isNaN(n)) return qty;
+  return `${n} ${n === 1 ? "piece" : "pieces"}`;
+}
 
 export function stepPrompt(
   step: ChatStep,
@@ -73,7 +80,7 @@ export function stepPrompt(
       };
     case "confirm_quantity":
       return {
-        text: `Quantity: **${order.quantityKg || "—"} kg** — is this correct?`,
+        text: `Quantity: **${formatQuantity(order.quantityPieces)}** — is this correct?`,
         quickReplies: ["Yes, correct", "Change quantity"],
       };
     case "ask_name":
@@ -84,7 +91,7 @@ export function stepPrompt(
       return { text: "Email address for invoice and delivery updates?" };
     case "summary":
       return {
-        text: `Order summary:\n• ${order.grade} · ${order.shape}\n• ${order.sizeMm} mm × ${order.lengthMm} mm length\n• ${order.quantityKg} kg\n• ${order.name} · ${order.phone}\n• ${order.email}`,
+        text: `Order summary:\n• ${order.grade} · ${order.shape}\n• ${order.sizeMm} mm × ${order.lengthMm} mm length\n• ${formatQuantity(order.quantityPieces)}\n• ${order.name} · ${order.phone}\n• ${order.email}`,
         quickReplies: ["Proceed to payment"],
       };
     case "payment":
@@ -145,6 +152,6 @@ export function fieldForChangeReply(text: string): keyof EnquiryDraft | null {
   if (t.includes("shape")) return "shape";
   if (t.includes("size")) return "sizeMm";
   if (t.includes("length")) return "lengthMm";
-  if (t.includes("quantity")) return "quantityKg";
+  if (t.includes("quantity")) return "quantityPieces";
   return null;
 }

@@ -57,7 +57,7 @@ export function GetMetalSheet() {
     enquiry.shape &&
     enquiry.sizeMm.trim() &&
     enquiry.lengthMm.trim() &&
-    enquiry.quantityKg.trim();
+    enquiry.quantityPieces.trim();
 
   const sizeLabel =
     enquiry.shape === "Flat Bar" ? "Size (thickness × width mm)" : "Size (mm)";
@@ -166,14 +166,14 @@ export function GetMetalSheet() {
           </label>
 
           <label className="nox-field">
-            <span>Quantity (kg)</span>
+            <span>Quantity</span>
             <input
               type="number"
-              min="0.1"
-              step="0.1"
-              placeholder="e.g. 25"
-              value={enquiry.quantityKg}
-              onChange={(e) => setEnquiry({ quantityKg: e.target.value })}
+              min="1"
+              step="1"
+              placeholder="e.g. 5"
+              value={enquiry.quantityPieces}
+              onChange={(e) => setEnquiry({ quantityPieces: e.target.value })}
               required
             />
           </label>
