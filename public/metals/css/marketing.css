@@ -231,10 +231,10 @@ button {
 /* —— Hero —— */
 .hero {
   position: relative;
-  min-height: min(92vh, 820px);
+  min-height: calc(100svh - 118px);
   display: flex;
   align-items: flex-end;
-  padding: 5rem 0 4.5rem;
+  padding: 3.5rem 0 3.25rem;
   overflow: hidden;
   isolation: isolate;
 }
@@ -246,7 +246,7 @@ button {
   background:
     linear-gradient(180deg, rgba(7, 8, 7, 0.35) 0%, rgba(7, 8, 7, 0.55) 40%, rgba(7, 8, 7, 0.96) 100%),
     linear-gradient(90deg, rgba(7, 8, 7, 0.75) 0%, rgba(7, 8, 7, 0.2) 55%, rgba(7, 8, 7, 0.55) 100%),
-    url("https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=2000&q=80")
+    url("img/hero-steel.jpg")
       center / cover no-repeat;
   transform: scale(1.04);
   animation: heroDrift 18s ease-in-out infinite alternate;
@@ -282,8 +282,7 @@ button {
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 1.25rem;
-  opacity: 0;
-  animation: riseIn 0.8s ease 0.1s forwards;
+  animation: riseIn 0.8s ease 0.05s both;
 }
 
 .hero-kicker::before {
@@ -301,8 +300,7 @@ button {
   letter-spacing: -0.02em;
   max-width: 11ch;
   margin-bottom: 1.25rem;
-  opacity: 0;
-  animation: riseIn 0.9s ease 0.2s forwards;
+  animation: riseIn 0.9s ease 0.12s both;
 }
 
 .hero h1 em {
@@ -315,16 +313,14 @@ button {
   color: var(--muted);
   max-width: 34rem;
   margin-bottom: 2rem;
-  opacity: 0;
-  animation: riseIn 0.9s ease 0.35s forwards;
+  animation: riseIn 0.9s ease 0.2s both;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem;
-  opacity: 0;
-  animation: riseIn 0.9s ease 0.5s forwards;
+  animation: riseIn 0.9s ease 0.28s both;
 }
 
 .btn-primary {
@@ -362,8 +358,8 @@ button {
 
 @keyframes riseIn {
   from {
-    opacity: 0;
-    transform: translateY(18px);
+    opacity: 0.001;
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -1018,8 +1014,12 @@ button {
   }
 
   .hero {
-    min-height: 78vh;
-    padding-top: 4rem;
+    min-height: calc(100svh - 130px);
+    padding: 2.5rem 0 2.5rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 11vw, 3.4rem);
   }
 
   .shop-panel.on {

@@ -788,18 +788,22 @@
       var shape = params.get("shape");
       var grade = params.get("grade");
       var size = params.get("size");
+      if (grade) document.getElementById("inGrade").value = grade;
+      if (size) document.getElementById("inSize").value = size;
       if (shape) {
         var buttons = document.getElementById("shapeRow").getElementsByTagName("button");
+        var matched = false;
         for (var bi = 0; bi < buttons.length; bi++) {
           if (buttons[bi].getAttribute("data-shape") === shape) {
             buttons[bi].click();
+            matched = true;
             break;
           }
         }
+        if (!matched) doSearch();
+      } else if (grade || size) {
+        doSearch();
       }
-      if (grade) document.getElementById("inGrade").value = grade;
-      if (size) document.getElementById("inSize").value = size;
-      if (shape || grade || size) doSearch();
       var hash = (window.location.hash || "").replace(/^#/, "");
       if (hash === "p4" || hash === "chem") {
         showTab("p4");
