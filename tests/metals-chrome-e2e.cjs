@@ -19,7 +19,7 @@ function startStaticServer() {
     const types = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript" };
     const server = http.createServer((req, res) => {
       let p = decodeURIComponent((req.url || "/").split("?")[0]);
-      if (p === "/" ) p = "/index.html";
+      if (p === "/" ) p = "/stock.html";
       const file = path.normalize(path.join(ROOT, p));
       if (!file.startsWith(ROOT)) { res.writeHead(403); res.end(); return; }
       fs.readFile(file, (err, buf) => {
@@ -129,7 +129,7 @@ async function main() {
     await cdp.connect();
     await cdp.send("Page.enable");
     await cdp.send("Runtime.enable");
-    await cdp.send("Page.navigate", { url: base + "/index.html" });
+    await cdp.send("Page.navigate", { url: base + "/stock.html" });
     await sleep(600);
 
     const title = await cdp.eval("document.title");
@@ -248,7 +248,7 @@ async function main() {
     const smShot = await screenshot(cdp, "metals-stock-manager-add.png");
     console.log("ok - added round/hex/square/flat", smShot);
 
-    await cdp.send("Page.navigate", { url: base + "/index.html" });
+    await cdp.send("Page.navigate", { url: base + "/stock.html" });
     await sleep(700);
     const overlay = await cdp.eval("JSON.parse(localStorage.getItem('jk_catalog_v1')||'{}')");
     const rKey = Object.keys(overlay.added || {}).find((k) => k.includes("EN-8D") && k.includes("Rolled"));
@@ -284,7 +284,7 @@ async function main() {
     assert(chips.includes("6x28"), "remove chips show 6x28: " + chips);
     await cdp.eval(`[...document.querySelectorAll('#smSizeChips .rem-chip')].find(c => c.textContent.trim()==='6x28').click()`);
     await sleep(200);
-    await cdp.send("Page.navigate", { url: base + "/index.html" });
+    await cdp.send("Page.navigate", { url: base + "/stock.html" });
     await sleep(700);
     const overlay2 = await cdp.eval("JSON.parse(localStorage.getItem('jk_catalog_v1')||'{}')");
     const fKey2 = Object.keys(overlay2.addedFlat || {}).find((k) => k.includes("Flat Bar") && k.includes("EN-8"));
@@ -313,7 +313,7 @@ async function main() {
     await sleep(200);
     const adminShot = await screenshot(cdp, "metals-admin-price.png");
     console.log("ok - admin price saved", adminShot);
-    await cdp.send("Page.navigate", { url: base + "/index.html" });
+    await cdp.send("Page.navigate", { url: base + "/stock.html" });
     await sleep(700);
     const price = await cdp.eval("localStorage.getItem('jk3_EN-8D|Round Bar|Rolled|47')");
     assert(price === "61.5", "price persisted: " + price);
@@ -353,7 +353,7 @@ async function main() {
     const renameShot = await screenshot(cdp, "metals-rename-grade.png");
     console.log("ok - renamed custom grade", renameShot);
 
-    await cdp.send("Page.navigate", { url: base + "/index.html" });
+    await cdp.send("Page.navigate", { url: base + "/stock.html" });
     await sleep(700);
     const overlay3 = await cdp.eval("JSON.parse(localStorage.getItem('jk_catalog_v1')||'{}')");
     assert((overlay3.newGrades || []).some((g) => g.g === "EN-99RENAMED"), "newGrades persisted rename");

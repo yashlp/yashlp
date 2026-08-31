@@ -56,6 +56,16 @@ const nextConfig: NextConfig = {
         destination: "/metals/index.html",
         permanent: false,
       },
+      {
+        source: "/metals/stock",
+        destination: "/metals/stock.html",
+        permanent: false,
+      },
+      {
+        source: "/metals/app",
+        destination: "/metals/stock.html",
+        permanent: false,
+      },
       ...(aestheticsOnly
         ? [
             {

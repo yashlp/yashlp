@@ -3,252 +3,441 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jagetiya Metals — Stock Search &amp; Price Manager</title>
-<link rel="stylesheet" href="css/styles.css">
+<title>Jagetiya Metals | Alloy &amp; Tool Steel Cut to Size | Vadodara</title>
+<meta name="description" content="Premium alloy and tool steel from Jagetiya Metals, Vadodara. Round, square, hex, and flat bars — EN-8, EN-19, EN-24, EN-31, WPS, MS, stainless, and non-ferrous. Search live stock and get cut to size.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/marketing.css">
 </head>
 <body>
-<div class="hdr">
-  <div class="hdr-l"><h1>JAGETIYA METALS</h1><p>STOCK SEARCH &amp; PRICE MANAGER</p></div>
-  <div class="hdr-r">+91-9824012344 | Kamlesh@jkmetal.in<br>502/1-A G.I.D.C., Makarpura, Vadodara</div>
-</div>
-<div class="tabs">
-  <button class="tbtn on" id="t1">Search Stock</button>
-  <button class="tbtn" id="t2">Admin - Manage Prices</button>
-  <button class="tbtn" id="t3">Stock Manager</button>
-  <button class="tbtn" id="t4">Chemical Composition</button>
-</div>
-
-<div class="tp on" id="p1">
-  <div class="panel">
-    <h2>Find Your Stock</h2>
-    <p>Select shape, enter size and / or grade. Shows live price for exact size matches.</p>
-    <span class="lbl">STEP 1 - SELECT SHAPE</span>
-    <div class="shapes" id="shapeRow">
-      <button class="shbtn" data-shape="Round Bar">Round Bar</button>
-      <button class="shbtn" data-shape="Square Bar">Square Bar</button>
-      <button class="shbtn" data-shape="Flat Bar">Flat Bar</button>
-      <button class="shbtn" data-shape="Hex Bar">Hex Bar</button>
-      <button class="shbtn" data-shape="Non-Ferrous">Non-Ferrous</button>
-      <button class="shbtn" data-shape="All">All Shapes</button>
-    </div>
-    <span class="lbl">STEP 2 - ENTER SIZE AND / OR GRADE</span>
-    <div class="irow">
-      <div class="fg" id="fgSize"><label>SIZE (MM)</label><input type="number" id="inSize" placeholder="e.g. 25, 100" min="1" max="600" step="0.1"></div>
-      <div class="fg" id="fgThk" style="display:none"><label>THICKNESS (MM)</label><input type="number" id="inThk" placeholder="e.g. 10, 25" min="1" max="200"></div>
-      <div class="fg" id="fgWid" style="display:none"><label>WIDTH (MM)</label><input type="number" id="inWid" placeholder="e.g. 50, 100" min="1" max="500"></div>
-      <div class="fg"><label>GRADE (OPTIONAL)</label><input type="text" id="inGrade" placeholder="e.g. EN-24, WPS, MS"></div>
-      <button class="gbtn" id="btnSearch">Search</button>
-      <button class="rbtn" id="btnReset">Reset</button>
+  <div class="news-bar">
+    <div class="wrap">
+      <p><strong>Stock</strong> Live inventory search for round, square, hex &amp; flat bars — prices in Rs/kg.</p>
+      <a href="stock.html">Open stock search →</a>
     </div>
   </div>
-  <div class="res">
-    <div class="sbar" id="sbar">Select a shape and enter a size or grade to begin</div>
-    <div class="grid" id="grid"></div>
-  </div>
-</div>
 
-<div class="tp" id="p2">
-  <div class="awrap">
-    <div class="ahead">
-      <div><h2>Price Manager</h2><p>Set price per kg for each individual size. Saves instantly. PIN required.</p></div>
-      <div class="abtnrow">
-        <button class="ibtn" id="btnImport">Import CSV</button>
-        <input type="file" id="csvIn" accept=".csv" style="display:none">
-        <button class="ebtn" id="btnExport">Export CSV</button>
-      </div>
+  <header class="site-nav" id="siteNav">
+    <div class="wrap">
+      <a class="brand" href="index.html" aria-label="Jagetiya Metals home">
+        <div class="brand-mark">JM<small>SINCE 1990</small></div>
+        <div class="brand-text">
+          <strong>JAGETIYA METALS</strong>
+          <span>Premium alloy &amp; tool steel</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#shop">Materials</a></li>
+        <li><a href="#stock-engine">Stock Engine</a></li>
+        <li><a href="#guides">Guides</a></li>
+        <li><a href="stock.html">Stock Search</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a class="nav-cta-mobile btn-primary" href="stock.html">Get Metal</a></li>
+      </ul>
+      <a class="nav-cta" href="stock.html">Get Metal</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu"><span></span></button>
     </div>
-    <div class="pin-bar">
-      <span style="font-size:12px;color:#8AAAC8;font-family:Georgia,serif;font-weight:700;">CHANGE PIN:</span>
-      <input type="password" id="newPin1" maxlength="4" placeholder="New 4-digit PIN" style="width:120px;padding:7px 10px;border-radius:6px;border:1.5px solid #4A9FD4;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:Georgia,serif;outline:none;text-align:center;">
-      <input type="password" id="newPin2" maxlength="4" placeholder="Confirm PIN" style="width:120px;padding:7px 10px;border-radius:6px;border:1.5px solid #4A9FD4;background:rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:Georgia,serif;outline:none;text-align:center;">
-      <button id="btnChangePin" style="padding:7px 18px;background:#C8960C;color:#0F2540;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:Georgia,serif;">Update PIN</button>
-      <span id="pinChgMsg" style="font-size:12px;color:#A8DFC0;font-family:Georgia,serif;"></span>
-    </div>
-    <div class="afilter">
-      <div class="fg" style="max-width:200px"><label style="color:#1B3A5C">FILTER BY GRADE / SHAPE</label><input type="text" id="af" placeholder="e.g. EN-24, Round Bar"></div>
-      <button class="fbtn" id="btnAF">Filter</button>
-      <button class="cbtn" id="btnAC">Clear</button>
-    </div>
-    <div class="ptw">
-      <table class="ptbl">
-        <thead><tr><th>GRADE</th><th>SHAPE</th><th>SUB-TYPE</th><th>SIZE</th><th>CURRENT PRICE</th><th>UPDATE</th></tr></thead>
-        <tbody id="ptbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+  </header>
 
-<div class="tp" id="p3">
-  <div class="awrap">
-    <div class="ahead">
-      <div><h2>Stock Manager</h2><p>PIN required. Add or remove sizes for any grade, including flats (thickness × width). Changes persist after refresh.</p></div>
-    </div>
-
-    <div class="sm-card">
-      <div class="sm-title">Add a Size to Existing Grade</div>
-      <div class="sm-sub">Round / hex / square: one size (side for square). Flat bars: thickness and width. Non-ferrous: optional size list.</div>
-      <div class="sm-row">
-        <div class="sm-field">
-          <span class="sm-lbl">SELECT GRADE</span>
-          <select id="smGrade1" class="sm-in" style="min-width:240px;cursor:pointer;"></select>
-        </div>
-        <div id="smRoundSizeDiv" class="col">
-          <span class="sm-lbl" id="smSizeLabel">SIZE (mm)</span>
-          <input id="smAddSize" class="sm-in" type="number" placeholder="e.g. 47" min="0.1" max="600" step="0.1" style="width:140px;">
-        </div>
-        <div id="smFlatThicknessDiv" class="col" style="display:none;">
-          <span class="sm-lbl">THICKNESS (mm)</span>
-          <input id="smAddThickness" class="sm-in" type="number" placeholder="e.g. 6" min="0.1" max="200" step="0.1" style="width:140px;">
-        </div>
-        <div id="smFlatWidthDiv" class="col" style="display:none;">
-          <span class="sm-lbl">WIDTH (mm)</span>
-          <input id="smAddWidth" class="sm-in" type="number" placeholder="e.g. 25" min="0.1" max="600" step="0.1" style="width:140px;">
-        </div>
-        <button id="btnSmAdd" style="padding:10px 20px;height:44px;background:#2E8B57;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;margin-top:20px;">+ Add</button>
-      </div>
-      <div id="smAddMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
-    </div>
-
-    <div class="sm-card">
-      <div class="sm-title">Remove a Size from a Grade</div>
-      <div class="sm-sub">Select a grade — all sizes appear below. Tap any size to remove it. Flat sizes show as thickness×width (e.g. 6x25).</div>
-      <div class="sm-row" style="margin-bottom:14px;">
-        <div class="sm-field">
-          <span class="sm-lbl">SELECT GRADE</span>
-          <select id="smGrade2" class="sm-in" style="min-width:220px;cursor:pointer;"></select>
+  <main>
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="wrap">
+        <p class="hero-kicker">Cut to size · Vadodara</p>
+        <h1>Metal at the speed of <em>stock</em></h1>
+        <p class="hero-lead">Alloy &amp; tool steel, cut to spec. Search live inventory by grade and size — quotes in minutes, not days.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="stock.html">Get Metal Fast <span aria-hidden="true">→</span></a>
+          <a class="btn-ghost" href="#shop">Shop by grade</a>
         </div>
       </div>
-      <div style="font-size:11px;font-weight:700;color:#C0392B;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:8px;">TAP A SIZE TO REMOVE IT:</div>
-      <div id="smSizeChips" style="padding:12px;background:#F7F4EE;border-radius:8px;line-height:2.2;min-height:50px;">Select a grade above to see all sizes</div>
-      <div id="smRemMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
-    </div>
+    </section>
 
-    <div class="sm-card alt">
-      <div class="sm-title">Add a New Grade</div>
-      <div class="sm-sub">Add a completely new grade. Flat Bar uses 6x25 pairs. Non-Ferrous sizes are optional.</div>
-      <div class="sm-row">
-        <div>
-          <span class="sm-lbl">GRADE NAME</span>
-          <input id="ngName" class="sm-in" type="text" placeholder="e.g. EN-36" style="width:140px;">
+    <section class="section shop" id="shop">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Cut to size</p>
+            <h2>Shop steel by grade or shape</h2>
+            <p class="section-lead">The same grades and shapes listed in our stock catalog — EN series, WPS tool steel, mild steel, stainless, and non-ferrous.</p>
+          </div>
+          <div class="shop-tabs" role="tablist" aria-label="Shop by">
+            <button class="shop-tab on" role="tab" aria-selected="true" data-panel="by-grade">By grade</button>
+            <button class="shop-tab" role="tab" aria-selected="false" data-panel="by-shape">By shape</button>
+          </div>
         </div>
-        <div>
-          <span class="sm-lbl">SHAPE</span>
-          <select id="ngShape" class="sm-in" style="cursor:pointer;">
-            <option>Round Bar</option>
-            <option>Square Bar</option>
-            <option>Hex Bar</option>
-            <option>Flat Bar</option>
-            <option>Non-Ferrous</option>
-          </select>
+
+        <div class="shop-panels">
+          <div class="shop-panel on" id="by-grade" role="tabpanel">
+            <article class="product-card">
+              <div class="product-top">
+                <h3>EN-8 / EN-8D</h3>
+                <span class="product-tag">Medium carbon</span>
+              </div>
+              <p class="product-desc">All-purpose engineering steel. Machines and responds well to heat treatment. Shafts, axles, bolts, and general components.</p>
+              <div class="chem-row" aria-label="Chemical composition">
+                <div class="chem"><div class="num">6</div><div class="sym">C</div><div class="pct">0.36–0.44</div></div>
+                <div class="chem"><div class="num">25</div><div class="sym">Mn</div><div class="pct">0.60–1.00</div></div>
+                <div class="chem"><div class="num">14</div><div class="sym">Si</div><div class="pct">0.15–0.35</div></div>
+                <div class="chem"><div class="num">24</div><div class="sym">Cr</div><div class="pct">≤0.20</div></div>
+              </div>
+              <div class="product-meta">
+                <span class="chip">Rolled</span>
+                <span class="chip">Bright Rod</span>
+                <span class="chip">Forging</span>
+                <span class="chip">C-45 Imported</span>
+              </div>
+              <a class="product-link" href="stock.html?grade=EN-8">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>EN-19 (4140)</h3>
+                <span class="product-tag">Chromoly · high strength</span>
+              </div>
+              <p class="product-desc">Cr-Mo alloy for gears, spindles, and high-stress shafts. Stocked as rolled rod and imported / forging sizes up to 450 mm.</p>
+              <div class="chem-row">
+                <div class="chem"><div class="num">6</div><div class="sym">C</div><div class="pct">0.38–0.43</div></div>
+                <div class="chem"><div class="num">25</div><div class="sym">Mn</div><div class="pct">0.75–1.00</div></div>
+                <div class="chem"><div class="num">24</div><div class="sym">Cr</div><div class="pct">0.80–1.10</div></div>
+                <div class="chem"><div class="num">42</div><div class="sym">Mo</div><div class="pct">0.15–0.25</div></div>
+              </div>
+              <div class="product-meta">
+                <span class="chip">Rod</span>
+                <span class="chip">Forging Rod</span>
+                <span class="chip">R.L / Laxcon / LSR</span>
+              </div>
+              <a class="product-link" href="stock.html?grade=EN-19">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>EN-24</h3>
+                <span class="product-tag">Ni-Cr-Mo · high tensile</span>
+              </div>
+              <p class="product-desc">Nickel-chrome-moly for demanding mechanical parts. Excellent toughness after heat treatment — automotive and heavy engineering.</p>
+              <div class="chem-row">
+                <div class="chem"><div class="num">6</div><div class="sym">C</div><div class="pct">0.36–0.44</div></div>
+                <div class="chem"><div class="num">24</div><div class="sym">Cr</div><div class="pct">1.00–1.40</div></div>
+                <div class="chem"><div class="num">28</div><div class="sym">Ni</div><div class="pct">1.30–1.70</div></div>
+                <div class="chem"><div class="num">42</div><div class="sym">Mo</div><div class="pct">0.20–0.30</div></div>
+              </div>
+              <div class="product-meta">
+                <span class="chip">Rod 16–200</span>
+                <span class="chip">Forging 210–450</span>
+              </div>
+              <a class="product-link" href="stock.html?grade=EN-24">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>EN-31</h3>
+                <span class="product-tag">Bearing / wear steel</span>
+              </div>
+              <p class="product-desc">High-carbon chrome steel for bearings, rolls, and wear parts. Hard, durable, and stocked in rolled and forging diameters.</p>
+              <div class="chem-row">
+                <div class="chem"><div class="num">6</div><div class="sym">C</div><div class="pct">0.90–1.05</div></div>
+                <div class="chem"><div class="num">25</div><div class="sym">Mn</div><div class="pct">0.30–0.50</div></div>
+                <div class="chem"><div class="num">14</div><div class="sym">Si</div><div class="pct">0.20–0.35</div></div>
+                <div class="chem"><div class="num">24</div><div class="sym">Cr</div><div class="pct">1.30–1.60</div></div>
+              </div>
+              <div class="product-meta">
+                <span class="chip">Rolled</span>
+                <span class="chip">Forging / Imported</span>
+              </div>
+              <a class="product-link" href="stock.html?grade=EN-31">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>WPS (D3)</h3>
+                <span class="product-tag">Tool &amp; die steel</span>
+              </div>
+              <p class="product-desc">Cold-work tool steel for dies, punches, and cutting tools. Round, square, and flat — rolled and forging sections.</p>
+              <div class="chem-row">
+                <div class="chem"><div class="num">6</div><div class="sym">C</div><div class="pct">0.65–0.75</div></div>
+                <div class="chem"><div class="num">25</div><div class="sym">Mn</div><div class="pct">0.40–0.60</div></div>
+                <div class="chem"><div class="num">14</div><div class="sym">Si</div><div class="pct">0.25–0.45</div></div>
+                <div class="chem"><div class="num">24</div><div class="sym">Cr</div><div class="pct">0.90–1.10</div></div>
+              </div>
+              <div class="product-meta">
+                <span class="chip">Round</span>
+                <span class="chip">Square</span>
+                <span class="chip">Flat</span>
+              </div>
+              <a class="product-link" href="stock.html?grade=WPS">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>MS / Bright</h3>
+                <span class="product-tag">Mild steel · fabrication</span>
+              </div>
+              <p class="product-desc">Bright and black mild steel for general fabrication. Round, square, hex, and flat — including centerless ground sizes.</p>
+              <div class="chem-row">
+                <div class="chem"><div class="num">6</div><div class="sym">C</div><div class="pct">0.16–0.23</div></div>
+                <div class="chem"><div class="num">25</div><div class="sym">Mn</div><div class="pct">0.35–0.80</div></div>
+                <div class="chem"><div class="num">14</div><div class="sym">Si</div><div class="pct">0.10–0.35</div></div>
+                <div class="chem"><div class="num">24</div><div class="sym">Cr</div><div class="pct">—</div></div>
+              </div>
+              <div class="product-meta">
+                <span class="chip">Bright Rod</span>
+                <span class="chip">Black Rod</span>
+                <span class="chip">Hex</span>
+                <span class="chip">Flat</span>
+              </div>
+              <a class="product-link" href="stock.html?grade=MS">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+          </div>
+
+          <div class="shop-panel" id="by-shape" role="tabpanel" hidden>
+            <article class="product-card">
+              <div class="product-top">
+                <h3>Round Bar</h3>
+                <span class="product-tag">Our deepest stock</span>
+              </div>
+              <p class="shape-range">Ø 4 – 450 mm</p>
+              <p class="product-desc">Rolled, bright, forging, imported, and centerless-ground rounds across EN-8, EN-9, EN-19, EN-24, 20MnCr5, EN-353, EN-31, WPS, and MS.</p>
+              <div class="product-meta">
+                <span class="chip">EN-8D</span>
+                <span class="chip">EN-19</span>
+                <span class="chip">EN-24</span>
+                <span class="chip">EN-31</span>
+                <span class="chip">WPS</span>
+                <span class="chip">MS</span>
+              </div>
+              <a class="product-link" href="stock.html?shape=Round%20Bar">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>Square Bar</h3>
+                <span class="product-tag">Side sizes in mm</span>
+              </div>
+              <p class="shape-range">8 – 155 mm</p>
+              <p class="product-desc">EN-8, WPS (D3), and MS Bright square bar — ready for machining and tooling work without the first squaring cut.</p>
+              <div class="product-meta">
+                <span class="chip">EN-8</span>
+                <span class="chip">WPS (D3)</span>
+                <span class="chip">MS Bright</span>
+              </div>
+              <a class="product-link" href="stock.html?shape=Square%20Bar">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>Flat Bar</h3>
+                <span class="product-tag">Thickness × width</span>
+              </div>
+              <p class="shape-range">5 × 16 up to heavy flats</p>
+              <p class="product-desc">EN-8 rolled, WPS rolled &amp; forging, MS Bright, and MS Black heavy flats — search by thickness and width.</p>
+              <div class="product-meta">
+                <span class="chip">EN-8</span>
+                <span class="chip">WPS</span>
+                <span class="chip">MS Bright</span>
+                <span class="chip">MS Black</span>
+              </div>
+              <a class="product-link" href="stock.html?shape=Flat%20Bar">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>Hex Bar</h3>
+                <span class="product-tag">MS Bright</span>
+              </div>
+              <p class="shape-range">AF 12 – 75 mm</p>
+              <p class="product-desc">Bright hexagon bar for fasteners, fittings, and machined components that skip the first indexing operation.</p>
+              <div class="product-meta">
+                <span class="chip">MS Bright</span>
+              </div>
+              <a class="product-link" href="stock.html?shape=Hex%20Bar">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>Non-Ferrous</h3>
+                <span class="product-tag">Brass · Copper · Al · SS</span>
+              </div>
+              <p class="shape-range">On enquiry</p>
+              <p class="product-desc">Brass, EC copper, aluminium HE30 / 6802, and stainless rods — SS 304/L, 316/L, 321, 410, 420, 430F, 431, 440C, 17-4-PH.</p>
+              <div class="product-meta">
+                <span class="chip">Brass</span>
+                <span class="chip">Copper</span>
+                <span class="chip">Aluminium</span>
+                <span class="chip">SS series</span>
+              </div>
+              <a class="product-link" href="stock.html?shape=Non-Ferrous">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="product-card">
+              <div class="product-top">
+                <h3>Also stocked</h3>
+                <span class="product-tag">Specialty grades</span>
+              </div>
+              <p class="shape-range">Round · forging</p>
+              <p class="product-desc">EN-9, EN-353, and 20MnCr5 for case-hardening and gear applications — rolled and forging diameters in the same search tool.</p>
+              <div class="product-meta">
+                <span class="chip">EN-9</span>
+                <span class="chip">EN-353</span>
+                <span class="chip">20MnCr5</span>
+              </div>
+              <a class="product-link" href="stock.html">Shop now <span aria-hidden="true">→</span></a>
+            </article>
+          </div>
         </div>
-        <div>
-          <span class="sm-lbl">SUB-TYPE</span>
-          <input id="ngSub" class="sm-in" type="text" placeholder="e.g. Rod" style="width:130px;">
-        </div>
-        <div>
-          <span class="sm-lbl" id="ngSizesHint">SIZES (comma separated)</span>
-          <input id="ngSizes" class="sm-in" type="text" placeholder="e.g. 16,20,25,32,40,50" style="width:240px;">
-        </div>
-        <button id="btnNgAdd" style="padding:10px 20px;background:#1B3A5C;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;">+ Add Grade</button>
       </div>
-      <div id="ngMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
-    </div>
+    </section>
 
-    <div class="sm-card">
-      <div class="sm-title">Rename a Grade</div>
-      <div class="sm-sub">Change the displayed grade name after it has been added. Shape, sub-type, sizes, and prices stay attached. Built-in grades are renamed as an overlay — the original catalog is not overwritten.</div>
-      <div class="sm-row">
-        <div class="sm-field">
-          <span class="sm-lbl">SELECT GRADE</span>
-          <select id="smGradeRename" class="sm-in" style="min-width:240px;cursor:pointer;"></select>
+    <section class="section nest" id="stock-engine">
+      <div class="wrap nest-grid">
+        <div class="nest-copy">
+          <p class="eyebrow">JK Stock Engine</p>
+          <h2>Every enquiry is a search. Ours run against live inventory.</h2>
+          <p>JK Stock takes your grade and size and reads it against our full catalog — round, square, hex, and flat — then surfaces exact matches, nearest sizes, and Rs/kg prices in one pass. Thousands of size rows. Dozens of grades. No phone-tag to find out if 63 mm EN-24 exists.</p>
+          <div class="feature-list">
+            <div class="feature">
+              <h3>Nearest size</h3>
+              <p>When the exact diameter isn’t on the floor, we show the sizes just below and above — so you can decide in seconds.</p>
+            </div>
+            <div class="feature">
+              <h3>Flat thickness × width</h3>
+              <p>Flat bar search understands both dimensions, including heavy MS Black and WPS forging flats.</p>
+            </div>
+            <div class="feature">
+              <h3>Live Rs/kg pricing</h3>
+              <p>Admin-managed prices per size, with CSV import/export — what you see in search is what the floor is quoting.</p>
+            </div>
+          </div>
         </div>
-        <div class="sm-field">
-          <span class="sm-lbl">NEW GRADE NAME</span>
-          <input id="smRenameTo" class="sm-in" type="text" placeholder="e.g. EN-36C" style="width:160px;">
+        <div class="nest-viz" aria-hidden="true">
+          <div class="viz-top">
+            <span>Inventory match</span>
+            <span class="viz-live">Live</span>
+          </div>
+          <div class="viz-bars">
+            <div class="viz-bar"><span>EN-24 Ø80</span><div class="track"><div class="fill"></div></div><span>Exact</span></div>
+            <div class="viz-bar"><span>EN-19 Ø100</span><div class="track"><div class="fill"></div></div><span>Exact</span></div>
+            <div class="viz-bar"><span>WPS flat</span><div class="track"><div class="fill"></div></div><span>Near</span></div>
+            <div class="viz-bar"><span>MS Hex 32</span><div class="track"><div class="fill"></div></div><span>Exact</span></div>
+          </div>
+          <div class="viz-stats">
+            <div class="viz-stat"><strong>450+</strong><span>Size rows</span></div>
+            <div class="viz-stat"><strong>&lt;1s</strong><span>Search</span></div>
+            <div class="viz-stat"><strong>5</strong><span>Shapes</span></div>
+          </div>
         </div>
-        <button id="btnSmRename" style="padding:10px 20px;height:44px;background:#C8960C;color:#0F2540;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;margin-top:20px;">Save Name</button>
       </div>
-      <div id="smRenameMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<div class="tp" id="p4">
-  <div class="awrap">
-    <div class="ahead"><div><h2>Chemical Composition</h2><p>View composition for individual grades or compare 2–3 grades side by side (C, Mn, Si, Cr, Ni, Mo percentage).</p></div></div>
-    <div class="sm-card">
-      <div class="sm-title">Individual Grade</div>
-      <select id="chemGrade" class="sm-in" style="min-width:240px;cursor:pointer;margin-bottom:14px;"></select>
-      <div id="chemIndividual" class="chem-wrap"></div>
-    </div>
-    <div class="sm-card">
-      <div class="sm-title">Compare Grades</div>
-      <div id="chemCheckboxes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px;"></div>
-      <button id="btnShowCompare" style="padding:10px 20px;background:#2E6DA4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;margin-bottom:14px;">Show Comparison</button>
-      <div id="chemCompare" style="overflow-x:auto;"></div>
-    </div>
-  </div>
-</div>
+    <section class="manifesto">
+      <div class="wrap">
+        <blockquote>Every machine in Gujarat starts with a bar of steel somebody waited too long for.</blockquote>
+        <p>The job shop in Makarpura. The OEM buyer juggling ten mills. The production manager who lost a shift over a late forging. We built Jagetiya Metals for them.</p>
+        <p class="punch">No mystery inventory. No three-day “let me check.” Just alloy &amp; tool steel — cut to size, from Vadodara stock.</p>
+      </div>
+    </section>
 
-<footer>JAGETIYA METALS | GST: 24AGIPS3207M1Z7 | Vadodara, Gujarat, India</footer>
+    <section class="section guides" id="guides">
+      <div class="wrap">
+        <p class="eyebrow">Featured guides</p>
+        <h2>Know the grade before you cut</h2>
+        <div class="guide-grid">
+          <a class="guide-card" href="stock.html#p4">
+            <h3>EN-8 vs EN-19</h3>
+            <p>When medium carbon is enough — and when you need chromoly.</p>
+          </a>
+          <a class="guide-card" href="stock.html#p4">
+            <h3>Chemical composition</h3>
+            <p>C, Mn, Si, Cr, Ni, Mo ranges for every stocked grade.</p>
+          </a>
+          <a class="guide-card" href="stock.html?shape=Flat%20Bar">
+            <h3>Reading flat sizes</h3>
+            <p>Thickness × width grids for EN-8, WPS, and MS flats.</p>
+          </a>
+          <a class="guide-card" href="stock.html?grade=WPS">
+            <h3>Tool steel basics</h3>
+            <p>WPS (D3) for dies, punches, and wear tooling.</p>
+          </a>
+        </div>
+      </div>
+    </section>
 
-<div class="pin-overlay" id="pin2Overlay">
-  <div class="pin-box">
-    <h2>Stock Manager</h2>
-    <p>Enter 4-digit PIN to manage stock sizes</p>
-    <div class="pin-dots">
-      <div class="pin-dot" id="p2d0"></div>
-      <div class="pin-dot" id="p2d1"></div>
-      <div class="pin-dot" id="p2d2"></div>
-      <div class="pin-dot" id="p2d3"></div>
-    </div>
-    <div class="pin-pad">
-      <button type="button" class="pin-key" data-k2="1">1</button>
-      <button type="button" class="pin-key" data-k2="2">2</button>
-      <button type="button" class="pin-key" data-k2="3">3</button>
-      <button type="button" class="pin-key" data-k2="4">4</button>
-      <button type="button" class="pin-key" data-k2="5">5</button>
-      <button type="button" class="pin-key" data-k2="6">6</button>
-      <button type="button" class="pin-key" data-k2="7">7</button>
-      <button type="button" class="pin-key" data-k2="8">8</button>
-      <button type="button" class="pin-key" data-k2="9">9</button>
-      <button type="button" class="pin-key wide" data-k2="0">0</button>
-      <button type="button" class="pin-key del" id="pin2Del">DEL</button>
-    </div>
-    <div class="pin-err" id="pin2Err"></div>
-    <div class="pin-hint">Stock Manager PIN: 2604</div>
-  </div>
-</div>
-<div class="pin-overlay" id="pinOverlay">
-  <div class="pin-box">
-    <h2>Admin Access</h2>
-    <p>Enter your 4-digit PIN to manage prices</p>
-    <div class="pin-dots">
-      <div class="pin-dot" id="pd0"></div>
-      <div class="pin-dot" id="pd1"></div>
-      <div class="pin-dot" id="pd2"></div>
-      <div class="pin-dot" id="pd3"></div>
-    </div>
-    <div class="pin-pad">
-      <button type="button" class="pin-key" data-k="1">1</button>
-      <button type="button" class="pin-key" data-k="2">2</button>
-      <button type="button" class="pin-key" data-k="3">3</button>
-      <button type="button" class="pin-key" data-k="4">4</button>
-      <button type="button" class="pin-key" data-k="5">5</button>
-      <button type="button" class="pin-key" data-k="6">6</button>
-      <button type="button" class="pin-key" data-k="7">7</button>
-      <button type="button" class="pin-key" data-k="8">8</button>
-      <button type="button" class="pin-key" data-k="9">9</button>
-      <button type="button" class="pin-key wide" data-k="0">0</button>
-      <button type="button" class="pin-key del" id="pinDel">DEL</button>
-    </div>
-    <div class="pin-err" id="pinErr"></div>
-    <div class="pin-hint">Default PIN: 1234 | Change in Admin settings</div>
-  </div>
-</div>
+    <section class="quote" id="quote">
+      <div class="wrap">
+        <div class="quote-box">
+          <div>
+            <p class="eyebrow">Instant stock check</p>
+            <h2>Your supplier takes three days. We take sixty seconds.</h2>
+            <p>Tell us the shape, grade, and size. JK Stock checks the catalog, finds exact or nearest sizes, and shows live Rs/kg pricing. Faster answers aren’t a promise — they’re the architecture.</p>
+            <a class="btn-primary" href="stock.html">Get Metal <span aria-hidden="true">→</span></a>
+          </div>
+          <form class="quote-side" id="quickSearch" action="stock.html" method="get">
+            <label for="qsShape">Shape</label>
+            <select id="qsShape" name="shape">
+              <option>Round Bar</option>
+              <option>Square Bar</option>
+              <option>Flat Bar</option>
+              <option>Hex Bar</option>
+              <option>Non-Ferrous</option>
+            </select>
+            <label for="qsGrade">Grade</label>
+            <input id="qsGrade" name="grade" type="text" placeholder="e.g. EN-24, WPS, MS" list="gradeList">
+            <datalist id="gradeList">
+              <option value="EN-8"></option>
+              <option value="EN-8D"></option>
+              <option value="EN-9"></option>
+              <option value="EN-19"></option>
+              <option value="EN-24"></option>
+              <option value="EN-31"></option>
+              <option value="EN-353"></option>
+              <option value="20MnCr5"></option>
+              <option value="WPS"></option>
+              <option value="MS"></option>
+              <option value="SS 304"></option>
+            </datalist>
+            <label for="qsSize">Size (mm)</label>
+            <input id="qsSize" name="size" type="number" min="1" max="600" step="0.1" placeholder="e.g. 25, 100">
+            <button class="btn-primary" type="submit">Search stock</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
 
-<script src="js/catalog.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/app.js"></script>
+  <footer class="site-footer" id="contact">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <strong>JAGETIYA METALS</strong>
+          <p>502/1-A G.I.D.C., Makarpura<br>Vadodara, Gujarat</p>
+          <p style="margin-top:0.75rem">Cuts and supplies across India</p>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#shop">Materials</a></li>
+            <li><a href="stock.html">Stock Search</a></li>
+            <li><a href="stock.html">Price Manager</a></li>
+            <li><a href="#guides">Guides</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <p><a href="mailto:Kamlesh@jkmetal.in">Kamlesh@jkmetal.in</a></p>
+          <p><a href="tel:+919824012344">+91-9824012344</a></p>
+          <p style="margin-top:0.75rem">GSTIN 24AGIPS3207M1Z7</p>
+          <p><a href="https://www.jkmetal.in" rel="noopener">www.jkmetal.in</a></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> Jagetiya Metals. Since 1990.</span>
+        <span>Premium alloy &amp; tool steel · Vadodara</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/marketing.js"></script>
 </body>
 </html>

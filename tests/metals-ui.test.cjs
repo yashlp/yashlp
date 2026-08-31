@@ -8,7 +8,8 @@ const fs = require("fs");
 const path = require("path");
 const http = require("http");
 const root = path.join(__dirname, "..", "public", "metals");
-const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const html = fs.readFileSync(path.join(root, "stock.html"), "utf8");
+const marketing = fs.readFileSync(path.join(root, "index.html"), "utf8");
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);
@@ -27,13 +28,28 @@ function structureTests() {
   assert(!html.includes("smAddSquareSide2"), "dead SIDE 2 field should be gone");
   assert(!html.includes("No password needed"), "PIN copy should not say no password");
   console.log("ok - html structure");
+
+  const mMust = [
+    "Shop steel by grade or shape",
+    "EN-8 / EN-8D",
+    "EN-19 (4140)",
+    "Round Bar",
+    "Flat Bar",
+    "stock.html",
+    "css/marketing.css",
+    "js/marketing.js",
+    "By grade",
+    "By shape",
+  ];
+  for (const s of mMust) assert(marketing.includes(s), "Marketing HTML missing: " + s);
+  console.log("ok - marketing html structure");
 }
 
 async function withServer(fn) {
   const types = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript" };
   const server = http.createServer((req, res) => {
     let p = decodeURIComponent((req.url || "/").split("?")[0]);
-    if (p === "/" || p === "/metals" || p === "/metals/") p = "/index.html";
+    if (p === "/" || p === "/metals" || p === "/metals/") p = "/stock.html";
     if (p.startsWith("/metals/")) p = p.slice("/metals".length);
     const file = path.normalize(path.join(root, p));
     if (!file.startsWith(root)) { res.writeHead(403); res.end(); return; }
@@ -64,7 +80,7 @@ async function playwrightTests(base) {
     return false;
   }
   const page = await browser.newPage();
-  await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
+  await page.goto(base + "/stock.html", { waitUntil: "domcontentloaded" });
   const title = await page.title();
   assert(title.includes("Jagetiya Metals"), "title");
 
