@@ -44,6 +44,9 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
           <Link href="/metals/materials">Materials</Link> / {grade.name}
         </p>
         <h1>{grade.name}</h1>
+        <p className="jk-lead" style={{ color: "#cfcfcf", marginTop: 8 }}>
+          {grade.headline}
+        </p>
         <p className="jk-lead">{grade.blurb}</p>
         <div className="jk-pills">
           {grade.chips.map((c) => (
