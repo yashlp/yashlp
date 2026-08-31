@@ -4,30 +4,20 @@ import { useState } from "react";
 import { GetMetalButton } from "./get-metal-button";
 import { GRADE_CARDS, SHAPE_CARDS, CONTACT } from "@/lib/metals/catalog-data";
 
-function ChemPills({ elements }: { elements: { num: number; symbol: string; value: string }[] }) {
-  return (
-    <div className="nox-chem-row">
-      {elements.map((el) => (
-        <div key={el.symbol} className="nox-chem-pill">
-          <span className="nox-chem-num">{el.num}</span>
-          <span className="nox-chem-sym">{el.symbol}</span>
-          <span className="nox-chem-val">{el.value}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function NoxCatalog() {
   const [tab, setTab] = useState<"grade" | "shape">("grade");
 
   return (
-    <section id="materials" className="nox-section">
+    <section id="products" className="nox-section">
       <div className="nox-container">
         <div className="nox-section-head">
           <div>
-            <p className="nox-eyebrow">Cut to size</p>
+            <p className="nox-eyebrow">Product list</p>
             <h2 className="nox-h2">Shop steel by grade or shape</h2>
+            <p className="nox-body" style={{ marginTop: "0.75rem", maxWidth: "36rem" }}>
+              Stocked grades and bar shapes from our Vadodara catalog. Select a product and tap Get
+              Metal to enquire.
+            </p>
           </div>
           <div className="nox-tabs" role="tablist" aria-label="Shop by">
             <button
@@ -67,7 +57,9 @@ export function NoxCatalog() {
                     </span>
                   ))}
                 </div>
-                <ChemPills elements={card.chemistry} />
+                <p className="nox-card-shapes">
+                  Shapes: {card.shapes.join(" · ")}
+                </p>
                 <div className="nox-card-actions">
                   <GetMetalButton
                     label="Get Metal"
@@ -110,8 +102,10 @@ export function NoxNav() {
           JAGETIYA METALS
         </a>
         <nav className="nox-nav-links">
-          <a href="#materials">Materials</a>
-          <a href="#instant-quote">Instant Quote</a>
+          <a href="#about">About</a>
+          <a href="#products">Products</a>
+          <a href="#chemistry">Chemistry</a>
+          <a href="#instant-quote">Enquire</a>
           <a href={`tel:${CONTACT.phone.replace(/[^+\d]/g, "")}`}>Contact</a>
         </nav>
         <GetMetalButton />
@@ -124,10 +118,11 @@ export function NoxHero() {
   return (
     <section className="nox-hero">
       <div className="nox-container">
-        <p className="nox-eyebrow">Vadodara, Gujarat</p>
-        <h1 className="nox-h1">Metal at the speed of software</h1>
+        <p className="nox-eyebrow">Vadodara, Gujarat · Since 1990</p>
+        <h1 className="nox-h1">Premium alloy &amp; carbon steel</h1>
         <p className="nox-hero-sub">
-          Alloy and carbon steel bars, cut to spec. Quotes in seconds, not days.
+          With over 30 years of industry leadership, Jagetiya Metals delivers top-tier steel
+          solutions — cut to spec, quoted in seconds.
         </p>
         <div className="nox-hero-cta">
           <GetMetalButton label="Get Metal Fast" size="large" />
@@ -166,23 +161,6 @@ export function NoxNestSection() {
   );
 }
 
-export function NoxMission() {
-  return (
-    <section className="nox-section">
-      <div className="nox-container">
-        <blockquote className="nox-quote">
-          Every machine in Gujarat starts with a bar of steel somebody waited too long for.
-        </blockquote>
-        <p className="nox-body max-w-2xl">
-          The tool shop in Makarpura. The fabrication buyer juggling ten suppliers. The production
-          manager who lost a contract over a late shipment. We built Jagetiya Metals for them. No
-          middlemen. No 3-week lead times. Just metal, cut to spec, shipped fast.
-        </p>
-      </div>
-    </section>
-  );
-}
-
 export function NoxInstantQuote() {
   return (
     <section id="instant-quote" className="nox-section nox-quote-section">
@@ -207,6 +185,9 @@ export function NoxFooter() {
       <div className="nox-container nox-footer-inner">
         <span className="nox-logo">JAGETIYA METALS</span>
         <div className="nox-footer-links">
+          <a href="#about">About</a>
+          <a href="#products">Products</a>
+          <a href="#chemistry">Chemistry</a>
           <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
           <a href={`tel:${CONTACT.phone.replace(/[^+\d]/g, "")}`}>{CONTACT.phone}</a>
         </div>

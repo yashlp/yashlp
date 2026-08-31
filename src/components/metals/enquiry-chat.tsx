@@ -4,14 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { MessageCircle, Send, X } from "lucide-react";
 import { useMetals } from "./metals-provider";
+import type { ChatMessage } from "@/lib/metals/enquiry";
 import {
-  type ChatMessage,
-  type ChatStep,
-  type ConfirmedOrder,
-  fieldForChangeReply,
-  nextStep,
-  stepPrompt,
-} from "@/lib/metals/enquiry";
+  completePayment,
+  createChatSession,
+  initialChatMessages,
+  processChatTurn,
+  type ChatSession,
+} from "@/lib/metals/chat-flow";
 import { estimatePriceInr, parseSizeMm } from "@/lib/metals/catalog-data";
 
 declare global {
@@ -35,22 +35,30 @@ function renderText(text: string) {
   ));
 }
 
+function estimateLine(order: ChatSession["order"]): string {
+  const est = estimatePriceInr({
+    grade: order.grade || "",
+    sizeMm: parseSizeMm(order.sizeMm || "0"),
+    lengthMm: parseFloat(order.lengthMm || "0"),
+    quantityPieces: parseFloat(order.quantityPieces || "0"),
+  });
+  return `Estimated total: ₹${est.toLocaleString("en-IN")} (excl. GST & freight).`;
+}
+
 export function EnquiryChat() {
   const { chatOpen, closeChat, confirmedOrder, setConfirmedOrder } = useMetals();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [step, setStep] = useState<ChatStep>("welcome");
+  const [session, setSession] = useState<ChatSession | null>(null);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
-  const [awaitingField, setAwaitingField] = useState<keyof ConfirmedOrder | null>(null);
+  const [busy, setBusy] = useState(false);
   const [razorpayKey, setRazorpayKey] = useState<string | null>(null);
   const [demoPay, setDemoPay] = useState(false);
   const [paying, setPaying] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const orderRef = useRef<Partial<ConfirmedOrder>>({});
-
-  useEffect(() => {
-    orderRef.current = { ...confirmedOrder };
-  }, [confirmedOrder]);
+  const wasOpenRef = useRef(false);
+  const orderRef = useRef(confirmedOrder);
+  orderRef.current = confirmedOrder;
 
   const pushAgent = useCallback((text: string, quickReplies?: string[]) => {
     setMessages((m) => [
@@ -63,27 +71,41 @@ export function EnquiryChat() {
     setMessages((m) => [...m, { id: uid(), role: "user", text, at: Date.now() }]);
   }, []);
 
-  const runAgentStep = useCallback(
-    async (s: ChatStep) => {
-      setTyping(true);
-      await new Promise((r) => setTimeout(r, 500));
-      const { text, quickReplies } = stepPrompt(s, orderRef.current);
-      pushAgent(text, quickReplies);
+  const deliverAgentReplies = useCallback(
+    async (replies: { text: string; quickReplies?: string[] }[]) => {
+      for (const reply of replies) {
+        setTyping(true);
+        await new Promise((r) => setTimeout(r, 400));
+        pushAgent(reply.text, reply.quickReplies);
+      }
       setTyping(false);
-      setStep(s);
     },
     [pushAgent]
   );
 
+  // Init chat only when panel opens (not when order fields update mid-chat)
   useEffect(() => {
-    if (!chatOpen) return;
+    const opening = chatOpen && !wasOpenRef.current;
+    wasOpenRef.current = chatOpen;
+
+    if (!opening) return;
+
+    const order = { ...orderRef.current };
+    const initial = createChatSession(order);
+    setSession(initial);
+    setInput("");
+    setBusy(false);
+    setPaying(false);
     setMessages([]);
-    setStep("welcome");
-    setAwaitingField(null);
-    orderRef.current = { ...confirmedOrder };
+
     void (async () => {
-      await runAgentStep("welcome");
-      await runAgentStep("confirm_grade");
+      setTyping(true);
+      await new Promise((r) => setTimeout(r, 300));
+      for (const reply of initialChatMessages(order)) {
+        pushAgent(reply.text, reply.quickReplies);
+        await new Promise((r) => setTimeout(r, 350));
+      }
+      setTyping(false);
     })();
 
     fetch("/api/metals/payment")
@@ -96,97 +118,55 @@ export function EnquiryChat() {
         setRazorpayKey(null);
         setDemoPay(true);
       });
-  }, [chatOpen, confirmedOrder, runAgentStep]);
+  }, [chatOpen, pushAgent]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
 
+  const activeQuickReplyMessageId = (() => {
+    if (typing || busy || paying || !session) return null;
+    if (session.step === "complete" || session.step === "payment") return null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m.role === "agent" && m.quickReplies?.length) return m.id;
+    }
+    return null;
+  })();
+
   const handleUserMessage = useCallback(
     async (text: string) => {
+      if (!session || busy || typing || paying) return;
       const trimmed = text.trim();
       if (!trimmed) return;
+
+      setBusy(true);
       pushUser(trimmed);
 
-      if (awaitingField) {
-        const patch = { [awaitingField]: trimmed };
-        orderRef.current = { ...orderRef.current, ...patch };
-        setConfirmedOrder(patch);
-        setAwaitingField(null);
-        const fieldStep = `confirm_${awaitingField.replace("Mm", "").replace("Kg", "")}` as ChatStep;
-        const confirmStep: ChatStep =
-          awaitingField === "sizeMm"
-            ? "confirm_size"
-            : awaitingField === "lengthMm"
-              ? "confirm_length"
-              : awaitingField === "quantityPieces"
-                ? "confirm_quantity"
-                : awaitingField === "grade"
-                  ? "confirm_grade"
-                  : awaitingField === "shape"
-                    ? "confirm_shape"
-                    : fieldStep;
-        await runAgentStep(confirmStep);
-        return;
+      const estimate =
+        session.step === "ask_email" ? estimateLine(session.order) : undefined;
+
+      const result = processChatTurn(session, trimmed, estimate);
+      setSession(result.session);
+      setConfirmedOrder(result.session.order);
+
+      if (result.agentReplies.length) {
+        await deliverAgentReplies(result.agentReplies);
       }
 
-      const changeField = fieldForChangeReply(trimmed);
-      if (changeField && trimmed.toLowerCase().includes("change")) {
-        setAwaitingField(changeField);
-        const labels: Record<string, string> = {
-          grade: "grade",
-          shape: "shape",
-          sizeMm: "size in mm",
-          lengthMm: "length in mm",
-          quantityPieces: "quantity (pieces)",
-        };
-        pushAgent(`What ${labels[changeField]} do you need?`);
-        return;
-      }
-
-      if (step === "ask_name") {
-        orderRef.current = { ...orderRef.current, name: trimmed };
-        setConfirmedOrder({ name: trimmed });
-        await runAgentStep("ask_phone");
-        return;
-      }
-      if (step === "ask_phone") {
-        orderRef.current = { ...orderRef.current, phone: trimmed };
-        setConfirmedOrder({ phone: trimmed });
-        await runAgentStep("ask_email");
-        return;
-      }
-      if (step === "ask_email") {
-        orderRef.current = { ...orderRef.current, email: trimmed };
-        setConfirmedOrder({ email: trimmed });
-        const o = orderRef.current;
-        const est = estimatePriceInr({
-          grade: o.grade || "",
-          sizeMm: parseSizeMm(o.sizeMm || "0"),
-          lengthMm: parseFloat(o.lengthMm || "0"),
-          quantityPieces: parseFloat(o.quantityPieces || "0"),
-        });
-        await runAgentStep("summary");
-        pushAgent(`Estimated total: ₹${est.toLocaleString("en-IN")} (excl. GST & freight).`);
-        return;
-      }
-
-      const following = nextStep(step, trimmed);
-      if (following === "payment" && step === "summary") {
-        await runAgentStep("payment");
-        return;
-      }
-      if (following !== step) {
-        await runAgentStep(following);
-      }
+      setBusy(false);
     },
-    [awaitingField, pushAgent, pushUser, runAgentStep, setConfirmedOrder, step]
+    [session, busy, typing, paying, pushUser, deliverAgentReplies, setConfirmedOrder]
   );
 
   async function handlePay() {
-    const o = orderRef.current;
+    if (!session || paying) return;
+    const o = session.order;
     if (!o.grade || !o.quantityPieces) return;
+
     setPaying(true);
+    pushUser("Pay now");
+
     const amount = estimatePriceInr({
       grade: o.grade,
       sizeMm: parseSizeMm(o.sizeMm || "0"),
@@ -198,17 +178,15 @@ export function EnquiryChat() {
       const res = await fetch("/api/metals/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amountInr: amount,
-          order: o,
-        }),
+        body: JSON.stringify({ amountInr: amount, order: o }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Payment failed");
 
       if (data.demo) {
-        pushUser("Pay now (demo)");
-        await runAgentStep("complete");
+        const done = completePayment(session);
+        setSession(done.session);
+        await deliverAgentReplies(done.agentReplies);
         setPaying(false);
         return;
       }
@@ -239,8 +217,9 @@ export function EnquiryChat() {
                 razorpaySignature: response.razorpay_signature,
               }),
             });
-            pushUser("Payment completed");
-            await runAgentStep("complete");
+            const done = completePayment(session);
+            setSession(done.session);
+            await deliverAgentReplies(done.agentReplies);
             resolve();
           },
           modal: { ondismiss: () => reject(new Error("cancelled")) },
@@ -249,15 +228,23 @@ export function EnquiryChat() {
         rzp.open();
       });
     } catch (err) {
-      pushAgent(err instanceof Error && err.message === "cancelled" ? "Payment cancelled — let me know when you're ready." : "Payment could not be completed. Try again or call us.");
+      pushAgent(
+        err instanceof Error && err.message === "cancelled"
+          ? "Payment cancelled — tap **Pay now** when you're ready."
+          : "Payment could not be completed. Try again or call us."
+      );
     } finally {
       setPaying(false);
     }
   }
 
-  if (!chatOpen) return null;
+  if (!chatOpen || !session) return null;
 
-  const showPay = step === "payment";
+  const showPay = session.step === "payment";
+  const showInput =
+    session.step !== "complete" &&
+    session.step !== "payment" &&
+    !session.awaitingField;
 
   return (
     <>
@@ -281,22 +268,25 @@ export function EnquiryChat() {
           {messages.map((msg) => (
             <div key={msg.id} className={`nox-chat-bubble nox-chat-${msg.role}`}>
               <p>{renderText(msg.text)}</p>
-              {msg.quickReplies && msg.role === "agent" && (
-                <div className="nox-quick-replies">
-                  {msg.quickReplies.map((q) => (
-                    <button
-                      key={q}
-                      type="button"
-                      onClick={() => {
-                        if (q === "Pay now") void handlePay();
-                        else void handleUserMessage(q);
-                      }}
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {msg.quickReplies &&
+                msg.role === "agent" &&
+                msg.id === activeQuickReplyMessageId && (
+                  <div className="nox-quick-replies">
+                    {msg.quickReplies.map((q) => (
+                      <button
+                        key={q}
+                        type="button"
+                        disabled={busy || typing}
+                        onClick={() => {
+                          if (q === "Pay now") void handlePay();
+                          else void handleUserMessage(q);
+                        }}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
             </div>
           ))}
           {typing && (
@@ -307,15 +297,20 @@ export function EnquiryChat() {
           <div ref={bottomRef} />
         </div>
 
-        {showPay && step === "payment" && (
+        {showPay && (
           <div className="nox-chat-pay">
-            <button type="button" className="nox-pay-btn" onClick={() => void handlePay()} disabled={paying}>
+            <button
+              type="button"
+              className="nox-pay-btn"
+              onClick={() => void handlePay()}
+              disabled={paying || busy}
+            >
               {paying ? "Processing…" : demoPay && !razorpayKey ? "Pay now (demo)" : "Pay with Razorpay"}
             </button>
           </div>
         )}
 
-        {step !== "complete" && step !== "payment" && (
+        {showInput && (
           <form
             className="nox-chat-input"
             onSubmit={(e) => {
@@ -328,10 +323,41 @@ export function EnquiryChat() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your reply…"
+              placeholder={
+                session.awaitingField
+                  ? "Type your answer…"
+                  : session.step.startsWith("confirm_")
+                    ? "Or type here…"
+                    : "Type your reply…"
+              }
+              disabled={busy || typing}
               aria-label="Chat message"
             />
-            <button type="submit" aria-label="Send">
+            <button type="submit" disabled={busy || typing} aria-label="Send">
+              <Send size={18} />
+            </button>
+          </form>
+        )}
+
+        {session.awaitingField && !typing && (
+          <form
+            className="nox-chat-input"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleUserMessage(input);
+              setInput("");
+            }}
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={`Enter ${session.awaitingField === "quantityPieces" ? "quantity" : session.awaitingField}…`}
+              disabled={busy || typing}
+              aria-label="Chat message"
+              autoFocus
+            />
+            <button type="submit" disabled={busy || typing} aria-label="Send">
               <Send size={18} />
             </button>
           </form>
@@ -341,7 +367,6 @@ export function EnquiryChat() {
   );
 }
 
-/** Floating chat launcher when panel is closed */
 export function ChatLauncher() {
   const { chatOpen, openChat } = useMetals();
   if (chatOpen) return null;
