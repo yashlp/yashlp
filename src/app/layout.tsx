@@ -84,9 +84,6 @@ const aestheticsMetadata: Metadata = {
 const buildDefaultMetadata = siteLooksLikeOnlyAesthetic() ? aestheticsMetadata : civicMetadata;
 
 export async function generateMetadata(): Promise<Metadata> {
-  if (siteLooksLikeOnlyAesthetic()) {
-    return aestheticsMetadata;
-  }
   const pathname = (await headers()).get("x-pathname") ?? "";
   if (pathname.startsWith("/metals")) {
     return {
@@ -97,6 +94,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Alloy steel, cut to spec. Quotes in seconds, not days. EN-8, EN-19, EN-24, 20MnCr5, EN-31, WPS (D3), mild steel, stainless, and non-ferrous from Vadodara.",
     };
+  }
+  if (siteLooksLikeOnlyAesthetic()) {
+    return aestheticsMetadata;
   }
   if (isCommercePlatformPath(pathname) || pathname.startsWith("/aesthetics")) {
     return aestheticsMetadata;

@@ -25,6 +25,7 @@ const logo = Orbitron({
 
 export const metadata: Metadata = {
   title: {
+    absolute: "Jagetiya Metals | Alloy Steel Cut to Size | Vadodara",
     default: "Jagetiya Metals | Alloy Steel Cut to Size | Vadodara",
     template: "%s | Jagetiya Metals",
   },
