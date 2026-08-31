@@ -1,0 +1,137 @@
+.metals-site {
+  --metals-bg: #000000;
+  --metals-surface: #0a0a0a;
+  --metals-border: #262626;
+  --metals-muted: #737373;
+  --metals-text: #fafafa;
+  --metals-accent: #c8960c;
+  --metals-accent-dim: rgba(200, 150, 12, 0.15);
+  background: var(--metals-bg);
+  color: var(--metals-text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.metals-site * {
+  box-sizing: border-box;
+}
+
+.metals-grain {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.metals-card {
+  border: 1px solid var(--metals-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.metals-card:hover {
+  border-color: #404040;
+  transform: translateY(-2px);
+}
+
+.metals-tab-active {
+  background: #171717;
+  color: #fff;
+}
+
+.metals-chem-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--metals-border);
+  border-radius: 8px;
+  min-width: 64px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.metals-chem-pill .symbol {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--metals-muted);
+  letter-spacing: 0.05em;
+}
+
+.metals-chem-pill .value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--metals-text);
+}
+
+.metals-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--metals-muted);
+  border: 1px solid var(--metals-border);
+  border-radius: 4px;
+}
+
+.metals-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.metals-btn-primary:hover {
+  background: #e5e5e5;
+}
+
+.metals-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid var(--metals-border);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.metals-btn-ghost:hover {
+  border-color: #525252;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.metals-news-ticker {
+  background: var(--metals-accent-dim);
+  border-bottom: 1px solid rgba(200, 150, 12, 0.25);
+}
+
+@keyframes metals-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metals-animate-in {
+  animation: metals-fade-up 0.6s ease forwards;
+}
