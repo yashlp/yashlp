@@ -110,6 +110,8 @@ export function middleware(request: NextRequest) {
     // Any other non-store path → store home (keeps CivicLens pages unreachable)
     const allowed =
       path.startsWith("/aesthetics") ||
+      path.startsWith("/metals") ||
+      path.startsWith("/api/metals") ||
       path.startsWith("/admin") ||
       path.startsWith("/api/commerce") ||
       path.startsWith("/api/admin") ||

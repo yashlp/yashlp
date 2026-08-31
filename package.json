@@ -12,6 +12,7 @@
     "vercel-build": "bash scripts/vercel-build.sh",
     "start": "next start",
     "lint": "next lint",
+    "test:metals": "tsx src/lib/metals/quote.test.ts",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-commerce": "tsx prisma/seed-commerce.ts",

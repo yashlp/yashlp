@@ -80,6 +80,11 @@ const nextConfig: NextConfig = {
         destination: "/admin/:path*",
         permanent: true,
       },
+      {
+        source: "/metals/index.html",
+        destination: "/metals",
+        permanent: false,
+      },
     ];
   },
   async headers() {
