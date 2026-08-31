@@ -74,13 +74,16 @@
   user-select: none;
 }
 
-.jk-btn-primary {
+.jk-btn-primary,
+.metals-root a.jk-btn-primary {
   background: #fff;
   color: #0a0a0a;
 }
 
-.jk-btn-primary:hover {
+.jk-btn-primary:hover,
+.metals-root a.jk-btn-primary:hover {
   background: #e5e5e5;
+  color: #0a0a0a;
 }
 
 .jk-btn-ghost {
@@ -158,7 +161,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 280px;
+  min-height: 300px;
   background: #cfc8bc;
   color: #111;
   overflow: hidden;
@@ -247,10 +250,11 @@
 }
 
 .jk-bar-art {
-  width: 58%;
-  margin: 2rem auto 0.5rem;
-  flex: 1;
-  min-height: 120px;
+  width: 70%;
+  max-width: 180px;
+  height: 140px;
+  margin: 2.25rem auto 0.25rem;
+  flex: 1 1 auto;
 }
 
 .jk-table {

@@ -47,6 +47,7 @@ function testMissingSizeSuggestsNearest() {
     dims: { diameterMm: 27, lengthMm: 1000, qty: 1 },
   });
   assert.ok(result);
+  assert.equal(result.inStock, false);
   const withNearest = result.matches.find((m) => m.nearest && (m.nearest.below.length || m.nearest.above.length));
   assert.ok(withNearest, "expected nearest sizes");
   assert.ok(withNearest!.nearest!.below.includes(25) || withNearest!.nearest!.above.includes(28));

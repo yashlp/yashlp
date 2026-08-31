@@ -221,16 +221,17 @@ export function QuoteForm() {
                       {q && (
                         <p className="mt-1 text-[11px] text-neutral-500">
                           {q.inStock ? "In stock" : "Confirm size"} · {formatKg(q.weightEachKg)}
-                          {q.matches
-                            .filter((m) => !m.exact && m.nearest)
-                            .slice(0, 1)
-                            .map((m) => {
-                              const n = [...(m.nearest?.below ?? []), ...(m.nearest?.above ?? [])]
-                                .slice(0, 4)
-                                .map(trimNum)
-                                .join(", ");
-                              return n ? ` · nearest ${n}` : "";
-                            })}
+                          {!q.inStock &&
+                            q.matches
+                              .filter((m) => m.nearest && (m.nearest.below.length || m.nearest.above.length))
+                              .slice(0, 1)
+                              .map((m) => {
+                                const n = [...(m.nearest?.below ?? []), ...(m.nearest?.above ?? [])]
+                                  .slice(0, 4)
+                                  .map(trimNum)
+                                  .join(", ");
+                                return n ? ` · nearest ${n}` : "";
+                              })}
                         </p>
                       )}
                     </td>
