@@ -122,13 +122,13 @@ body:has(.jk-root) {
 }
 
 .jk-hero {
-  padding: 88px 24px 48px;
+  padding: 64px 24px 36px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .jk-hero h1 {
-  font-size: clamp(48px, 9vw, 104px);
+  font-size: clamp(44px, 8vw, 92px);
   line-height: 0.95;
   letter-spacing: -0.04em;
   font-weight: 500;
