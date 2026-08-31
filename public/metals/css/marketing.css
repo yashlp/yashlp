@@ -244,9 +244,9 @@ button {
   inset: 0;
   z-index: -2;
   background:
-    linear-gradient(180deg, rgba(7, 8, 7, 0.35) 0%, rgba(7, 8, 7, 0.55) 40%, rgba(7, 8, 7, 0.96) 100%),
-    linear-gradient(90deg, rgba(7, 8, 7, 0.75) 0%, rgba(7, 8, 7, 0.2) 55%, rgba(7, 8, 7, 0.55) 100%),
-    url("img/hero-steel.jpg")
+    linear-gradient(180deg, rgba(7, 8, 7, 0.25) 0%, rgba(7, 8, 7, 0.45) 45%, rgba(7, 8, 7, 0.92) 100%),
+    linear-gradient(90deg, rgba(7, 8, 7, 0.55) 0%, rgba(7, 8, 7, 0.15) 55%, rgba(7, 8, 7, 0.4) 100%),
+    url("../img/hero-steel.jpg")
       center / cover no-repeat;
   transform: scale(1.04);
   animation: heroDrift 18s ease-in-out infinite alternate;
