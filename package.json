@@ -22,6 +22,7 @@
     "db:go-live": "tsx scripts/go-live.ts",
     "db:setup": "prisma db push && tsx prisma/seed.ts",
     "db:setup-commerce": "prisma db push && tsx prisma/seed-commerce.ts",
+    "test:metals": "tsx scripts/test-metals-catalog.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

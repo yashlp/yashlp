@@ -88,6 +88,16 @@ export async function generateMetadata(): Promise<Metadata> {
     return aestheticsMetadata;
   }
   const pathname = (await headers()).get("x-pathname") ?? "";
+  if (pathname.startsWith("/metals")) {
+    return {
+      title: {
+        default: "Jagetiya Metals | Alloy Steel Cut to Size | Vadodara",
+        template: "%s | Jagetiya Metals",
+      },
+      description:
+        "EN-8, EN-19 (4140), EN-24, WPS D3, stainless, brass, copper, and aluminium cut to size from Vadodara.",
+    };
+  }
   if (isCommercePlatformPath(pathname) || pathname.startsWith("/aesthetics")) {
     return aestheticsMetadata;
   }

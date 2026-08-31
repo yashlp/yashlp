@@ -111,6 +111,7 @@ export function middleware(request: NextRequest) {
     const allowed =
       path.startsWith("/aesthetics") ||
       path.startsWith("/admin") ||
+      path.startsWith("/metals") ||
       path.startsWith("/api/commerce") ||
       path.startsWith("/api/admin") ||
       path.startsWith("/seller") ||

@@ -71,6 +71,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/metals/index.html",
+        destination: "/metals",
+        permanent: false,
+      },
+      {
         source: "/platform-admin",
         destination: "/admin/login",
         permanent: true,

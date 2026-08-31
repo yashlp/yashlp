@@ -19,6 +19,7 @@ export async function RootShell({ children }: { children: React.ReactNode }) {
     isCommercePlatformPath(pathname) ||
     pathname.startsWith("/aesthetics") ||
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/metals") ||
     pathname.startsWith("/api/commerce") ||
     pathname.startsWith("/api/admin") ||
     pathname.startsWith("/seller")
