@@ -11,6 +11,10 @@ Usage:
 
 Daily adjustment: each grade sheet has a yellow cell at I3. Selling Price is
 Base Price + $I$3, so typing 1 adds Rs 1 to every size without changing bases.
+
+Add Size: each grade sheet has a corner inbox (shape + SIZE / THICKNESS / WIDTH).
+UNIQUE/VSTACK/FILTER unions the catalog with the inbox so a new size appears in
+the list; duplicates (25 vs 25.0, 6x25 vs 6 x 25) are skipped.
 """
 from __future__ import annotations
 
@@ -26,6 +30,7 @@ from openpyxl.comments import Comment
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Protection, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook.defined_name import DefinedName
+from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.page import PageMargins
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -44,6 +49,9 @@ ROW_ALT = "FFF8E7"
 LINK_BLUE = "1B3A5C"
 MUTED = "5A6A7A"
 GREEN = "1A5C32"
+MINT = "E8F6EF"
+MINT_INPUT = "F4FCF8"
+SKY = "D6EAF8"
 
 ADJ_CELL = "I3"
 ADJ_ABS = "$I$3"
@@ -51,6 +59,17 @@ HEADER_ROW = 5
 FIRST_DATA_ROW = 6
 PRODUCTS_SHEET = "Products"
 EXAMPLE_BASES = {16: 72.00, 18: 71.50}  # first grade sheet only
+EXTRA_SIZE_ROWS = 20
+STAGING_FIRST_ROW = 7
+STAGING_LAST_ROW = 26  # 20 optional extra size slots (L7:L26)
+ADD_SHAPE_CELL = "M2"
+ADD_SIZE_CELL = "M3"
+ADD_TH_CELL = "M4"
+ADD_W_CELL = "O4"
+ADD_STATUS_CELL = "M5"
+ADD_KEY_CELL = "P2"
+SHAPE_CHOICES = ("Round Bar", "Square Bar", "Hex Bar", "Flat Bar", "Non-Ferrous")
+SHAPES_1D = ("Round Bar", "Hex Bar", "Non-Ferrous")
 
 SHAPE_ABBR = {
     "Round Bar": "RB",
@@ -94,6 +113,12 @@ THICK_GOLD = Border(
     top=Side(style="medium", color=GOLD),
     bottom=Side(style="medium", color=GOLD),
 )
+THICK_GREEN = Border(
+    left=Side(style="medium", color=GREEN),
+    right=Side(style="medium", color=GREEN),
+    top=Side(style="medium", color=GREEN),
+    bottom=Side(style="medium", color=GREEN),
+)
 NAVY_FILL = PatternFill("solid", fgColor=NAVY)
 GOLD_FILL = PatternFill("solid", fgColor=GOLD)
 CREAM_FILL = PatternFill("solid", fgColor=CREAM)
@@ -102,6 +127,10 @@ PALE_FILL = PatternFill("solid", fgColor=PALE)
 ALT_FILL = PatternFill("solid", fgColor=ROW_ALT)
 WHITE_FILL = PatternFill("solid", fgColor=WHITE)
 HEADER_FILL = PatternFill("solid", fgColor="1B3A5C")
+MINT_FILL = PatternFill("solid", fgColor=MINT)
+MINT_INPUT_FILL = PatternFill("solid", fgColor=MINT_INPUT)
+SKY_FILL = PatternFill("solid", fgColor=SKY)
+GREEN_FILL = PatternFill("solid", fgColor=GREEN)
 
 TITLE_FONT = Font(name="Calibri", size=18, bold=True, color=WHITE)
 COMPANY_FONT = Font(name="Calibri", size=11, bold=True, color=GOLD)
@@ -125,6 +154,152 @@ def fmt_num(n) -> str:
     if abs(n - int(n)) < 1e-9:
         return str(int(n))
     return ("%g" % n)
+
+
+def _as_number(value):
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    text = str(value).strip().replace(" ", "").replace("×", "x")
+    if not text:
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def _compact_number(value):
+    number = _as_number(value)
+    if number is None:
+        return None
+    if abs(number - int(number)) < 1e-9:
+        return int(number)
+    return number
+
+
+def normalize_existing_key(value):
+    """Canonical form for duplicate checks: 25 == 25.0, '6x25' == '6 x 25'."""
+    if value is None or value == "":
+        return None
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return _compact_number(value)
+    text = str(value).strip().replace(" ", "").replace("×", "x").replace("X", "x")
+    if not text:
+        return None
+    if "x" in text:
+        left, _, right = text.partition("x")
+        a, b = _compact_number(left), _compact_number(right)
+        if a is None or b is None:
+            return text
+        return "%sx%s" % (fmt_num(a), fmt_num(b))
+    return _compact_number(text) if _as_number(text) is not None else text
+
+
+def canonical_size_key(shape, size=None, thickness=None, width=None):
+    """Size key produced by the Add Size inbox for the selected shape, or None."""
+    shape = (shape or "").strip()
+    size_n = _compact_number(size)
+    th_n = _compact_number(thickness)
+    w_n = _compact_number(width)
+    if shape == "Flat Bar":
+        if th_n is None or w_n is None:
+            return None
+        return "%sx%s" % (fmt_num(th_n), fmt_num(w_n))
+    if shape == "Square Bar":
+        if th_n is None:
+            return None
+        if w_n is None:
+            return th_n
+        return "%sx%s" % (fmt_num(th_n), fmt_num(w_n))
+    if shape in SHAPES_1D:
+        return size_n
+    return None
+
+
+def inbox_status(existing_keys, new_key):
+    if new_key is None or new_key == "":
+        return "Fill the fields for this shape"
+    new_n = normalize_existing_key(new_key)
+    for key in existing_keys:
+        if normalize_existing_key(key) == new_n:
+            return "Already added — skipped"
+    return "Added"
+
+
+def unique_size_list(catalog_keys, inbox_keys):
+    """Catalog-first UNIQUE union used by extra rows (skip blanks and duplicates)."""
+    out = []
+    seen = set()
+    for key in list(catalog_keys) + list(inbox_keys):
+        norm = normalize_existing_key(key)
+        if norm is None or norm == "":
+            continue
+        if norm in seen:
+            continue
+        seen.add(norm)
+        out.append(norm)
+    return out
+
+
+def new_sizes_only(catalog_keys, inbox_keys):
+    catalog_norm = {normalize_existing_key(k) for k in catalog_keys}
+    catalog_norm.discard(None)
+    catalog_norm.discard("")
+    return [k for k in unique_size_list(catalog_keys, inbox_keys) if k not in catalog_norm]
+
+
+def extra_size_formula(index: int, cat_ref: str) -> str:
+    """1-based INDEX into UNIQUE(VSTACK(catalog, inbox)) minus catalog (Excel 365 / Sheets)."""
+    let_expr = (
+        "LET(cat,%s,box,VSTACK($P$2,$L$7:$L$26),"
+        "live,UNIQUE(FILTER(VSTACK(cat,box),VSTACK(cat,box)<>\"\")),"
+        "FILTER(live,COUNTIF(cat,live)=0))"
+    ) % cat_ref
+    return "=IFERROR(INDEX(%s,%d),\"\")" % (let_expr, index)
+
+
+def extra_flat_part_formula(index: int, cat_ref: str, part: str) -> str:
+    """Parse TxW key from the UNIQUE new-size list into thickness or width."""
+    news = (
+        "LET(cat,%s,box,VSTACK($P$2,$L$7:$L$26),"
+        "live,UNIQUE(FILTER(VSTACK(cat,box),VSTACK(cat,box)<>\"\")),"
+        "FILTER(live,COUNTIF(cat,live)=0))"
+    ) % cat_ref
+    if part == "th":
+        extract = "IFERROR(VALUE(LEFT(t,FIND(\"x\",t)-1)),\"\")"
+    elif part == "w":
+        extract = "IFERROR(VALUE(MID(t,FIND(\"x\",t)+1,32)),\"\")"
+    else:
+        extract = "k"
+    return (
+        "=LET(k,IFERROR(INDEX(%s,%d),\"\"),t,SUBSTITUTE(SUBSTITUTE(TRIM(k&\"\"),\" \",\"\"),\"×\",\"x\"),"
+        "IF(OR(k=\"\",ISNUMBER(k)),\"\",%s))"
+    ) % (news, index, extract)
+
+
+def size_key_formula() -> str:
+    n_m4 = "IF(ISNUMBER($M$4),$M$4,VALUE($M$4))"
+    n_o4 = "IF(ISNUMBER($O$4),$O$4,VALUE($O$4))"
+    n_m3 = "IF(ISNUMBER($M$3),$M$3,VALUE($M$3))"
+    tw = "TEXT(%s,\"0.######\")&\"x\"&TEXT(%s,\"0.######\")" % (n_m4, n_o4)
+    return (
+        "=IFERROR(IF($M$2=\"Flat Bar\",IF(OR($M$4=\"\",$O$4=\"\"),\"\",%s),"
+        "IF($M$2=\"Square Bar\",IF($M$4=\"\",\"\",IF($O$4=\"\",%s,%s)),"
+        "IF(OR($M$2=\"Round Bar\",$M$2=\"Hex Bar\",$M$2=\"Non-Ferrous\"),"
+        "IF($M$3=\"\",\"\",%s),\"\"))),\"\")"
+    ) % (tw, n_m4, tw, n_m3)
+
+
+def status_formula(cat_ref: str) -> str:
+    return (
+        "=IF($P$2=\"\",\"Fill the fields for this shape\","
+        "IF(OR(COUNTIF(%s,$P$2)>0,COUNTIF($L$7:$L$26,$P$2)>0),"
+        "\"Already added — skipped\",\"Added\"))"
+    ) % cat_ref
 
 
 def quote_sheet(name: str) -> str:
@@ -345,6 +520,126 @@ def add_adjustment_box(ws: Worksheet):
     ws["I3"].number_format = "0.00"
 
 
+def add_size_box(ws: Worksheet, entry: dict, cat_ref: str):
+    """Green Add Size inbox to the right of Daily Adjustment (visible in frozen rows 1–5)."""
+    title_font = Font(name="Calibri", size=11, bold=True, color=WHITE)
+    hint_font = Font(name="Calibri", size=8, color=NAVY)
+    status_font = Font(name="Calibri", size=10, bold=True, color=GREEN)
+
+    merge_fill(ws, 1, 12, 1, 15, GREEN_FILL, title_font, CENTER)
+    ws.cell(row=1, column=12).value = "ADD SIZE"
+    ws.cell(row=1, column=12).comment = Comment(
+        "Press Enter after filling dimensions; the size appears in this sheet's list if it is new.\n"
+        "Round / Hex / Non-Ferrous: SIZE (mm) only.\n"
+        "Square: THICKNESS (Side) and optional WIDTH. Blank width adds the Side; both add TxW.\n"
+        "Flat: THICKNESS and WIDTH required (6 and 25 → 6x25).\n"
+        "Duplicates are skipped (25 = 25.0, 6x25 = 6 x 25).",
+        "Jagetiya Metals",
+    )
+
+    apply_cell(ws, 2, 12, "Shape", font=ADJ_LABEL_FONT, fill=MINT_FILL, alignment=RIGHT)
+    apply_cell(
+        ws, 2, 13, entry["shape"],
+        font=ADJ_LABEL_FONT, fill=MINT_INPUT_FILL, alignment=CENTER, border=THICK_GREEN,
+        comment=Comment(
+            "Defaults to this grade's shape. Changing it only changes which dimension fields apply on THIS sheet.",
+            "Jagetiya Metals",
+        ),
+    )
+    merge_fill(ws, 2, 14, 2, 15, MINT_FILL, hint_font, CENTER)
+    ws.cell(row=2, column=14).value = "This sheet only — shape pick changes which fields to fill."
+
+    apply_cell(ws, 3, 12, "SIZE (mm)", font=ADJ_LABEL_FONT, fill=MINT_FILL, alignment=RIGHT)
+    apply_cell(
+        ws, 3, 13, None,
+        font=ADJ_INPUT_FONT, fill=WHITE_FILL, alignment=CENTER, border=THICK_GREEN,
+        comment=Comment("Round / Hex / Non-Ferrous: type SIZE (mm) and press Enter.", "Jagetiya Metals"),
+    )
+    merge_fill(ws, 3, 14, 3, 15, MINT_FILL, hint_font, LEFT)
+    ws.cell(row=3, column=14).value = (
+        '=IF(OR($M$2="Round Bar",$M$2="Hex Bar",$M$2="Non-Ferrous"),'
+        '"1D: fill SIZE only, then press Enter.",'
+        '"Leave SIZE blank — use Thickness and Width.")'
+    )
+
+    apply_cell(ws, 4, 12, "THICKNESS (mm)", font=ADJ_LABEL_FONT, fill=MINT_FILL, alignment=RIGHT)
+    apply_cell(
+        ws, 4, 13, None,
+        font=ADJ_INPUT_FONT, fill=WHITE_FILL, alignment=CENTER, border=THICK_GREEN,
+        comment=Comment(
+            "Square: Thickness is the Side if Width is blank. Flat: required with Width.",
+            "Jagetiya Metals",
+        ),
+    )
+    apply_cell(ws, 4, 14, "WIDTH (mm)", font=ADJ_LABEL_FONT, fill=MINT_FILL, alignment=RIGHT)
+    apply_cell(
+        ws, 4, 15, None,
+        font=ADJ_INPUT_FONT, fill=WHITE_FILL, alignment=CENTER, border=THICK_GREEN,
+        comment=Comment(
+            "Square: optional (blank = Side only; both = TxW). Flat: required, e.g. 6 and 25 → 6x25.",
+            "Jagetiya Metals",
+        ),
+    )
+
+    apply_cell(ws, 5, 12, "Status", font=ADJ_LABEL_FONT, fill=MINT_FILL, alignment=RIGHT)
+    merge_fill(ws, 5, 13, 5, 15, MINT_FILL, status_font, CENTER)
+    ws.cell(row=5, column=13).value = status_formula(cat_ref)
+
+    apply_cell(
+        ws, 1, 16, "Size key (auto)",
+        font=Font(name="Calibri", size=8, bold=True, color=WHITE),
+        fill=GREEN_FILL, alignment=CENTER,
+    )
+    apply_cell(
+        ws, 2, 16, size_key_formula(),
+        font=ADJ_LABEL_FONT, fill=MINT_INPUT_FILL, alignment=CENTER, border=THICK_GREEN,
+    )
+    merge_fill(ws, 3, 16, 5, 16, MINT_FILL, Font(name="Calibri", size=8, italic=True, color=NAVY), CENTER)
+    ws.cell(row=3, column=16).value = (
+        "Press Enter after filling dimensions; the size appears in the list if it is new."
+    )
+
+    for r in range(1, 6):
+        for c in range(12, 17):
+            cell = ws.cell(row=r, column=c)
+            cell.protection = UNLOCKED
+            if c < 16 and r in (1, 5):
+                cell.border = THICK_GREEN
+    for addr in (ADD_SHAPE_CELL, ADD_SIZE_CELL, ADD_TH_CELL, ADD_W_CELL, ADD_KEY_CELL):
+        ws[addr].border = THICK_GREEN
+        ws[addr].protection = UNLOCKED
+    ws[ADD_SIZE_CELL].fill = WHITE_FILL
+    ws[ADD_TH_CELL].fill = WHITE_FILL
+    ws[ADD_W_CELL].fill = WHITE_FILL
+    ws[ADD_SHAPE_CELL].fill = MINT_INPUT_FILL
+    ws[ADD_KEY_CELL].fill = MINT_INPUT_FILL
+
+    dv = DataValidation(
+        type="list",
+        formula1='"%s"' % ",".join(SHAPE_CHOICES),
+        allow_blank=False,
+        showDropDown=False,
+        showErrorMessage=True,
+        errorTitle="Shape",
+        error="Choose Round Bar, Square Bar, Hex Bar, Flat Bar, or Non-Ferrous.",
+        promptTitle="Shape",
+        prompt="Select the shape for the new size on this sheet.",
+        showInputMessage=True,
+    )
+    dv.add(ADD_SHAPE_CELL)
+    ws.add_data_validation(dv)
+
+    merge_fill(ws, 6, 12, 6, 15, GREEN_FILL, Font(name="Calibri", size=9, bold=True, color=WHITE), LEFT)
+    ws.cell(row=6, column=12).value = "More sizes (optional) — type 25 or 6x25, one per row"
+    for r in range(STAGING_FIRST_ROW, STAGING_LAST_ROW + 1):
+        apply_cell(ws, r, 12, None, font=BODY_FONT, fill=MINT_INPUT_FILL, alignment=CENTER, border=THIN)
+    apply_cell(
+        ws, STAGING_FIRST_ROW, 13,
+        "UNIQUE skips duplicates (25 = 25.0, 6x25 = 6 x 25)",
+        font=MUTED_FONT, fill=MINT_FILL, alignment=LEFT,
+    )
+
+
 def add_products_sheet(wb: Workbook, entries: list[dict]):
     ws = wb.active
     ws.title = PRODUCTS_SHEET
@@ -380,6 +675,8 @@ def add_products_sheet(wb: Workbook, entries: list[dict]):
         "4. Type 1 to add Rs 1/kg to every size. Type -2 to reduce Rs 2/kg. Leave 0 for no change.",
         "5. Edit Base Price anytime — that is the stored rate. Daily Adjustment never overwrites it, and does not compound.",
         "6. Each grade has its own box so different grades can move independently. The yellow box on this sheet is only a copy-from hint.",
+        "7. To add a size: use the green Add Size box (beside Daily Adjustment). Pick the shape, fill SIZE (Round/Hex) or THICKNESS and WIDTH (Square/Flat), press Enter.",
+        "8. The size appears in that sheet's list if it is new. Duplicates are skipped (25 = 25.0, 6x25 = 6 x 25). Status shows Added vs Already added — skipped.",
     ]
     for i, line in enumerate(instructions):
         r = 5 + i
@@ -410,13 +707,13 @@ def add_products_sheet(wb: Workbook, entries: list[dict]):
             ws.cell(row=r, column=c).border = THICK_GOLD
             ws.cell(row=r, column=c).protection = UNLOCKED
 
-    header_row = 13
+    header_row = 15
     headers = ["#", "Grade", "Shape", "Sub-type", "Make / notes", "Sheet name", "Size count", "Kind"]
     for c, h in enumerate(headers, 1):
         apply_cell(ws, header_row, c, h, font=COL_FONT, fill=HEADER_FILL, alignment=CENTER, border=THIN)
     ws.row_dimensions[header_row].height = 22
     ws.auto_filter.ref = "A%d:H%d" % (header_row, header_row + len(entries))
-    ws.freeze_panes = "A14"
+    ws.freeze_panes = "A16"
 
     for i, e in enumerate(entries, 1):
         r = header_row + i
@@ -440,8 +737,8 @@ def add_products_sheet(wb: Workbook, entries: list[dict]):
     ws.cell(row=note_r, column=1).value = (
         "Regenerate this file from the catalog:  python3 scripts/generate_metals_price_workbook.py"
     )
-    page_setup(ws, freeze="A14")
-    ws.print_title_rows = "1:13"
+    page_setup(ws, freeze="A16")
+    ws.print_title_rows = "1:15"
     unlock_sheet(ws, note_r + 2, 12)
     ws.protection.sheet = False
 
@@ -452,7 +749,7 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
     ws.sheet_properties.tabColor = SHAPE_TAB.get(entry["shape"], NAVY)
     kind = classify(entry)
 
-    # column widths
+    extra_widths = {11: 3, 12: 22, 13: 16, 14: 16, 15: 14, 16: 18}
     if kind == "flat":
         widths = [16, 14, 14, 20, 14, 22, 36, 18, 14, 14]
         headers = [
@@ -464,6 +761,7 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
         sell_col = 6
         notes_col = 7
         last_table_col = 7
+        size_col_letter = "C"
     else:
         widths = [16, 20, 14, 22, 40, 12, 12, 18, 14, 14]
         headers = [
@@ -474,10 +772,12 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
         sell_col = 4
         notes_col = 5
         last_table_col = 5
+        size_col_letter = "A"
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
+    for col_idx, w in extra_widths.items():
+        ws.column_dimensions[get_column_letter(col_idx)].width = w
 
-    # Header band
     merge_fill(ws, 1, 1, 1, last_table_col, NAVY_FILL, Font(name="Calibri", size=11, bold=True, color=GOLD), LEFT)
     ws.cell(row=1, column=1).value = "JAGETIYA METALS  ·  +91-9824012344  ·  Kamlesh@jkmetal.in  ·  GST 24AGIPS3207M1Z7"
     ws.row_dimensions[1].height = 20
@@ -486,7 +786,7 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
     ws.cell(row=2, column=1).value = entry["grade"]
     ws.row_dimensions[2].height = 28
 
-    make = entry["make"] or ("Note-only grade — add sizes in the rows below" if kind == "note" else "—")
+    make = entry["make"] or ("Note-only grade — add sizes with the green Add Size box" if kind == "note" else "—")
     merge_fill(ws, 3, 1, 3, last_table_col, CREAM_FILL, BODY_FONT, LEFT)
     ws.cell(row=3, column=1).value = "Shape: %s    ·    Sub-type: %s    ·    Make / notes: %s" % (
         entry["shape"], entry["subtype"], make,
@@ -500,22 +800,27 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
     back.hyperlink = "#%s!A1" % quote_sheet(PRODUCTS_SHEET)
     if kind == "note":
         merge_fill(ws, 4, 2, 4, last_table_col, PatternFill("solid", fgColor="FEF3CD"), EXAMPLE_FONT, LEFT)
-        ws.cell(row=4, column=2).value = "Add sizes in the rows below. Type a size and a base price; Selling Price fills in from the yellow box."
+        ws.cell(row=4, column=2).value = (
+            "Use the green Add Size box (right). Fill SIZE or Thickness×Width, press Enter; "
+            "the size appears below if it is new. Then type a base price."
+        )
     elif is_first:
         merge_fill(ws, 4, 2, 4, last_table_col, PatternFill("solid", fgColor="FEF3CD"), EXAMPLE_FONT, LEFT)
         ws.cell(row=4, column=2).value = (
             "Example: sizes 16 and 18 have sample base prices so you can test the yellow box. "
-            "Put 1 in I3 — both selling prices rise by 1. Other grades start with blank bases."
+            "Put 1 in I3 — both selling prices rise by 1. Add a new size in the green box on the right."
         )
     else:
         merge_fill(ws, 4, 2, 4, last_table_col, CREAM_FILL, MUTED_FONT, LEFT)
-        ws.cell(row=4, column=2).value = "Enter base prices in the yellow-header table. Selling Price follows cell I3."
+        ws.cell(row=4, column=2).value = (
+            "Enter base prices in the table. Selling Price follows I3. Add sizes with the green box."
+        )
 
     add_adjustment_box(ws)
 
     for c, h in enumerate(headers, 1):
         apply_cell(ws, HEADER_ROW, c, h, font=COL_FONT, fill=HEADER_FILL, alignment=CENTER, border=THIN)
-    ws.row_dimensions[HEADER_ROW].height = 22
+    ws.row_dimensions[HEADER_ROW].height = 30
 
     adj_abs = ADJ_ABS
     rows_written = 0
@@ -525,9 +830,17 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
         if kind == "flat":
             apply_cell(ws, r, 1, size_vals["th"], font=BODY_FONT, fill=fill, alignment=CENTER, border=THIN)
             apply_cell(ws, r, 2, size_vals["w"], font=BODY_FONT, fill=fill, alignment=CENTER, border=THIN)
-            apply_cell(ws, r, 3, size_vals["label"], font=Font(name="Calibri", size=11, bold=True, color=NAVY), fill=fill, alignment=CENTER, border=THIN)
+            apply_cell(
+                ws, r, 3, size_vals["label"],
+                font=Font(name="Calibri", size=11, bold=True, color=NAVY),
+                fill=fill, alignment=CENTER, border=THIN,
+            )
         else:
-            apply_cell(ws, r, 1, size_vals["size"], font=Font(name="Calibri", size=11, bold=True, color=NAVY), fill=fill, alignment=CENTER, border=THIN)
+            apply_cell(
+                ws, r, 1, size_vals["size"],
+                font=Font(name="Calibri", size=11, bold=True, color=NAVY),
+                fill=fill, alignment=CENTER, border=THIN,
+            )
 
         base_ref = "%s%d" % (get_column_letter(base_col), r)
         apply_cell(
@@ -545,22 +858,24 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
             font=SELL_FONT, fill=fill, alignment=CENTER, border=THIN,
             num_fmt="0.00",
         )
-        apply_cell(ws, r, notes_col, note, font=EXAMPLE_FONT if note else MUTED_FONT, fill=fill, alignment=LEFT, border=THIN)
+        apply_cell(
+            ws, r, notes_col, note,
+            font=EXAMPLE_FONT if note else MUTED_FONT, fill=fill, alignment=LEFT, border=THIN,
+        )
 
     if kind == "flat":
         for th, w, label in flat_rows(entry):
             r = FIRST_DATA_ROW + rows_written
-            write_price_row(r, {"th": th if th != int(th) else int(th), "w": w if float(w) != int(float(w)) else int(float(w)), "label": label})
+            write_price_row(r, {
+                "th": th if th != int(th) else int(th),
+                "w": w if float(w) != int(float(w)) else int(float(w)),
+                "label": label,
+            })
             rows_written += 1
     elif kind == "note":
-        # Placeholder + extra blank template rows with formulas already in place
         r = FIRST_DATA_ROW
-        write_price_row(r, {"size": ""}, note="Add sizes in the rows below")
+        write_price_row(r, {"size": ""}, note="Catalog placeholder — use Add Size for new sizes")
         rows_written = 1
-        for extra in range(7):
-            r = FIRST_DATA_ROW + rows_written
-            write_price_row(r, {"size": ""})
-            rows_written += 1
     else:
         for sz in entry["sizes"]:
             r = FIRST_DATA_ROW + rows_written
@@ -574,27 +889,42 @@ def add_grade_sheet(wb: Workbook, entry: dict, index: int, is_first: bool):
             write_price_row(r, {"size": display}, example_base=example, note=note)
             rows_written += 1
 
-    last_row = FIRST_DATA_ROW + rows_written - 1
-    ws.auto_filter.ref = "A%d:%s%d" % (HEADER_ROW, get_column_letter(last_table_col), last_row)
-    page_setup(ws, freeze="A6")
-    ws.print_title_rows = "1:5"
+    last_cat_row = FIRST_DATA_ROW + rows_written - 1
+    cat_ref = "$%s$%d:$%s$%d" % (size_col_letter, FIRST_DATA_ROW, size_col_letter, last_cat_row)
+    add_size_box(ws, entry, cat_ref)
+
+    extra_note = "New size from Add Size — type a base price; selling uses $I$3"
+    for i in range(1, EXTRA_SIZE_ROWS + 1):
+        r = last_cat_row + i
+        if kind == "flat":
+            write_price_row(r, {
+                "th": extra_flat_part_formula(i, cat_ref, "th"),
+                "w": extra_flat_part_formula(i, cat_ref, "w"),
+                "label": extra_size_formula(i, cat_ref),
+            }, note=extra_note if i == 1 else "")
+        else:
+            write_price_row(r, {"size": extra_size_formula(i, cat_ref)}, note=extra_note if i == 1 else "")
+        rows_written += 1
+
+    last_row = last_cat_row + EXTRA_SIZE_ROWS
     last_col_letter = get_column_letter(last_table_col)
     ws.auto_filter.ref = "A%d:%s%d" % (HEADER_ROW, last_col_letter, last_row)
+    page_setup(ws, freeze="A6")
+    ws.print_title_rows = "1:5"
 
-    # Sheet-local named range for the daily adjustment input
     defn = DefinedName(
         name="DailyAdj",
         attr_text="%s!$I$3" % quote_sheet(name),
         localSheetId=None,
     )
-    # localSheetId assigned after sheet is in workbook
     defn.localSheetId = wb.sheetnames.index(name)
     wb.defined_names.add(defn)
 
-    unlock_sheet(ws, max(last_row + 2, 8), 12)
+    unlock_sheet(ws, max(last_row + 2, STAGING_LAST_ROW + 2), 16)
     ws.protection.sheet = False
     entry["first_data_row"] = FIRST_DATA_ROW
     entry["last_data_row"] = last_row
+    entry["last_cat_row"] = last_cat_row
     entry["base_col"] = base_col
     entry["kind"] = kind
     return ws
@@ -613,8 +943,8 @@ def build_workbook(entries: list[dict]) -> Workbook:
     wb.properties.creator = "Jagetiya Metals"
     wb.properties.subject = "Editable steel price list by grade and size"
     wb.properties.description = (
-        "Each grade sheet has a yellow Daily Adjustment (I3). "
-        "Selling Price = Base Price + I3. No protection, no password."
+        "Each grade sheet has a yellow Daily Adjustment (I3) and a green Add Size box. "
+        "Selling Price = Base Price + I3. UNIQUE unions new sizes. No protection, no password."
     )
     wb.properties.company = "Jagetiya Metals"
 
@@ -628,6 +958,56 @@ def build_workbook(entries: list[dict]) -> Workbook:
         ws.protection.sheet = False
         ws.protection.enable = False
     return wb
+
+
+def _verify_add_size_logic() -> list[str]:
+    """Duplicate skip and shape-field rules (mirrors the UNIQUE inbox)."""
+    errors = []
+    cases = [
+        ("Round Bar", 25, None, None, 25),
+        ("Round Bar", 25.0, None, None, 25),
+        ("Hex Bar", "25.0", None, None, 25),
+        ("Non-Ferrous", 12, None, None, 12),
+        ("Square Bar", None, 40, None, 40),
+        ("Square Bar", None, 6, 25, "6x25"),
+        ("Flat Bar", None, 6, 25, "6x25"),
+        ("Flat Bar", None, 6, None, None),
+        ("Round Bar", None, 16, None, None),
+    ]
+    for shape, size, th, w, expected in cases:
+        got = canonical_size_key(shape, size, th, w)
+        if got != expected:
+            errors.append("canonical_size_key(%s) got %r want %r" % (shape, got, expected))
+
+    catalog = [16, 18, 20, 25, 28]
+    if inbox_status(catalog, 25) != "Already added — skipped":
+        errors.append("duplicate 25 should be skipped")
+    if inbox_status(catalog, 25.0) != "Already added — skipped":
+        errors.append("duplicate 25.0 should be skipped")
+    if inbox_status(catalog, "25.0") != "Already added — skipped":
+        errors.append("duplicate text 25.0 should be skipped")
+    if inbox_status(catalog, 30) != "Added":
+        errors.append("new size 30 should be Added")
+    if inbox_status(catalog, None) != "Fill the fields for this shape":
+        errors.append("empty inbox should ask for fields")
+
+    flats = ["6x25", "6x32", "10x40"]
+    if inbox_status(flats, "6x25") != "Already added — skipped":
+        errors.append("flat 6x25 duplicate")
+    if inbox_status(flats, "6 x 25") != "Already added — skipped":
+        errors.append("flat 6 x 25 should match 6x25")
+    if inbox_status(flats, "6×25") != "Already added — skipped":
+        errors.append("flat 6×25 should match 6x25")
+    if inbox_status(flats, "8x25") != "Added":
+        errors.append("new flat 8x25 should be Added")
+
+    union = unique_size_list([16, 18, 25], [25.0, 30, "", 18])
+    if union != [16, 18, 25, 30]:
+        errors.append("unique_size_list order/dups got %r" % union)
+    news = new_sizes_only([16, 18, 25], [25.0, 30, "18"])
+    if news != [30]:
+        errors.append("new_sizes_only should keep only 30, got %r" % news)
+    return errors
 
 
 def verify_workbook(path: Path, catalog_js: Path) -> dict:
@@ -678,8 +1058,12 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
 
     adj_re = re.compile(r"=\$I\$3$", re.I)
     sell_re = re.compile(r'=IF\(([A-Z]+)(\d+)="","",\1\2\+\$I\$3\)$')
+    unique_marks = ("UNIQUE", "VSTACK", "FILTER")
+    shape_list = {s.strip() for s in SHAPE_CHOICES}
 
     first_grade = catalog[0]["sheet"]
+    add_size_ok = 0
+    extra_formula_ok = 0
     for e in catalog:
         name = e["sheet"]
         if name not in wb.sheetnames:
@@ -694,7 +1078,6 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
             errors.append("%s %s default is %r, expected 0" % (name, ADJ_CELL, adj.value))
         fmt = (adj.number_format or "").replace("\\", "")
         if "0.00" not in fmt and fmt not in ("0.00",):
-            # still accept standard 0.00
             if adj.number_format != "0.00":
                 errors.append("%s %s number format is %r" % (name, ADJ_CELL, adj.number_format))
 
@@ -704,27 +1087,62 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
             if header[0] != "Thickness (mm)" or header[1] != "Width (mm)":
                 errors.append("%s missing thickness/width columns: %s" % (name, header[:3]))
             base_col, adj_col, sell_col = 4, 5, 6
+            size_col = 3
             n_expect = size_count(e)
         else:
             if header[0] != "Size (mm)":
                 errors.append("%s missing Size (mm) column: %s" % (name, header[0]))
             base_col, adj_col, sell_col = 2, 3, 4
-            n_expect = size_count(e) if kind != "note" else 1  # at least placeholder
+            size_col = 1
+            n_expect = size_count(e) if kind != "note" else 1
 
-        data_rows = 0
+        title = ws.cell(1, 12).value
+        if title != "ADD SIZE":
+            errors.append("%s missing Add Size panel title, got %r" % (name, title))
+        shape_val = ws[ADD_SHAPE_CELL].value
+        if shape_val != e["shape"]:
+            errors.append("%s Add Size shape default %r != %r" % (name, shape_val, e["shape"]))
+        if ws.cell(3, 12).value != "SIZE (mm)":
+            errors.append("%s missing SIZE (mm) field" % name)
+        if ws.cell(4, 12).value != "THICKNESS (mm)":
+            errors.append("%s missing THICKNESS field" % name)
+        if ws.cell(4, 14).value != "WIDTH (mm)":
+            errors.append("%s missing WIDTH field" % name)
+        status_val = ws[ADD_STATUS_CELL].value
+        if not isinstance(status_val, str) or "Already added — skipped" not in status_val or "Added" not in status_val:
+            errors.append("%s status formula missing Added/skipped text: %r" % (name, status_val))
+        key_val = ws[ADD_KEY_CELL].value
+        if not isinstance(key_val, str) or "$M$2" not in key_val:
+            errors.append("%s size-key formula missing shape switch: %r" % (name, key_val))
+        else:
+            if "Round Bar" not in key_val or "Flat Bar" not in key_val or "Square Bar" not in key_val:
+                errors.append("%s size-key formula missing shape branches" % name)
+            if "$M$3" not in key_val:
+                errors.append("%s size-key formula missing SIZE input $M$3" % name)
+            if "$M$4" not in key_val or "$O$4" not in key_val:
+                errors.append("%s size-key formula missing THICKNESS/WIDTH cells" % name)
+        dv_ok = False
+        for dv in ws.data_validations.dataValidation:
+            ranges = str(dv.sqref)
+            if ADD_SHAPE_CELL in ranges and dv.type == "list":
+                formula = dv.formula1 or ""
+                if all(s in formula for s in shape_list):
+                    dv_ok = True
+        if not dv_ok:
+            errors.append("%s missing shape dropdown on %s" % (name, ADD_SHAPE_CELL))
+        else:
+            add_size_ok += 1
+
+        last_cat = FIRST_DATA_ROW + n_expect - 1
+        extra_start = last_cat + 1
+        extra_end = last_cat + EXTRA_SIZE_ROWS
+
         first_sell = None
         first_adj = None
         first_base = None
-        r = FIRST_DATA_ROW
-        while r <= (ws.max_row or FIRST_DATA_ROW):
-            size_val = ws.cell(r, 1).value
+        for r in range(FIRST_DATA_ROW, extra_end + 1):
             sell = ws.cell(r, sell_col).value
             adjf = ws.cell(r, adj_col).value
-            if sell is None and adjf is None and size_val is None:
-                break
-            if sell is None:
-                break
-            data_rows += 1
             if first_sell is None:
                 first_sell = sell
                 first_adj = adjf
@@ -735,18 +1153,34 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
             if not isinstance(sell, str) or not sell_re.match(sell.strip()):
                 errors.append("%s row %d Selling formula %r" % (name, r, sell))
                 break
-            # locked flag should be false
             if ws.cell(r, sell_col).protection.locked:
                 errors.append("%s row %d selling cell is locked" % (name, r))
                 break
-            r += 1
 
-        if kind == "flat" and data_rows != n_expect:
-            errors.append("%s flat size count %d != %d" % (name, data_rows, n_expect))
-        elif kind == "round" and data_rows != n_expect:
-            errors.append("%s size count %d != %d" % (name, data_rows, n_expect))
-        elif kind == "note" and data_rows < 1:
-            errors.append("%s note sheet has no placeholder row" % name)
+        extra_checked = 0
+        for r in range(extra_start, extra_end + 1):
+            size_val = ws.cell(r, size_col).value
+            if not isinstance(size_val, str):
+                errors.append("%s extra row %d size is not a UNIQUE formula: %r" % (name, r, size_val))
+                break
+            missing = [m for m in unique_marks if m not in size_val]
+            if missing:
+                errors.append("%s extra row %d missing %s in %r" % (name, r, missing, size_val[:80]))
+                break
+            if "$I$3" not in str(ws.cell(r, sell_col).value):
+                errors.append("%s extra row %d selling formula must use $I$3" % (name, r))
+                break
+            extra_checked += 1
+        if extra_checked == EXTRA_SIZE_ROWS:
+            extra_formula_ok += 1
+
+        if kind == "flat":
+            th_f = ws.cell(extra_start, 1).value
+            w_f = ws.cell(extra_start, 2).value
+            if not (isinstance(th_f, str) and "FIND" in th_f and "x" in th_f):
+                errors.append("%s extra flat thickness formula missing TxW parse: %r" % (name, th_f))
+            if not (isinstance(w_f, str) and "FIND" in w_f):
+                errors.append("%s extra flat width formula missing TxW parse: %r" % (name, w_f))
 
         if name == first_grade:
             report["sample_formulas"] = {
@@ -755,6 +1189,8 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
                 "daily_adj": first_adj,
                 "selling_price": first_sell,
                 "example_base_16mm": first_base,
+                "add_size_shape": shape_val,
+                "add_size_status": status_val,
                 "conceptual_if_adj_1": (
                     None if first_base in (None, "") else float(first_base) + 1
                 ),
@@ -762,13 +1198,24 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
             if first_base not in EXAMPLE_BASES.values():
                 errors.append("First grade sheet should include example base prices, got %r" % first_base)
 
+    report["add_size_panels"] = add_size_ok
+    report["extra_unique_rows"] = extra_formula_ok
+    if add_size_ok != len(catalog):
+        errors.append("Add Size panel present on %d / %d grade sheets" % (add_size_ok, len(catalog)))
+    if extra_formula_ok != len(catalog):
+        errors.append("UNIQUE extra rows present on %d / %d grade sheets" % (extra_formula_ok, len(catalog)))
+
+    logic_errors = _verify_add_size_logic()
+    errors.extend(logic_errors)
+
     # Products hyperlinks
     p = wb[PRODUCTS_SHEET]
     if p.protection.sheet:
         errors.append("Products sheet is protected")
         report["protected_sheets"].append(PRODUCTS_SHEET)
     found_links = 0
-    for row in p.iter_rows(min_row=14, max_row=14 + len(catalog), min_col=6, max_col=6):
+    products_header = 15
+    for row in p.iter_rows(min_row=products_header + 1, max_row=products_header + len(catalog), min_col=6, max_col=6):
         cell = row[0]
         if cell.hyperlink:
             found_links += 1
@@ -817,7 +1264,11 @@ def print_report(report: dict) -> None:
         for e in report["errors"]:
             print("  -", e)
     else:
-        print("VERIFY OK — unprotected, one sheet per grade, I3 daily adj, Selling=Base+$I$3")
+        print("VERIFY OK — unprotected, one sheet per grade, I3 daily adj, Add Size UNIQUE, Selling=Base+$I$3")
+        if report.get("add_size_panels"):
+            print("Add Size panels:", report["add_size_panels"])
+        if report.get("extra_unique_rows"):
+            print("UNIQUE extra-row sheets:", report["extra_unique_rows"])
 
 
 def main(argv: list[str] | None = None) -> int:
