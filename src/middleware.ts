@@ -58,7 +58,7 @@ function isCivicPath(path: string) {
 }
 
 function isStaticAsset(path: string) {
-  return /\.(?:png|jpe?g|gif|webp|svg|ico|avif|woff2?|ttf|css|js|map|txt|xml|json)$/i.test(
+  return /\.(?:png|jpe?g|gif|webp|svg|ico|avif|woff2?|ttf|css|js|map|txt|xml|json|xlsx|xls|csv)$/i.test(
     path
   );
 }
@@ -179,5 +179,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.xlsx$).*)"],
 };
