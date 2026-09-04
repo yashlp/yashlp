@@ -50,9 +50,25 @@ On save, overlay maps (`added` / `removed` / `addedFlat` / `removedFlat` / `newG
 
 Built-in grades are not mutated in the catalog. Each rename is appended to a versioned `renamedGrades` array in `jk_catalog_v1` (`{sh,s,from,to,at}`). On load, custom grades are applied first, then renames in array order. If the destination name already exists, that rename is skipped so a refresh cannot duplicate a grade or apply the same rename twice.
 
+## Shared price Excel
+
+An editable workbook of every built-in grade and size lives at [`public/metals/Jagetiya_Metals_Price_List.xlsx`](../public/metals/Jagetiya_Metals_Price_List.xlsx) (download from the metals page: **Download Price Excel**).
+
+Each grade has its own sheet. Type today's market move in the yellow **Daily Adjustment (Rs/kg)** box on the right (cell `I3`). Every **Selling Price** on that sheet is `Base Price + I3` — enter `1` to add Rs 1/kg to all sizes. Base prices are not overwritten and the delta does not compound. The file has no password and no sheet protection.
+
+Regenerate from the catalog (keeps sizes in sync with `public/metals/js/catalog.js`):
+
+```bash
+python3 scripts/generate_metals_price_workbook.py
+python3 scripts/generate_metals_price_workbook.py --verify
+```
+
+Requires Python 3 and `openpyxl` (`pip install openpyxl`).
+
 ## Tests
 
 ```bash
 npm run test:metals
 npm run test:metals:e2e   # Chrome headless UI (system Chrome)
+python3 tests/metals-price-workbook.test.py
 ```
