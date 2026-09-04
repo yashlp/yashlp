@@ -57,18 +57,23 @@ An editable workbook of every built-in grade and size lives at [`public/metals/J
 - Site: `/metals/Jagetiya_Metals_Price_List.xlsx`
 - GitHub: [Jagetiya_Metals_Price_List.xlsx](https://github.com/yashlp/yashlp/raw/cursor/jagetiya-metals-price-excel-ecab/public/metals/Jagetiya_Metals_Price_List.xlsx)
 
-Each grade has its own sheet with **every shape for that grade** on one list (`Shape | Sub-type | Size | Price`). Example: `MS Bright` square, hex, and flat share one tab. There is no make/notes column, no daily adjustment box, and no separate selling-price column — just edit **Price (Rs/kg)**.
+Each grade has its own sheet with **every shape for that grade** on one list:
+`Shape | Sub-type | Size | Base Price | Selling Price`.
 
-### Edit a specific size’s price
+Example: `MS Bright` square, hex, and flat share one tab. There is no make/notes column.
 
-On the right, **SELECT SIZE → EDIT PRICE** is a filterable table (`Shape | Size | Price`). Filter or scroll to the size and type the price. The left **Price** column mirrors that cell. You can also type prices in the left Price column for newly added rows.
+### Daily adjustment
+
+- On each **grade sheet**, the yellow **Daily Adjustment (Rs/kg)** box is at cell `I3`.
+- **Selling Price** = Base Price + I3. Type `1` to add Rs 1/kg to every size on that sheet (does not compound; Base Price stays as typed).
+- On the **Products** sheet, **MASTER DAILY ADJUSTMENT (optional)** is a notepad you can copy into each grade’s I3 when the same change applies to every grade. It does not drive prices by itself.
 
 ### How to add a size
 
-1. Go to the **green empty rows** at the bottom of the left list (or the green rows under the side price table).
+1. Go to the **green empty rows** at the bottom of the list.
 2. Pick **Shape** from the dropdown.
-3. Type **Size**: `25` for round/square/hex, or `6x25` for flat. The **ADD SIZE HELP** box can build `Thickness×Width` for you.
-4. Type **Price**.
+3. Type **Size**: `25` for round/square/hex, or `6x25` for flat. **ADD A SIZE** on the right can build Thickness×Width for you.
+4. Type **Base Price**. Selling Price fills in from Daily Adjustment.
 5. If that size already exists for the same shape, the Size cell turns **red** — do not add it twice.
 
 The file has no password and no sheet protection.
