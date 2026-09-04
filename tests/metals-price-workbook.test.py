@@ -19,7 +19,9 @@ from generate_metals_price_workbook import (  # noqa: E402
     DEFAULT_OUTPUT,
     EXTRA_SIZE_ROWS,
     canonical_size_key,
+    group_entries_by_grade,
     inbox_status,
+    load_catalog,
     new_sizes_only,
     print_report,
     unique_size_list,
@@ -54,6 +56,40 @@ def _logic_checks() -> list[str]:
     return errors
 
 
+def _grouping_checks() -> list[str]:
+    errors = []
+    catalog = load_catalog(CATALOG_JS)
+    families = group_entries_by_grade(catalog)
+    if len(families) >= len(catalog):
+        errors.append("family count %d should be < catalog entries %d" % (len(families), len(catalog)))
+    grades = [f["grade"] for f in families]
+    if len(grades) != len(set(grades)):
+        errors.append("duplicate grade families: %s" % grades)
+    by_name = {f["grade"]: f for f in families}
+
+    bright = by_name.get("MS Bright")
+    if not bright:
+        errors.append("missing MS Bright family")
+    else:
+        want = {"Square Bar", "Hex Bar", "Flat Bar"}
+        have = set(bright["shapes"])
+        if have != want:
+            errors.append("MS Bright shapes %s != %s" % (have, want))
+
+    en8 = by_name.get("EN-8")
+    if not en8 or "Round Bar" not in en8["shapes"] or "Flat Bar" not in en8["shapes"]:
+        errors.append("EN-8 should include Round and Flat, got %s" % (en8 or {}).get("shapes"))
+
+    wps = by_name.get("WPS (D3)")
+    if not wps or set(wps["shapes"]) < {"Round Bar", "Square Bar", "Flat Bar"}:
+        errors.append("WPS (D3) should include Round, Square, Flat, got %s" % (wps or {}).get("shapes"))
+
+    for a, b in (("MS", "MS Bright"), ("MS Bright", "MS Black"), ("EN-8", "EN-8D"), ("EN-8D", "EN-8D / C-45")):
+        if a not in by_name or b not in by_name:
+            errors.append("expected separate grades %r and %r" % (a, b))
+    return errors
+
+
 def main() -> int:
     path = DEFAULT_OUTPUT
     if not path.is_file():
@@ -61,15 +97,17 @@ def main() -> int:
         print("Run: python3 scripts/generate_metals_price_workbook.py")
         return 1
     logic = _logic_checks()
-    if logic:
+    grouping = _grouping_checks()
+    if logic or grouping:
         print("LOGIC FAILED:")
-        for err in logic:
+        for err in logic + grouping:
             print("  -", err)
         return 1
     report = verify_workbook(path, CATALOG_JS)
     print_report(report)
     print("Add Size cells:", ADD_SHAPE_CELL, ADD_SIZE_CELL, ADD_TH_CELL, ADD_W_CELL, ADD_STATUS_CELL, ADD_KEY_CELL)
-    print("Extra UNIQUE rows per sheet:", EXTRA_SIZE_ROWS)
+    print("Extra UNIQUE rows per shape section:", EXTRA_SIZE_ROWS)
+    print("Catalog entries:", report.get("catalog_entries"), "unique grades:", report.get("unique_grades"))
     return 0 if report["ok"] else 1
 
 

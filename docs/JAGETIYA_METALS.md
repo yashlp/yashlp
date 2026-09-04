@@ -57,20 +57,20 @@ An editable workbook of every built-in grade and size lives at [`public/metals/J
 - Site: `/metals/Jagetiya_Metals_Price_List.xlsx`
 - GitHub: [Jagetiya_Metals_Price_List.xlsx](https://github.com/yashlp/yashlp/raw/cursor/jagetiya-metals-price-excel-ecab/public/metals/Jagetiya_Metals_Price_List.xlsx)
 
-Each grade has its own sheet. Type today's market move in the yellow **Daily Adjustment (Rs/kg)** box on the right (cell `I3`). Every **Selling Price** on that sheet is `Base Price + I3` — enter `1` to add Rs 1/kg to all sizes. Base prices are not overwritten and the delta does not compound. The file has no password and no sheet protection.
+Each grade has its own sheet with **every shape for that grade** stacked on it (Round / Square / Hex / Flat). `MS Bright` square, hex, and flat share one tab; `MS`, `MS Bright`, and `MS Black` stay separate. Type today's market move in the yellow **Daily Adjustment (Rs/kg)** box on the right (cell `I3`). Every **Selling Price** on that sheet is `Base Price + I3` — enter `1` to add Rs 1/kg to all sizes of all shapes. Base prices are not overwritten and the delta does not compound. The file has no password and no sheet protection.
 
 ### How to add a size
 
 Every grade sheet has a green **Add Size** box to the right of Daily Adjustment (frozen with the header).
 
-1. Leave **Shape** on this sheet's shape, or pick another shape if the new size uses different dimensions. Changing shape only changes which fields apply on **this** sheet.
+1. Pick **Shape** (Round Bar, Square Bar, Hex Bar, Flat Bar, or Non-Ferrous). The new size is appended into **that shape's section on this same sheet**.
 2. Fill the fields for that shape, then press **Enter**:
    - **Round / Hex / Non-Ferrous (1D):** `SIZE (mm)` only
    - **Square:** `THICKNESS` (treated as Side) and optional `WIDTH`. Blank width adds the single Side value. Both filled adds `TxW` (example `6x25`)
    - **Flat:** `THICKNESS` and `WIDTH` are required; the size key is `TxW` (example `6x25`)
-3. The size appears in **this sheet's** list if it is new. Status shows **Added** or **Already added — skipped**.
+3. The size appears in that shape section if it is new. Status shows **Added** or **Already added — skipped**. Duplicates are checked **within that shape section** (`25` = `25.0`, `6x25` = `6 x 25`).
 4. Type a **Base Price** on the new row. Selling Price is still `Base + $I$3`.
-5. Optional: type more keys in the **More sizes** slots (`25` or `6x25`, one per row).
+5. Optional: type more keys in the **More sizes** slots (`25` or `6x25`, one per row) while that shape is selected.
 
 Duplicates are skipped: `25` and `25.0` are the same; `6x25` and `6 x 25` are the same. Excel 365 and Google Sheets update the list with `UNIQUE` / `VSTACK` / `FILTER` (no VBA, no password).
 
