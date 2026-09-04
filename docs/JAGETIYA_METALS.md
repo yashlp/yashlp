@@ -52,7 +52,10 @@ Built-in grades are not mutated in the catalog. Each rename is appended to a ver
 
 ## Shared price Excel
 
-An editable workbook of every built-in grade and size lives at [`public/metals/Jagetiya_Metals_Price_List.xlsx`](../public/metals/Jagetiya_Metals_Price_List.xlsx) (download from the metals page: **Download Price Excel**).
+An editable workbook of every built-in grade and size lives at [`public/metals/Jagetiya_Metals_Price_List.xlsx`](../public/metals/Jagetiya_Metals_Price_List.xlsx). On the metals page, **Download Price Excel** uses the root-absolute path `/metals/Jagetiya_Metals_Price_List.xlsx` (so it still works when the URL is `/metals` without a trailing slash). If a Vercel preview asks you to log in, use **If that fails, download from GitHub**:
+
+- Site: `/metals/Jagetiya_Metals_Price_List.xlsx`
+- GitHub: [Jagetiya_Metals_Price_List.xlsx](https://github.com/yashlp/yashlp/raw/cursor/jagetiya-metals-price-excel-ecab/public/metals/Jagetiya_Metals_Price_List.xlsx)
 
 Each grade has its own sheet. Type today's market move in the yellow **Daily Adjustment (Rs/kg)** box on the right (cell `I3`). Every **Selling Price** on that sheet is `Base Price + I3` — enter `1` to add Rs 1/kg to all sizes. Base prices are not overwritten and the delta does not compound. The file has no password and no sheet protection.
 

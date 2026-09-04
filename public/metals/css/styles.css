@@ -6,6 +6,8 @@ body{font-family:Georgia,serif;background:#F0EDE8;color:#1A1A1A;min-height:100vh
 .hdr-r{font-size:10px;color:#8AA0B8;text-align:right;line-height:1.8;}
 .xlsx-dl{display:inline-block;margin-top:4px;padding:4px 10px;background:#C8960C;color:#0F2540;font-size:10px;font-weight:700;text-decoration:none;border-radius:4px;letter-spacing:.3px;}
 .xlsx-dl:hover{background:#e0b020;color:#0F2540;}
+.xlsx-dl-gh{display:inline-block;margin-top:2px;color:#C8960C;font-size:9px;font-weight:600;text-decoration:underline;letter-spacing:.2px;}
+.xlsx-dl-gh:hover{color:#e0b020;}
 .tabs{display:flex;background:#0F2540;border-bottom:3px solid #C8960C;}
 .tbtn{padding:11px 20px;font-size:12px;font-weight:700;color:#8AA0B8;cursor:pointer;border:none;background:transparent;font-family:Georgia,serif;border-bottom:3px solid transparent;margin-bottom:-3px;}
 .tbtn.on{color:#C8960C;border-bottom-color:#C8960C;}

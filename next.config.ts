@@ -98,6 +98,34 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        source: "/metals/Jagetiya_Metals_Price_List.xlsx",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+          {
+            key: "Content-Disposition",
+            value: 'attachment; filename="Jagetiya_Metals_Price_List.xlsx"',
+          },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+        ],
+      },
+      {
+        source: "/metals/:path*.xlsx",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+          {
+            key: "Content-Disposition",
+            value: 'attachment; filename="Jagetiya_Metals_Price_List.xlsx"',
+          },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+        ],
+      },
     ];
   },
 };
