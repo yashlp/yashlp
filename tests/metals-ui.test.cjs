@@ -22,10 +22,21 @@ function structureTests() {
     "id=\"smGradeRename\"", "id=\"smRenameTo\"", "id=\"btnSmRename\"", "Rename a Grade",
     "js/catalog.js", "js/storage.js", "js/app.js", "css/styles.css",
     "24AGIPS3207M1Z7", "Kamlesh@jkmetal.in",
+    "Download Price Excel",
+    'href="/metals/Jagetiya_Metals_Price_List.xlsx"',
+    "If that fails, download from GitHub",
+    "https://github.com/yashlp/yashlp/raw/cursor/jagetiya-metals-price-excel-ecab/public/metals/Jagetiya_Metals_Price_List.xlsx",
   ];
   for (const s of must) assert(html.includes(s), "HTML missing: " + s);
   assert(!html.includes("smAddSquareSide2"), "dead SIDE 2 field should be gone");
   assert(!html.includes("No password needed"), "PIN copy should not say no password");
+  assert(
+    !html.includes('href="Jagetiya_Metals_Price_List.xlsx"'),
+    "xlsx href must be root-absolute, not relative"
+  );
+  const xlsx = path.join(root, "Jagetiya_Metals_Price_List.xlsx");
+  assert(fs.existsSync(xlsx), "workbook missing from public/metals");
+  assert(fs.readFileSync(xlsx).subarray(0, 2).toString() === "PK", "workbook is not a zip/xlsx");
   console.log("ok - html structure");
 }
 

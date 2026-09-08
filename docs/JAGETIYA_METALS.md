@@ -50,9 +50,49 @@ On save, overlay maps (`added` / `removed` / `addedFlat` / `removedFlat` / `newG
 
 Built-in grades are not mutated in the catalog. Each rename is appended to a versioned `renamedGrades` array in `jk_catalog_v1` (`{sh,s,from,to,at}`). On load, custom grades are applied first, then renames in array order. If the destination name already exists, that rename is skipped so a refresh cannot duplicate a grade or apply the same rename twice.
 
+## Shared price Excel
+
+An editable workbook of every built-in grade and size lives at [`public/metals/Jagetiya_Metals_Price_List.xlsx`](../public/metals/Jagetiya_Metals_Price_List.xlsx). On the metals page, **Download Price Excel** uses the root-absolute path `/metals/Jagetiya_Metals_Price_List.xlsx` (so it still works when the URL is `/metals` without a trailing slash). If a Vercel preview asks you to log in, use **If that fails, download from GitHub**:
+
+- Site: `/metals/Jagetiya_Metals_Price_List.xlsx`
+- GitHub: [Jagetiya_Metals_Price_List.xlsx](https://github.com/yashlp/yashlp/raw/cursor/jagetiya-metals-price-excel-ecab/public/metals/Jagetiya_Metals_Price_List.xlsx)
+
+Each grade has its own sheet with **every shape for that grade** on one list:
+`Shape | Sub-type | Size | Rate (Rs/kg) | Base Price (Rs/kg)`.
+
+Example: `MS Bright` square, hex, and flat share one tab. There is no make/notes column and no Selling Price column.
+
+### Daily adjustment
+
+- On each **grade sheet**, the yellow **Daily Adjustment (Rs/kg)** box is at cell `I3`.
+- **Base Price = Rate + I3**. Type `1` to add Rs 1/kg to every Base Price on that sheet. Rate stays as typed (does not compound).
+- On the **Products** sheet, **MASTER DAILY ADJUSTMENT (optional)** is a notepad you can copy into each grade’s I3 when the same change applies.
+- The workbook is set to **automatic calculation** and full recalc on open, so Daily Adjustment works on shared copies (WhatsApp / Drive / email).
+- If Base Price does not update after changing I3: click **Enable Editing**, then **Formulas → Calculation Options → Automatic** (or press `F9`). The yellow box also shows a live check: `100 + Daily Adj`.
+
+### How to add a size
+
+1. Go to the **green empty rows** at the bottom of the list.
+2. Pick **Shape** from the dropdown.
+3. Type **Size**: `25` for round/square/hex, or `6x25` for flat. **ADD A SIZE** on the right can build Thickness×Width for you.
+4. Type **Rate**. Base Price fills in as Rate + Daily Adjustment.
+5. If that size already exists for the same shape, the Size cell turns **red** — do not add it twice.
+
+The file has no password and no sheet protection.
+
+Regenerate from the catalog (keeps sizes in sync with `public/metals/js/catalog.js`):
+
+```bash
+python3 scripts/generate_metals_price_workbook.py
+python3 scripts/generate_metals_price_workbook.py --verify
+```
+
+Requires Python 3 and `openpyxl` (`pip install openpyxl`).
+
 ## Tests
 
 ```bash
 npm run test:metals
 npm run test:metals:e2e   # Chrome headless UI (system Chrome)
+python3 tests/metals-price-workbook.test.py
 ```
