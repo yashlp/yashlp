@@ -2,12 +2,13 @@
 """Generate the Jagetiya Metals product price workbook from the built-in catalog.
 
 One sheet per grade (all shapes together). Columns:
-  Shape | Sub-type | Size | Base Price (Rs/kg)
-No Selling Price column — Base Price is the only price. Edit Base Price
-directly. Daily Adjustment (Master + per-sheet I3) is a notepad reminder
-so you can add today's market move into Base Price cells.
+  Shape | Sub-type | Size | Rate (Rs/kg) | Base Price (Rs/kg)
 
-No make/notes. No side "select size edit price" table.
+Rate is the permanent price you type. Base Price = Rate + Daily Adjustment (I3),
+so entering 1 in the yellow box increases every Base Price by Rs 1.
+
+Products sheet has Master Daily Adjustment (optional notepad to copy into I3).
+No make/notes. No side "select size edit price" table. No Selling column.
 Add sizes in green empty rows at the bottom.
 
 Usage:
@@ -354,13 +355,13 @@ def page_setup(ws: Worksheet, freeze: str = "A6"):
 
 
 def add_adjustment_box(ws: Worksheet):
-    """Yellow daily-adjustment notepad on the right of every grade sheet (I3)."""
+    """Yellow daily-adjustment box — Base Price = Rate + I3."""
     merge_fill(ws, 1, 7, 1, 10, GOLD_FILL, Font(name="Calibri", size=11, bold=True, color=NAVY), CENTER)
     ws.cell(row=1, column=7).value = "DAILY ADJUSTMENT (Rs/kg)"
 
     merge_fill(ws, 2, 7, 2, 10, YELLOW_FILL, Font(name="Calibri", size=9, color=NAVY), CENTER)
     ws.cell(row=2, column=7).value = (
-        "Today's market move (e.g. 1 or -2). Reminder only — add this into each Base Price cell."
+        "Enter 1 to add Rs 1 to every Base Price. Enter -2 to reduce Rs 2. Leave 0 for no change."
     )
     ws.row_dimensions[2].height = 32
 
@@ -374,7 +375,7 @@ def add_adjustment_box(ws: Worksheet):
 
     merge_fill(ws, 4, 7, 4, 10, YELLOW_FILL, Font(name="Calibri", size=9, italic=True, color=NAVY), CENTER)
     ws.cell(row=4, column=7).value = (
-        "No Selling Price column. Edit Base Price only — add today's change into those cells, then set this back to 0."
+        "Base Price = Rate + this box. Rates stay as typed. Change 1 to 3 and all Base Prices use +3 (not compounding)."
     )
     ws.row_dimensions[3].height = 28
     ws.row_dimensions[4].height = 28
@@ -415,7 +416,7 @@ def add_size_help(ws: Worksheet):
     merge_fill(ws, 5, 11, 5, 13, MINT_FILL, Font(name="Calibri", size=9, color=NAVY), LEFT)
     ws.cell(row=5, column=11).value = (
         "1) Scroll to a green empty row  2) Pick Shape  3) Type Size (25 or 6x25)  "
-        "4) Type Base Price  5) Red Size = already added — skip"
+        "4) Type Rate  5) Base Price fills in (= Rate + Daily Adj)  6) Red Size = already added — skip"
     )
     ws.row_dimensions[5].height = 36
 
@@ -449,10 +450,10 @@ def add_products_sheet(wb: Workbook, families: list[dict]):
     instructions = [
         "How to use",
         "1. Open a grade sheet (click a name below). Example: MS Bright has Square, Hex, and Flat on one tab.",
-        "2. There is only Base Price — no Selling Price column. Type or change prices in the Base Price column only.",
-        "3. Yellow Daily Adjustment (and Master Daily Adjustment on the right) is a notepad for today's market move (e.g. +1 or -2).",
-        "4. Add that amount into each Base Price cell when rates move, then set the yellow box back to 0.",
-        "5. To add a size: green empty rows — pick Shape, type Size (25 or 6x25), type Base Price.",
+        "2. Type permanent prices in the Rate column. Base Price = Rate + Daily Adjustment (updates automatically).",
+        "3. Put today's change in the yellow Daily Adjustment box (I3), or copy from Master Daily Adjustment on the right.",
+        "4. Type 1 in Daily Adjustment to add Rs 1/kg to every Base Price on that sheet. Rate stays as typed (does not compound).",
+        "5. To add a size: green empty rows — pick Shape, type Size (25 or 6x25), type Rate. Base Price fills in.",
         "6. Duplicate sizes for the same shape turn red — do not add twice.",
     ]
     for i, line in enumerate(instructions):
@@ -465,20 +466,20 @@ def add_products_sheet(wb: Workbook, families: list[dict]):
         )
         ws.cell(row=r, column=1).value = line
 
-    # Master Daily Adjustment (optional notepad)
+    # Master Daily Adjustment (optional notepad) — copy into grade I3
     merge_fill(ws, 5, 8, 5, 10, GOLD_FILL, Font(name="Calibri", size=11, bold=True, color=NAVY), CENTER)
     ws.cell(row=5, column=8).value = "MASTER DAILY ADJUSTMENT (optional)"
     merge_fill(ws, 6, 8, 7, 10, YELLOW_FILL, Font(name="Calibri", size=9, color=NAVY), CENTER)
     ws.cell(row=6, column=8).value = (
-        "Write today's market move here (e.g. 1 or -2). Copy into each grade sheet's yellow I3 box if useful. "
-        "Then add that amount into Base Price cells on those sheets. Grades do not share this cell."
+        "Copy this number into each grade sheet's yellow I3 box only if the same change applies. "
+        "Grade sheets do NOT share this cell — each grade can move on its own."
     )
     apply_cell(ws, 8, 8, "Copy-from value", font=LABEL_FONT, fill=YELLOW_FILL, alignment=RIGHT, border=THICK_GOLD)
     apply_cell(ws, 8, 9, 0, font=INPUT_FONT, fill=YELLOW_FILL, alignment=CENTER, border=THICK_GOLD, num_fmt="0.00")
     apply_cell(ws, 8, 10, "Rs/kg", font=LABEL_FONT, fill=YELLOW_FILL, alignment=LEFT, border=THICK_GOLD)
     merge_fill(ws, 9, 8, 11, 10, CREAM_FILL, MUTED_FONT, CENTER)
     ws.cell(row=9, column=8).value = (
-        "Notepad only. It does not change Base Price by itself — edit Base Price cells for the real rate."
+        "This cell is a notepad only. Paste it into a grade sheet's I3 to raise that sheet's Base Prices."
     )
     for r in range(5, 9):
         for c in range(8, 11):
@@ -517,35 +518,35 @@ def add_grade_family_sheet(wb: Workbook, family: dict, is_first: bool):
     shapes = family["shapes"]
     ws.sheet_properties.tabColor = SHAPE_TAB.get(shapes[0], NAVY) if len(shapes) == 1 else NAVY
 
-    widths = {1: 16, 2: 26, 3: 12, 4: 18, 5: 3, 6: 3, 7: 14, 8: 4, 9: 12, 10: 10, 11: 14, 12: 12, 13: 16}
+    widths = {1: 16, 2: 26, 3: 12, 4: 16, 5: 18, 6: 3, 7: 14, 8: 4, 9: 12, 10: 10, 11: 14, 12: 12, 13: 16}
     for col, w in widths.items():
         ws.column_dimensions[get_column_letter(col)].width = w
 
-    merge_fill(ws, 1, 1, 1, 4, NAVY_FILL, Font(name="Calibri", size=11, bold=True, color=GOLD), LEFT)
+    merge_fill(ws, 1, 1, 1, 5, NAVY_FILL, Font(name="Calibri", size=11, bold=True, color=GOLD), LEFT)
     ws.cell(row=1, column=1).value = (
         "JAGETIYA METALS  ·  +91-9824012344  ·  Kamlesh@jkmetal.in  ·  GST 24AGIPS3207M1Z7"
     )
     ws.row_dimensions[1].height = 20
 
-    merge_fill(ws, 2, 1, 2, 4, CREAM_FILL, GRADE_FONT, LEFT)
+    merge_fill(ws, 2, 1, 2, 5, CREAM_FILL, GRADE_FONT, LEFT)
     ws.cell(row=2, column=1).value = family["grade"]
     ws.row_dimensions[2].height = 28
 
-    merge_fill(ws, 3, 1, 3, 4, CREAM_FILL, BODY_FONT, LEFT)
+    merge_fill(ws, 3, 1, 3, 5, CREAM_FILL, BODY_FONT, LEFT)
     ws.cell(row=3, column=1).value = "Shapes: %s" % family["shapes_label"]
 
     back = apply_cell(ws, 4, 1, "← Back to Products", font=LINK_FONT, fill=CREAM_FILL, alignment=LEFT)
     back.hyperlink = "#%s!A1" % quote_sheet(PRODUCTS_SHEET)
-    merge_fill(ws, 4, 2, 4, 4, CREAM_FILL, MUTED_FONT, LEFT)
+    merge_fill(ws, 4, 2, 4, 5, CREAM_FILL, MUTED_FONT, LEFT)
     ws.cell(row=4, column=2).value = (
-        "Only Base Price — edit that column for rates. Yellow Daily Adjustment is a notepad for today's move. "
+        "Type Rate for permanent prices. Base Price = Rate + yellow Daily Adjustment (I3). "
         "Add sizes in the green rows at the bottom."
     )
 
     add_adjustment_box(ws)
     add_size_help(ws)
 
-    headers = ["Shape", "Sub-type", "Size", "Base Price (Rs/kg)"]
+    headers = ["Shape", "Sub-type", "Size", "Rate (Rs/kg)", "Base Price (Rs/kg)"]
     for c, h in enumerate(headers, 1):
         apply_cell(ws, 5, c, h, font=COL_FONT, fill=HEADER_FILL, alignment=CENTER, border=THIN)
     ws.row_dimensions[5].height = 22
@@ -561,8 +562,14 @@ def add_grade_family_sheet(wb: Workbook, family: dict, is_first: bool):
             font=Font(name="Calibri", size=11, bold=True, color=NAVY),
             fill=fill, alignment=CENTER, border=THIN,
         )
+        # Rate = permanent editable price
         apply_cell(
             ws, row, 4, item["price"],
+            font=BODY_FONT, fill=fill, alignment=CENTER, border=THIN, num_fmt="0.00",
+        )
+        # Base Price = Rate + Daily Adjustment — rises when I3 changes
+        apply_cell(
+            ws, row, 5, '=IF(D%d="","",D%d+%s)' % (row, row, ADJ_ABS),
             font=SELL_FONT, fill=fill, alignment=CENTER, border=THIN, num_fmt="0.00",
         )
         row += 1
@@ -577,7 +584,7 @@ def add_grade_family_sheet(wb: Workbook, family: dict, is_first: bool):
         error="Choose Round Bar, Square Bar, Hex Bar, Flat Bar, or Non-Ferrous.",
         showInputMessage=True,
         promptTitle="Add size",
-        prompt="Pick Shape, type Size (25 or 6x25), type Base Price.",
+        prompt="Pick Shape, type Size (25 or 6x25), type Rate.",
     )
     ws.add_data_validation(shape_dv)
 
@@ -586,11 +593,15 @@ def add_grade_family_sheet(wb: Workbook, family: dict, is_first: bool):
         apply_cell(ws, row, 1, None, font=BODY_FONT, fill=fill, alignment=LEFT, border=THIN)
         apply_cell(ws, row, 2, None, font=BODY_FONT, fill=fill, alignment=LEFT, border=THIN)
         apply_cell(ws, row, 3, None, font=BODY_FONT, fill=fill, alignment=CENTER, border=THIN)
-        apply_cell(ws, row, 4, None, font=SELL_FONT, fill=fill, alignment=CENTER, border=THIN, num_fmt="0.00")
+        apply_cell(ws, row, 4, None, font=BODY_FONT, fill=fill, alignment=CENTER, border=THIN, num_fmt="0.00")
+        apply_cell(
+            ws, row, 5, '=IF(D%d="","",D%d+%s)' % (row, row, ADJ_ABS),
+            font=SELL_FONT, fill=fill, alignment=CENTER, border=THIN, num_fmt="0.00",
+        )
         shape_dv.add(ws.cell(row=row, column=1).coordinate)
         if i == 0:
             apply_cell(
-                ws, row, 2, "← New size: Shape + Size + Base Price",
+                ws, row, 2, "← New size: Shape + Size + Rate",
                 font=MUTED_FONT, fill=fill, alignment=LEFT, border=THIN,
             )
         row += 1
@@ -610,7 +621,7 @@ def add_grade_family_sheet(wb: Workbook, family: dict, is_first: bool):
         ),
     )
 
-    ws.auto_filter.ref = "A5:D%d" % last_data_row
+    ws.auto_filter.ref = "A5:E%d" % last_data_row
     page_setup(ws, freeze="A6")
     ws.print_title_rows = "1:5"
     unlock_sheet(ws, last_data_row + 2, 13)
@@ -629,8 +640,8 @@ def build_workbook(entries: list[dict]) -> Workbook:
     wb.properties.creator = "Jagetiya Metals"
     wb.properties.subject = "Editable steel price list by grade (all shapes on one sheet)"
     wb.properties.description = (
-        "One sheet per grade. Base Price only (no Selling column). "
-        "Master Daily Adjustment notepad on Products. Add sizes in green rows. No password."
+        "One sheet per grade. Base Price = Rate + Daily Adjustment (I3). "
+        "Master Daily Adjustment on Products. Add sizes in green rows. No password."
     )
     wb.properties.company = "Jagetiya Metals"
 
@@ -670,6 +681,8 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
     if p.cell(8, 9).value not in (0, 0.0):
         errors.append("Master Daily Adjustment default should be 0")
 
+    sell_re = re.compile(r'=IF\(D(\d+)="","",D\1\+\$I\$3\)$')
+
     for fam in families:
         name = fam["sheet"]
         if name not in wb.sheetnames:
@@ -682,34 +695,25 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
             errors.append("%s grade header wrong" % name)
 
         headers = [str(ws.cell(5, c).value or "") for c in range(1, 6)]
-        if headers[:4] != ["Shape", "Sub-type", "Size", "Base Price (Rs/kg)"]:
-            errors.append("%s headers %r" % (name, headers[:4]))
-        if headers[4] and "selling" in headers[4].lower():
-            errors.append("%s still has Selling Price column" % name)
-        # column E header should be empty / not selling
-        if ws.cell(5, 5).value and "selling" in str(ws.cell(5, 5).value).lower():
-            errors.append("%s Selling Price header still present" % name)
+        if headers != ["Shape", "Sub-type", "Size", "Rate (Rs/kg)", "Base Price (Rs/kg)"]:
+            errors.append("%s headers %r" % (name, headers))
+        if any("selling" in h.lower() for h in headers):
+            errors.append("%s still has Selling Price" % name)
 
         for c in range(1, 14):
             for r in range(1, 4):
                 v = str(ws.cell(r, c).value or "")
                 if "SELECT SIZE" in v.upper():
                     errors.append("%s still has Select Size Edit Price panel" % name)
-                if "SELLING PRICE" in v.upper() and r == 5:
-                    errors.append("%s selling in header area" % name)
 
         if ws.cell(1, 7).value != "DAILY ADJUSTMENT (Rs/kg)":
             errors.append("%s missing Daily Adjustment box" % name)
         if ws[ADJ_CELL].value not in (0, 0.0):
             errors.append("%s I3 should be 0" % name)
 
-        # Base price must be a value (or empty), not a selling formula with $I$3
-        base = ws.cell(DATA_START, 4).value
-        if isinstance(base, str) and base.startswith("=") and "$I$3" in base:
-            errors.append("%s Base Price should be editable value, not adj formula: %r" % (name, base))
-        sell = ws.cell(DATA_START, 5).value
-        if isinstance(sell, str) and "$I$3" in sell:
-            errors.append("%s still has Selling formula in column E: %r" % (name, sell))
+        base = ws.cell(DATA_START, 5).value
+        if not (isinstance(base, str) and sell_re.match(base.strip())):
+            errors.append("%s Base Price formula should be Rate+$I$3, got %r" % (name, base))
 
         shapes_found = set()
         for r in range(DATA_START, DATA_START + 4000):
@@ -723,11 +727,13 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
                 errors.append("%s missing shape %s" % (name, s))
 
         if fam["grade"] == families[0]["grade"]:
+            rate = ws.cell(DATA_START, 4).value
             report["sample"] = {
                 "sheet": name,
                 "I3": ws[ADJ_CELL].value,
-                "base_D6": ws.cell(DATA_START, 4).value,
-                "col_E6": ws.cell(DATA_START, 5).value,
+                "rate_D6": rate,
+                "base_E6": ws.cell(DATA_START, 5).value,
+                "conceptual_if_adj_1": (None if rate in (None, "") else float(rate) + 1),
             }
 
     by_name = {f["grade"]: f for f in families}
@@ -772,7 +778,7 @@ def print_report(report: dict) -> None:
         for e in report["errors"]:
             print("  -", e)
     else:
-        print("VERIFY OK — Base Price only (no Selling), Master Daily Adj notepad, no select-size panel")
+        print("VERIFY OK — Base Price = Rate + I3 (Daily Adj raises Base Price)")
 
 
 def main(argv: list[str] | None = None) -> int:
