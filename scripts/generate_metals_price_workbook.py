@@ -361,9 +361,10 @@ def add_adjustment_box(ws: Worksheet):
 
     merge_fill(ws, 2, 7, 2, 10, YELLOW_FILL, Font(name="Calibri", size=9, color=NAVY), CENTER)
     ws.cell(row=2, column=7).value = (
-        "Enter 1 to add Rs 1 to every Base Price. Enter -2 to reduce Rs 2. Leave 0 for no change."
+        "Enter 1 to add Rs 1 to every Base Price. Enter -2 to reduce Rs 2. Leave 0 for no change. "
+        "Works on shared copies — if numbers stay stuck, click Enable Editing, then Formulas → Automatic."
     )
-    ws.row_dimensions[2].height = 32
+    ws.row_dimensions[2].height = 40
 
     apply_cell(ws, 3, 7, "Today's change", font=LABEL_FONT, fill=YELLOW_FILL, alignment=RIGHT)
     apply_cell(ws, 3, 8, None, font=LABEL_FONT, fill=YELLOW_FILL, alignment=CENTER)
@@ -373,22 +374,34 @@ def add_adjustment_box(ws: Worksheet):
     )
     apply_cell(ws, 3, 10, "Rs/kg", font=LABEL_FONT, fill=YELLOW_FILL, alignment=LEFT)
 
-    merge_fill(ws, 4, 7, 4, 10, YELLOW_FILL, Font(name="Calibri", size=9, italic=True, color=NAVY), CENTER)
+    merge_fill(ws, 4, 7, 4, 9, YELLOW_FILL, Font(name="Calibri", size=9, italic=True, color=NAVY), LEFT)
     ws.cell(row=4, column=7).value = (
-        "Base Price = Rate + this box. Rates stay as typed. Change 1 to 3 and all Base Prices use +3 (not compounding)."
+        "Base Price = Rate + this box (not compounding). Check: 100 + Daily Adj →"
+    )
+    apply_cell(
+        ws, 4, 10, "=100+$I$3",
+        font=Font(name="Calibri", size=11, bold=True, color=GREEN),
+        fill=YELLOW_FILL, alignment=CENTER, border=THICK_GOLD, num_fmt="0.00",
     )
     ws.row_dimensions[3].height = 28
     ws.row_dimensions[4].height = 28
 
     for r in range(1, 5):
         for c in range(7, 11):
-            ws.cell(row=r, column=c).border = THICK_GOLD
-            ws.cell(row=r, column=c).protection = UNLOCKED
+            cell = ws.cell(row=r, column=c)
+            cell.border = THICK_GOLD
+            cell.protection = UNLOCKED
     ws["I3"].border = THICK_GOLD
     ws["I3"].fill = YELLOW_FILL
     ws["I3"].font = INPUT_FONT
     ws["I3"].number_format = "0.00"
     ws["I3"].value = 0
+    ws["J4"].value = "=100+$I$3"
+    ws["J4"].number_format = "0.00"
+    ws["J4"].font = Font(name="Calibri", size=11, bold=True, color=GREEN)
+    ws["J4"].fill = YELLOW_FILL
+    ws["J4"].border = THICK_GOLD
+    ws["J4"].protection = UNLOCKED
 
 
 def add_size_help(ws: Worksheet):
@@ -455,6 +468,8 @@ def add_products_sheet(wb: Workbook, families: list[dict]):
         "4. Type 1 in Daily Adjustment to add Rs 1/kg to every Base Price on that sheet. Rate stays as typed (does not compound).",
         "5. To add a size: green empty rows — pick Shape, type Size (25 or 6x25), type Rate. Base Price fills in.",
         "6. Duplicate sizes for the same shape turn red — do not add twice.",
+        "7. Sharing: send this .xlsx file (WhatsApp/Drive/email). Recipient must open in Excel or Google Sheets and click Enable Editing if asked. Daily Adjustment works on every copy.",
+        "8. If Base Price does not change after editing I3: Formulas → Calculation Options → Automatic (or press F9).",
     ]
     for i, line in enumerate(instructions):
         r = 5 + i
@@ -486,11 +501,11 @@ def add_products_sheet(wb: Workbook, families: list[dict]):
             ws.cell(row=r, column=c).border = THICK_GOLD
             ws.cell(row=r, column=c).protection = UNLOCKED
 
-    header_row = 13
+    header_row = 16
     headers = ["#", "Grade", "Shapes on this sheet", "Size count", "Sheet name"]
     for c, h in enumerate(headers, 1):
         apply_cell(ws, header_row, c, h, font=COL_FONT, fill=HEADER_FILL, alignment=CENTER, border=THIN)
-    ws.freeze_panes = "A14"
+    ws.freeze_panes = "A17"
 
     for i, fam in enumerate(families, 1):
         r = header_row + i
@@ -508,7 +523,7 @@ def add_products_sheet(wb: Workbook, families: list[dict]):
     note_r = last + 2
     merge_fill(ws, note_r, 1, note_r, 5, CREAM_FILL, MUTED_FONT, LEFT)
     ws.cell(row=note_r, column=1).value = "Regenerate:  python3 scripts/generate_metals_price_workbook.py"
-    page_setup(ws, freeze="A14")
+    page_setup(ws, freeze="A17")
     unlock_sheet(ws, note_r + 2, 12)
 
 
@@ -641,9 +656,15 @@ def build_workbook(entries: list[dict]) -> Workbook:
     wb.properties.subject = "Editable steel price list by grade (all shapes on one sheet)"
     wb.properties.description = (
         "One sheet per grade. Base Price = Rate + Daily Adjustment (I3). "
-        "Master Daily Adjustment on Products. Add sizes in green rows. No password."
+        "Master Daily Adjustment on Products. Works on shared copies. No password."
     )
     wb.properties.company = "Jagetiya Metals"
+
+    # Force Excel/Sheets to recalculate when a shared copy is opened
+    wb.calculation.calcMode = "auto"
+    wb.calculation.fullCalcOnLoad = True
+    wb.calculation.calcCompleted = False
+    wb.calculation.forceFullCalc = True
 
     add_products_sheet(wb, families)
     for i, fam in enumerate(families):
@@ -711,9 +732,23 @@ def verify_workbook(path: Path, catalog_js: Path) -> dict:
         if ws[ADJ_CELL].value not in (0, 0.0):
             errors.append("%s I3 should be 0" % name)
 
+        # Base Price must be Rate + $I$3 so shared copies recalculate Daily Adj
         base = ws.cell(DATA_START, 5).value
         if not (isinstance(base, str) and sell_re.match(base.strip())):
             errors.append("%s Base Price formula should be Rate+$I$3, got %r" % (name, base))
+        check = ws["J4"].value
+        if check != "=100+$I$3":
+            errors.append("%s missing Daily Adj live check formula on J4: %r" % (name, check))
+
+        # Calculation settings (checked once via first sheet's workbook)
+        if fam is families[0]:
+            calc = wb.calculation
+            if getattr(calc, "calcMode", None) not in ("auto", "Auto", None):
+                # openpyxl may return 'auto'
+                if str(getattr(calc, "calcMode", "")).lower() != "auto":
+                    errors.append("Workbook calcMode should be auto, got %r" % calc.calcMode)
+            if getattr(calc, "fullCalcOnLoad", None) is not True:
+                errors.append("Workbook fullCalcOnLoad should be True for shared copies")
 
         shapes_found = set()
         for r in range(DATA_START, DATA_START + 4000):

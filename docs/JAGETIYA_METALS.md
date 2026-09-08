@@ -67,6 +67,8 @@ Example: `MS Bright` square, hex, and flat share one tab. There is no make/notes
 - On each **grade sheet**, the yellow **Daily Adjustment (Rs/kg)** box is at cell `I3`.
 - **Base Price = Rate + I3**. Type `1` to add Rs 1/kg to every Base Price on that sheet. Rate stays as typed (does not compound).
 - On the **Products** sheet, **MASTER DAILY ADJUSTMENT (optional)** is a notepad you can copy into each grade’s I3 when the same change applies.
+- The workbook is set to **automatic calculation** and full recalc on open, so Daily Adjustment works on shared copies (WhatsApp / Drive / email).
+- If Base Price does not update after changing I3: click **Enable Editing**, then **Formulas → Calculation Options → Automatic** (or press `F9`). The yellow box also shows a live check: `100 + Daily Adj`.
 
 ### How to add a size
 
