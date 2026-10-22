@@ -21,7 +21,7 @@
 <div class="tp on" id="p1">
   <div class="panel">
     <h2>Find Your Stock</h2>
-    <p>Select shape, enter size and / or grade. Shows live price for exact size matches.</p>
+    <p>Select shape, enter size and / or grade. Each size shows its own Rs/kg price.</p>
     <span class="lbl">STEP 1 - SELECT SHAPE</span>
     <div class="shapes" id="shapeRow">
       <button class="shbtn" data-shape="Round Bar">Round Bar</button>
@@ -86,7 +86,7 @@
 
     <div class="sm-card">
       <div class="sm-title">Add a Size to Existing Grade</div>
-      <div class="sm-sub">Round / hex / square: one size (side for square). Flat bars: thickness and width. Non-ferrous: optional size list.</div>
+      <div class="sm-sub">Round / hex / square: one size (side for square). Flat bars: thickness and width. Set the Rs/kg price for that size here — it shows on search immediately.</div>
       <div class="sm-row">
         <div class="sm-field">
           <span class="sm-lbl">SELECT GRADE</span>
@@ -104,21 +104,25 @@
           <span class="sm-lbl">WIDTH (mm)</span>
           <input id="smAddWidth" class="sm-in" type="number" placeholder="e.g. 25" min="0.1" max="600" step="0.1" style="width:140px;">
         </div>
+        <div class="col">
+          <span class="sm-lbl">PRICE (Rs/kg)</span>
+          <input id="smAddPrice" class="sm-in" type="number" placeholder="e.g. 68.50" min="0" step="0.01" style="width:130px;">
+        </div>
         <button id="btnSmAdd" style="padding:10px 20px;height:44px;background:#2E8B57;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;margin-top:20px;">+ Add</button>
       </div>
       <div id="smAddMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
     </div>
 
     <div class="sm-card">
-      <div class="sm-title">Remove a Size from a Grade</div>
-      <div class="sm-sub">Select a grade — all sizes appear below. Tap any size to remove it. Flat sizes show as thickness×width (e.g. 6x25).</div>
+      <div class="sm-title">Edit size prices</div>
+      <div class="sm-sub">Select a grade — every size is listed with its price. Change the Rs/kg and save, or remove a size. Flat sizes show as thickness×width (e.g. 6x25).</div>
       <div class="sm-row" style="margin-bottom:14px;">
         <div class="sm-field">
           <span class="sm-lbl">SELECT GRADE</span>
           <select id="smGrade2" class="sm-in" style="min-width:220px;cursor:pointer;"></select>
         </div>
       </div>
-      <div style="font-size:11px;font-weight:700;color:#C0392B;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:8px;">TAP A SIZE TO REMOVE IT:</div>
+      <div style="font-size:11px;font-weight:700;color:#1B3A5C;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:8px;">PRICE PER SIZE (Rs/kg):</div>
       <div id="smSizeChips" style="padding:12px;background:#F7F4EE;border-radius:8px;line-height:2.2;min-height:50px;">Select a grade above to see all sizes</div>
       <div id="smRemMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
     </div>
@@ -147,7 +151,7 @@
         </div>
         <div>
           <span class="sm-lbl" id="ngSizesHint">SIZES (comma separated)</span>
-          <input id="ngSizes" class="sm-in" type="text" placeholder="e.g. 16,20,25,32,40,50" style="width:240px;">
+          <input id="ngSizes" class="sm-in" type="text" placeholder="e.g. 16:68,20:72,25" style="width:260px;">
         </div>
         <button id="btnNgAdd" style="padding:10px 20px;background:#1B3A5C;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;">+ Add Grade</button>
       </div>

@@ -36,9 +36,9 @@ npx --yes serve public/metals
 
 | Tab | PIN | What it does |
 | --- | --- | --- |
-| Search Stock | none | Shape + size/grade search, nearest sizes, live prices |
+| Search Stock | none | Shape + size/grade search. Every listed size shows its own Rs/kg price |
 | Admin — Manage Prices | `1234` (changeable) | Per-size Rs/kg, CSV import/export |
-| Stock Manager | `2604` | Add/remove sizes, add grades (with optional chemistry), and rename grade names |
+| Stock Manager | `2604` | Add/remove sizes with a Rs/kg price on each size, add grades (with optional chemistry), and rename grade names |
 | Chemical Composition | none | Grade chemistry; compare up to 3 grades (synced with catalog grades) |
 
 Default PINs are product defaults from the original tool, not deployment secrets.
