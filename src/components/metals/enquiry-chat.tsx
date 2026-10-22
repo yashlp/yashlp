@@ -13,6 +13,7 @@ import {
   type ChatSession,
 } from "@/lib/metals/chat-flow";
 import { estimatePriceInr, parseSizeMm } from "@/lib/metals/catalog-data";
+import { listedPriceLine, readPriceEntries } from "@/lib/metals/size-prices";
 
 declare global {
   interface Window {
@@ -36,6 +37,15 @@ function renderText(text: string) {
 }
 
 function estimateLine(order: ChatSession["order"]): string {
+  if (typeof window !== "undefined" && order.grade && order.shape && order.sizeMm) {
+    const listed = listedPriceLine(
+      readPriceEntries(window.localStorage),
+      order.grade,
+      order.shape,
+      order.sizeMm
+    );
+    if (listed) return listed;
+  }
   const est = estimatePriceInr({
     grade: order.grade || "",
     sizeMm: parseSizeMm(order.sizeMm || "0"),

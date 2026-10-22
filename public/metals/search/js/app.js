@@ -8,7 +8,10 @@
   var DB = data.cloneBuiltin();
 
   function gp(g, sh, st, sz) { return storeApi.getPrice(store, g, sh, st, sz); }
-  function sp(g, sh, st, sz, p) { storeApi.setPrice(store, g, sh, st, sz, p); }
+  function sp(g, sh, st, sz, p) {
+    storeApi.setPrice(store, g, sh, st, sz, p);
+    try { window.dispatchEvent(new CustomEvent("jk-prices-updated")); } catch (_) {}
+  }
   function gc(g) { return data.gc(g); }
   function uniqSort(a) { return data.uniqSort(a || []); }
   function nearest(a, t, n) { return data.nearest(a || [], t, n); }

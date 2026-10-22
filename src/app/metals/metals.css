@@ -367,6 +367,72 @@
   margin-top: 0.5rem;
 }
 
+.nox-size-price {
+  margin: -0.35rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f5f5f5;
+  font-family: ui-monospace, monospace;
+}
+
+.nox-price-filters {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .nox-price-filters {
+    grid-template-columns: 1fr 1.2fr 0.8fr;
+    align-items: end;
+  }
+}
+
+.nox-price-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  max-height: 28rem;
+  overflow-y: auto;
+  border: 1px solid var(--nox-border);
+  background: #0a0a0a;
+  padding: 0.5rem;
+}
+
+.nox-price-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid transparent;
+}
+
+.nox-price-row.exact {
+  background: #14532d;
+  border-color: #166534;
+}
+
+.nox-price-row.near {
+  background: #1c1917;
+  border-color: #44403c;
+}
+
+.nox-price-size {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.nox-price-val {
+  font-size: 0.8rem;
+  color: #d4d4d4;
+  text-align: right;
+}
+
 .nox-card-shapes {
   font-size: 0.75rem;
   color: #525252;

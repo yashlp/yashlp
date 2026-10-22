@@ -5,6 +5,7 @@ import { GetMetalSheet } from "@/components/metals/get-metal-sheet";
 import { EnquiryChat, ChatLauncher } from "@/components/metals/enquiry-chat";
 import { NoxAbout } from "@/components/metals/nox-about";
 import { NoxChemistry } from "@/components/metals/nox-chemistry";
+import { NoxSizePrices } from "@/components/metals/nox-size-prices";
 import {
   NoxNav,
   NoxNewsBanner,
@@ -24,6 +25,7 @@ export default function MetalsHomePage() {
         <NoxHero />
         <NoxAbout />
         <NoxCatalog />
+        <NoxSizePrices />
         <NoxChemistry />
         <NoxNestSection />
         <NoxInstantQuote />

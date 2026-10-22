@@ -104,6 +104,7 @@ export function NoxNav() {
         <nav className="nox-nav-links">
           <a href="#about">About</a>
           <a href="#products">Products</a>
+          <a href="#prices">Prices</a>
           <a href="#chemistry">Chemistry</a>
           <a href="#instant-quote">Enquire</a>
           <a href={`tel:${CONTACT.phone.replace(/[^+\d]/g, "")}`}>Contact</a>
@@ -187,6 +188,7 @@ export function NoxFooter() {
         <div className="nox-footer-links">
           <a href="#about">About</a>
           <a href="#products">Products</a>
+          <a href="#prices">Prices</a>
           <a href="#chemistry">Chemistry</a>
           <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
           <a href={`tel:${CONTACT.phone.replace(/[^+\d]/g, "")}`}>{CONTACT.phone}</a>

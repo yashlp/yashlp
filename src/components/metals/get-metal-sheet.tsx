@@ -4,20 +4,17 @@ import { useEffect, useMemo } from "react";
 import { X } from "lucide-react";
 import { useMetals } from "./metals-provider";
 import { SHAPES } from "@/lib/metals/catalog-data";
-import {
-  getAllGrades,
-  getGradesForShape,
-  getShapesForGrade,
-  getSizesForGradeAndShape,
-} from "@/lib/metals/catalog-queries";
+import { getAllGrades, getShapesForGrade } from "@/lib/metals/catalog-queries";
+import { useLiveStock } from "@/lib/metals/use-live-stock";
 
 export function GetMetalSheet() {
   const { sheetOpen, enquiry, setEnquiry, closeGetMetal, submitEnquiry } = useMetals();
+  const { gradesFor, sizesFor, priceText } = useLiveStock();
 
   const gradeOptions = useMemo(() => {
-    if (enquiry.shape) return getGradesForShape(enquiry.shape);
+    if (enquiry.shape) return gradesFor(enquiry.shape);
     return getAllGrades();
-  }, [enquiry.shape]);
+  }, [enquiry.shape, gradesFor]);
 
   const shapeOptions = useMemo(() => {
     if (enquiry.grade) return getShapesForGrade(enquiry.grade);
@@ -25,8 +22,8 @@ export function GetMetalSheet() {
   }, [enquiry.grade]);
 
   const sizeOptions = useMemo(
-    () => getSizesForGradeAndShape(enquiry.grade, enquiry.shape),
-    [enquiry.grade, enquiry.shape]
+    () => sizesFor(enquiry.shape, enquiry.grade),
+    [enquiry.grade, enquiry.shape, sizesFor]
   );
 
   useEffect(() => {
@@ -143,14 +140,23 @@ export function GetMetalSheet() {
                     ? "No sizes listed"
                     : "Select size"}
               </option>
-              {sizeOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                  {s !== "Contact for size" ? " mm" : ""}
-                </option>
-              ))}
+              {sizeOptions.map((s) => {
+                const price = priceText(enquiry.shape, enquiry.grade, s);
+                return (
+                  <option key={s} value={s}>
+                    {s}
+                    {s !== "Contact for size" ? " mm" : ""}
+                    {price ? ` — ${price}` : ""}
+                  </option>
+                );
+              })}
             </select>
           </label>
+          {enquiry.sizeMm ? (
+            <p className="nox-size-price">
+              {priceText(enquiry.shape, enquiry.grade, enquiry.sizeMm) || "Price not set for this size"}
+            </p>
+          ) : null}
 
           <label className="nox-field">
             <span>Length (mm)</span>
