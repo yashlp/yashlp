@@ -133,7 +133,7 @@ export function processChatTurn(
 ): ChatTurnResult {
   const text = rawText.trim();
   const agentReplies: AgentReply[] = [];
-  let next: ChatSession = {
+  const next: ChatSession = {
     ...session,
     order: { ...session.order },
   };
