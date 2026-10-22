@@ -51,6 +51,10 @@ See **[DEPLOY.md](./DEPLOY.md)** for going live on Vercel + Neon.
 | Backend | Next.js API Routes |
 | Database | SQLite + Prisma ORM |
 
+## Jagetiya Metals
+
+Stock search and price manager lives at [`/metals`](./public/metals/index.html) when the Next.js app is running (`npm run dev:fast` → [http://localhost:3000/metals](http://localhost:3000/metals)). See [`docs/JAGETIYA_METALS.md`](./docs/JAGETIYA_METALS.md).
+
 ## Documentation
 
 Master product spec: [`CivicLens_Master_PRD.md`](./CivicLens_Master_PRD.md)
