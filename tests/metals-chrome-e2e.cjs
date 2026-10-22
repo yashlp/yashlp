@@ -282,7 +282,7 @@ async function main() {
     await sleep(120);
     const chips = await cdp.eval("document.getElementById('smSizeChips').innerText");
     assert(chips.includes("6x28"), "remove chips show 6x28: " + chips);
-    await cdp.eval(`[...document.querySelectorAll('#smSizeChips .rem-chip')].find(c => c.textContent.trim()==='6x28').click()`);
+    await cdp.eval(`[...document.querySelectorAll('#smSizeChips .rem-chip')].find(c => c.getAttribute('data-label')==='6x28').click()`);
     await sleep(200);
     await cdp.send("Page.navigate", { url: base + "/index.html" });
     await sleep(700);

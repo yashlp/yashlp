@@ -8,7 +8,10 @@
   var DB = data.cloneBuiltin();
 
   function gp(g, sh, st, sz) { return storeApi.getPrice(store, g, sh, st, sz); }
-  function sp(g, sh, st, sz, p) { storeApi.setPrice(store, g, sh, st, sz, p); }
+  function sp(g, sh, st, sz, p) {
+    storeApi.setPrice(store, g, sh, st, sz, p);
+    try { window.dispatchEvent(new CustomEvent("jk-prices-updated")); } catch (_) {}
+  }
   function gc(g) { return data.gc(g); }
   function uniqSort(a) { return data.uniqSort(a || []); }
   function nearest(a, t, n) { return data.nearest(a || [], t, n); }
@@ -16,6 +19,8 @@
 
   function persist() {
     storeApi.saveCustom(store, custom);
+    try { window.dispatchEvent(new CustomEvent("jk-catalog-updated")); } catch (_) {}
+    renderProducts();
   }
 
   function bootCatalog() {
@@ -26,13 +31,48 @@
 
   function phtml(g, sh, st, sz) {
     var p = gp(g, sh, st, String(sz));
-    if (p === null) return '<div class="noprice">No price set for ' + sz + ' mm. Set it in Admin tab.</div>';
+    if (p === null) return '<div class="noprice">No price set for ' + sz + ' mm. Add it in Stock Manager.</div>';
     return '<div class="prow"><span class="plbl">PRICE - ' + sz + ' mm</span><span class="pval">Rs ' + p.toFixed(2) + '<small>/kg</small></span></div>';
   }
   function pfhtml(g, sh, st, t, w) {
     var p = gp(g, sh, st, t + "x" + w);
     if (p === null) return "";
     return ' <b style="color:#C8960C;font-size:10px">Rs ' + p.toFixed(2) + '/kg</b>';
+  }
+  function priceBadge(g, sh, st, sz) {
+    var p = gp(g, sh, st, String(sz));
+    if (p === null || isNaN(p)) return "";
+    return '<span class="szp">Rs ' + p.toFixed(2) + '/kg</span>';
+  }
+  function readOptionalPrice(raw) {
+    var t = String(raw == null ? "" : raw).trim();
+    if (!t) return { ok: true, price: null };
+    var n = parseFloat(t);
+    if (isNaN(n) || n < 0) return { ok: false, error: "Enter a valid price in Rs/kg, or leave it blank." };
+    return { ok: true, price: n };
+  }
+  function applyPricesFromRaw(g, sh, st, raw, isFlat) {
+    String(raw || "").split(",").forEach(function (part) {
+      var token = part.trim();
+      if (!token || token.indexOf(":") === -1) return;
+      var bits = token.split(":");
+      var price = parseFloat(String(bits[1] || "").trim());
+      if (isNaN(price) || price < 0) return;
+      var sizeTok = bits[0].trim();
+      var key;
+      if (isFlat) {
+        var m = sizeTok.match(/^(\d+(?:\.\d+)?)\s*[xX*]\s*(\d+(?:\.\d+)?)$/);
+        if (!m) return;
+        var wid = parseFloat(m[2]);
+        var widLabel = Math.abs(wid - Math.round(wid)) < 0.0001 ? String(Math.round(wid)) : String(wid);
+        key = storeApi.flatKey(m[1]) + "x" + widLabel;
+      } else {
+        var n = parseFloat(sizeTok);
+        if (isNaN(n)) return;
+        key = String(n);
+      }
+      sp(g, sh, st, key, price);
+    });
   }
 
   function setSbar(msg, cls) {
@@ -141,8 +181,8 @@
         if (!nb.b.length && !nb.a.length) return null;
         nr = true;
         var chips = "";
-        for (var i = 0; i < nb.b.length; i++) chips += '<span class="nc" data-f="inSize" data-v="' + nb.b[i] + '">' + nb.b[i] + ' (below)</span>';
-        for (var j = 0; j < nb.a.length; j++) chips += '<span class="nc" data-f="inSize" data-v="' + nb.a[j] + '">' + nb.a[j] + ' (above)</span>';
+        for (var i = 0; i < nb.b.length; i++) chips += '<span class="nc" data-f="inSize" data-v="' + nb.b[i] + '">' + nb.b[i] + ' (below) ' + priceBadge(e.g, sh, e.s, nb.b[i]) + '</span>';
+        for (var j = 0; j < nb.a.length; j++) chips += '<span class="nc" data-f="inSize" data-v="' + nb.a[j] + '">' + nb.a[j] + ' (above) ' + priceBadge(e.g, sh, e.s, nb.a[j]) + '</span>';
         mh = '<div class="mno"><span class="ml">Size <b>' + t + ' mm</b> not available in this grade</span></div>' +
           '<div class="mnear"><span class="ml">Nearest available:</span><div class="nr">' + chips + '</div></div>';
       }
@@ -152,15 +192,15 @@
     for (var k = 0; k < sz.length; k++) {
       var cls = "sz";
       if (t !== null) { if (sz[k] === t) cls = "sz ex"; else if (nb2.b.indexOf(sz[k]) !== -1 || nb2.a.indexOf(sz[k]) !== -1) cls = "sz nr2"; }
-      ac += '<span class="' + cls + '" data-v="' + sz[k] + '">' + sz[k] + '</span>';
+      ac += '<span class="' + cls + '" data-v="' + sz[k] + '">' + sz[k] + priceBadge(e.g, sh, e.s, sz[k]) + '</span>';
     }
     var mk = e.m ? '<span class="tag">' + e.m + '</span>' : "";
     var html = '<div class="card"><div class="ch" style="background:' + col + '18;border-bottom:2px solid ' + col + '44">' +
       '<span class="gbadge" style="background:' + col + '">' + e.g + '</span>' +
       '<div class="meta"><span class="tag sh">' + sh + '</span><span class="tag">' + e.s + '</span>' + mk + '</div></div>' +
       '<div class="cb">' + mh +
-      '<span class="togs">Show all sizes (' + sz.length + ')</span>' +
-      '<div class="cbox" data-c="' + sz.length + '">' + ac + '</div>' +
+      '<span class="togs">' + (t !== null ? "Hide all sizes" : "Show all sizes (" + sz.length + ")") + '</span>' +
+      '<div class="cbox' + (t !== null ? " on" : "") + '" data-c="' + sz.length + '">' + ac + '</div>' +
       '</div></div>';
     return { html: html, ex: ex, nr: nr };
   }
@@ -185,14 +225,19 @@
         else if (ws.indexOf(wv) === -1) { var nw = nearest(ws, wv, 2); if ((nw.b.length || nw.a.length) && !isnT) { nr = true; rc = "rn"; } }
         for (var wi = 0; wi < ws.length; wi++) {
           var w = ws[wi];
-          if (w === wv && !isnT) { var fp = pfhtml(e.g, sh, e.s, t, w); wh += '<span class="we">' + w + fp + '</span> '; }
+          var fp = pfhtml(e.g, sh, e.s, t, w);
+          if (w === wv && !isnT) wh += '<span class="we">' + w + fp + '</span> ';
           else {
             var nw2 = nearest(ws, wv, 2);
-            if ((nw2.b.indexOf(w) !== -1 || nw2.a.indexOf(w) !== -1) && !isnT) wh += '<span class="wn">' + w + '</span> ';
-            else wh += '<span style="color:#999">' + w + '</span> ';
+            if ((nw2.b.indexOf(w) !== -1 || nw2.a.indexOf(w) !== -1) && !isnT) wh += '<span class="wn">' + w + fp + '</span> ';
+            else wh += '<span class="fw">' + w + fp + '</span> ';
           }
         }
-      } else { wh = ws.join(", "); }
+      } else {
+        for (var wj = 0; wj < ws.length; wj++) {
+          wh += '<span class="fw">' + ws[wj] + pfhtml(e.g, sh, e.s, t, ws[wj]) + '</span> ';
+        }
+      }
       var tl = isnT ? '<span style="color:#9A7D0A;font-weight:700">' + t + ' (nearest)</span>' : '<b>' + t + '</b>';
       rows += '<tr class="' + rc + '"><td>' + tl + ' mm</td><td>' + wh + '</td></tr>';
     }
@@ -335,6 +380,16 @@
     return list[idx];
   }
 
+  function sizeEditRow(label, szKey, price, attrs) {
+    var val = price !== null && !isNaN(price) ? price : "";
+    return '<div class="sz-edit-row">' +
+      '<span class="sz-edit-label">' + label + '</span>' +
+      '<input class="sz-price-in" type="number" min="0" step="0.01" placeholder="Rs/kg" value="' + val + '" data-szkey="' + szKey + '">' +
+      '<button type="button" class="sz-price-save" ' + attrs + ' data-szkey="' + szKey + '">Save price</button>' +
+      '<button type="button" class="rem-chip" data-label="' + label + '" ' + attrs + '>Remove</button>' +
+      '</div>';
+  }
+
   function refreshChips() {
     var item = selectedGrade("smGrade2");
     var box = document.getElementById("smSizeChips");
@@ -342,23 +397,47 @@
     var ent = storeApi.findEntry(DB, item.sh, item.g, item.s);
     if (!ent) { box.innerHTML = "No sizes found."; return; }
     var h = "";
+    var base = 'data-sh="' + item.sh + '" data-g="' + encodeURIComponent(item.g) + '" data-s="' + encodeURIComponent(item.s) + '"';
     if (ent.flat) {
       var chips = storeApi.flatChips(ent);
       if (!chips.length) { box.innerHTML = "<span class='hint-muted'>No flat sizes. Add thickness + width above.</span>"; return; }
       for (var i = 0; i < chips.length; i++) {
         var c = chips[i];
-        h += '<span class="rem-chip" data-kind="flat" data-sh="' + item.sh + '" data-g="' + encodeURIComponent(item.g) + '" data-s="' + encodeURIComponent(item.s) + '" data-thk="' + c.thk + '" data-wid="' + c.width + '">' + c.label + '</span>';
+        var fp = gp(item.g, item.sh, item.s, c.label);
+        h += sizeEditRow(c.label, c.label, fp, base + ' data-kind="flat" data-thk="' + c.thk + '" data-wid="' + c.width + '"');
       }
     } else if (ent.sz && ent.sz.length) {
       var sizes = uniqSort(ent.sz);
       for (var j = 0; j < sizes.length; j++) {
-        h += '<span class="rem-chip" data-kind="sz" data-sh="' + item.sh + '" data-g="' + encodeURIComponent(item.g) + '" data-s="' + encodeURIComponent(item.s) + '" data-sz="' + sizes[j] + '">' + sizes[j] + '</span>';
+        var spv = gp(item.g, item.sh, item.s, String(sizes[j]));
+        h += sizeEditRow(sizes[j] + " mm", String(sizes[j]), spv, base + ' data-kind="sz" data-sz="' + sizes[j] + '"');
       }
     } else {
       box.innerHTML = "<span class='hint-muted'>Note-only grade (no sizes). Add a size above to start a size list.</span>";
       return;
     }
-    box.innerHTML = h;
+    box.innerHTML = '<div class="sz-edit">' + h + '</div>';
+    var saves = box.getElementsByClassName("sz-price-save");
+    for (var svi = 0; svi < saves.length; svi++) {
+      saves[svi].addEventListener("click", function () {
+        var row = this.parentNode;
+        var input = row ? row.querySelector(".sz-price-in") : null;
+        var parsed = readOptionalPrice(input ? input.value : "");
+        if (!parsed.ok || parsed.price === null) {
+          showMsg("smRemMsg", parsed.ok ? "Enter a price to save." : parsed.error, false);
+          return;
+        }
+        var g = decodeURIComponent(this.getAttribute("data-g"));
+        var sh = this.getAttribute("data-sh");
+        var s = decodeURIComponent(this.getAttribute("data-s"));
+        sp(g, sh, s, this.getAttribute("data-szkey"), parsed.price);
+        this.className = "sz-price-save done";
+        this.innerHTML = "Saved";
+        showMsg("smRemMsg", "Price saved for " + this.getAttribute("data-szkey") + " — Rs " + parsed.price.toFixed(2) + "/kg", true);
+        var btn = this;
+        setTimeout(function () { btn.className = "sz-price-save"; btn.innerHTML = "Save price"; }, 1200);
+      });
+    }
     var nodes = box.getElementsByClassName("rem-chip");
     for (var t = 0; t < nodes.length; t++) {
       nodes[t].addEventListener("click", function () {
@@ -440,13 +519,13 @@
     var input = document.getElementById("ngSizes");
     if (shape === "Flat Bar") {
       hint.textContent = "THICKNESSxWIDTH PAIRS";
-      input.placeholder = "e.g. 6x25,6x32,10x50";
+      input.placeholder = "e.g. 6x25:70,6x32:72,10x50";
     } else if (shape === "Non-Ferrous") {
-      hint.textContent = "SIZES (optional)";
-      input.placeholder = "optional, e.g. 12,16,20";
+      hint.textContent = "SIZES (optional, size:price)";
+      input.placeholder = "optional, e.g. 12:90,16:92";
     } else {
-      hint.textContent = "SIZES (comma separated)";
-      input.placeholder = "e.g. 16,20,25,32,40,50";
+      hint.textContent = "SIZES (size or size:price)";
+      input.placeholder = "e.g. 16:68,20:72,25";
     }
   }
 
@@ -461,42 +540,67 @@
     document.getElementById("btnSmAdd").addEventListener("click", function () {
       var item = selectedGrade("smGrade1");
       if (!item) { showMsg("smAddMsg", "Select a grade first.", false); return; }
+      var priced = readOptionalPrice(document.getElementById("smAddPrice").value);
+      if (!priced.ok) { showMsg("smAddMsg", priced.error, false); return; }
       var res;
+      var sizeKey;
       if (item.sh === "Flat Bar") {
         var thk = parseFloat(document.getElementById("smAddThickness").value);
         var wid = parseFloat(document.getElementById("smAddWidth").value);
         res = storeApi.addFlatSize(DB, custom, item.sh, item.g, item.s, thk, wid);
         if (!res.ok) { showMsg("smAddMsg", res.error, false); return; }
-        persist();
+        sizeKey = res.label;
         document.getElementById("smAddThickness").value = "";
         document.getElementById("smAddWidth").value = "";
-        showMsg("smAddMsg", "Added " + res.label + " to " + res.ent.g + " successfully!", true);
       } else {
         var szVal = parseFloat(document.getElementById("smAddSize").value);
         res = storeApi.addSize(DB, custom, item.sh, item.g, item.s, szVal);
         if (!res.ok) { showMsg("smAddMsg", res.error, false); return; }
-        persist();
+        sizeKey = String(res.size);
         document.getElementById("smAddSize").value = "";
-        showMsg("smAddMsg", "Added " + res.size + " mm to " + res.ent.g + " successfully!", true);
       }
+      var priceNote = "";
+      if (priced.price !== null) {
+        sp(item.g, item.sh, item.s, sizeKey, priced.price);
+        priceNote = " at Rs " + priced.price.toFixed(2) + "/kg";
+      }
+      document.getElementById("smAddPrice").value = "";
+      persist();
+      showMsg("smAddMsg", "Added " + (res.label || (res.size + " mm")) + " to " + res.ent.g + priceNote + "!", true);
       populateSMDropdowns();
     });
 
     document.getElementById("btnNgAdd").addEventListener("click", function () {
+      var sizesRaw = document.getElementById("ngSizes").value;
+      var sizesOnly = String(sizesRaw || "").replace(/:\s*\d+(?:\.\d+)?/g, "");
       var res = storeApi.addNewGrade(DB, custom, {
         g: document.getElementById("ngName").value,
         sh: document.getElementById("ngShape").value,
         s: document.getElementById("ngSub").value,
-        sizesRaw: document.getElementById("ngSizes").value
+        sizesRaw: sizesOnly,
+        chem: {
+          C: document.getElementById("ngChemC").value,
+          Mn: document.getElementById("ngChemMn").value,
+          Si: document.getElementById("ngChemSi").value,
+          Cr: document.getElementById("ngChemCr").value,
+          Ni: document.getElementById("ngChemNi").value,
+          Mo: document.getElementById("ngChemMo").value
+        }
       });
       if (!res.ok) { showMsg("ngMsg", res.error, false); return; }
+      applyPricesFromRaw(res.rec.g, res.rec.sh, res.rec.s, sizesRaw, res.rec.sh === "Flat Bar");
       persist();
       document.getElementById("ngName").value = "";
       document.getElementById("ngSub").value = "";
       document.getElementById("ngSizes").value = "";
+      ["ngChemC", "ngChemMn", "ngChemSi", "ngChemCr", "ngChemNi", "ngChemMo"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.value = "";
+      });
       var extra = res.rec.note ? " (note-only)" : (res.rec.flat ? " with flat sizes" : " with " + (res.rec.sz || []).length + " sizes");
       showMsg("ngMsg", "Grade " + res.rec.g + " (" + res.rec.sh + ") added" + extra + "!", true);
       populateSMDropdowns(res.rec.sh + "|" + res.rec.g + "|" + res.rec.s);
+      refreshChemComposition();
     });
 
     document.getElementById("btnSmRename").addEventListener("click", function () {
@@ -615,9 +719,14 @@
   }
 
   var CHEM_COMP = data.CHEM_COMP;
-  var chemGrades = Object.keys(CHEM_COMP).sort();
+  var chemInited = false;
+
+  function getChemGrades() {
+    return storeApi.listDbGrades(DB, SL);
+  }
+
   function renderChemTable(grades) {
-    var elem = ["C", "Mn", "Si", "Cr", "Ni", "Mo"];
+    var elem = storeApi.CHEM_ELEMENTS;
     var h = '<table style="width:100%;border-collapse:collapse;font-family:Georgia,serif;"><tr style="background:#2E6DA4;color:#fff;">';
     h += '<th style="padding:10px;text-align:left;border:1px solid #ccc;font-size:13px;font-weight:700;">Element</th>';
     for (var g = 0; g < grades.length; g++) h += '<th style="padding:10px;text-align:center;border:1px solid #ccc;font-size:13px;font-weight:700;">' + grades[g] + '</th>';
@@ -625,47 +734,112 @@
     for (var e = 0; e < elem.length; e++) {
       h += '<tr style="background:' + (e % 2 ? "#F7F4EE" : "#fff") + '">';
       h += '<td style="padding:10px;border:1px solid #ccc;font-size:13px;font-weight:600;color:#1B3A5C;">' + elem[e] + '</td>';
-      for (var gi = 0; gi < grades.length; gi++) h += '<td style="padding:10px;border:1px solid #ccc;text-align:center;font-size:13px;color:#145A32;">' + CHEM_COMP[grades[gi]][elem[e]] + '%</td>';
+      for (var gi = 0; gi < grades.length; gi++) {
+        var row = storeApi.resolveChem(grades[gi], CHEM_COMP, custom.chemComp || {});
+        h += '<td style="padding:10px;border:1px solid #ccc;text-align:center;font-size:13px;color:#145A32;">' + (row[elem[e]] || "—") + '%</td>';
+      }
       h += '</tr>';
     }
     h += '</table>';
     return h;
   }
-  var chemInited = false;
-  function initChemComposition() {
-    if (chemInited) return;
-    chemInited = true;
+
+  function refreshChemComposition() {
+    var chemGrades = getChemGrades();
     var sel = document.getElementById("chemGrade");
-    for (var i = 0; i < chemGrades.length; i++) {
-      var o = document.createElement("option"); o.value = i; o.text = chemGrades[i]; sel.appendChild(o);
-    }
-    sel.addEventListener("change", function () {
-      document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[parseInt(this.value, 10)]]);
-    });
-    document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[0]]);
     var cbox = document.getElementById("chemCheckboxes");
+    if (!sel || !cbox) return;
+    var prevSel = sel.value;
+    var checked = {};
+    var chks = cbox.querySelectorAll("input[type='checkbox']");
+    for (var i = 0; i < chks.length; i++) {
+      if (chks[i].checked) checked[chks[i].getAttribute("data-grade")] = true;
+    }
+    sel.innerHTML = "";
+    cbox.innerHTML = "";
     for (var j = 0; j < chemGrades.length; j++) {
+      var o = document.createElement("option");
+      o.value = String(j);
+      o.text = chemGrades[j];
+      sel.appendChild(o);
       var lbl = document.createElement("label");
       lbl.style.display = "flex"; lbl.style.alignItems = "center"; lbl.style.gap = "8px"; lbl.style.padding = "8px";
       lbl.style.cursor = "pointer"; lbl.style.borderRadius = "6px"; lbl.style.background = "#F7F4EE";
       lbl.style.fontSize = "13px"; lbl.style.fontFamily = "Georgia,serif"; lbl.style.fontWeight = "600"; lbl.style.color = "#1B3A5C";
-      var chk = document.createElement("input"); chk.type = "checkbox"; chk.value = j; chk.style.width = "18px"; chk.style.height = "18px"; chk.style.cursor = "pointer";
+      var chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.value = String(j);
+      chk.setAttribute("data-grade", chemGrades[j]);
+      chk.style.width = "18px"; chk.style.height = "18px"; chk.style.cursor = "pointer";
+      if (checked[chemGrades[j]]) chk.checked = true;
       var sp = document.createElement("span"); sp.textContent = chemGrades[j];
       lbl.appendChild(chk); lbl.appendChild(sp); cbox.appendChild(lbl);
     }
+    if (chemGrades.length) {
+      var idx = Math.min(parseInt(prevSel, 10) || 0, chemGrades.length - 1);
+      if (idx < 0) idx = 0;
+      sel.value = String(idx);
+      document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[idx]]);
+    } else {
+      document.getElementById("chemIndividual").innerHTML = '<span style="color:#C0392B;font-size:13px;">No grades in catalog.</span>';
+    }
+  }
+
+  function initChemComposition() {
+    if (chemInited) {
+      refreshChemComposition();
+      return;
+    }
+    chemInited = true;
+    var sel = document.getElementById("chemGrade");
+    sel.addEventListener("change", function () {
+      var chemGrades = getChemGrades();
+      document.getElementById("chemIndividual").innerHTML = renderChemTable([chemGrades[parseInt(this.value, 10)]]);
+    });
     document.getElementById("btnShowCompare").addEventListener("click", function () {
+      var chemGrades = getChemGrades();
       var chks = document.querySelectorAll("#chemCheckboxes input[type='checkbox']");
       var selG = [];
-      for (var i = 0; i < chks.length; i++) { if (chks[i].checked) selG.push(chemGrades[parseInt(chks[i].value, 10)]); }
+      for (var i = 0; i < chks.length; i++) {
+        if (chks[i].checked) selG.push(chks[i].getAttribute("data-grade"));
+      }
       if (selG.length === 0) { document.getElementById("chemCompare").innerHTML = '<span style="color:#C0392B;font-size:13px;">Select at least 1 grade.</span>'; return; }
       if (selG.length > 3) { document.getElementById("chemCompare").innerHTML = '<span style="color:#C0392B;font-size:13px;">Max 3 grades allowed.</span>'; return; }
       document.getElementById("chemCompare").innerHTML = renderChemTable(selG);
     });
+    refreshChemComposition();
+  }
+
+  function renderProducts() {
+    var host = document.getElementById("productList");
+    if (!host || !DB) return;
+    var html = "";
+    for (var si = 0; si < SL.length; si++) {
+      var sh = SL[si];
+      var ents = DB[sh] || [];
+      if (!ents.length) continue;
+      html += '<div class="prod-shape"><h3>' + sh + '</h3>';
+      for (var i = 0; i < ents.length; i++) {
+        var e = ents[i];
+        var detail = "Contact for sizes";
+        if (e.flat) {
+          var thks = Object.keys(e.flat);
+          detail = thks.length + (thks.length === 1 ? " thickness" : " thicknesses");
+        } else if (e.sz && e.sz.length) {
+          detail = e.sz.length + (e.sz.length === 1 ? " size" : " sizes");
+        }
+        var sub = e.s ? String(e.s) : "";
+        var make = e.m ? " · " + e.m : "";
+        html += '<div class="prod-grade"><div><b>' + e.g + '</b><div class="prod-meta">' + sub + make + '</div></div><div class="prod-meta">' + detail + '</div></div>';
+      }
+      html += "</div>";
+    }
+    host.innerHTML = html || '<p class="prod-meta">No grades in the catalog yet.</p>';
   }
 
   function showTab(id) {
-    var panels = ["p1", "p2", "p3", "p4"];
-    var tabs = ["t1", "t2", "t3", "t4"];
+    var panels = ["p1", "p2", "p3", "p4", "p5", "p6"];
+    var tabs = ["t1", "t2", "t3", "t4", "t5", "t6"];
     for (var i = 0; i < panels.length; i++) {
       document.getElementById(panels[i]).className = panels[i] === id ? "tp on" : "tp";
     }
@@ -694,6 +868,7 @@
 
   window.addEventListener("DOMContentLoaded", function () {
     bootCatalog();
+    renderProducts();
     showIdle();
     initPins();
 
@@ -709,6 +884,11 @@
     document.getElementById("t4").addEventListener("click", function () {
       showTab("p4");
       initChemComposition();
+    });
+    document.getElementById("t5").addEventListener("click", function () { showTab("p5"); });
+    document.getElementById("t6").addEventListener("click", function () {
+      showTab("p6");
+      renderProducts();
     });
 
     var sbs = document.getElementById("shapeRow").getElementsByTagName("button");

@@ -9,19 +9,51 @@
 <body>
 <div class="hdr">
   <div class="hdr-l"><h1>JAGETIYA METALS</h1><p>STOCK SEARCH &amp; PRICE MANAGER</p></div>
-  <div class="hdr-r">+91-9824012344 | Kamlesh@jkmetal.in<br>502/1-A G.I.D.C., Makarpura, Vadodara</div>
+  <div class="hdr-r">+91 9558812335 | Kamlesh@jkmetal.in<br>502/1-A G.I.D.C., Makarpura, Vadodara</div>
 </div>
 <div class="tabs">
   <button class="tbtn on" id="t1">Search Stock</button>
+  <button class="tbtn" id="t5">About</button>
+  <button class="tbtn" id="t6">Products</button>
+  <button class="tbtn" id="t4">Chemical Composition</button>
   <button class="tbtn" id="t2">Admin - Manage Prices</button>
   <button class="tbtn" id="t3">Stock Manager</button>
-  <button class="tbtn" id="t4">Chemical Composition</button>
+</div>
+
+<div class="tp" id="p5">
+  <div class="awrap about-wrap">
+    <div class="ahead"><div><h2>About Jagetiya Metals</h2><p>Vadodara · founded 1990 as Dashera</p></div></div>
+    <p class="about-lead">Pioneering excellence in ferrous and non-ferrous metal supply for over three decades, delivering unmatched quality and reliability to the steel industry.</p>
+    <div class="about-body">
+      <p>Founded in 1990 as Dashera, Jagetiya Metals has grown into a cornerstone of Gujarat's steel industry, supplying premium ferrous and non-ferrous metals to industrial powerhouses across Makarpura G.I.D.C., Baroda, Por, Halol, Savali, and Panchmahal District.</p>
+      <p>Jagetiya Metals combines decades of expertise with a commitment to innovation, delivering tailored metal procurement solutions that meet the rigorous demands of modern industry. Our reputation for quality, precision, and reliability has solidified our position as a trusted partner.</p>
+      <p>At Jagetiya Metals, we prioritize operational excellence, ensuring timely delivery and stringent quality standards to support the success of our clients across Gujarat and beyond.</p>
+    </div>
+    <div class="about-stats">
+      <div class="about-stat"><h3>30+ Years</h3><div class="sub">Industry Leadership</div><p>Over three decades of expertise in delivering high-quality metals and industrial solutions.</p></div>
+      <div class="about-stat"><h3>Strategic Reach</h3><div class="sub">Industrial Hubs</div><p>Serving Makarpura G.I.D.C., Baroda, Por, Halol, Savali, and Panchmahal District.</p></div>
+      <div class="about-stat"><h3>Trusted Partner</h3><div class="sub">Client Relationships</div><p>Building enduring partnerships with industries through reliability and trust.</p></div>
+      <div class="about-stat"><h3>Certified Excellence</h3><div class="sub">Certified Standards</div><p>Delivering premium metals with testing certificates for industrial excellence.</p></div>
+    </div>
+    <div class="about-cut">
+      <h3>Cutting Job Work Excellence</h3>
+      <p>All types of precision cutting with hydraulic bandsaw machines, from 16 mm to 550 mm capacity.</p>
+      <div class="about-pills"><span>Hydraulic Bandsaw Technology</span><span>16 mm – 550 mm Capacity</span><span>Precision Cut Quality</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="tp" id="p6">
+  <div class="awrap">
+    <div class="ahead"><div><h2>Products</h2><p>Grades and shapes from the live catalog. A grade added in Stock Manager shows up here and in Chemical Composition.</p></div></div>
+    <div id="productList" class="product-list">Loading catalog…</div>
+  </div>
 </div>
 
 <div class="tp on" id="p1">
   <div class="panel">
     <h2>Find Your Stock</h2>
-    <p>Select shape, enter size and / or grade. Shows live price for exact size matches.</p>
+    <p>Select shape, enter size and / or grade. Each size shows its own Rs/kg price.</p>
     <span class="lbl">STEP 1 - SELECT SHAPE</span>
     <div class="shapes" id="shapeRow">
       <button class="shbtn" data-shape="Round Bar">Round Bar</button>
@@ -86,7 +118,7 @@
 
     <div class="sm-card">
       <div class="sm-title">Add a Size to Existing Grade</div>
-      <div class="sm-sub">Round / hex / square: one size (side for square). Flat bars: thickness and width. Non-ferrous: optional size list.</div>
+      <div class="sm-sub">Round / hex / square: one size (side for square). Flat bars: thickness and width. Set the Rs/kg price for that size here — it shows on search immediately.</div>
       <div class="sm-row">
         <div class="sm-field">
           <span class="sm-lbl">SELECT GRADE</span>
@@ -104,21 +136,25 @@
           <span class="sm-lbl">WIDTH (mm)</span>
           <input id="smAddWidth" class="sm-in" type="number" placeholder="e.g. 25" min="0.1" max="600" step="0.1" style="width:140px;">
         </div>
+        <div class="col">
+          <span class="sm-lbl">PRICE (Rs/kg)</span>
+          <input id="smAddPrice" class="sm-in" type="number" placeholder="e.g. 68.50" min="0" step="0.01" style="width:130px;">
+        </div>
         <button id="btnSmAdd" style="padding:10px 20px;height:44px;background:#2E8B57;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;margin-top:20px;">+ Add</button>
       </div>
       <div id="smAddMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
     </div>
 
     <div class="sm-card">
-      <div class="sm-title">Remove a Size from a Grade</div>
-      <div class="sm-sub">Select a grade — all sizes appear below. Tap any size to remove it. Flat sizes show as thickness×width (e.g. 6x25).</div>
+      <div class="sm-title">Edit size prices</div>
+      <div class="sm-sub">Select a grade — every size is listed with its price. Change the Rs/kg and save, or remove a size. Flat sizes show as thickness×width (e.g. 6x25).</div>
       <div class="sm-row" style="margin-bottom:14px;">
         <div class="sm-field">
           <span class="sm-lbl">SELECT GRADE</span>
           <select id="smGrade2" class="sm-in" style="min-width:220px;cursor:pointer;"></select>
         </div>
       </div>
-      <div style="font-size:11px;font-weight:700;color:#C0392B;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:8px;">TAP A SIZE TO REMOVE IT:</div>
+      <div style="font-size:11px;font-weight:700;color:#1B3A5C;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:8px;">PRICE PER SIZE (Rs/kg):</div>
       <div id="smSizeChips" style="padding:12px;background:#F7F4EE;border-radius:8px;line-height:2.2;min-height:50px;">Select a grade above to see all sizes</div>
       <div id="smRemMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
     </div>
@@ -147,11 +183,20 @@
         </div>
         <div>
           <span class="sm-lbl" id="ngSizesHint">SIZES (comma separated)</span>
-          <input id="ngSizes" class="sm-in" type="text" placeholder="e.g. 16,20,25,32,40,50" style="width:240px;">
+          <input id="ngSizes" class="sm-in" type="text" placeholder="e.g. 16:68,20:72,25" style="width:260px;">
         </div>
         <button id="btnNgAdd" style="padding:10px 20px;background:#1B3A5C;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;">+ Add Grade</button>
       </div>
       <div id="ngMsg" style="font-size:13px;font-weight:600;margin-top:10px;min-height:18px;"></div>
+      <div class="sm-row" style="margin-top:10px;flex-wrap:wrap;">
+        <div style="width:100%;font-size:11px;font-weight:700;color:#1B3A5C;font-family:Courier,monospace;letter-spacing:1px;margin-bottom:6px;">CHEMISTRY % (OPTIONAL — SYNCED TO COMPOSITION TAB)</div>
+        <div><span class="sm-lbl">C</span><input id="ngChemC" class="sm-in" type="text" placeholder="0.36-0.44" style="width:90px;"></div>
+        <div><span class="sm-lbl">Mn</span><input id="ngChemMn" class="sm-in" type="text" placeholder="0.60-1.00" style="width:90px;"></div>
+        <div><span class="sm-lbl">Si</span><input id="ngChemSi" class="sm-in" type="text" placeholder="0.15-0.35" style="width:90px;"></div>
+        <div><span class="sm-lbl">Cr</span><input id="ngChemCr" class="sm-in" type="text" placeholder="0.00-0.20" style="width:90px;"></div>
+        <div><span class="sm-lbl">Ni</span><input id="ngChemNi" class="sm-in" type="text" placeholder="0.00-0.20" style="width:90px;"></div>
+        <div><span class="sm-lbl">Mo</span><input id="ngChemMo" class="sm-in" type="text" placeholder="0.00" style="width:90px;"></div>
+      </div>
     </div>
 
     <div class="sm-card">

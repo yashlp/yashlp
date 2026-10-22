@@ -20,6 +20,11 @@ function structureTests() {
     "id=\"t4\"", "id=\"p4\"", "id=\"smAddThickness\"", "id=\"smAddWidth\"",
     "id=\"smSizeLabel\"", "PIN required", "Chemical Composition",
     "id=\"smGradeRename\"", "id=\"smRenameTo\"", "id=\"btnSmRename\"", "Rename a Grade",
+    "id=\"smAddPrice\"", "PRICE (Rs/kg)",
+    "id=\"ngChemC\"", "id=\"ngChemMn\"",
+    "id=\"t5\"", "id=\"p5\"", "About Jagetiya Metals",
+    "id=\"t6\"", "id=\"p6\"", "id=\"productList\"",
+    "+91 9558812335",
     "js/catalog.js", "js/storage.js", "js/app.js", "css/styles.css",
     "24AGIPS3207M1Z7", "Kamlesh@jkmetal.in",
   ];
@@ -114,10 +119,12 @@ async function playwrightTests(base) {
   const roundOpt = labels.findIndex((l) => l.includes("EN-8D") && l.includes("Round Bar") && l.includes("Rolled"));
   await page.selectOption("#smGrade1", String(roundOpt));
   await page.fill("#smAddSize", "47");
+  await page.fill("#smAddPrice", "55");
   await page.click("#btnSmAdd");
   await page.waitForTimeout(150);
   const addMsg = await page.locator("#smAddMsg").innerText();
   assert(addMsg.toLowerCase().includes("added"), "add size message: " + addMsg);
+  assert(addMsg.includes("55.00"), "add size stores price: " + addMsg);
 
   const flatOpt = labels.findIndex((l) => l.includes("EN-8") && l.includes("Flat Bar") && l.includes("Rolled"));
   await page.selectOption("#smGrade1", String(flatOpt));
@@ -147,6 +154,7 @@ async function playwrightTests(base) {
   await page.waitForTimeout(200);
   const after = await page.locator("#grid").innerHTML();
   assert(after.includes("47") || after.includes("Exact size"), "search finds persisted 47");
+  assert(after.includes("55.00"), "search shows Rs/kg for the size");
 
   await page.click("#t2");
   for (const d of ["1", "2", "3", "4"]) await page.click('#pinOverlay [data-k="' + d + '"]');
